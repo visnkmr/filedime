@@ -1,18 +1,24 @@
-const { invoke } = window.__TAURI__.tauri;
-const { listen } = window.__TAURI__.event;
+const { invoke } = (window as any).__TAURI__.tauri;
+const { listen } = (window as any).__TAURI__.event;
 
 
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
-
+    (window as any).__TAURI__.invoke(
+        "list_files",
+        {path: "/home/roger/Downloads/github/"
+      });
 
 // get a reference to the back button element
-const backButton = document.getElementById("back-button");
-lastfolder="."
+const backButton = document.getElementById("back-button") as HTMLButtonElement;
+var lastfolder="/home/roger/Downloads/github/"
 // add a click event listener to the back button
 backButton.addEventListener("click", () => {
+    if(lastfolder==="")
+        lastfolder="."
     pathInput.value=lastfolder
+    htmlbase.innerHTML=""
   // check if there is any previous path in the history
   window.__TAURI__.invoke(
     "list_files",
@@ -24,22 +30,26 @@ backButton.addEventListener("click", () => {
 const pathInput = document.getElementById("path-input");
 const listButton = document.getElementById("list-button");
 const fileList = document.getElementById("file-list");
+const htmlbase = document.getElementById("htmlbase");
+const parentsize = document.getElementById("parent-size");
 
 // add an event listener to the list button
-listButton.addEventListener("click", () => {
+listButton.addEventListener("click", async () => {
   // get the value of the path input
   let path = pathInput.value;
   // invoke the list_files command from the backend with the path as argument
-  window.__TAURI__.invoke(
+  await window.__TAURI__.invoke(
     "list_files",
     {path: path
   });
+  pathInput.value=path
 });
 
 // add an event listener to the file list
-fileList.addEventListener("click", (event) => {
+fileList.addEventListener("click", async (event) => {
   // get the target element of the event
   let target = event.target;
+  parentsize.innerHTML=target.dataset.parentsize;
   // check if the target is a list item
   if (target.tagName === "LI") {
     // get the data attributes of the target
@@ -58,8 +68,13 @@ fileList.addEventListener("click", (event) => {
         }
       );
     } else {
-        if(name.contains(".md")){
-            document.body.innerHTML =  window.__TAURI__.invoke("loadmarkdown", { name: path });
+        let mdext=".md";
+        console.log(target.dataset.name)
+        console.log(target.dataset.parent)
+        if(name.includes(mdext)){
+            fileList.innerHTML=""
+            htmlbase.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
+            // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
             var links = document.getElementsByTagName("a"); // get all links
             for (var i = 0; i < links.length; i++) { // loop through them
                 var link = links[i]; // get current link
@@ -76,7 +91,7 @@ fileList.addEventListener("click", (event) => {
         //     }
         //   );
       // alert the name and path of the file
-      alert(`You clicked on ${name} at ${path}`);
+    //   alert(`You clicked on ${name} at ${path}`);
     }
   }
 });
@@ -101,7 +116,12 @@ window.__TAURI__.event.listen("list-files", (data) => {
     li.dataset.isDir = file.is_dir;
     li.dataset.size = file.size;
     li.dataset.parent = file.parent;
-    lastfolder=file.parent;
+    li.dataset.grandparent = file.grandparent;
+    li.dataset.parentsize = file.parentsize;
+    lastfolder=file.grandparent;
+    // console.log(lastfolder)
+    parentsize.innerHTML=file.parentsize;
+    pathInput.value=file.parent
     // pathInput.value=file.parent
     // console.log(file.parent);
     // append the list item to the file list
