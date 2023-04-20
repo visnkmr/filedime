@@ -3,7 +3,26 @@ const { listen } = window.__TAURI__.event;
 
 let greetInputEl;
 let greetMsgEl;
+// get a reference to the back button element
+const backButton = document.getElementById("back-button");
 
+// add a click event listener to the back button
+backButton.addEventListener("click", () => {
+  // check if there is any previous path in the history
+  if (pathHistory.length > 0) {
+    // pop the last path from the history
+    let previousPath = pathHistory.pop();
+    // update the path input value with the previous path
+    pathInput.value = previousPath;
+    // invoke the list_files function with the previous path
+    window.__TAURI__.invoke(
+      "list_files",
+      {
+        path: previousPath
+      }
+    );
+  }
+});
 async function loadmarkdown() {
   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
   document.body.innerHTML = await invoke("loadmarkdown", { name: "fg" });
@@ -17,36 +36,37 @@ async function loadmarkdown() {
   }
   
 }
-listen('message', (event) => {
-    // console.log(event.payload[0]);
-    console.log(event.payload);
-    // const data = event.payload;
-    // let upload = data[0];
-    // let download = data[1];
-    // let todaytotal = data[2];
-    // if (last_upload > 0) {
-    //     if (upload < last_upload)
-    //         upload_speed = 0;
-    //     else
-    //         upload_speed = upload - last_upload;
-    // }
-    // if (last_download > 0) {
-    //     if (download < last_download)
-    //         down_speed = 0;
-    //     else
-    //         down_speed = download - last_download;
-    // }
-    // last_upload = upload;
-    // last_download = download;
-    document.getElementById("content").innerHTML = event.payload;
-});
+
+window.addEventListener("DOMContentLoaded", () => {
+  greetInputEl = document.querySelector("#greet-input");
+  greetMsgEl = document.querySelector("#greet-msg");
+  document
+    .querySelector("#greet-button")
+    .addEventListener("click", () => greet());
+    listen('message', (event) => {
+      // console.log(event.payload[0]);
+      console.log(event.payload);
+      // const data = event.payload;
+      // let upload = data[0];
+      // let download = data[1];
+      // let todaytotal = data[2];
+      // if (last_upload > 0) {
+      //     if (upload < last_upload)
+      //         upload_speed = 0;
+      //     else
+      //         upload_speed = upload - last_upload;
+      // }
+      // if (last_download > 0) {
+      //     if (download < last_download)
+      //         down_speed = 0;
+      //     else
+      //         down_speed = download - last_download;
+      // }
+      // last_upload = upload;
+      // last_download = download;
+      document.getElementById("content").innerHTML = event.payload;
+  });
+
+
 loadmarkdown();
-// window.addEventListener("DOMContentLoaded", () => {
-//   greetInputEl = document.querySelector("#greet-input");
-//   greetMsgEl = document.querySelector("#greet-msg");
-//   document
-//     .querySelector("#greet-button")
-//     .addEventListener("click", () => greet());
-// });
-
-
+});
