@@ -3,7 +3,7 @@ const { listen } = window.__TAURI__.event;
 
 
 // web app code
-lastfolder="."
+
 window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke(
         "list_files",
@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // get a reference to the back button element
 const backButton = document.getElementById("back-button");
-
+lastfolder="/home/roger/Downloads/github/"
 // add a click event listener to the back button
 backButton.addEventListener("click", () => {
     if(lastfolder==="")
@@ -49,6 +49,7 @@ listButton.addEventListener("click", async () => {
 fileList.addEventListener("click", async (event) => {
   // get the target element of the event
   let target = event.target;
+  parentsize.innerHTML=target.dataset.parentsize;
   // check if the target is a list item
   if (target.tagName === "LI") {
     // get the data attributes of the target
@@ -118,7 +119,9 @@ window.__TAURI__.event.listen("list-files", (data) => {
     li.dataset.grandparent = file.grandparent;
     li.dataset.parentsize = file.parentsize;
     lastfolder=file.grandparent;
+    // console.log(lastfolder)
     parentsize.innerHTML=file.parentsize;
+    pathInput.value=file.parent
     // pathInput.value=file.parent
     // console.log(file.parent);
     // append the list item to the file list

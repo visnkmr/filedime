@@ -66,7 +66,7 @@ struct FileItem {
   path: String,
   is_dir: bool,
   size:String,
-  granparent:String,
+  grandparent:String,
   parent:String,
   parentsize:String
 }
@@ -75,6 +75,7 @@ const CACHE_EXPIRY:u64=60;
 // define a command to list the files and directories in a given path
 #[tauri::command]
 async fn list_files(path: String, window: Window) -> Result<serde_json::Value, String> {
+  println!("{}",path);
   // get the app handle from the window
  
   let app_handle = window.app_handle();
@@ -104,7 +105,7 @@ let parent=path.clone();
                 path:path.clone(),
                 is_dir,
                 size:sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&path),true),
-                granparent:parent.parent().unwrap().to_string_lossy().to_string(),
+                grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
                 parent:parent.to_string_lossy().to_string(),
                 parentsize:sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&parent.to_string_lossy().to_string()),true)
             };
@@ -115,7 +116,8 @@ let parent=path.clone();
         // sort the vector by name
         files.sort_by(|a, b| a.name.cmp(&b.name));
         // emit an event to the frontend with the vector as payload
-        println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
+        println!("reachedhere");
+        // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
         app_handle.emit_to(
           "main",
           "list-files",

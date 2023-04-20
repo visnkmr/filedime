@@ -19,6 +19,7 @@ impl FileSizeFinder {
 
     // Define a function that finds the size of a file or folder given its path
     pub fn find_size(&mut self, path: &str) -> u64 {
+        // 0 as u64
         // Check if the path is already in the cache
         if let Some(size) = self.cache.get(path) {
             // Return the cached size
