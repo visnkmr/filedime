@@ -4,6 +4,8 @@
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
+  background-color: black;
+  color: white;
 }
 
 input {

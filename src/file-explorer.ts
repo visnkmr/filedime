@@ -143,14 +143,14 @@ fileList.addEventListener("click", async (event) => {
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
   parentsize.innerHTML=data.payload.toString();
-  // console.log(lastpsize)
+  console.log(data.payload.toString())
 });
 (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
   lastfolder=data.payload.toString();
-  // console.log(lastpsize)
+  console.log(data.payload.toString())
 });
 (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
   pathInput.value=data.payload.toString();
-  // console.log(lastpsize)
+  console.log(data.payload.toString())
 });
 });

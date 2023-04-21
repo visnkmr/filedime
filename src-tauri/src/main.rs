@@ -1,8 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Read, thread, time::Duration};
+use std::{io::Read, thread, time::Duration, path::Path};
 mod yu;
+use filesize::PathExt;
 use tauri::{Manager, api::file::read_string};
 // #[tauri::command] // add this attribute
 // fn read_and_emit(app_handle: tauri::AppHandle) -> Result<(), String> { // change return type to Result
@@ -16,12 +17,39 @@ use tauri::{Manager, api::file::read_string};
 // }
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn loadmarkdown(name: &str) -> String {
+fn loadmarkdown(name: String, window: Window) -> String {
     let mut content=String::new();
+    let app_handle = window.app_handle();
+    let path=PathBuf::from(name.clone());
+    let parent=path.clone();
 
     // let mut file = std::fs::File::open("/home/roger/.config/LogLinktoDisk/links.md").unwrap();
     let mut file = std::fs::File::open(name).unwrap();
-
+    
+  
+  app_handle.emit_to(
+      "main",
+      "folder-size",
+      {
+        sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&path.to_string_lossy()),true)
+      },
+    )
+    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send file size"));
+  
+  app_handle.emit_to(
+      "main",
+      "grandparent-loc",
+      parent.parent().unwrap().to_string_lossy().to_string(),
+    )
+    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send grandparentloc"));
+  
+  app_handle.emit_to(
+      "main",
+      "parent-loc",
+      parent.to_string_lossy().to_string(),
+    )
+    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
+  
     file.read_to_string(&mut content).unwrap();
     markdown::to_html_with_options(
         &content ,
@@ -151,7 +179,9 @@ let mut tfsize=0;
       app_handle.emit_to(
           "main",
           "folder-size",
-          sizeunit::size(tfsize,true),
+          {
+            sizeunit::size(tfsize,true)
+          },
         )
         .map_err(|e| e.to_string())?;
       
@@ -177,6 +207,7 @@ let mut tfsize=0;
       }
     }
   } else {
+    
     // return Err with an invalid path message
     Err("Invalid path".to_string())
   }

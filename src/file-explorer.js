@@ -70,11 +70,14 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     window.__TAURI__.event.listen("folder-size", (data) => {
         parentsize.innerHTML = data.payload.toString();
+        console.log(data.payload.toString());
     });
     window.__TAURI__.event.listen("grandparent-loc", (data) => {
         lastfolder = data.payload.toString();
+        console.log(data.payload.toString());
     });
     window.__TAURI__.event.listen("parent-loc", (data) => {
         pathInput.value = data.payload.toString();
+        console.log(data.payload.toString());
     });
 });

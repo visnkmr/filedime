@@ -1,14 +1,15 @@
 {
   "build": {
-    "beforeDevCommand": "",
-    "beforeBuildCommand": "",
+    "beforeDevCommand": "npm run build:ts  ",
+    "beforeBuildCommand": "npm run build:ts  ",
+    
     "devPath": "../src",
     "distDir": "../src",
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "notes",
-    "version": "0.0.0"
+    "productName": "V File explorer",
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -27,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "visnk.app.xplorer",
+      "identifier": "visnk.app.vexplorer",
       "targets": "all"
     },
     "security": {
@@ -40,7 +41,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "notes",
+        "title": "V File Explorer",
         "width": 800,
         "height": 600
       }
