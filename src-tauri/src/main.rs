@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{io::Read, thread, time::Duration};
-
+mod yu;
 use tauri::{Manager, api::file::read_string};
 // #[tauri::command] // add this attribute
 // fn read_and_emit(app_handle: tauri::AppHandle) -> Result<(), String> { // change return type to Result
@@ -66,9 +66,8 @@ struct FileItem {
   path: String,
   is_dir: bool,
   size:String,
-  grandparent:String,
-  parent:String,
-  parentsize:String
+  // grandparent:String,
+  // parent:String
 }
 const CACHE_EXPIRY:u64=60;
 
@@ -82,6 +81,7 @@ async fn list_files(path: String, window: Window) -> Result<serde_json::Value, S
   // convert the path to a PathBuf
   let path = PathBuf::from(path);
 let parent=path.clone();
+let mut tfsize=0;
 //    let mut finder = ;
   // check if the path exists and is a directory
   if path.exists() && path.is_dir() {
@@ -90,6 +90,7 @@ let parent=path.clone();
       Ok(entries) => {
         // create an empty vector to store the file items
         let mut files = Vec::new();
+        
         // loop through the entries
         for entry in entries {
           // get the metadata of the entry
@@ -107,7 +108,8 @@ let parent=path.clone();
                 size:{
                   let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&path);
                   let tr=if(size>1){
-                    
+                    tfsize+=size;
+                    // println!("{}",tfsize);
                    sizeunit::size(size,true)
                   }
                   else{
@@ -115,26 +117,27 @@ let parent=path.clone();
                   };
                   tr
                 },
-                grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
-                parent:parent.to_string_lossy().to_string(),
-                parentsize:{
-                  let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&parent.to_string_lossy().to_string());
-                  let tr=if(size>1){
+                // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
+                // parent:parent.to_string_lossy().to_string()
+                //tfsize
+                // {
+                //   let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&parent.to_string_lossy().to_string());
+                //   let tr=if(size>1){
                     
-                   sizeunit::size(size,true)
-                  }
-                  else{
-                    "".to_string()
-                  };
-                  tr
-                }
+                //    sizeunit::size(size,true)
+                //   }
+                //   else{
+                //     "".to_string()
+                //   };
+                //   tr
+                // }
             };
             // push the file item to the vector
             files.push(file);
           }
         }
         // sort the vector by name
-        files.sort_by(|a, b| a.name.cmp(&b.name));
+        // files.sort_by(|a, b| a.name.cmp(&b.name));
         // emit an event to the frontend with the vector as payload
         println!("reachedhere");
         // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
@@ -142,6 +145,27 @@ let parent=path.clone();
           "main",
           "list-files",
           serde_json::to_string(&files.clone()).unwrap(),
+        )
+        .map_err(|e| e.to_string())?;
+      
+      app_handle.emit_to(
+          "main",
+          "folder-size",
+          sizeunit::size(tfsize,true),
+        )
+        .map_err(|e| e.to_string())?;
+      
+      app_handle.emit_to(
+          "main",
+          "grandparent-loc",
+          parent.parent().unwrap().to_string_lossy().to_string(),
+        )
+        .map_err(|e| e.to_string())?;
+      
+      app_handle.emit_to(
+          "main",
+          "parent-loc",
+          parent.to_string_lossy().to_string(),
         )
         .map_err(|e| e.to_string())?;
         // return Ok with the vector

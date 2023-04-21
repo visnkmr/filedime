@@ -112,6 +112,7 @@ fileList.addEventListener("click", async (event) => {
   let files:File[] = JSON.parse(data.payload);
   // clear the file list
   fileList.innerHTML = "";
+  // var lastpsize=""
   // loop through the files array
   for (let file of files) {
     // create a list item element for each file
@@ -123,17 +124,33 @@ fileList.addEventListener("click", async (event) => {
     li.dataset.path = file.path;
     li.dataset.isDir = file.is_dir.toString();
     li.dataset.size = file.size.toString();
-    li.dataset.parent = file.parent;
-    li.dataset.grandparent = file.grandparent;
-    li.dataset.parentsize = file.parentsize.toString();
-    lastfolder=file.grandparent;
+    // li.dataset.parent = file.parent;
+    // li.dataset.grandparent = file.grandparent;
+    // li.dataset.parentsize = file.parentsize.toString();
+    
     // console.log(lastfolder)
-    parentsize.innerHTML=file.parentsize.toString();
-    pathInput.value=file.parent
+    // lastpsize=file.parentsize.toString();
+    
+    
     // pathInput.value=file.parent
     // console.log(file.parent);
     // append the list item to the file list
     fileList.appendChild(li);
   }
+  // parentsize.innerHTML=lastpsize;
+  // console.log(lastpsize)
+});
+// listen for the list-files event from the backend
+(window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
+  parentsize.innerHTML=data.payload.toString();
+  // console.log(lastpsize)
+});
+(window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
+  lastfolder=data.payload.toString();
+  // console.log(lastpsize)
+});
+(window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
+  pathInput.value=data.payload.toString();
+  // console.log(lastpsize)
 });
 });

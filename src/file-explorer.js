@@ -65,13 +65,16 @@ window.addEventListener("DOMContentLoaded", () => {
             li.dataset.path = file.path;
             li.dataset.isDir = file.is_dir.toString();
             li.dataset.size = file.size.toString();
-            li.dataset.parent = file.parent;
-            li.dataset.grandparent = file.grandparent;
-            li.dataset.parentsize = file.parentsize.toString();
-            lastfolder = file.grandparent;
-            parentsize.innerHTML = file.parentsize.toString();
-            pathInput.value = file.parent;
             fileList.appendChild(li);
         }
+    });
+    window.__TAURI__.event.listen("folder-size", (data) => {
+        parentsize.innerHTML = data.payload.toString();
+    });
+    window.__TAURI__.event.listen("grandparent-loc", (data) => {
+        lastfolder = data.payload.toString();
+    });
+    window.__TAURI__.event.listen("parent-loc", (data) => {
+        pathInput.value = data.payload.toString();
     });
 });

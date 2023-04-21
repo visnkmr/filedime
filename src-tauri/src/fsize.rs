@@ -41,6 +41,8 @@ pub struct FileSizeFinder {
 
 // Import rayon prelude
 use rayon::prelude::*;
+
+use crate::yu;
 impl FileSizeFinder {
     pub fn new(expiration: u64) -> Self {
         Self {
@@ -81,7 +83,7 @@ impl FileSizeFinder {
         // Get the size of the entry using filesize crate
         let mut size = 
         if entry_path.is_dir(){
-            0
+            yu::uio(entry_path.as_os_str().to_os_string().to_string_lossy().to_string())
         }
         else{
             entry_path.size_on_disk().unwrap_or(0)
@@ -164,3 +166,34 @@ impl FileSizeFinder {
         });
     }
 }
+
+
+// use std::path::PathBuf;
+// use rayon::prelude::*;
+// // use filesize::PathExt;
+// #[test]
+// fn tryu() {
+//     let path = PathBuf::from("/home/roger/Downloads/github");
+//     let total_size = path
+//         .read_dir()
+//         .unwrap()
+        
+//         .par_bridge()
+//         .filter_map(|entry| {
+//             let path = entry.unwrap().path();
+//             if path.is_file() && !path.is_symlink() {
+//                 Some(path)
+//             } 
+//             // else if path.is_dir() {
+                
+//             // }
+//             else{
+//                 None
+//             }
+//         })
+//         .filter(|path| !path.starts_with("./.git"))
+//         .map(|path| path.size_on_disk().unwrap())
+//         .sum::<u64>();
+
+//     println!("Total size: {}", total_size);
+// }
