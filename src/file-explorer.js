@@ -5,7 +5,7 @@ window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke("list_files", { path: "/home/roger/Downloads/github/"
     });
     const backButton = document.getElementById("back-button");
-    lastfolder = "/home/roger/Downloads/github/";
+    var lastfolder = "/home/roger/Downloads/github/";
     backButton.addEventListener("click", () => {
         if (lastfolder === "")
             lastfolder = ".";
@@ -63,13 +63,13 @@ window.addEventListener("DOMContentLoaded", () => {
             li.textContent = file.name + " " + file.size;
             li.dataset.name = file.name;
             li.dataset.path = file.path;
-            li.dataset.isDir = file.is_dir;
-            li.dataset.size = file.size;
+            li.dataset.isDir = file.is_dir.toString();
+            li.dataset.size = file.size.toString();
             li.dataset.parent = file.parent;
             li.dataset.grandparent = file.grandparent;
-            li.dataset.parentsize = file.parentsize;
+            li.dataset.parentsize = file.parentsize.toString();
             lastfolder = file.grandparent;
-            parentsize.innerHTML = file.parentsize;
+            parentsize.innerHTML = file.parentsize.toString();
             pathInput.value = file.parent;
             fileList.appendChild(li);
         }

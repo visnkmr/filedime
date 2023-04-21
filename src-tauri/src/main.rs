@@ -55,8 +55,8 @@ use std::fs;
 use std::path::PathBuf;
 use serde::{Serialize, Deserialize};
 use tauri::{AppHandle,  Window};
-mod filesize;
-use filesize::*;
+mod fsize;
+use fsize::*;
 mod sizeunit;
 
 // define a struct to represent a file or directory
@@ -104,10 +104,30 @@ let parent=path.clone();
                 name,
                 path:path.clone(),
                 is_dir,
-                size:sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&path),true),
+                size:{
+                  let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&path);
+                  let tr=if(size>1){
+                    
+                   sizeunit::size(size,true)
+                  }
+                  else{
+                    "".to_string()
+                  };
+                  tr
+                },
                 grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
                 parent:parent.to_string_lossy().to_string(),
-                parentsize:sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&parent.to_string_lossy().to_string()),true)
+                parentsize:{
+                  let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&parent.to_string_lossy().to_string());
+                  let tr=if(size>1){
+                    
+                   sizeunit::size(size,true)
+                  }
+                  else{
+                    "".to_string()
+                  };
+                  tr
+                }
             };
             // push the file item to the vector
             files.push(file);

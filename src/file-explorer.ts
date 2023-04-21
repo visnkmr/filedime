@@ -18,27 +18,27 @@ backButton.addEventListener("click", () => {
     if(lastfolder==="")
         lastfolder="."
     pathInput.value=lastfolder
-    htmlbase.innerHTML=""
+    htmlbase.innerHTML="";
   // check if there is any previous path in the history
-  window.__TAURI__.invoke(
+  (window as any).__TAURI__.invoke(
     "list_files",
     {path: lastfolder
   });
 });
 
 // get the elements from the HTML document
-const pathInput = document.getElementById("path-input");
-const listButton = document.getElementById("list-button");
-const fileList = document.getElementById("file-list");
-const htmlbase = document.getElementById("htmlbase");
-const parentsize = document.getElementById("parent-size");
+const pathInput = document.getElementById("path-input") as HTMLInputElement;
+const listButton = document.getElementById("list-button") as HTMLButtonElement;
+const fileList = document.getElementById("file-list") as HTMLUListElement;
+const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
+const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 
 // add an event listener to the list button
 listButton.addEventListener("click", async () => {
   // get the value of the path input
   let path = pathInput.value;
   // invoke the list_files command from the backend with the path as argument
-  await window.__TAURI__.invoke(
+  await (window as any).__TAURI__.invoke(
     "list_files",
     {path: path
   });
@@ -48,8 +48,8 @@ listButton.addEventListener("click", async () => {
 // add an event listener to the file list
 fileList.addEventListener("click", async (event) => {
   // get the target element of the event
-  let target = event.target;
-  parentsize.innerHTML=target.dataset.parentsize;
+  let target = event.target as HTMLElement;
+  parentsize.innerHTML=target.dataset.parentsize!;
   // check if the target is a list item
   if (target.tagName === "LI") {
     // get the data attributes of the target
@@ -59,9 +59,9 @@ fileList.addEventListener("click", async (event) => {
     // check if the target is a directory
     if (isDir === "true") {
       // set the value of the path input to the path of the directory
-      pathInput.value = path;
+      pathInput.value = path!;
       // invoke the list_files command from the backend with the path as argument
-      window.__TAURI__.invoke(
+      (window as any).__TAURI__.invoke(
         "list_files",
         {
             path: path
@@ -71,9 +71,9 @@ fileList.addEventListener("click", async (event) => {
         let mdext=".md";
         console.log(target.dataset.name)
         console.log(target.dataset.parent)
-        if(name.includes(mdext)){
+        if(name!.includes(mdext)){
             fileList.innerHTML=""
-            htmlbase.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
+            htmlbase.innerHTML = await (window as any).__TAURI__.invoke("loadmarkdown", { name: path });
             // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
             var links = document.getElementsByTagName("a"); // get all links
             for (var i = 0; i < links.length; i++) { // loop through them
@@ -97,11 +97,19 @@ fileList.addEventListener("click", async (event) => {
 });
 
 // listen for the list-files event from the backend
-window.__TAURI__.event.listen("list-files", (data) => {
-    
+(window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
+  type File = {
+    name: string;
+    path: string;
+    is_dir: boolean;
+    size: number;
+    parent: string;
+    grandparent: string;
+    parentsize: number;
+  };
     console.log(data.payload)
   // parse the data as JSON
-  let files = JSON.parse(data.payload);
+  let files:File[] = JSON.parse(data.payload);
   // clear the file list
   fileList.innerHTML = "";
   // loop through the files array
@@ -113,14 +121,14 @@ window.__TAURI__.event.listen("list-files", (data) => {
     // set the data attributes of the list item to the properties of the file
     li.dataset.name = file.name;
     li.dataset.path = file.path;
-    li.dataset.isDir = file.is_dir;
-    li.dataset.size = file.size;
+    li.dataset.isDir = file.is_dir.toString();
+    li.dataset.size = file.size.toString();
     li.dataset.parent = file.parent;
     li.dataset.grandparent = file.grandparent;
-    li.dataset.parentsize = file.parentsize;
+    li.dataset.parentsize = file.parentsize.toString();
     lastfolder=file.grandparent;
     // console.log(lastfolder)
-    parentsize.innerHTML=file.parentsize;
+    parentsize.innerHTML=file.parentsize.toString();
     pathInput.value=file.parent
     // pathInput.value=file.parent
     // console.log(file.parent);
