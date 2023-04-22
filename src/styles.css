@@ -26,3 +26,19 @@ li {
   border-bottom: 1px solid #ccc;
   cursor: pointer;
 }
+#parent-size{
+  margin-left:.5em;
+  margin-right:.5em;
+}
+/* 
+#path-input{
+  width: 60%;
+} */
+
+#path-input {
+  flex-grow: 1;
+}
+nav {
+  display: flex;
+  align-items: center; /* vertically align the items */
+}

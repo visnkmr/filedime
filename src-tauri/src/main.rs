@@ -162,28 +162,32 @@ let mut tfsize=0;
             };
             // push the file item to the vector
             files.push(file);
+            app_handle.emit_to(
+              "main",
+              "list-files",
+              serde_json::to_string(&files.clone()).unwrap(),
+            )
+            .map_err(|e| e.to_string())?;
+          
+          app_handle.emit_to(
+              "main",
+              "folder-size",
+              {
+                sizeunit::size(tfsize,true)
+              },
+            )
+            .map_err(|e| e.to_string())?;
+          
+          
           }
+
         }
         // sort the vector by name
         // files.sort_by(|a, b| a.name.cmp(&b.name));
         // emit an event to the frontend with the vector as payload
         println!("reachedhere");
         // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
-        app_handle.emit_to(
-          "main",
-          "list-files",
-          serde_json::to_string(&files.clone()).unwrap(),
-        )
-        .map_err(|e| e.to_string())?;
-      
-      app_handle.emit_to(
-          "main",
-          "folder-size",
-          {
-            sizeunit::size(tfsize,true)
-          },
-        )
-        .map_err(|e| e.to_string())?;
+        
       
       app_handle.emit_to(
           "main",
@@ -198,6 +202,15 @@ let mut tfsize=0;
           parent.to_string_lossy().to_string(),
         )
         .map_err(|e| e.to_string())?;
+      
+      // app_handle.emit_to(
+      //         "main",
+      //         "list-files",
+      //         serde_json::to_string(&files.clone()).unwrap(),
+      //       )
+      //       .map_err(|e| e.to_string())?;
+          
+          
         // return Ok with the vector
         Ok(serde_json::to_value(&files.clone()).unwrap())
       },
@@ -217,11 +230,13 @@ fn main() {
   tauri::Builder::default()
     .setup(|app| {
       // get an instance of AppHandle
-    //   let app_handle = app.handle();
-      // spawn a thread to list the files in the current directory on startup
-    //   std::thread::spawn(move || {
-    //     list_files(".".to_string(), app_handle.get_window("main").unwrap());
-    //   });
+    //   let app_handle = app.handle().get_window("main").unwrap();
+    //   // spawn a thread to list the files in the current directory on startup
+    // //   std::thread::spawn(move || {
+    // //     list_files(".".to_string(), app_handle.get_window("main").unwrap());
+    // //   });
+    //   // set the window flags to remove WS_MAXIMIZEBOX
+    //   app_handle.set_window_flags(|flags| flags & !WS_MAXIMIZEBOX)?;
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![

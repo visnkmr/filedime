@@ -41,6 +41,7 @@
       {
         "fullscreen": false,
         "resizable": true,
+        "maxWidth": 400,
         "title": "V File Explorer",
         "width": 800,
         "height": 600
