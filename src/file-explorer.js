@@ -1,6 +1,7 @@
 "use strict";
 const { invoke } = window.__TAURI__.tauri;
 const { listen } = window.__TAURI__.event;
+var interval;
 window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke("list_files", { path: "/home/roger/Downloads/github/"
     });
@@ -80,4 +81,23 @@ window.addEventListener("DOMContentLoaded", () => {
         pathInput.value = data.payload.toString();
         console.log(data.payload.toString());
     });
+    window.__TAURI__.event.listen("start-timer", (data) => {
+        updatetimer();
+    });
+    window.__TAURI__.event.listen("stop-timer", (data) => {
+        clearInterval(interval);
+    });
 });
+function updatetimer() {
+    var timer = document.getElementById("timer");
+    var startTime = new Date();
+    interval = setInterval(function () {
+        var currentTime = new Date();
+        var elapsedTime = currentTime - startTime;
+        var minutes = Math.floor(elapsedTime / 1000 / 60);
+        var seconds = Math.floor(elapsedTime / 1000 % 60);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        timer.textContent = minutes + ":" + seconds;
+    }, 1000);
+}

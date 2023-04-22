@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Read, thread, time::Duration, path::Path};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH}, path::Path};
 mod yu;
 use filesize::PathExt;
 use tauri::{Manager, api::file::read_string, State};
@@ -102,10 +102,26 @@ const CACHE_EXPIRY:u64=60;
 // define a command to list the files and directories in a given path
 #[tauri::command]
 async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinder>) -> Result<serde_json::Value, String> {
-  println!("{}",path);
+  
+  
+  let now = SystemTime::now();
+  
+  let duration = now.duration_since(UNIX_EPOCH).unwrap();
+  
+  let startime = duration.as_secs();
+  
+  println!("{}----{}",path,startime);
+
   // get the app handle from the window
  
   let app_handle = window.app_handle();
+  app_handle.emit_to(
+    "main",
+    "start-timer",
+    "",
+  )
+  .map_err(|e| e.to_string())?;
+
   // convert the path to a PathBuf
   let path = PathBuf::from(path);
 let parent=path.clone();
@@ -188,21 +204,36 @@ let mut tfsize=0;
         println!("reachedhere");
         // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
         
-      
-      app_handle.emit_to(
+       state.print_cache_size();
+        let now = SystemTime::now();
+  
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        
+        let endtime = duration.as_secs();
+        
+        println!("endtime----{}",endtime-startime);
+        
+        app_handle.emit_to(
           "main",
-          "grandparent-loc",
-          parent.parent().unwrap().to_string_lossy().to_string(),
+          "stop-timer",
+          "",
         )
         .map_err(|e| e.to_string())?;
-      
-      app_handle.emit_to(
-          "main",
-          "parent-loc",
-          parent.to_string_lossy().to_string(),
-        )
-        .map_err(|e| e.to_string())?;
-      
+
+        app_handle.emit_to(
+            "main",
+            "grandparent-loc",
+            parent.parent().unwrap().to_string_lossy().to_string(),
+          )
+          .map_err(|e| e.to_string())?;
+        
+        app_handle.emit_to(
+            "main",
+            "parent-loc",
+            parent.to_string_lossy().to_string(),
+          )
+          .map_err(|e| e.to_string())?;
+        
       // app_handle.emit_to(
       //         "main",
       //         "list-files",
@@ -224,10 +255,11 @@ let mut tfsize=0;
     // return Err with an invalid path message
     Err("Invalid path".to_string())
   }
+  
 }
 
 fn main() {
-  let g=FileSizeFinder::new(CACHE_EXPIRY);
+  let mut g=FileSizeFinder::new(CACHE_EXPIRY);
   tauri::Builder::default()
     .setup(|app| {
       // get an instance of AppHandle

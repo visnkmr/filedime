@@ -3,12 +3,13 @@ const { listen } = (window as any).__TAURI__.event;
 
 
 // web app code
-
+var interval:number ;
 window.addEventListener("DOMContentLoaded", () => {
     (window as any).__TAURI__.invoke(
         "list_files",
         {path: "/home/roger/Downloads/github/"
       });
+      
 
 // get a reference to the back button element
 const backButton = document.getElementById("back-button") as HTMLButtonElement;
@@ -103,9 +104,6 @@ fileList.addEventListener("click", async (event) => {
     path: string;
     is_dir: boolean;
     size: number;
-    parent: string;
-    grandparent: string;
-    parentsize: number;
   };
     console.log(data.payload)
   // parse the data as JSON
@@ -153,4 +151,41 @@ fileList.addEventListener("click", async (event) => {
   pathInput.value=data.payload.toString();
   console.log(data.payload.toString())
 });
+
+(window as any).__TAURI__.event.listen("start-timer", (data: { payload: string }) => {
+  updatetimer();
 });
+
+(window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
+  clearInterval(interval);
+});
+
+});
+
+function updatetimer(){
+  // Get the timer element
+var timer = document.getElementById("timer");
+
+// Set the start time
+var startTime = new Date();
+
+// Update the timer every second
+interval = setInterval(function() {
+  // Get the current time
+  var currentTime = new Date();
+
+  // Calculate the elapsed time
+  var elapsedTime = currentTime - startTime;
+
+  // Convert the elapsed time to minutes and seconds
+  var minutes = Math.floor(elapsedTime / 1000 / 60);
+  var seconds = Math.floor(elapsedTime / 1000 % 60);
+
+  // Pad the minutes and seconds with leading zeros if needed
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+
+  // Display the elapsed time
+  timer.textContent = minutes + ":" + seconds;
+}, 1000);
+}

@@ -1,9 +1,11 @@
 // use jwalk::WalkDirGeneric;
 use filesize::PathExt;
+use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
+use std::mem::{size_of_val, self};
 use std::path::Path;
 use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::RwLock;
 // use dirscan::*;
 
@@ -36,19 +38,23 @@ use std::sync::RwLock;
 // Define a struct that holds the cache and the expiration time
 pub struct FileSizeFinder {
     cache: RwLock<HashMap<String, u64>>,
-    // expiration: Duration,
+    expiration: Duration,
+    // app_handle:AppHandle
+    // size:usize
 }
 
 // Import rayon prelude
 use rayon::prelude::*;
 
-use crate::yu;
+use crate::{yu, sizeunit};
 impl FileSizeFinder {
     pub fn new(expiration: u64) -> Self {
         Self {
             // Wrap the cache in a RwLock
             cache: RwLock::new(HashMap::new()),
-            // expiration: Duration::from_secs(expiration),
+            expiration: Duration::from_secs(expiration),
+            // app_handle: apphandle
+            // size:0
         }
     }
     // pub fn navfolder(&self,path:ReadDir)->u64{
@@ -69,46 +75,74 @@ impl FileSizeFinder {
     //     };
     //     size
     // }
-   pub fn addsize(&self, path: &str,size:u64) -> u64{
-    if let Some(size) = self.cache.read().unwrap().get(path) {
-        eprintln!("from cache");
-        // Return the cached size
-        return *size;
-    }
-    self.cache.write().unwrap().insert(path.to_string(), size);
-    eprintln!("added {} to cache", path);
+//    pub fn addsize(&self, path: &str,size:u64) -> u64{
+//     if let Some(size) = self.cache.read().unwrap().get(path) {
+//         //println!("from cache");
+//         // Return the cached size
+//         return *size;
+//     }
+//     self.cache.write().unwrap().insert(path.to_string(), size);
+//     //println!("added {} to cache", path);
     
-    size
+//     size
 
-   }
-    pub fn find_size(&self, path: &str) -> u64 {
-        // Check if the size is cached
-        if let Some(size) = self.cache.read().unwrap().get(path) {
-            eprintln!("from cache");
-            // Return the cached size
-            return *size;
+//    }
+pub fn find_size(&self, path: &str) -> u64 {
+    // Use a single read lock guard to access the cache
+    let mut cache = self.cache.read().unwrap();
+
+    if let Some(size) = cache.get(path) {
+        let now = SystemTime::now();
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        let nowtime = duration.as_secs();
+        // Use the same lock guard to get the expiry time
+        if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
+            if nowtime < *expirytime {
+                return *size;
+            } else {
+                println!("expired")
+            }
         }
-
-        // Get the path of the entry
-        let entry_path = Path::new(path);
-
-        // Get the size of the entry using filesize crate
-        let mut size = 
-        if entry_path.is_dir(){
-            yu::uio(entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),self)
-        }
-        else{
-            entry_path.size_on_disk().unwrap_or(0)
-        };
-        // Use write method to get a lock guard
-        self.cache.write().unwrap().insert(path.to_string(), size);
-        eprintln!("added {} to cache", path);
-
-        
-
-        
-        size
     }
+
+    // Drop the read lock guard before acquiring a write lock guard
+    drop(cache);
+
+    let entry_path = Path::new(path);
+
+    let mut size = if entry_path.is_dir() {
+        yu::uio(
+            entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
+            self,
+        )
+    } else {
+        entry_path.size_on_disk().unwrap_or(0)
+    };
+
+    // Use a single write lock guard to update the cache
+    let mut cache = self.cache.write().unwrap();
+    cache.insert(path.to_string(), size);
+    
+    // Add the size of the key and the value to the total
+    // self.size += mem::size_of_val(&path.to_string());
+    // self.size += mem::size_of_val(&size);
+       
+
+    let now = SystemTime::now();
+
+    let later = now + (self.expiration);
+
+    let duration = later.duration_since(UNIX_EPOCH).unwrap();
+
+    let expirytime = duration.as_secs();
+    cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
+    // self.print_cache_size();
+
+    // self.size += mem::size_of_val(&"expiry_".to_string());
+    // self.size += mem::size_of_val(&expirytime);
+
+    size
+}
     // pub fn find_size3(&self, path: &str) -> u64 {
         
     //      // Check if the size is cached
@@ -132,7 +166,7 @@ impl FileSizeFinder {
     //             self.find_size( &entry.unwrap().path().to_string_lossy().to_string())
     //         })
     //         .sum();
-    //        //     eprintln!("Name: {}", path.unwrap().path().display())
+    //        //     //println!("Name: {}", path.unwrap().path().display())
            
     //     }
     //     //     size += WalkDir::new(entry_path)
@@ -155,7 +189,7 @@ impl FileSizeFinder {
     //     //         .map(|entry| entry.state)
     //     //         .sum::<u64>();
     //     // }
-    //     // eprintln!("{}--{}",path,size);
+    //     // //println!("{}--{}",path,size);
     //     // Use write method to get a lock guard
     //     self.cache.write().unwrap().insert(path.to_string(), size);
 
@@ -164,21 +198,62 @@ impl FileSizeFinder {
     // }
 
     
-    // fn clear_cache(&mut self) {
+    pub fn clear_cache(&mut self) {
         
-    //     let now = Instant::now();
+        let now = Instant::now();
 
         
-    //     // Use write method to get a lock guard
-    //     self.cache.write().unwrap().retain(|_, &mut v| {
+        // Use write method to get a lock guard
+        self.cache.write().unwrap().retain(|_, &mut v| {
             
-    //         let duration = Duration::from_secs(v);
+            let duration = Duration::from_secs(v);
             
-    //         let instant = now.checked_sub(duration).unwrap();
+            let instant = now.checked_sub(duration).unwrap();
             
-    //         now.duration_since(instant) < self.expiration
-    //     });
-    // }
+            now.duration_since(instant) < self.expiration
+        });
+    }
+    // Add a method to print the total size of the cache
+  pub fn print_cache_size(&self)
+//   ->(u64,u64) 
+  {
+    // Use a single read lock guard to access the cache
+    let cache = self.cache.read().unwrap();
+
+    // Initialize a variable to store the total size
+    let mut total_size = 0;
+
+    // Initialize a mutable reference to the cache iterator
+    let mut cache_iter = cache.iter();
+
+    // let mut folsize=0;
+    // Loop until the iterator returns None
+    while let Some((key, value)) = cache_iter.next() {
+        // Add the size of the key and the value to the total
+        total_size += mem::size_of_val(key);
+        total_size += mem::size_of_val(value);
+        // if !key.starts_with("expiry_"){
+        //     folsize+=value;
+
+        // }
+
+    }
+
+    // self.app_handle.emit_to(
+    //     "main",
+    //     "folder-size",
+    //     {
+    //       sizeunit::size(folsize,true)
+    //     },
+    //   )
+    //   .map_err(|e| e.to_string()).unwrap();
+
+    println!("cache:{}----numfolders:{}",sizeunit::size(total_size as u64,true),cache.len() as u64);
+
+    // Print the total size in bytes
+    // println!("The cache size is {} bytes", total_size);
+    // (total_size as u64,cache.len() as u64)
+  }
 }
 
 
@@ -209,5 +284,5 @@ impl FileSizeFinder {
 //         .map(|path| path.size_on_disk().unwrap())
 //         .sum::<u64>();
 
-//     eprintln!("Total size: {}", total_size);
+//     //println!("Total size: {}", total_size);
 // }
