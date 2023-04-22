@@ -104,18 +104,41 @@ fileList.addEventListener("click", async (event) => {
 const datalist = document.getElementById("path-list");
 
 // Add an input event listener to the input element
-pathInput.addEventListener("input", () => {
+pathInput.addEventListener("input", async () => {
   // Get the current value of the input element
   console.log("here")
   const path = pathInput.value;
   console.log(path);
 
   // Invoke the Rust function with the path as an argument
-  (window as any).__TAURI__.invoke({
-    cmd: "get_path_options",
+  await (window as any).__TAURI__.invoke(
+    "get_path_options",{
     path: path,
-  });
+  })
+    .then((options) => {
+      console.log(options)
+      // Clear the datalist options
+      if(options!==null)
+      {
 
+        datalist.innerHTML = "";
+  
+        // Loop through the options returned by Rust
+        for (const option of options) {
+          // Create a new option element with the option value
+          const optionElement = document.createElement("option");
+          console.log("here#1")
+          optionElement.value = option;
+  
+          // Append the option element to the datalist element
+          datalist.appendChild(optionElement);
+        }
+      }
+    })
+    .catch((error) => {
+      // Handle any errors from Rust
+      console.error(error);
+    });
 });
 
 // listen for the list-files event from the backend
@@ -182,22 +205,6 @@ pathInput.addEventListener("input", () => {
 
 (window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
   clearInterval(interval);
-});
-
-(window as any).__TAURI__.event.listen("pop-datalist", (data: { payload: string }) => {
-  // clearInterval(interval);
-  // Clear the datalist options
-  datalist.innerHTML = "";
-
-  // Loop through the options returned by Rust
-  for (const option of data.payload) {
-    // Create a new option element with the option value
-    const optionElement = document.createElement("option");
-    optionElement.value = option;
-
-    // Append the option element to the datalist element
-    datalist.appendChild(optionElement);
-  }
 });
 
 });

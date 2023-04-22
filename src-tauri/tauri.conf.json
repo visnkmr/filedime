@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "npm run build:ts  ",
-    "beforeBuildCommand": "npm run build:ts  ",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
     
     "devPath": "../src",
     "distDir": "../src",

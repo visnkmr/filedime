@@ -56,13 +56,27 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
     const datalist = document.getElementById("path-list");
-    pathInput.addEventListener("input", () => {
+    pathInput.addEventListener("input", async () => {
         console.log("here");
         const path = pathInput.value;
         console.log(path);
-        window.__TAURI__.invoke({
-            cmd: "get_path_options",
+        await window.__TAURI__.invoke("get_path_options", {
             path: path,
+        })
+            .then((options) => {
+            console.log(options);
+            if (options !== null) {
+                datalist.innerHTML = "";
+                for (const option of options) {
+                    const optionElement = document.createElement("option");
+                    console.log("here#1");
+                    optionElement.value = option;
+                    datalist.appendChild(optionElement);
+                }
+            }
+        })
+            .catch((error) => {
+            console.error(error);
         });
     });
     window.__TAURI__.event.listen("list-files", (data) => {
@@ -99,14 +113,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     window.__TAURI__.event.listen("stop-timer", (data) => {
         clearInterval(interval);
-    });
-    window.__TAURI__.event.listen("pop-datalist", (data) => {
-        datalist.innerHTML = "";
-        for (const option of data.payload) {
-            const optionElement = document.createElement("option");
-            optionElement.value = option;
-            datalist.appendChild(optionElement);
-        }
     });
 });
 function updatetimer() {
