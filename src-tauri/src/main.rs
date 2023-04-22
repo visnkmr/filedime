@@ -4,7 +4,7 @@
 use std::{io::Read, thread, time::Duration, path::Path};
 mod yu;
 use filesize::PathExt;
-use tauri::{Manager, api::file::read_string};
+use tauri::{Manager, api::file::read_string, State};
 // #[tauri::command] // add this attribute
 // fn read_and_emit(app_handle: tauri::AppHandle) -> Result<(), String> { // change return type to Result
 //   let content = read_string("/home/roger/.config/LogLinktoDisk/links.md").unwrap(); // use ? instead of unwrap
@@ -17,7 +17,7 @@ use tauri::{Manager, api::file::read_string};
 // }
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn loadmarkdown(name: String, window: Window) -> String {
+fn loadmarkdown(name: String, window: Window,g:State<FileSizeFinder>) -> String {
     let mut content=String::new();
     let app_handle = window.app_handle();
     let path=PathBuf::from(name.clone());
@@ -31,7 +31,7 @@ fn loadmarkdown(name: String, window: Window) -> String {
       "main",
       "folder-size",
       {
-        sizeunit::size(FileSizeFinder::new(CACHE_EXPIRY).find_size(&path.to_string_lossy()),true)
+        sizeunit::size(g.find_size(&path.to_string_lossy()),true)
       },
     )
     .map_err(|e| e.to_string()).unwrap_or(println!("failed to send file size"));
@@ -101,7 +101,7 @@ const CACHE_EXPIRY:u64=60;
 
 // define a command to list the files and directories in a given path
 #[tauri::command]
-async fn list_files(path: String, window: Window) -> Result<serde_json::Value, String> {
+async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinder>) -> Result<serde_json::Value, String> {
   println!("{}",path);
   // get the app handle from the window
  
@@ -134,7 +134,7 @@ let mut tfsize=0;
                 path:path.clone(),
                 is_dir,
                 size:{
-                  let size=FileSizeFinder::new(CACHE_EXPIRY).find_size(&path);
+                  let size=state.find_size(&path);
                   let tr=if(size>1){
                     tfsize+=size;
                     // println!("{}",tfsize);
@@ -227,10 +227,12 @@ let mut tfsize=0;
 }
 
 fn main() {
+  let g=FileSizeFinder::new(CACHE_EXPIRY);
   tauri::Builder::default()
     .setup(|app| {
       // get an instance of AppHandle
-    //   let app_handle = app.handle().get_window("main").unwrap();
+      // let app_handle = app.handle().get_window("main").unwrap();
+      // let g=app.state::<FileSizeFinder>();
     //   // spawn a thread to list the files in the current directory on startup
     // //   std::thread::spawn(move || {
     // //     list_files(".".to_string(), app_handle.get_window("main").unwrap());
@@ -239,6 +241,7 @@ fn main() {
     //   app_handle.set_window_flags(|flags| flags & !WS_MAXIMIZEBOX)?;
       Ok(())
     })
+    .manage(g)
     .invoke_handler(tauri::generate_handler![
         list_files,
         loadmarkdown

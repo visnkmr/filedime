@@ -2,13 +2,17 @@ use rayon::prelude::*;
 use std::{fs, path::{PathBuf, Path}};
 use walkdir::WalkDir;
 
+use crate::fsize::FileSizeFinder;
+
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path) -> u64 {
-    fs::metadata(path).map(|m| m.len()).unwrap_or(0)
+fn file_size(path: &std::path::Path,g:&FileSizeFinder) -> u64 {
+    g.find_size(&path.to_string_lossy())
+    // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
+    // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-fn dir_size(path: &String) -> u64 {
+fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
     // Create a walkdir iterator over the directory
     let walker = WalkDir::new(path)
         // Convert errors into options
@@ -28,7 +32,7 @@ fn dir_size(path: &String) -> u64 {
         // Filter out paths that start with "./.git"
         .filter(|entry| !entry.path().starts_with("./.git"))
         // Map each path to its file size
-        .map(|entry| file_size(entry.path()))
+        .map(|entry| file_size(entry.path(),g))
         // Sum up all file sizes
         .sum::<u64>();
 
@@ -36,9 +40,9 @@ fn dir_size(path: &String) -> u64 {
 }
 
 // #[test]
-pub fn uio(path:String)->u64 {
+pub fn uio(path:String,g:&FileSizeFinder)->u64 {
     // Get the current directory path
     // let path = PathBuf::from("/home/roger/Downloads/github");
     // Print the total size in bytes
-    dir_size(&path)
+    dir_size(&path,g)
 }
