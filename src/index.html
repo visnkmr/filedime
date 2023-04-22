@@ -4,8 +4,18 @@
     <meta charset="UTF-8" />
     <title>File Explorer</title>
     <link rel="stylesheet" href="styles.css" />
+    
     <nav>
-      <input id="path-input" type="text"/>
+      <!-- Add a datalist element with some possible paths -->
+      <datalist id="path-list">
+        <!-- <option value="/home/user/Documents" />
+        <option value="/home/user/Downloads" />
+        <option value="/home/user/Pictures" /> -->
+      </datalist>
+
+      <!-- Add the list attribute to the input element -->
+      <input id="path-input" type="text" list="path-list" />
+      <!-- <input id="path-input" type="text"/> -->
       <p id="parent-size"></p>
       <button id="list-button">List</button>
       <button id="back-button">Back</button>

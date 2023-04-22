@@ -276,8 +276,35 @@ fn main() {
     .manage(g)
     .invoke_handler(tauri::generate_handler![
         list_files,
-        loadmarkdown
+        loadmarkdown,
+        get_path_options
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
+}
+// In Rust, define a function that takes a path as an argument and returns a list of possible paths
+#[tauri::command]
+fn get_path_options(path: String, window: Window) -> Vec<String> {
+  let app_handle=window.app_handle();
+  // Use some logic to generate a list of possible paths based on the input path
+  // For example, use std::fs::read_dir to list the files in a directory
+  let mut options = Vec::new();
+  if let Ok(entries) = std::fs::read_dir(path) {
+    for entry in entries {
+      if let Ok(entry) = entry {
+        if let Ok(file_name) = entry.file_name().into_string() {
+          options.push(file_name);
+        }
+      }
+    }
+  }
+  app_handle.emit_to(
+    "main",
+    "pop-datalist",
+    options.clone(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+  // Return the list of possible paths
+  println!("{:?}",options);
+  options
 }

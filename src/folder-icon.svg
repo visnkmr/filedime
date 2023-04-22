@@ -1,0 +1,18 @@
+<!-- Use an svg element to create the folder icon -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+>
+  <!-- Use a path element to draw the outline of the folder -->
+  <path
+    fill="#007aff"
+    d="M18.5 5.5h-7.5l-1.5-2h-6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z"
+  />
+  <!-- Use another path element to draw the inner shadow of the folder -->
+  <path
+    fill="#66aaff"
+    d="M18.5 6.5v-.5h-7.5l-1.5-2h-6v.5h6l1.5 2h7.5z"
+  />
+</svg>

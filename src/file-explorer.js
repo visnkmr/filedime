@@ -55,6 +55,16 @@ window.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
+    const datalist = document.getElementById("path-list");
+    pathInput.addEventListener("input", () => {
+        console.log("here");
+        const path = pathInput.value;
+        console.log(path);
+        window.__TAURI__.invoke({
+            cmd: "get_path_options",
+            path: path,
+        });
+    });
     window.__TAURI__.event.listen("list-files", (data) => {
         console.log(data.payload);
         let files = JSON.parse(data.payload);
@@ -65,6 +75,9 @@ window.addEventListener("DOMContentLoaded", () => {
             li.dataset.name = file.name;
             li.dataset.path = file.path;
             li.dataset.isDir = file.is_dir.toString();
+            if (file.is_dir) {
+                li.id = "folder";
+            }
             li.dataset.size = file.size.toString();
             fileList.appendChild(li);
         }
@@ -87,17 +100,25 @@ window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.event.listen("stop-timer", (data) => {
         clearInterval(interval);
     });
+    window.__TAURI__.event.listen("pop-datalist", (data) => {
+        datalist.innerHTML = "";
+        for (const option of data.payload) {
+            const optionElement = document.createElement("option");
+            optionElement.value = option;
+            datalist.appendChild(optionElement);
+        }
+    });
 });
 function updatetimer() {
-    var timer = document.getElementById("timer");
-    var startTime = new Date();
+    let timer = document.getElementById("timer");
+    let startTime = new Date();
     interval = setInterval(function () {
-        var currentTime = new Date();
-        var elapsedTime = currentTime - startTime;
-        var minutes = Math.floor(elapsedTime / 1000 / 60);
-        var seconds = Math.floor(elapsedTime / 1000 % 60);
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-        timer.textContent = minutes + ":" + seconds;
+        let currentTime = new Date();
+        let elapsedTime = currentTime.getTime() - startTime.getTime();
+        let minutes = Math.floor(elapsedTime / 1000 / 60);
+        let seconds = Math.floor((elapsedTime / 1000) % 60);
+        let paddedMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
+        let paddedSeconds = seconds < 10 ? "0" + seconds : seconds.toString();
+        timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
 }

@@ -1,6 +1,6 @@
-/* web app code */
+/*/~ web app code ~/
 
-/* add some basic styles */
+/~ add some basic styles ~/
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
@@ -20,7 +20,7 @@ ul {
   list-style: none;
   padding: 0;
 }
-
+*/
 li {
   padding: 5px;
   border-bottom: 1px solid #ccc;
@@ -30,15 +30,106 @@ li {
   margin-left:.5em;
   margin-right:.5em;
 }
-/* 
+/*
+/~ 
 #path-input{
   width: 60%;
-} */
+} ~/
 
 #path-input {
   flex-grow: 1;
 }
 nav {
   display: flex;
-  align-items: center; /* vertically align the items */
+  align-items: center; /~ vertically align the items ~/
+}
+*/
+
+/* Use a system font for the text */
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Use a flexbox layout for the navigation bar */
+nav {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+/* Style the input element for the path */
+#path-input {
+  flex: 1; /* take up the remaining space */
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* Style the button elements */
+#list-button,
+#back-button {
+  height: 30px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007aff;
+  color: white;
+}
+
+/* Style the timer element */
+#timer {
+  margin-left: auto; /* align to the right */
+}
+
+/* Style the unordered list element for the files */
+#file-list {
+  list-style-type: none; /* remove the bullets */
+  margin: 0; /* remove the default margin */
+  padding: 0; /* remove the default padding */
+}
+
+/* Style the list item elements for the files */
+#file-list li {
+  display: flex; /* use a flexbox layout */
+  align-items: center; /* align items vertically */
+  height: 40px; /* set a fixed height */
+  padding-left: 10px; /* add some left padding */
+  border-bottom: 1px solid #e0e0e0; /* add a bottom border */
+}
+
+/* Style the file name element */
+#file-list li span {
+  margin-left: 10px; /* add some left margin */
+}
+
+/*Use a dark gray color for the body background
+body {
+  background-color: #333333;
+}
+
+/~ Use a lighter gray color for the navigation bar background ~/
+nav {
+  background-color: #444444;
+}
+
+/~ Use a white color for the text ~/
+* {
+  color: white;
+}
+
+/~ Use a blue color for the button background ~/
+#list-button,
+#back-button {
+  background-color: #007aff;
+}*/
+
+/* Use a pseudo-element to insert the SVG before each li element */
+#file-list li#folder::before {
+  content: url("folder-icon.svg"); /* set the content to the SVG URL */
+  display: inline-block; /* make the pseudo-element inline-block */
+  width: 20px; /* set a fixed width */
+  height: 20px; /* set a fixed height */
+  margin-right: 10px; /* add some right margin */
 }

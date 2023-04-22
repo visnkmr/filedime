@@ -97,6 +97,27 @@ fileList.addEventListener("click", async (event) => {
   }
 });
 
+// Get the input element
+// const input = document.getElementById("path-input");
+
+// Get the datalist element
+const datalist = document.getElementById("path-list");
+
+// Add an input event listener to the input element
+pathInput.addEventListener("input", () => {
+  // Get the current value of the input element
+  console.log("here")
+  const path = pathInput.value;
+  console.log(path);
+
+  // Invoke the Rust function with the path as an argument
+  (window as any).__TAURI__.invoke({
+    cmd: "get_path_options",
+    path: path,
+  });
+
+});
+
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
   type File = {
@@ -121,6 +142,9 @@ fileList.addEventListener("click", async (event) => {
     li.dataset.name = file.name;
     li.dataset.path = file.path;
     li.dataset.isDir = file.is_dir.toString();
+    if (file.is_dir){
+      li.id="folder"
+    }
     li.dataset.size = file.size.toString();
     // li.dataset.parent = file.parent;
     // li.dataset.grandparent = file.grandparent;
@@ -160,32 +184,54 @@ fileList.addEventListener("click", async (event) => {
   clearInterval(interval);
 });
 
+(window as any).__TAURI__.event.listen("pop-datalist", (data: { payload: string }) => {
+  // clearInterval(interval);
+  // Clear the datalist options
+  datalist.innerHTML = "";
+
+  // Loop through the options returned by Rust
+  for (const option of data.payload) {
+    // Create a new option element with the option value
+    const optionElement = document.createElement("option");
+    optionElement.value = option;
+
+    // Append the option element to the datalist element
+    datalist.appendChild(optionElement);
+  }
 });
 
-function updatetimer(){
+});
+
+// Declare the type of the timer element
+type TimerElement = HTMLElement & {
+  textContent: string;
+};
+
+// Declare the type of the interval variableZ
+function updatetimer() {
   // Get the timer element
-var timer = document.getElementById("timer");
+  let timer = document.getElementById("timer") as TimerElement;
 
-// Set the start time
-var startTime = new Date();
+  // Set the start time
+  let startTime = new Date();
 
-// Update the timer every second
-interval = setInterval(function() {
-  // Get the current time
-  var currentTime = new Date();
+  // Update the timer every second
+  interval = setInterval(function () {
+    // Get the current time
+    let currentTime = new Date();
 
-  // Calculate the elapsed time
-  var elapsedTime = currentTime - startTime;
+    // Calculate the elapsed time
+    let elapsedTime = currentTime.getTime() - startTime.getTime();
 
-  // Convert the elapsed time to minutes and seconds
-  var minutes = Math.floor(elapsedTime / 1000 / 60);
-  var seconds = Math.floor(elapsedTime / 1000 % 60);
+    // Convert the elapsed time to minutes and seconds
+    let minutes: number = Math.floor(elapsedTime / 1000 / 60);
+let seconds: number = Math.floor((elapsedTime / 1000) % 60);
 
-  // Pad the minutes and seconds with leading zeros if needed
-  minutes = minutes < 10 ? "0" + minutes : minutes;
-  seconds = seconds < 10 ? "0" + seconds : seconds;
+// Pad the minutes and seconds with leading zeros if needed
+let paddedMinutes: string = minutes < 10 ? "0" + minutes : minutes.toString();
+let paddedSeconds: string = seconds < 10 ? "0" + seconds : seconds.toString();
 
-  // Display the elapsed time
-  timer.textContent = minutes + ":" + seconds;
-}, 1000);
+    // Display the elapsed time
+    timer.textContent = paddedMinutes + ":" + paddedSeconds;
+  }, 1000);
 }
