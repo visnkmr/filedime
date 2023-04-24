@@ -4,7 +4,7 @@
 use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH}, path::Path};
 mod yu;
 use filesize::PathExt;
-use tauri::{Manager, api::file::read_string, State};
+use tauri::{Manager, api::file::read_string, State, Runtime};
 // #[tauri::command] // add this attribute
 // fn read_and_emit(app_handle: tauri::AppHandle) -> Result<(), String> { // change return type to Result
 //   let content = read_string("/home/roger/.config/LogLinktoDisk/links.md").unwrap(); // use ? instead of unwrap
@@ -257,6 +257,11 @@ let mut tfsize=0;
   }
   
 }
+#[tauri::command]
+async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tauri::Window<R>) -> Result<(), String> {
+  println!("{}",path);
+  Ok(())
+}
 
 fn main() {
   let mut g=FileSizeFinder::new(CACHE_EXPIRY);
@@ -277,28 +282,45 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
         list_files,
         loadmarkdown,
-        get_path_options
+        get_path_options,
+        openpath
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
-fn get_path_options(path: String) -> Vec<String> {
+fn get_path_options(mut path: String) -> Vec<String> {
   // let whereto=path.clone();
   // let app_handle=window.app_handle();
   // Use some logic to generate a list of possible paths based on the input path
   // For example, use std::fs::read_dir to list the files in a directory
   let mut options = Vec::new();
-  if let Ok(entries) = std::fs::read_dir(path) {
-    for entry in entries {
-      if let Ok(entry) = entry {
-        // if let Ok(file_name) = entry.path().to_string_lossy().to_string()
-         {
-          options.push(entry.path().to_string_lossy().to_string());
-        }
-      }
+  let pathasbuf=PathBuf::from(path.clone());
+  if(!pathasbuf.exists()){
+    if let Some(parent) = pathasbuf.parent() {
+      // Convert parent to OsStr
+      path = parent.as_os_str().to_string_lossy().to_string();
     }
+  }
+  // if let Some(index) = path.rfind('/') {
+  //   // Get the substring from 0 to index
+  //       if let Some(substring) = path.get(0..index+1) {
+          // Use substring instead of path
+      if let Ok(entries) = std::fs::read_dir(path) {
+        for entry in entries {
+          if let Ok(entry) = entry {
+            // if let Ok(file_name) = entry.path().to_string_lossy().to_string()
+            {
+              // if(!entry.path().is_file()){
+
+                options.push(entry.path().to_string_lossy().to_string());
+              // }
+            }
+          }
+        }
+      // }
+    // }
   }
   // app_handle.emit_to(
   //   "main",
