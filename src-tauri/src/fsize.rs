@@ -222,6 +222,8 @@ pub fn find_size(&self, path: &str) -> u64 {
 
     // Initialize a variable to store the total size
     let mut total_size = 0;
+    let mut total_key_size = 0;
+    let mut total_value_size = 0;
 
     // Initialize a mutable reference to the cache iterator
     let mut cache_iter = cache.iter();
@@ -231,7 +233,10 @@ pub fn find_size(&self, path: &str) -> u64 {
     while let Some((key, value)) = cache_iter.next() {
         // Add the size of the key and the value to the total
         total_size += mem::size_of_val(key);
-        total_size += mem::size_of_val(value);
+        // if(!key.contains("expiry")){
+        //     total_key_size+=mem::size_of_val(key);
+        // }
+        // total_size += mem::size_of_val(value);
         // if !key.starts_with("expiry_"){
         //     folsize+=value;
 
@@ -248,7 +253,7 @@ pub fn find_size(&self, path: &str) -> u64 {
     //   )
     //   .map_err(|e| e.to_string()).unwrap();
 
-    println!("cache:{}----numfolders:{}",sizeunit::size(total_size as u64,true),cache.len() as u64);
+    println!("cache:{}----numfolders:{}---onlynamesize:{}",sizeunit::size(total_size as u64,true),cache.len() as u64,sizeunit::size(total_key_size as u64,true));
 
     // Print the total size in bytes
     // println!("The cache size is {} bytes", total_size);
@@ -261,20 +266,19 @@ pub fn find_size(&self, path: &str) -> u64 {
 // use rayon::prelude::*;
 // // use filesize::PathExt;
 // #[test]
+
 // fn tryu() {
 //     let path = PathBuf::from("/home/roger/Downloads/github");
 //     let total_size = path
 //         .read_dir()
-//         .unwrap()
-        
+//         .unwrap()       
 //         .par_bridge()
 //         .filter_map(|entry| {
 //             let path = entry.unwrap().path();
 //             if path.is_file() && !path.is_symlink() {
 //                 Some(path)
 //             } 
-//             // else if path.is_dir() {
-                
+//             // else if path.is_dir() {       
 //             // }
 //             else{
 //                 None
@@ -283,6 +287,5 @@ pub fn find_size(&self, path: &str) -> u64 {
 //         .filter(|path| !path.starts_with("./.git"))
 //         .map(|path| path.size_on_disk().unwrap())
 //         .sum::<u64>();
-
 //     //println!("Total size: {}", total_size);
 // }
