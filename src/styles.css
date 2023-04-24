@@ -71,7 +71,7 @@ nav {
 #list-button,
 #back-button {
   height: 30px;
-  margin-left: 10px;
+  margin-right: 10px;
   border: none;
   border-radius: 5px;
   background-color: #007aff;
