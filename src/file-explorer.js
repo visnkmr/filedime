@@ -28,22 +28,20 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     fileList.addEventListener("click", async (event) => {
         let target = event.target;
-        parentsize.innerHTML = target.dataset.parentsize;
+        // parentsize.innerHTML = target.dataset.parentsize;
         if (target.tagName === "LI") {
             let name = target.dataset.name;
             let path = target.dataset.path;
             let isDir = target.dataset.isDir;
             if (isDir === "true") {
                 pathInput.value = path;
+                parentsize.innerHTML = target.dataset.parentsize;
                 window.__TAURI__.invoke("list_files", {
                     path: path
                 });
             }
-            else {
-                let mdext = ".md";
-                console.log(target.dataset.name);
-                console.log(target.dataset.parent);
-                if (name.includes(mdext)) {
+            else if (name.toLowerCase().endsWith(".md")) {
+                {
                     fileList.innerHTML = "";
                     htmlbase.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
                     var links = document.getElementsByTagName("a");
@@ -52,6 +50,11 @@ window.addEventListener("DOMContentLoaded", () => {
                         link.setAttribute("target", "_blank");
                     }
                 }
+            }
+            else {
+                window.__TAURI__.invoke("openpath", {
+                    path: path
+                });
             }
         }
     });
