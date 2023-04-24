@@ -21,7 +21,7 @@ ul {
   padding: 0;
 }
 */
-li {
+td {
   padding: 5px;
   border-bottom: 1px solid #ccc;
   cursor: pointer;
@@ -91,8 +91,8 @@ nav {
 }
 
 /* Style the list item elements for the files */
-#file-list li {
-  display: flex; /* use a flexbox layout */
+#file-list td {
+ /* display: flex; /~ use a flexbox layout ~/*/
   align-items: center; /* align items vertically */
   height: 40px; /* set a fixed height */
   padding-left: 10px; /* add some left padding */
@@ -100,7 +100,7 @@ nav {
 }
 
 /* Style the file name element */
-#file-list li span {
+#file-list td span {
   margin-left: 10px; /* add some left margin */
 }
 
@@ -126,7 +126,7 @@ nav {
 }*/
 
 /* Use a pseudo-element to insert the SVG before each li element */
-#file-list li#folder::before {
+#file-list td#folder::before {
   content: url("folder-icon.svg"); /* set the content to the SVG URL */
   display: inline-block; /* make the pseudo-element inline-block */
   width: 20px; /* set a fixed width */

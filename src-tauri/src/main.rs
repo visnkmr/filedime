@@ -94,6 +94,7 @@ struct FileItem {
   path: String,
   is_dir: bool,
   size:String,
+  rawfs:u64
   // grandparent:String,
   // parent:String
 }
@@ -144,13 +145,13 @@ let mut tfsize=0;
             let path = entry.as_ref().unwrap().path().to_string_lossy().into_owned();
             // check if the entry is a file or a directory
             let is_dir = metadata.is_dir();
+            let size=state.find_size(&path);
             // create a file item from the entry data
             let file = FileItem { 
                 name,
                 path:path.clone(),
                 is_dir,
                 size:{
-                  let size=state.find_size(&path);
                   let tr=if(size>1){
                     tfsize+=size;
                     // println!("{}",tfsize);
@@ -161,7 +162,7 @@ let mut tfsize=0;
                   };
                   tr
                 },
-                // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
+                rawfs:size,                // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
                 // parent:parent.to_string_lossy().to_string()
                 //tfsize
                 // {

@@ -27,13 +27,16 @@ window.addEventListener("DOMContentLoaded", () => {
         pathInput.value = path;
     });
     fileList.addEventListener("click", async (event) => {
+        console.log("here");
         let target = event.target;
-        // parentsize.innerHTML = target.dataset.parentsize;
-        if (target.tagName === "LI") {
+        console.log(target.tagName);
+        if (target.tagName === "TD") {
+            console.log(target.dataset);
             let name = target.dataset.name;
             let path = target.dataset.path;
             let isDir = target.dataset.isDir;
             if (isDir === "true") {
+                console.log("dir");
                 pathInput.value = path;
                 parentsize.innerHTML = target.dataset.parentsize;
                 window.__TAURI__.invoke("list_files", {
@@ -83,21 +86,69 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
     window.__TAURI__.event.listen("list-files", (data) => {
-        console.log(data.payload);
         let files = JSON.parse(data.payload);
+        console.log("files");
         fileList.innerHTML = "";
+        let thead = document.createElement("thead");
+        let tr = document.createElement("tr");
+        let th1 = document.createElement("th");
+        let th2 = document.createElement("th");
+        th1.textContent = "Filename";
+        th2.textContent = "Filesize";
+        th1.id = "filename";
+        th2.id = "filesize";
+        tr.appendChild(th1);
+        tr.appendChild(th2);
+        thead.appendChild(tr);
+        fileList.appendChild(thead);
+        let tbody = document.createElement("tbody");
         for (let file of files) {
-            let li = document.createElement("li");
-            li.textContent = file.name + " " + file.size;
-            li.dataset.name = file.name;
-            li.dataset.path = file.path;
-            li.dataset.isDir = file.is_dir.toString();
+            let tr = document.createElement("tr");
+            let td1 = document.createElement("td");
+            td1.textContent = file.name;
+            td1.dataset.value = file.name;
+            td1.dataset.name = file.name;
+            td1.dataset.path = file.path;
+            td1.dataset.isDir = file.is_dir.toString();
             if (file.is_dir) {
-                li.id = "folder";
+                td1.id = "folder";
             }
-            li.dataset.size = file.size.toString();
-            fileList.appendChild(li);
+            td1.dataset.size = file.size.toString();
+            tr.appendChild(td1);
+            let td2 = document.createElement("td");
+            td2.textContent = file.size.toString();
+            td2.dataset.value = file.rawfs.toString();
+            tr.appendChild(td2);
+            tbody.appendChild(tr);
         }
+        fileList.appendChild(tbody);
+        let order = "asc";
+        function compare(a, b) {
+            if (order === "asc") {
+                return a < b ? -1 : a > b ? 1 : 0;
+            }
+            else {
+                return a > b ? -1 : a < b ? 1 : 0;
+            }
+        }
+        function sortTable(index) {
+            let rows = Array.from(tbody.rows);
+            rows.sort(function (a, b) {
+                return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
+            });
+            for (let row of rows) {
+                tbody.appendChild(row);
+            }
+            order = order === "asc" ? "desc" : "asc";
+        }
+        let filename = document.getElementById("filename");
+        let filesize = document.getElementById("filesize");
+        filename.addEventListener("click", function () {
+            sortTable(0);
+        });
+        filesize.addEventListener("click", function () {
+            sortTable(1);
+        });
     });
     window.__TAURI__.event.listen("folder-size", (data) => {
         parentsize.innerHTML = data.payload.toString();
