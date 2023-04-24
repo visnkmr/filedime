@@ -50,7 +50,6 @@ listButton.addEventListener("click", async () => {
 fileList.addEventListener("click", async (event) => {
   // get the target element of the event
   let target = event.target as HTMLElement;
-  parentsize.innerHTML=target.dataset.parentsize!;
   // check if the target is a list item
   if (target.tagName === "LI") {
     // get the data attributes of the target
@@ -61,6 +60,8 @@ fileList.addEventListener("click", async (event) => {
     if (isDir === "true") {
       // set the value of the path input to the path of the directory
       pathInput.value = path!;
+      parentsize.innerHTML=target.dataset.parentsize!;
+
       // invoke the list_files command from the backend with the path as argument
       (window as any).__TAURI__.invoke(
         "list_files",
@@ -68,11 +69,11 @@ fileList.addEventListener("click", async (event) => {
             path: path
         }
       );
-    } else {
-        let mdext=".md";
-        console.log(target.dataset.name)
-        console.log(target.dataset.parent)
-        if(name!.includes(mdext)){
+    } else if((name as string).toLowerCase().endsWith(".md")){
+        // let mdext=".md";
+        // console.log(target.dataset.name)
+        // console.log(target.dataset.parent)
+        {
             fileList.innerHTML=""
             htmlbase.innerHTML = await (window as any).__TAURI__.invoke("loadmarkdown", { name: path });
             // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
@@ -93,6 +94,14 @@ fileList.addEventListener("click", async (event) => {
         //   );
       // alert the name and path of the file
     //   alert(`You clicked on ${name} at ${path}`);
+    }
+    else{
+      (window as any).__TAURI__.invoke(
+        "openpath",
+        {
+            path: path
+        }
+      );
     }
   }
 });
