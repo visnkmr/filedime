@@ -134,7 +134,10 @@ window.addEventListener("DOMContentLoaded", () => {
         function sortTable(index) {
             let rows = Array.from(tbody.rows);
             rows.sort(function (a, b) {
-                return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
+                if (index === 0)
+                    return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
+                else
+                    return compare(parseInt(a.cells[index].dataset.value), parseInt(b.cells[index].dataset.value));
             });
             for (let row of rows) {
                 tbody.appendChild(row);

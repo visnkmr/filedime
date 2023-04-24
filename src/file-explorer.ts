@@ -248,7 +248,11 @@ pathInput.addEventListener("input", async () => {
     let rows = Array.from(tbody.rows);
     // sort the rows based on the cell value at the given index
     rows.sort(function (a, b) {
+      if(index===0)
       return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
+      else
+      return compare(parseInt(a.cells[index].dataset.value as string),parseInt(b.cells[index].dataset.value as string));
+      
     });
     // append the sorted rows to the table body
     for (let row of rows) {
