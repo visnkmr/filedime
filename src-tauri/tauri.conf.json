@@ -1,7 +1,11 @@
 {
   "build": {
-    "beforeDevCommand": "",
-    "beforeBuildCommand": "",
+    "beforeDevCommand": {
+      "script": ""
+    },
+    "beforeBuildCommand": {
+      "script": ""
+    },
     
     "devPath": "../src",
     "distDir": "../src",
