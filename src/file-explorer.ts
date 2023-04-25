@@ -162,6 +162,8 @@ pathInput.addEventListener("input", async () => {
     is_dir: boolean;
     size: number;
     rawfs: number;
+    lmdate:number;
+    timestamp:number;
   };
   // parse the data as JSON
   let files:File[] = JSON.parse(data.payload);
@@ -179,14 +181,18 @@ pathInput.addEventListener("input", async () => {
     // create two table header cells for the filename and filesize columns
     let th1 = document.createElement("th");
     let th2 = document.createElement("th");
+    let th3 = document.createElement("th");
     // set the text content of the header cells
     th1.textContent = "Filename";
     th2.textContent = "Filesize";
+    th3.textContent = "Last modified";
     th1.id = "filename";
     th2.id = "filesize";
+    th3.id = "lastmod";
     // append the header cells to the header row
     tr.appendChild(th1);
     tr.appendChild(th2);
+    tr.appendChild(th3);
     // append the header row to the table head
     thead.appendChild(tr);
     // append the table head to the table
@@ -227,6 +233,14 @@ pathInput.addEventListener("input", async () => {
     // append the table cells to the table row
     
     tr.appendChild(td2);
+    
+    let td3 = document.createElement("td");
+    td3.textContent = file.lmdate.toString();
+    td3.dataset.value = file.timestamp.toString();
+    // td3.dataset.value = file.rawfs.toString();
+    // append the table cells to the table row
+    
+    tr.appendChild(td3);
     // append the table row to the table body
     tbody.appendChild(tr);
   }
@@ -248,7 +262,7 @@ pathInput.addEventListener("input", async () => {
     let rows = Array.from(tbody.rows);
     // sort the rows based on the cell value at the given index
     rows.sort(function (a, b) {
-      if(index===0)
+      if(index!==1)
       return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
       else
       return compare(parseInt(a.cells[index].dataset.value as string),parseInt(b.cells[index].dataset.value as string));
@@ -263,6 +277,7 @@ pathInput.addEventListener("input", async () => {
   }
   let filename = document.getElementById("filename");
   let filesize = document.getElementById("filesize");
+  let lastmod = document.getElementById("lastmod");
    // add a click event listener to the filename th element
    filename.addEventListener("click", function () {
     // call the sortTable function with index 0
@@ -272,6 +287,11 @@ pathInput.addEventListener("input", async () => {
   filesize.addEventListener("click", function () {
     // call the sortTable function with index 1
     sortTable(1);
+  });
+  // add a click event listener to the lastmod th element
+  lastmod.addEventListener("click", function () {
+    // call the sortTable function with index 1
+    sortTable(2);
   });
   // // loop through the files array
   // for (let file of files) {

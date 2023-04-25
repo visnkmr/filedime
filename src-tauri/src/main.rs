@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH}, path::Path};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self}, path::Path};
 mod yu;
 use filesize::PathExt;
 use tauri::{Manager, api::file::read_string, State, Runtime};
@@ -94,7 +94,9 @@ struct FileItem {
   path: String,
   is_dir: bool,
   size:String,
-  rawfs:u64
+  rawfs:u64,
+  lmdate:String,
+  timestamp:String
   // grandparent:String,
   // parent:String
 }
@@ -146,6 +148,7 @@ let mut tfsize=0;
             // check if the entry is a file or a directory
             let is_dir = metadata.is_dir();
             let size=state.find_size(&path);
+            let (lmdate,timestamp)=lastmodified(&path);
             // create a file item from the entry data
             let file = FileItem { 
                 name,
@@ -162,7 +165,10 @@ let mut tfsize=0;
                   };
                   tr
                 },
-                rawfs:size,                // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
+                rawfs:size,    
+                lmdate:lmdate,
+                timestamp:timestamp
+                // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
                 // parent:parent.to_string_lossy().to_string()
                 //tfsize
                 // {
@@ -272,7 +278,74 @@ async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tau
   };
   Ok(())
 }
+use chrono::{DateTime, Local, Utc};
+fn lastmodified(path:&str)->(String,String){
 
+    // get the metadata of the path
+    let metadata = fs::metadata(path.clone()).unwrap();
+    
+    // get the last modification time
+    let modified = metadata.modified().unwrap();
+    
+    // get the current system time
+    let now = SystemTime::now();
+    
+    // get the difference between now and modified
+    let diff = now.duration_since(modified).unwrap();
+    
+    // create a duration of 7 days
+    let seven_days = Duration::from_secs(7 * 24 * 60 * 60);
+    let one_day = Duration::from_secs(1 * 24 * 60 * 60);
+    
+    // check if diff is less than or equal to seven_days
+  //   let date = if diff <= seven_days {
+  //     // format modified as a relative date
+  //     let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
+  //     // let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+  //     let relative_date = modified_date.format("%R %a").to_string();
+  //     println!("{} was modified {}", path, relative_date);
+  //     relative_date
+  // } else {
+  //     // format modified as a UNIX timestamp
+  //     let modified_date = DateTime::<Utc>::from(modified);
+  //     let unix_timestamp = modified_date.timestamp();
+  //     println!("{} was modified at {}", path, unix_timestamp);
+  //     unix_timestamp.to_string()
+  // };
+  let timestamp;
+  let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
+  timestamp=format!("{}",modified_date.timestamp());
+  let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+  let relative_date = modified_date.format("%R %a").to_string();
+  let absolute_date = modified_date.format("%d-%m-%y %H:%S").to_string();
+  let date=if diff <= seven_days && diff > one_day {
+    // format modified as a relative date
+    let diff = now_date.signed_duration_since(modified_date);
+
+    // get the number of days in the difference
+    let days = diff.num_days();
+    println!("{} was modified {}", path, days);
+    // relative_date
+    format!("{} day(s) ago @ {} ",days,relative_date)
+    // println!("{} was modified {}", path, relative_date);
+    // relative_date
+} else if diff <= one_day {
+  // format modified as a relative date
+  // let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
+
+  // // let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+  // let relative_date = modified_date.format("%R").to_string();
+  
+  println!("{} was modified {}", path, relative_date);
+  relative_date
+} else{
+    // format modified as an absolute date
+    // let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
+    println!("{} was modified on {}", path, absolute_date);
+    absolute_date
+};
+    (date,timestamp)
+}
 fn main() {
   let mut g=FileSizeFinder::new(CACHE_EXPIRY);
   tauri::Builder::default()

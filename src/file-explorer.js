@@ -93,12 +93,16 @@ window.addEventListener("DOMContentLoaded", () => {
         let tr = document.createElement("tr");
         let th1 = document.createElement("th");
         let th2 = document.createElement("th");
+        let th3 = document.createElement("th");
         th1.textContent = "Filename";
         th2.textContent = "Filesize";
+        th3.textContent = "Last modified";
         th1.id = "filename";
         th2.id = "filesize";
+        th3.id = "lastmod";
         tr.appendChild(th1);
         tr.appendChild(th2);
+        tr.appendChild(th3);
         thead.appendChild(tr);
         fileList.appendChild(thead);
         let tbody = document.createElement("tbody");
@@ -119,6 +123,10 @@ window.addEventListener("DOMContentLoaded", () => {
             td2.textContent = file.size.toString();
             td2.dataset.value = file.rawfs.toString();
             tr.appendChild(td2);
+            let td3 = document.createElement("td");
+            td3.textContent = file.lmdate.toString();
+            td3.dataset.value = file.timestamp.toString();
+            tr.appendChild(td3);
             tbody.appendChild(tr);
         }
         fileList.appendChild(tbody);
@@ -134,7 +142,7 @@ window.addEventListener("DOMContentLoaded", () => {
         function sortTable(index) {
             let rows = Array.from(tbody.rows);
             rows.sort(function (a, b) {
-                if (index === 0)
+                if (index !== 1)
                     return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
                 else
                     return compare(parseInt(a.cells[index].dataset.value), parseInt(b.cells[index].dataset.value));
@@ -146,11 +154,15 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         let filename = document.getElementById("filename");
         let filesize = document.getElementById("filesize");
+        let lastmod = document.getElementById("lastmod");
         filename.addEventListener("click", function () {
             sortTable(0);
         });
         filesize.addEventListener("click", function () {
             sortTable(1);
+        });
+        lastmod.addEventListener("click", function () {
+            sortTable(2);
         });
     });
     window.__TAURI__.event.listen("folder-size", (data) => {
@@ -166,14 +178,17 @@ window.addEventListener("DOMContentLoaded", () => {
         console.log(data.payload.toString());
     });
     window.__TAURI__.event.listen("start-timer", (data) => {
+        timer.className = "show";
         updatetimer();
     });
     window.__TAURI__.event.listen("stop-timer", (data) => {
+        timer.className = "hide";
         clearInterval(interval);
     });
 });
+let timer = document.getElementById("timer");
+timer.className = "hide";
 function updatetimer() {
-    let timer = document.getElementById("timer");
     let startTime = new Date();
     interval = setInterval(function () {
         let currentTime = new Date();
