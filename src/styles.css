@@ -54,17 +54,23 @@ nav {
 nav {
   display: flex;
   align-items: center;
-  padding: 10px;
-  background-color: #f0f0f0;
+  /* padding: 10px;   */
+  position: sticky; 
+  top: 0; 
+  left: 0; 
+  /* height: 80px; */
+  width: 100%;
+  /* background-color: #f0f0f0; */
 }
+
 
 /* Style the input element for the path */
 #path-input {
   flex: 1; /* take up the remaining space */
   height: 30px;
-  border: none;
   border-radius: 5px;
   padding: 5px;
+  border-color: #000;
 }
 
 /* Style the button elements */
