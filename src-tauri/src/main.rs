@@ -261,6 +261,15 @@ let mut tfsize=0;
 #[tauri::command]
 async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tauri::Window<R>) -> Result<(), String> {
   println!("{}",path);
+  match(opener::open(path)){
+    Ok(g)=>{
+      println!("opening")
+      
+    },Err(e)=>{
+      
+      println!("error opening file")
+    }
+  };
   Ok(())
 }
 
