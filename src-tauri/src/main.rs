@@ -96,7 +96,8 @@ struct FileItem {
   size:String,
   rawfs:u64,
   lmdate:String,
-  timestamp:String
+  timestamp:i64,
+  foldercon:i32
   // grandparent:String,
   // parent:String
 }
@@ -147,7 +148,10 @@ let mut tfsize=0;
             let path = entry.as_ref().unwrap().path().to_string_lossy().into_owned();
             // check if the entry is a file or a directory
             let is_dir = metadata.is_dir();
+            // let csizebefore=state.print_cache_size();
             let size=state.find_size(&path);
+            let foldercon=state.foldercon(&path);
+            // println!("{}---{}",path,foldercon);
             let (lmdate,timestamp)=lastmodified(&path);
             // create a file item from the entry data
             let file = FileItem { 
@@ -167,7 +171,8 @@ let mut tfsize=0;
                 },
                 rawfs:size,    
                 lmdate:lmdate,
-                timestamp:timestamp
+                timestamp:timestamp,
+                foldercon:foldercon
                 // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
                 // parent:parent.to_string_lossy().to_string()
                 //tfsize
@@ -279,7 +284,7 @@ async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tau
   Ok(())
 }
 use chrono::{DateTime, Local, Utc};
-fn lastmodified(path:&str)->(String,String){
+fn lastmodified(path:&str)->(String,i64){
 
     // get the metadata of the path
     let metadata = fs::metadata(path.clone()).unwrap();
@@ -314,7 +319,8 @@ fn lastmodified(path:&str)->(String,String){
   // };
   let timestamp;
   let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
-  timestamp=format!("{}",modified_date.timestamp());
+  timestamp=modified_date.timestamp();
+  // timestamp=format!("{}",modified_date.timestamp());
   let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
   let relative_date = modified_date.format("%R %a").to_string();
   let absolute_date = modified_date.format("%d-%m-%y %H:%S").to_string();
@@ -324,7 +330,7 @@ fn lastmodified(path:&str)->(String,String){
 
     // get the number of days in the difference
     let days = diff.num_days();
-    println!("{} was modified {}", path, days);
+    // println!("{} was modified {}", path, days);
     // relative_date
     format!("{} day(s) ago @ {} ",days,relative_date)
     // println!("{} was modified {}", path, relative_date);
@@ -336,12 +342,12 @@ fn lastmodified(path:&str)->(String,String){
   // // let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
   // let relative_date = modified_date.format("%R").to_string();
   
-  println!("{} was modified {}", path, relative_date);
+  // println!("{} was modified {}", path, relative_date);
   relative_date
 } else{
     // format modified as an absolute date
     // let modified_date = DateTime::<Utc>::from(modified).with_timezone(&Local);
-    println!("{} was modified on {}", path, absolute_date);
+    // println!("{} was modified on {}", path, absolute_date);
     absolute_date
 };
     (date,timestamp)

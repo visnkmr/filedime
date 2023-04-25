@@ -88,6 +88,10 @@ impl FileSizeFinder {
 
 //    }
 pub fn find_size(&self, path: &str) -> u64 {
+    // let k=0;
+    // if(k==0){
+    //     return 0;
+    // }
     // Use a single read lock guard to access the cache
     let mut cache = self.cache.read().unwrap();
 
@@ -215,6 +219,7 @@ pub fn find_size(&self, path: &str) -> u64 {
     }
     // Add a method to print the total size of the cache
   pub fn print_cache_size(&self)
+  ->i32
 //   ->(u64,u64) 
   {
     // Use a single read lock guard to access the cache
@@ -254,7 +259,57 @@ pub fn find_size(&self, path: &str) -> u64 {
     //   .map_err(|e| e.to_string()).unwrap();
 
     println!("cache:{}----numfolders:{}---onlynamesize:{}",sizeunit::size(total_size as u64,true),cache.len() as u64,sizeunit::size(total_key_size as u64,true));
+    cache.len() as i32
+    // Print the total size in bytes
+    // println!("The cache size is {} bytes", total_size);
+    // (total_size as u64,cache.len() as u64)
+  }
+  pub fn foldercon(&self,path:&str)
+  ->i32
+//   ->(u64,u64) 
+  {
+    // Use a single read lock guard to access the cache
+    let cache = self.cache.read().unwrap();
 
+    // Initialize a variable to store the total size
+    let mut total_size = 0;
+    // let mut total_key_size = 0;
+    // let mut total_value_size = 0;
+
+    // Initialize a mutable reference to the cache iterator
+    let mut cache_iter = cache.iter();
+
+    // let mut folsize=0;
+    // Loop until the iterator returns None
+    while let Some((key, _)) = cache_iter.next() {
+        if(key.starts_with(path))
+        {
+            total_size += 1;
+        }
+        // Add the size of the key and the value to the total
+        
+        // if(!key.contains("expiry")){
+        //     total_key_size+=mem::size_of_val(key);
+        // }
+        // total_size += mem::size_of_val(value);
+        // if !key.starts_with("expiry_"){
+        //     folsize+=value;
+
+        // }
+
+    }
+
+    // self.app_handle.emit_to(
+    //     "main",
+    //     "folder-size",
+    //     {
+    //       sizeunit::size(folsize,true)
+    //     },
+    //   )
+    //   .map_err(|e| e.to_string()).unwrap();
+
+    // println!("cache:{}----numfolders:{}---onlynamesize:{}",sizeunit::size(total_size as u64,true),cache.len() as u64,sizeunit::size(total_key_size as u64,true));
+    total_size
     // Print the total size in bytes
     // println!("The cache size is {} bytes", total_size);
     // (total_size as u64,cache.len() as u64)

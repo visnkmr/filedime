@@ -75,7 +75,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 datalist.innerHTML = "";
                 for (const option of options) {
                     const optionElement = document.createElement("option");
-                    console.log("here#1");
                     optionElement.value = option;
                     datalist.appendChild(optionElement);
                 }
@@ -106,6 +105,7 @@ window.addEventListener("DOMContentLoaded", () => {
         thead.appendChild(tr);
         fileList.appendChild(thead);
         let tbody = document.createElement("tbody");
+        console.log(files.length);
         for (let file of files) {
             let tr = document.createElement("tr");
             let td1 = document.createElement("td");
@@ -115,6 +115,7 @@ window.addEventListener("DOMContentLoaded", () => {
             td1.dataset.path = file.path;
             td1.dataset.isDir = file.is_dir.toString();
             if (file.is_dir) {
+                td1.textContent = file.name + " (" + file.foldercon + ")";
                 td1.id = "folder";
             }
             td1.dataset.size = file.size.toString();

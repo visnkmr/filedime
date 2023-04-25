@@ -140,7 +140,7 @@ pathInput.addEventListener("input", async () => {
         for (const option of options) {
           // Create a new option element with the option value
           const optionElement = document.createElement("option");
-          console.log("here#1")
+          // console.log("here#1")
           optionElement.value = option;
   
           // Append the option element to the datalist element
@@ -164,6 +164,7 @@ pathInput.addEventListener("input", async () => {
     rawfs: number;
     lmdate:number;
     timestamp:number;
+    foldercon:number;
   };
   // parse the data as JSON
   let files:File[] = JSON.parse(data.payload);
@@ -200,6 +201,7 @@ pathInput.addEventListener("input", async () => {
 
     
     let tbody = document.createElement("tbody");
+    console.log(files.length)
     // console.log(data.payload)
   // loop through the files array
   for (let file of files) {
@@ -207,13 +209,15 @@ pathInput.addEventListener("input", async () => {
     let tr = document.createElement("tr");
     // create two table cell elements for the filename and filesize columns
     let td1 = document.createElement("td");
+
     td1.textContent = file.name;
     td1.dataset.value = file.name;
     td1.dataset.name = file.name;
     td1.dataset.path = file.path;
-
+    
     td1.dataset.isDir = file.is_dir.toString();
     if (file.is_dir){
+      td1.textContent = file.name+" ("+file.foldercon+")";
       td1.id="folder"
     }
     td1.dataset.size = file.size.toString();
