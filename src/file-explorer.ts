@@ -1,6 +1,12 @@
 const { invoke } = (window as any).__TAURI__.tauri;
 const { listen } = (window as any).__TAURI__.event;
-
+var folcount=0;
+(window as any).__TAURI__.event.listen("folder-count", (data: { payload: number }) => {
+  // parentsize.innerHTML=data.payload.toString();.
+  folcount=data.payload;
+  console.log(folcount)
+  // console.log("fromhere"+data.payload.toString())
+});
 
 // web app code
 var interval:number ;
@@ -153,6 +159,7 @@ pathInput.addEventListener("input", async () => {
       console.error(error);
     });
 });
+var loaded=0;
 
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
@@ -168,7 +175,7 @@ pathInput.addEventListener("input", async () => {
   };
   // parse the data as JSON
   let files:File[] = JSON.parse(data.payload);
-  console.log("files")
+  // console.log("files")
   // clear the file list
   fileList.innerHTML = "";
   // var lastpsize=""
@@ -202,6 +209,17 @@ pathInput.addEventListener("input", async () => {
     
     let tbody = document.createElement("tbody");
     console.log(files.length)
+    loaded=files.length;
+    var percomp=(loaded/folcount*100);
+    var setp=document.getElementById("myprogress") as HTMLProgressElement;
+    setp.value=percomp;
+    if(percomp==100)
+      setp.className="hide"
+      else
+      setp.className="show"
+  console.log("here"+percomp.toString());
+
+
     // console.log(data.payload)
   // loop through the files array
   for (let file of files) {
@@ -332,6 +350,7 @@ pathInput.addEventListener("input", async () => {
   parentsize.innerHTML=data.payload.toString();
   console.log(data.payload.toString())
 });
+
 (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
   lastfolder=data.payload.toString();
   console.log(data.payload.toString())

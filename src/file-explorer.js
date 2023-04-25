@@ -1,6 +1,11 @@
 "use strict";
 const { invoke } = window.__TAURI__.tauri;
 const { listen } = window.__TAURI__.event;
+var folcount = 0;
+window.__TAURI__.event.listen("folder-count", (data) => {
+    folcount = data.payload;
+    console.log(folcount);
+});
 var interval;
 window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke("list_files", { path: "/home/roger/Downloads/github/"
@@ -84,9 +89,9 @@ window.addEventListener("DOMContentLoaded", () => {
             console.error(error);
         });
     });
+    var loaded = 0;
     window.__TAURI__.event.listen("list-files", (data) => {
         let files = JSON.parse(data.payload);
-        console.log("files");
         fileList.innerHTML = "";
         let thead = document.createElement("thead");
         let tr = document.createElement("tr");
@@ -106,6 +111,15 @@ window.addEventListener("DOMContentLoaded", () => {
         fileList.appendChild(thead);
         let tbody = document.createElement("tbody");
         console.log(files.length);
+        loaded = files.length;
+        var percomp = (loaded / folcount * 100);
+        var setp = document.getElementById("myprogress");
+        setp.value = percomp;
+        if (percomp == 100)
+            setp.className = "hide";
+        else
+            setp.className = "show";
+        console.log("here" + percomp.toString());
         for (let file of files) {
             let tr = document.createElement("tr");
             let td1 = document.createElement("td");

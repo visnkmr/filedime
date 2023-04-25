@@ -129,6 +129,13 @@ async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinde
   // convert the path to a PathBuf
   let path = PathBuf::from(path);
 let parent=path.clone();
+let fcount=fs::read_dir(&path).unwrap().count();
+app_handle.emit_to(
+  "main",
+  "folder-count",
+  fcount,
+)
+.map_err(|e| e.to_string())?;
 let mut tfsize=0;
 //    let mut finder = ;
   // check if the path exists and is a directory

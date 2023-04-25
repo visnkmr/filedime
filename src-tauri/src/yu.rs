@@ -30,7 +30,7 @@ fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
             path.is_file() && !path.is_symlink()
         })
         // Filter out paths that start with "./.git"
-        .filter(|entry| !entry.path().starts_with("./.git"))
+        .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
         // Map each path to its file size
         .map(|entry| file_size(entry.path(),g))
         // Sum up all file sizes
