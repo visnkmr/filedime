@@ -318,10 +318,12 @@ pathInput.addEventListener("input", async () => {
 });
 
 (window as any).__TAURI__.event.listen("start-timer", (data: { payload: string }) => {
+  timer.className="show"
   updatetimer();
 });
 
 (window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
+  timer.className="hide"
   clearInterval(interval);
 });
 
@@ -331,11 +333,12 @@ pathInput.addEventListener("input", async () => {
 type TimerElement = HTMLElement & {
   textContent: string;
 };
-
+let timer = document.getElementById("timer") as TimerElement;
+timer.className="hide"
 // Declare the type of the interval variableZ
 function updatetimer() {
   // Get the timer element
-  let timer = document.getElementById("timer") as TimerElement;
+ 
 
   // Set the start time
   let startTime = new Date();

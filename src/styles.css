@@ -139,3 +139,10 @@ nav {
   height: 20px; /* set a fixed height */
   margin-right: 10px; /* add some right margin */
 }
+
+.show{
+  display: block;
+}
+.hide{
+  display: none;
+}
