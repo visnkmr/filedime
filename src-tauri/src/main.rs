@@ -162,11 +162,14 @@ let mut tfsize=0;
         let mut count=0;
         let mut totsize=0;
         let mut now = Instant::now();
+        let update:Vec<u64>=vec![20,40,60,80];
+
         let mut firsttime=true;
         let mut folderloc=0;
         // loop through the entries
         for entry in entries {
           count+=1;
+          let msval=update.iter().next().unwrap_or(&90);
           // get the metadata of the entry
           if let Ok(metadata) = entry.as_ref().unwrap().metadata() {
             // get the name and path of the entry
@@ -251,7 +254,7 @@ let mut tfsize=0;
             files.push(file);
             let elapsed = now.elapsed();
             
-            if elapsed.ge(&Duration::from_millis(20)) || firsttime || (count%20==0 && elapsed.ge(&Duration::from_millis(20)))
+            if elapsed.ge(&Duration::from_millis(*msval)) || firsttime || (count%20==0 && elapsed.ge(&Duration::from_millis(20)))
             {
               firsttime=false;
             //Todo move to a separate function and call after every select interval instead of count%10
