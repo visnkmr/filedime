@@ -130,10 +130,24 @@ async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinde
   let path = PathBuf::from(path);
 let parent=path.clone();
 let fcount=fs::read_dir(&path).unwrap().count();
+println!("folders---{}",fcount);
 app_handle.emit_to(
   "main",
   "folder-count",
   fcount,
+)
+.map_err(|e| e.to_string())?;
+app_handle.emit_to(
+  "main",
+  "grandparent-loc",
+  parent.parent().unwrap().to_string_lossy().to_string(),
+)
+.map_err(|e| e.to_string())?;
+
+app_handle.emit_to(
+  "main",
+  "parent-loc",
+  parent.to_string_lossy().to_string(),
 )
 .map_err(|e| e.to_string())?;
 let mut tfsize=0;
@@ -144,15 +158,20 @@ let mut tfsize=0;
     match fs::read_dir(&path) {
       Ok(entries) => {
         // create an empty vector to store the file items
-        let mut files = Vec::new();
-        
+        let mut files:Vec<FileItem> = Vec::new();
+        let mut count=0;
+        let mut totsize=0;
+        let mut now = Instant::now();
+        let mut firsttime=true;
         // loop through the entries
         for entry in entries {
+          count+=1;
           // get the metadata of the entry
           if let Ok(metadata) = entry.as_ref().unwrap().metadata() {
             // get the name and path of the entry
             let name = entry.as_ref().unwrap().file_name().into_string().unwrap();
             let path = entry.as_ref().unwrap().path().to_string_lossy().into_owned();
+            
             // check if the entry is a file or a directory
             let is_dir = metadata.is_dir();
             // let csizebefore=state.print_cache_size();
@@ -162,11 +181,11 @@ let mut tfsize=0;
             let (lmdate,timestamp)=lastmodified(&path);
             // create a file item from the entry data
             let file = FileItem { 
-                name,
+                name:name.clone(),
                 path:path.clone(),
                 is_dir,
                 size:{
-                  let tr=if(size>1){
+                 tr=if(size>1){
                     tfsize+=size;
                     // println!("{}",tfsize);
                    sizeunit::size(size,true)
@@ -174,10 +193,10 @@ let mut tfsize=0;
                   else{
                     "".to_string()
                   };
-                  tr
+                  tr.clone()
                 },
                 rawfs:size,    
-                lmdate:lmdate,
+                lmdate:lmdate.clone(),
                 timestamp:timestamp,
                 foldercon:foldercon
                 // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
@@ -196,27 +215,59 @@ let mut tfsize=0;
                 // }
             };
             // push the file item to the vector
+            totsize+=mem::size_of_val(&file);
+            // totsize+=mem::size_of_val(&name);
+            // totsize+=mem::size_of_val(&path);
+            // totsize+=mem::size_of_val(&is_dir);
+            // totsize+=mem::size_of_val(&tr);
+            // totsize+=mem::size_of_val(&size);
+            // totsize+=mem::size_of_val(&lmdate);
+            // totsize+=mem::size_of_val(&timestamp);
+            // totsize+=mem::size_of_val(&foldercon);
+            println!("{}-----{} out of {} \t{}--{}",sizeunit::size(totsize as u64,true),count,fcount,name,path);
             files.push(file);
+            let elapsed = now.elapsed();
+            
+            if elapsed.ge(&Duration::from_millis(20)) || firsttime || (count%20==0 && elapsed.ge(&Duration::from_millis(20)))
+            {
+              firsttime=false;
+            //Todo move to a separate function and call after every select interval instead of count%10
+              app_handle.emit_to(
+                "main",
+                "list-files",
+                serde_json::to_string(&files.clone()).unwrap(),
+              )
+              .map_err(|e| e.to_string())?;
+            
             app_handle.emit_to(
-              "main",
-              "list-files",
-              serde_json::to_string(&files.clone()).unwrap(),
-            )
-            .map_err(|e| e.to_string())?;
+                "main",
+                "folder-size",
+                {
+                  sizeunit::size(tfsize,true)
+                },
+              )
+              .map_err(|e| e.to_string())?;
+            }
           
-          app_handle.emit_to(
-              "main",
-              "folder-size",
-              {
-                sizeunit::size(tfsize,true)
-              },
-            )
-            .map_err(|e| e.to_string())?;
-          
-          
+            now = Instant::now();
           }
 
         }
+        app_handle.emit_to(
+          "main",
+          "list-files",
+          serde_json::to_string(&files.clone()).unwrap(),
+        )
+        .map_err(|e| e.to_string())?;
+      
+      app_handle.emit_to(
+          "main",
+          "folder-size",
+          {
+            sizeunit::size(tfsize,true)
+          },
+        )
+        .map_err(|e| e.to_string())?;
         // sort the vector by name
         // files.sort_by(|a, b| a.name.cmp(&b.name));
         // emit an event to the frontend with the vector as payload
@@ -239,19 +290,7 @@ let mut tfsize=0;
         )
         .map_err(|e| e.to_string())?;
 
-        app_handle.emit_to(
-            "main",
-            "grandparent-loc",
-            parent.parent().unwrap().to_string_lossy().to_string(),
-          )
-          .map_err(|e| e.to_string())?;
         
-        app_handle.emit_to(
-            "main",
-            "parent-loc",
-            parent.to_string_lossy().to_string(),
-          )
-          .map_err(|e| e.to_string())?;
         
       // app_handle.emit_to(
       //         "main",

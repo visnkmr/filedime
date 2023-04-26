@@ -121,6 +121,9 @@ pub fn find_size(&self, path: &str) -> u64 {
         )
     } else {
         entry_path.size_on_disk().unwrap_or(0)
+        
+        // let metadata = entry_path.symlink_metadata().unwrap();
+        // entry_path.size_on_disk_fast(&metadata).unwrap_or(0)
     };
 
     // Use a single write lock guard to update the cache

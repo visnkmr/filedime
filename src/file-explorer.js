@@ -129,8 +129,13 @@ window.addEventListener("DOMContentLoaded", () => {
             td1.dataset.path = file.path;
             td1.dataset.isDir = file.is_dir.toString();
             if (file.is_dir) {
-                td1.textContent = file.name + " (" + file.foldercon + ")";
                 td1.id = "folder";
+                if (file.foldercon > 0) {
+                    td1.textContent = file.name + " (" + file.foldercon + ")";
+                }
+                else {
+                    td1.textContent = file.name;
+                }
             }
             td1.dataset.size = file.size.toString();
             tr.appendChild(td1);

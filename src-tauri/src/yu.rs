@@ -27,10 +27,12 @@ fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
         // Filter out directories and symlinks
         .filter(|entry| {
             let path = entry.path();
-            path.is_file() && !path.is_symlink()
+            path.is_file() &&
+             !path.is_symlink() &&
+             !path.to_string_lossy().to_string().contains("/.git")
         })
         // Filter out paths that start with "./.git"
-        .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
+        // .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
         // Map each path to its file size
         .map(|entry| file_size(entry.path(),g))
         // Sum up all file sizes
