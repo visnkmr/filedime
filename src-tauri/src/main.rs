@@ -163,6 +163,7 @@ let mut tfsize=0;
         let mut totsize=0;
         let mut now = Instant::now();
         let mut firsttime=true;
+        let mut folderloc=0;
         // loop through the entries
         for entry in entries {
           count+=1;
@@ -171,6 +172,20 @@ let mut tfsize=0;
             // get the name and path of the entry
             let name = entry.as_ref().unwrap().file_name().into_string().unwrap();
             let path = entry.as_ref().unwrap().path().to_string_lossy().into_owned();
+            if !entry.as_ref().unwrap().path().is_dir(){
+              match(entry.as_ref().unwrap().path().extension()){
+                Some(g)=>{
+                  if g.to_string_lossy().to_string()=="rs"{
+                    folderloc=fs::read_to_string(entry.as_ref().unwrap().path()).expect("Unable to open file").lines().count();
+                    println!("{}",folderloc);
+                  }
+
+                },
+                None=>{
+
+                }
+              }
+            }
             
             // check if the entry is a file or a directory
             let is_dir = metadata.is_dir();
@@ -195,7 +210,13 @@ let mut tfsize=0;
                   else{
                     "".to_string()
                   };
-                  tr.clone()
+                  if(folderloc>0){
+                    tr.clone() + " (" + &folderloc.to_string() + ")"
+                  }
+                  else{
+                    tr.clone()
+
+                  }
                 },
                 rawfs:size,    
                 lmdate:lmdate.clone(),
