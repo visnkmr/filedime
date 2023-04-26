@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self}, path::Path};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem};
 mod yu;
 use filesize::PathExt;
 use tauri::{Manager, api::file::read_string, State, Runtime};
@@ -177,6 +177,8 @@ let mut tfsize=0;
             // let csizebefore=state.print_cache_size();
             let size=state.find_size(&path);
             let foldercon=state.foldercon(&path);
+            let mut tr;
+            // let size=0;
             // println!("{}---{}",path,foldercon);
             let (lmdate,timestamp)=lastmodified(&path);
             // create a file item from the entry data
