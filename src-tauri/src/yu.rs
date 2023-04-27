@@ -15,8 +15,11 @@ fn file_size(path: &std::path::Path,g:&FileSizeFinder) -> u64 {
 fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
     // Create a walkdir iterator over the directory
     let walker = WalkDir::new(path)
+    // .min_depth(1) // skip the root directory
+    //   .max_depth(1)
         // Convert errors into options
         .into_iter()
+        
         .filter_map(|e| e.ok());
 
     // Convert the walkdir iterator into a parallel iterator
