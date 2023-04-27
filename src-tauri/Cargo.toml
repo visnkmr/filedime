@@ -28,6 +28,8 @@ filesize = "0.2.0"
 markdown= {git="https://github.com/wooorm/markdown-rs.git"}
 opener="0.6.1"
 chrono="0.4.24"
+# infer="0.13.0"
+
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

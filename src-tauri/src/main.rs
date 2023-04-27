@@ -233,22 +233,40 @@ let handle=thread::spawn(move || {
           //   }
           // }).unwrap_or(0); .
           let mut folderloc=0;
+          let mut filetype="Folder".to_string();
           if !e.path().is_dir(){
+          //   let extension = Path::new(&path)
+          //   .extension()
+          //   .and_then(|os_str| os_str.to_str());
+          // filetype=extension.unwrap();
+            // folderloc=match(extension){
+            //   Some("rs")=>{
+            //     fs::read_to_string(e.path()).expect("Unable to open file").lines().count()
+            //   },
+            //   _=>{
+            //     0
+            //   }
+            // };
+            
             match(e.path().extension()){
               Some(g)=>{
                 if g.to_string_lossy().to_string()=="rs"{
                   folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
                   println!("{}",folderloc);
                 }
+                filetype=g.to_string_lossy().to_string();
 
               },
               None=>{
-
+                // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
+                filetype="".to_string();
               }
             }
           }
           let tr;
           let (lmdate,timestamp)=lastmodified(&path);
+          // let filetype=infer::get_from_path(&path).unwrap().unwrap().mime_type();
+          
           
           // (name, size, path);
           FileItem { 
@@ -265,10 +283,10 @@ let handle=thread::spawn(move || {
                 "".to_string()
               };
               if(folderloc>0){
-                tr.clone() + " (" + &folderloc.to_string() + ")"
+                tr.clone() + " (" + &folderloc.to_string() + ")" 
               }
               else{
-                tr.clone()
+                tr.clone() +"("+filetype.as_str()+")"
 
               }
             },
