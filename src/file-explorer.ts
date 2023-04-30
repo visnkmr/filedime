@@ -33,6 +33,18 @@ backButton.addEventListener("click", () => {
   });
 });
 
+// get a reference to the back button element
+const nosize = document.getElementById("no-size") as HTMLButtonElement;
+// add a click event listener to the back button
+nosize.addEventListener("click", () => {
+  // check if there is any previous path in the history
+  (window as any).__TAURI__.invoke(
+    "nosize",
+    {
+      path: pathInput.value
+  });
+});
+
 // get the elements from the HTML document
 const pathInput = document.getElementById("path-input") as HTMLInputElement;
 const listButton = document.getElementById("list-button") as HTMLButtonElement;

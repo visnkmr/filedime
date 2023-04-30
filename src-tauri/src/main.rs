@@ -525,6 +525,13 @@ async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tau
   };
   Ok(())
 }
+
+#[tauri::command]
+async fn nosize(path:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.nosize();
+  list_files(path, window, state).await;
+  Ok(())
+}
 use chrono::{DateTime, Local, Utc};
 fn lastmodified(path:&str)->(String,i64){
 
@@ -615,6 +622,7 @@ fn main() {
         loadmarkdown,
         get_path_options,
         openpath
+        nosize
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

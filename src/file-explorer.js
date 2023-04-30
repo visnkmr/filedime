@@ -20,6 +20,12 @@ window.addEventListener("DOMContentLoaded", () => {
         window.__TAURI__.invoke("list_files", { path: lastfolder
         });
     });
+    const nosize = document.getElementById("no-size");
+    nosize.addEventListener("click", () => {
+        window.__TAURI__.invoke("nosize", {
+            path: pathInput.value
+        });
+    });
     const pathInput = document.getElementById("path-input");
     const listButton = document.getElementById("list-button");
     const fileList = document.getElementById("file-list");

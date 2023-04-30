@@ -39,6 +39,7 @@ use std::sync::RwLock;
 pub struct FileSizeFinder {
     cache: RwLock<HashMap<String, u64>>,
     expiration: Duration,
+    nosize:RwLock<bool>
     // app_handle:AppHandle
     // size:usize
 }
@@ -53,6 +54,7 @@ impl FileSizeFinder {
             // Wrap the cache in a RwLock
             cache: RwLock::new(HashMap::new()),
             expiration: Duration::from_secs(expiration),
+            nosize:RwLock::new(true)
             // app_handle: apphandle
             // size:0
         }
@@ -115,10 +117,17 @@ pub fn find_size(&self, path: &str) -> u64 {
     let entry_path = Path::new(path);
 
     let mut size = if entry_path.is_dir() {
-        yu::uio(
-            entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
-            self,
-        )
+        let nosize=self.nosize.read().unwrap();
+        if(*nosize){
+            0 as u64
+        }
+        else{
+            yu::uio(
+                entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
+                self,
+            )
+
+        }
     } else {
         entry_path.size_on_disk().unwrap_or(0)
         
@@ -266,6 +275,18 @@ pub fn find_size(&self, path: &str) -> u64 {
     // Print the total size in bytes
     // println!("The cache size is {} bytes", total_size);
     // (total_size as u64,cache.len() as u64)
+  }
+  pub fn nosize(&self){
+    let shouldsize;
+    {
+
+        shouldsize=!*self.nosize.read().unwrap();
+    }
+    let mut setsize=self.nosize.write().unwrap();
+    *setsize=shouldsize;
+    // {
+    //     println!("{:?}",*self.nosize.read().unwrap())
+    // }
   }
   pub fn foldercon(&self,path:&str)
   ->i32
