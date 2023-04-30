@@ -51,12 +51,21 @@ fn loadmarkdown(name: String, window: Window,g:State<FileSizeFinder>) -> String 
       parent.to_string_lossy().to_string(),
     )
     .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
-  
-    file.read_to_string(&mut content).unwrap();
-    markdown::to_html_with_options(
-        &content ,
-        &markdown::Options::gfm()
-    ).unwrap()
+  file.read_to_string(&mut content).unwrap();
+  let htmformd=markdown::to_html_with_options(
+      &content ,
+      &markdown::Options::gfm()
+  ).unwrap();
+
+  app_handle.emit_to(
+      "main",
+      "load-markdown",
+      &htmformd,
+    )
+    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
+
+  htmformd
+    
     // format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
@@ -108,8 +117,24 @@ const CACHE_EXPIRY:u64=60;
 // define a command to list the files and directories in a given path
 #[tauri::command]
 async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinder>) -> Result<(), String> {
+  // println!("{}",path);
+  let testpath=PathBuf::from(path.clone());
   
-  
+
+  if(path.ends_with(".md")){
+    loadmarkdown(path,window,state);
+    return Ok(());
+  }
+
+  if(testpath.is_file()){
+    openpath(path).await?;
+    return Ok(());
+  }
+
+  if(!testpath.is_dir()){
+    return Ok(())
+  }
+
   let now = SystemTime::now();
   
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
@@ -512,7 +537,7 @@ let handle=thread::spawn(move || {
   
 }
 #[tauri::command]
-async fn openpath<R: Runtime>(path: String,app: tauri::AppHandle<R>, window: tauri::Window<R>) -> Result<(), String> {
+async fn openpath(path: String) -> Result<(), String> {
   println!("{}",path);
   match(opener::open(path)){
     Ok(g)=>{
@@ -621,7 +646,7 @@ fn main() {
         list_files,
         loadmarkdown,
         get_path_options,
-        openpath
+        openpath,
         nosize
         ])
     .run(tauri::generate_context!())

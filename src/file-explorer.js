@@ -6,6 +6,11 @@ window.__TAURI__.event.listen("folder-count", (data) => {
     folcount = data.payload;
     console.log(folcount);
 });
+const pathInput = document.getElementById("path-input");
+const listButton = document.getElementById("list-button");
+const fileList = document.getElementById("file-list");
+const htmlbase = document.getElementById("htmlbase");
+const parentsize = document.getElementById("parent-size");
 var interval;
 window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke("list_files", { path: "/home/roger/Downloads/github/"
@@ -26,74 +31,11 @@ window.addEventListener("DOMContentLoaded", () => {
             path: pathInput.value
         });
     });
-    const pathInput = document.getElementById("path-input");
-    const listButton = document.getElementById("list-button");
-    const fileList = document.getElementById("file-list");
-    const htmlbase = document.getElementById("htmlbase");
-    const parentsize = document.getElementById("parent-size");
     listButton.addEventListener("click", async () => {
         let path = pathInput.value;
         await window.__TAURI__.invoke("list_files", { path: path
         });
         pathInput.value = path;
-    });
-    fileList.addEventListener("click", async (event) => {
-        console.log("here");
-        let target = event.target;
-        console.log(target.tagName);
-        if (target.tagName === "TD") {
-            console.log(target.dataset);
-            let name = target.dataset.name;
-            let path = target.dataset.path;
-            let isDir = target.dataset.isDir;
-            if (isDir === "true") {
-                console.log("dir");
-                pathInput.value = path;
-                parentsize.innerHTML = target.dataset.parentsize;
-                window.__TAURI__.invoke("list_files", {
-                    path: path
-                });
-            }
-            else if (name.toLowerCase().endsWith(".md")) {
-                {
-                    fileList.innerHTML = "";
-                    htmlbase.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
-                    var links = document.getElementsByTagName("a");
-                    for (var i = 0; i < links.length; i++) {
-                        var link = links[i];
-                        link.setAttribute("target", "_blank");
-                    }
-                }
-            }
-            else {
-                window.__TAURI__.invoke("openpath", {
-                    path: path
-                });
-            }
-        }
-    });
-    const datalist = document.getElementById("path-list");
-    pathInput.addEventListener("input", async () => {
-        console.log("here");
-        const path = pathInput.value;
-        console.log(path);
-        await window.__TAURI__.invoke("get_path_options", {
-            path: path,
-        })
-            .then((options) => {
-            console.log(options);
-            if (options !== null) {
-                datalist.innerHTML = "";
-                for (const option of options) {
-                    const optionElement = document.createElement("option");
-                    optionElement.value = option;
-                    datalist.appendChild(optionElement);
-                }
-            }
-        })
-            .catch((error) => {
-            console.error(error);
-        });
     });
     var loaded = 0;
     window.__TAURI__.event.listen("list-files", (data) => {
@@ -191,6 +133,57 @@ window.addEventListener("DOMContentLoaded", () => {
             sortTable(2);
         });
     });
+    fileList.addEventListener("click", async (event) => {
+        console.log("here");
+        let target = event.target;
+        console.log(target.tagName);
+        if (target.tagName === "TD") {
+            console.log(target.dataset);
+            let name = target.dataset.name;
+            let path = target.dataset.path;
+            let isDir = target.dataset.isDir;
+            if (isDir === "true") {
+                console.log("dir");
+                pathInput.value = path;
+                parentsize.innerHTML = target.dataset.parentsize;
+                window.__TAURI__.invoke("list_files", {
+                    path: path
+                });
+            }
+            else if (name.toLowerCase().endsWith(".md")) {
+                openmarkdown(await window.__TAURI__.invoke("loadmarkdown", { name: path }));
+            }
+            else {
+                openpath(path);
+            }
+        }
+    });
+    const datalist = document.getElementById("path-list");
+    pathInput.addEventListener("input", async () => {
+        console.log("here");
+        const path = pathInput.value;
+        console.log(path);
+        await window.__TAURI__.invoke("get_path_options", {
+            path: path,
+        })
+            .then((options) => {
+            console.log(options);
+            if (options !== null) {
+                datalist.innerHTML = "";
+                for (const option of options) {
+                    const optionElement = document.createElement("option");
+                    optionElement.value = option;
+                    datalist.appendChild(optionElement);
+                }
+            }
+        })
+            .catch((error) => {
+            console.error(error);
+        });
+    });
+    window.__TAURI__.event.listen("load-markdown", (data) => {
+        openmarkdown(data.payload);
+    });
     window.__TAURI__.event.listen("folder-size", (data) => {
         parentsize.innerHTML = data.payload.toString();
         console.log(data.payload.toString());
@@ -225,4 +218,18 @@ function updatetimer() {
         let paddedSeconds = seconds < 10 ? "0" + seconds : seconds.toString();
         timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
+}
+function openmarkdown(htmlfrommd) {
+    fileList.innerHTML = "";
+    htmlbase.innerHTML = htmlfrommd;
+    var links = document.getElementsByTagName("a");
+    for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        link.setAttribute("target", "_blank");
+    }
+}
+async function openpath(path) {
+    window.__TAURI__.invoke("openpath", {
+        path: path
+    });
 }
