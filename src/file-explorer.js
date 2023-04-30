@@ -11,6 +11,7 @@ const listButton = document.getElementById("list-button");
 const fileList = document.getElementById("file-list");
 const htmlbase = document.getElementById("htmlbase");
 const parentsize = document.getElementById("parent-size");
+var menu = document.getElementById("menu");
 var reload = document.getElementById("reload");
 var interval;
 window.addEventListener("DOMContentLoaded", () => {
@@ -44,6 +45,27 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
     var loaded = 0;
+    menu.addEventListener("click", function (e) {
+        var id = e.target.id;
+        switch (id) {
+            case "o1":
+                console.log("o1");
+                console.log(e);
+                break;
+            case "o2":
+                break;
+            case "o3":
+                break;
+            default:
+                break;
+        }
+        menu.style.display = "none";
+    });
+    document.addEventListener("click", function (e) {
+        if (e.target.id !== "td1" && e.target.parentNode !== menu) {
+            menu.style.display = "none";
+        }
+    });
     window.__TAURI__.event.listen("list-files", (data) => {
         let files = JSON.parse(data.payload);
         fileList.innerHTML = "";
@@ -78,6 +100,7 @@ window.addEventListener("DOMContentLoaded", () => {
             let tr = document.createElement("tr");
             let td1 = document.createElement("td");
             td1.textContent = file.name;
+            td1.id = "td1";
             td1.dataset.value = file.name;
             td1.dataset.name = file.name;
             td1.dataset.path = file.path;
@@ -93,6 +116,12 @@ window.addEventListener("DOMContentLoaded", () => {
             }
             td1.dataset.size = file.size.toString();
             tr.appendChild(td1);
+            td1.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+                menu.style.display = "block";
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+            });
             let td2 = document.createElement("td");
             td2.textContent = file.size.toString();
             td2.dataset.value = file.rawfs.toString();
@@ -209,6 +238,11 @@ window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.event.listen("stop-timer", (data) => {
         timer.className = "hide";
         clearInterval(interval);
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.keyCode === 27) {
+            menu.style.display = "none";
+        }
     });
 });
 let timer = document.getElementById("timer");

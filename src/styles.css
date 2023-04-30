@@ -199,3 +199,21 @@ progress{
   border: 1px solid black;
   display: none;
 }
+
+/* Style for the custom context menu */
+.menu {
+  display: none;
+  position: absolute;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  list-style: none;
+}
+
+.menu li {
+  cursor: pointer;
+}
+
+.menu li:hover {
+  background-color: #e0e0e0;
+}

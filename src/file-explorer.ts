@@ -98,7 +98,6 @@ listButton.addEventListener("click", async () => {
   });
   pathInput.value=path
 });
-var loaded=0;
 
 // add an event listener to the list button
 reload.addEventListener("click", async () => {
@@ -144,6 +143,60 @@ reload.addEventListener("click", async () => {
     {path: path
   });
   // pathInput.value=path
+});
+var loaded=0;
+// Add a listener for the click event on the menu
+menu.addEventListener("click", function(e) {
+  // Get the id of the clicked option
+  var id = (e.target as HTMLLIElement).id;
+  
+  // Do something based on the id
+  switch (id) {
+    case "o1":
+      console.log("o1")
+      console.log(e)
+      // Code for option 1
+      break;
+    case "o2":
+      // Code for option 2
+      break;
+    case "o3":
+      // Code for option 3
+      break;
+    default:
+      // Code for other cases
+      break;
+  }
+  menu.style.display = "none";
+});
+// Add a listener for the click event on the document
+document.addEventListener("click", function(e:Event) {
+  // Hide the menu if the user clicks outside of it
+  if ((e.target as HTMLElement).id !== "td1" && (e.target! as HTMLElement).parentNode !== menu) {
+    menu.style.display = "none";
+  }
+  // else if(e.target!.parentNode == menu){
+  //   var id = e.target!.id;
+
+  // // Do something based on the id
+  // switch (id) {
+  //   case "o1":
+  //     // console.log(e.target!.dataset.name)
+  //     // Code for option 1
+  //     break;
+  //   case "o2":
+  //     console.log("o2")
+  //     // Code for option 2
+  //     break;
+  //   case "o3":
+  //     // Code for option 3
+  //     break;
+  //   default:
+  //     // Code for other cases
+  //     break;
+  // }
+    
+  // }
 });
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
@@ -213,6 +266,7 @@ reload.addEventListener("click", async () => {
     let td1 = document.createElement("td");
 
     td1.textContent = file.name;
+    td1.id="td1";
     td1.dataset.value = file.name;
     td1.dataset.name = file.name;
     td1.dataset.path = file.path;
@@ -239,6 +293,23 @@ reload.addEventListener("click", async () => {
     // td1.appendChild(a);
     // set the text content of the second table cell to the size of the file
     tr.appendChild(td1);
+
+    // Add a listener for the contextmenu event
+    td1.addEventListener("contextmenu", function(e) {
+      // Prevent the default menu from showing up
+      e.preventDefault();
+      
+      // Show the custom menu
+      menu.style.display = "block";
+      
+      // Position the menu according to the mouse coordinates
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+    });
+
+    
+    
+
     let td2 = document.createElement("td");
     td2.textContent = file.size.toString();
     td2.dataset.value = file.rawfs.toString();
@@ -253,6 +324,7 @@ reload.addEventListener("click", async () => {
     // append the table cells to the table row
     
     tr.appendChild(td3);
+
     // append the table row to the table body
     tbody.appendChild(tr);
   }
@@ -338,6 +410,7 @@ reload.addEventListener("click", async () => {
 // add an event listener to the file list
 fileList.addEventListener("click", async (event) => {
 
+  
   console.log("here")
   // get the target element of the event
   let target = event.target as HTMLElement;
@@ -445,6 +518,19 @@ pathInput.addEventListener("input", async () => {
   clearInterval(interval);
 });
 // notify();
+// Get the target element and the menu element
+// var target = document.getElementById("target") ;
+
+
+
+
+// Add a listener for the keydown event on the document
+document.addEventListener("keydown", function(e) {
+  // Hide the menu if the user presses Esc
+  if (e.keyCode === 27) {
+    menu.style.display = "none";
+  }
+});
 
 });
 
