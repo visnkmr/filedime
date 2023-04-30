@@ -11,6 +11,7 @@ const listButton = document.getElementById("list-button");
 const fileList = document.getElementById("file-list");
 const htmlbase = document.getElementById("htmlbase");
 const parentsize = document.getElementById("parent-size");
+var reload = document.getElementById("reload");
 var interval;
 window.addEventListener("DOMContentLoaded", () => {
     window.__TAURI__.invoke("list_files", { path: "/home/roger/Downloads/github/"
@@ -36,6 +37,11 @@ window.addEventListener("DOMContentLoaded", () => {
         await window.__TAURI__.invoke("list_files", { path: path
         });
         pathInput.value = path;
+    });
+    reload.addEventListener("click", async () => {
+        let path = pathInput.value;
+        await window.__TAURI__.invoke("list_files", { path: path
+        });
     });
     var loaded = 0;
     window.__TAURI__.event.listen("list-files", (data) => {

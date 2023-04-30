@@ -13,6 +13,7 @@ const listButton = document.getElementById("list-button") as HTMLButtonElement;
 const fileList = document.getElementById("file-list") as HTMLTableElement;
 const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
+var reload = document.getElementById("reload") as HTMLButtonElement;
 
 // web app code
 var interval:number ;
@@ -99,6 +100,51 @@ listButton.addEventListener("click", async () => {
 });
 var loaded=0;
 
+// add an event listener to the list button
+reload.addEventListener("click", async () => {
+  // get the value of the path input
+  let path = pathInput.value;
+  // invoke the list_files command from the backend with the path as argument
+//   if((name as string).toLowerCase().endsWith(".md")){
+//     // let mdext=".md";
+//     // console.log(target.dataset.name)
+//     // console.log(target.dataset.parent)
+//     {
+//         fileList.innerHTML=""
+//         htmlbase.innerHTML = await (window as any).__TAURI__.invoke("loadmarkdown", { name: path });
+//         // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
+//         var links = document.getElementsByTagName("a"); // get all links
+//         for (var i = 0; i < links.length; i++) { // loop through them
+//             var link = links[i]; // get current link
+//             // var href = link.getAttribute("href"); // get href attribute
+//             // if (href && href.startsWith("http") && !href.includes("yourdomain")) { // check conditions
+//             link.setAttribute("target", "_blank"); // set target attribute
+//             // }
+//         }
+//     }
+//     // window.__TAURI__.invoke(
+//     //     "list_files",
+//     //     {
+//     //         path: path
+//     //     }
+//     //   );
+//   // alert the name and path of the file
+// //   alert(`You clicked on ${name} at ${path}`);
+// }
+// else{
+//   (window as any).__TAURI__.invoke(
+//     "openpath",
+//     {
+//         path: path
+//     }
+//   );
+// }
+  await (window as any).__TAURI__.invoke(
+    "list_files",
+    {path: path
+  });
+  // pathInput.value=path
+});
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
   type File = {
