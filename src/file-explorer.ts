@@ -373,6 +373,7 @@ pathInput.addEventListener("input", async () => {
 (window as any).__TAURI__.event.listen("load-markdown", (data: { payload: string }) => {
   openmarkdown(data.payload)
 });
+// notify();
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
   parentsize.innerHTML=data.payload.toString();
@@ -397,6 +398,7 @@ pathInput.addEventListener("input", async () => {
   timer.className="hide"
   clearInterval(interval);
 });
+// notify();
 
 });
 
@@ -433,7 +435,22 @@ let paddedSeconds: string = seconds < 10 ? "0" + seconds : seconds.toString();
     // Display the elapsed time
     timer.textContent = paddedMinutes + ":" + paddedSeconds;
   }, 1000);
-}function openmarkdown(htmlfrommd:string){
+}
+
+function notify() {
+  
+  // Get the popup element
+  var popup = document.getElementById("popup") as HTMLDivElement;
+
+  // Show the popup
+  popup.style.display = "block";
+
+  // Set a timeout to hide the popup
+  setTimeout(function() {
+      popup.style.display = "none";
+  }, 5000); // 5 seconds
+}
+
 function openmarkdown(htmlfrommd:string){
   fileList.innerHTML=""
   htmlbase.innerHTML = htmlfrommd;

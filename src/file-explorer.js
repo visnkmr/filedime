@@ -219,6 +219,13 @@ function updatetimer() {
         timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
 }
+function notify() {
+    var popup = document.getElementById("popup");
+    popup.style.display = "block";
+    setTimeout(function () {
+        popup.style.display = "none";
+    }, 5000);
+}
 function openmarkdown(htmlfrommd) {
     fileList.innerHTML = "";
     htmlbase.innerHTML = htmlfrommd;

@@ -187,3 +187,15 @@ nav {
 progress{
   width: 100%;
 }
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 200px;
+  background-color: white;
+  border: 1px solid black;
+  display: none;
+}
