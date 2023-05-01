@@ -13,11 +13,14 @@ const listButton = document.getElementById("list-button") as HTMLButtonElement;
 const fileList = document.getElementById("file-list") as HTMLTableElement;
 const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
-var reload = document.getElementById("reload") as HTMLButtonElement;
+const menu = document.getElementById("menu") as HTMLUListElement;
+const reload = document.getElementById("reload") as HTMLButtonElement;
+
 
 // web app code
 var interval:number ;
 window.addEventListener("DOMContentLoaded", () => {
+  
     (window as any).__TAURI__.invoke(
         "list_files",
         {path: "/home/roger/Downloads/github/"
@@ -58,40 +61,6 @@ listButton.addEventListener("click", async () => {
   // get the value of the path input
   let path = pathInput.value;
   // invoke the list_files command from the backend with the path as argument
-//   if((name as string).toLowerCase().endsWith(".md")){
-//     // let mdext=".md";
-//     // console.log(target.dataset.name)
-//     // console.log(target.dataset.parent)
-//     {
-//         fileList.innerHTML=""
-//         htmlbase.innerHTML = await (window as any).__TAURI__.invoke("loadmarkdown", { name: path });
-//         // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
-//         var links = document.getElementsByTagName("a"); // get all links
-//         for (var i = 0; i < links.length; i++) { // loop through them
-//             var link = links[i]; // get current link
-//             // var href = link.getAttribute("href"); // get href attribute
-//             // if (href && href.startsWith("http") && !href.includes("yourdomain")) { // check conditions
-//             link.setAttribute("target", "_blank"); // set target attribute
-//             // }
-//         }
-//     }
-//     // window.__TAURI__.invoke(
-//     //     "list_files",
-//     //     {
-//     //         path: path
-//     //     }
-//     //   );
-//   // alert the name and path of the file
-// //   alert(`You clicked on ${name} at ${path}`);
-// }
-// else{
-//   (window as any).__TAURI__.invoke(
-//     "openpath",
-//     {
-//         path: path
-//     }
-//   );
-// }
   await (window as any).__TAURI__.invoke(
     "list_files",
     {path: path
@@ -99,45 +68,11 @@ listButton.addEventListener("click", async () => {
   pathInput.value=path
 });
 
-// add an event listener to the list button
+// add an event listener to the button
 reload.addEventListener("click", async () => {
   // get the value of the path input
   let path = pathInput.value;
   // invoke the list_files command from the backend with the path as argument
-//   if((name as string).toLowerCase().endsWith(".md")){
-//     // let mdext=".md";
-//     // console.log(target.dataset.name)
-//     // console.log(target.dataset.parent)
-//     {
-//         fileList.innerHTML=""
-//         htmlbase.innerHTML = await (window as any).__TAURI__.invoke("loadmarkdown", { name: path });
-//         // document.body.innerHTML = await window.__TAURI__.invoke("loadmarkdown", { name: path });
-//         var links = document.getElementsByTagName("a"); // get all links
-//         for (var i = 0; i < links.length; i++) { // loop through them
-//             var link = links[i]; // get current link
-//             // var href = link.getAttribute("href"); // get href attribute
-//             // if (href && href.startsWith("http") && !href.includes("yourdomain")) { // check conditions
-//             link.setAttribute("target", "_blank"); // set target attribute
-//             // }
-//         }
-//     }
-//     // window.__TAURI__.invoke(
-//     //     "list_files",
-//     //     {
-//     //         path: path
-//     //     }
-//     //   );
-//   // alert the name and path of the file
-// //   alert(`You clicked on ${name} at ${path}`);
-// }
-// else{
-//   (window as any).__TAURI__.invoke(
-//     "openpath",
-//     {
-//         path: path
-//     }
-//   );
-// }
   await (window as any).__TAURI__.invoke(
     "list_files",
     {path: path
@@ -158,12 +93,18 @@ menu.addEventListener("click", function(e) {
       // Code for option 1
       break;
     case "o2":
+      console.log("o2")
+      console.log(e)
       // Code for option 2
       break;
     case "o3":
+      console.log("o3")
+      console.log(e)
       // Code for option 3
       break;
     default:
+      console.log("o4")
+      console.log(e)
       // Code for other cases
       break;
   }
@@ -175,28 +116,6 @@ document.addEventListener("click", function(e:Event) {
   if ((e.target as HTMLElement).id !== "td1" && (e.target! as HTMLElement).parentNode !== menu) {
     menu.style.display = "none";
   }
-  // else if(e.target!.parentNode == menu){
-  //   var id = e.target!.id;
-
-  // // Do something based on the id
-  // switch (id) {
-  //   case "o1":
-  //     // console.log(e.target!.dataset.name)
-  //     // Code for option 1
-  //     break;
-  //   case "o2":
-  //     console.log("o2")
-  //     // Code for option 2
-  //     break;
-  //   case "o3":
-  //     // Code for option 3
-  //     break;
-  //   default:
-  //     // Code for other cases
-  //     break;
-  // }
-    
-  // }
 });
 // listen for the list-files event from the backend
 (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
@@ -209,6 +128,7 @@ document.addEventListener("click", function(e:Event) {
     lmdate:number;
     timestamp:number;
     foldercon:number;
+    ftype:string;
   };
   // parse the data as JSON
   let files:File[] = JSON.parse(data.payload);
@@ -227,15 +147,19 @@ document.addEventListener("click", function(e:Event) {
     let th1 = document.createElement("th");
     let th2 = document.createElement("th");
     let th3 = document.createElement("th");
+    let th4 = document.createElement("th");
     // set the text content of the header cells
     th1.textContent = "Filename";
     th2.textContent = "Filesize";
     th3.textContent = "Last modified";
+    th4.textContent = "File type";
     th1.id = "filename";
     th2.id = "filesize";
     th3.id = "lastmod";
+    th4.id = "ftype";
     // append the header cells to the header row
     tr.appendChild(th1);
+    tr.appendChild(th4);
     tr.appendChild(th2);
     tr.appendChild(th3);
     // append the header row to the table head
@@ -308,6 +232,12 @@ document.addEventListener("click", function(e:Event) {
     });
 
     
+    let td4 = document.createElement("td");
+    td4.textContent = file.ftype;
+    td4.dataset.value = file.ftype;
+    // append the table cells to the table row
+    
+    tr.appendChild(td4);
     
 
     let td2 = document.createElement("td");
@@ -324,6 +254,7 @@ document.addEventListener("click", function(e:Event) {
     // append the table cells to the table row
     
     tr.appendChild(td3);
+
 
     // append the table row to the table body
     tbody.appendChild(tr);
@@ -346,7 +277,7 @@ document.addEventListener("click", function(e:Event) {
     let rows = Array.from(tbody.rows);
     // sort the rows based on the cell value at the given index
     rows.sort(function (a, b) {
-      if(index!==1)
+      if(index!==2)
       return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
       else
       return compare(parseInt(a.cells[index].dataset.value as string),parseInt(b.cells[index].dataset.value as string));
@@ -362,6 +293,7 @@ document.addEventListener("click", function(e:Event) {
   let filename = document.getElementById("filename") as HTMLTableCellElement;
   let filesize = document.getElementById("filesize")as HTMLTableCellElement;
   let lastmod = document.getElementById("lastmod")as HTMLTableCellElement;
+  let ftype = document.getElementById("ftype")as HTMLTableCellElement;
    // add a click event listener to the filename th element
    filename.addEventListener("click", function () {
     // call the sortTable function with index 0
@@ -370,42 +302,18 @@ document.addEventListener("click", function(e:Event) {
   // add a click event listener to the filesize th element
   filesize.addEventListener("click", function () {
     // call the sortTable function with index 1
-    sortTable(1);
+    sortTable(2);
   });
   // add a click event listener to the lastmod th element
   lastmod.addEventListener("click", function () {
     // call the sortTable function with index 1
-    sortTable(2);
+    sortTable(3);
+  }); 
+  
+  ftype.addEventListener("click", function () {
+    // call the sortTable function with index 1
+    sortTable(1);
   });
-  // // loop through the files array
-  // for (let file of files) {
-  //   // create a list item element for each file
-  //   let li = document.createElement("li");
-  //   // set the text content of the list item to the name of the file
-  //   li.textContent = file.name+" "+file.size;
-  //   // set the data attributes of the list item to the properties of the file
-  //   li.dataset.name = file.name;
-  //   li.dataset.path = file.path;
-  //   li.dataset.isDir = file.is_dir.toString();
-  //   if (file.is_dir){
-  //     li.id="folder"
-  //   }
-  //   li.dataset.size = file.size.toString();
-  //   // li.dataset.parent = file.parent;
-  //   // li.dataset.grandparent = file.grandparent;
-  //   // li.dataset.parentsize = file.parentsize.toString();
-    
-  //   // console.log(lastfolder)
-  //   // lastpsize=file.parentsize.toString();
-    
-    
-  //   // pathInput.value=file.parent
-  //   // console.log(file.parent);
-  //   // append the list item to the file list
-  //   fileList.appendChild(li);
-  // }
-  // parentsize.innerHTML=lastpsize;
-  // console.log(lastpsize)
 });
 // add an event listener to the file list
 fileList.addEventListener("click", async (event) => {
@@ -527,7 +435,7 @@ pathInput.addEventListener("input", async () => {
 // Add a listener for the keydown event on the document
 document.addEventListener("keydown", function(e) {
   // Hide the menu if the user presses Esc
-  if (e.keyCode === 27) {
+  if (e.key === "Escape") {
     menu.style.display = "none";
   }
 });

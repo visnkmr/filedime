@@ -108,7 +108,8 @@ struct FileItem {
   rawfs:u64,
   lmdate:String,
   timestamp:i64,
-  foldercon:i32
+  foldercon:i32,
+  ftype:String
   // grandparent:String,
   // parent:String
 }
@@ -284,7 +285,7 @@ let handle=thread::spawn(move || {
               },
               None=>{
                 // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
-                filetype="".to_string();
+                filetype="unknown".to_string();
               }
             }
           }
@@ -311,14 +312,15 @@ let handle=thread::spawn(move || {
                 tr.clone() + " (" + &folderloc.to_string() + ")" 
               }
               else{
-                tr.clone() +"("+filetype.as_str()+")"
+                tr.clone() 
 
               }
             },
             rawfs:size,    
             lmdate:lmdate.clone(),
             timestamp:timestamp,
-            foldercon:foldercon
+            foldercon:foldercon,
+            ftype:filetype,
             // grandparent:parent.parent().unwrap().to_string_lossy().to_string(),
             // parent:parent.to_string_lossy().to_string()
             //tfsize
