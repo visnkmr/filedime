@@ -1,5 +1,6 @@
 // use jwalk::WalkDirGeneric;
 use filesize::PathExt;
+use serde::Serialize;
 use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
 use std::mem::{size_of_val, self};
@@ -15,6 +16,13 @@ pub struct cachestore{
     size:u64,
     expirytime: u64,
 }
+#[derive(Clone,Debug)]
+pub struct tab{
+    path:String,
+    focusfolder:String,
+    history:Vec<String>
+}
+
 // // A function that takes a path to a file or directory and returns its size in bytes
 // fn file_size(path: &str) -> u64 {
 //     // Create a GFile object from the path
@@ -42,7 +50,7 @@ pub struct cachestore{
 pub struct FileSizeFinder {
     cstore:RwLock<HashMap<String,cachestore>>,
     nosize:RwLock<bool>,
-    tabs:Vec<String>,
+    tabs:RwLock<HashMap<String,tab>>,
     expiration:Duration
     // app_handle:AppHandle
     // size:usize
@@ -50,15 +58,65 @@ pub struct FileSizeFinder {
 
 // Import rayon prelude
 use rayon::prelude::*;
-
+#[derive(Clone,Debug,Serialize)]
+pub struct tabinfo{
+    id:String,
+    path:String,
+    ff:String,
+    history:Vec<String>
+}
 use crate::{yu, sizeunit};
 impl FileSizeFinder {
+    pub fn addtab(&self,id:String,path:String,ff:String){
+        println!("{}---{}---{}",id,path,ff);
+        let mut tabhist=Vec::new();
+        match(self.tabs.read().unwrap().get(&id)){
+            Some(tabi)=>{
+                let tabprevurl=tabi.path.clone();
+                tabhist=tabi.history.clone();
+                tabhist.push(tabprevurl);
+            },
+            None=>{
+
+            }
+        }
+        
+        // drop(tabi);
+        let mut tabs=self.tabs.write().unwrap();
+        // let tname=tabs.get(&id).unwrap().path.clone();
+        // if(tname == path){
+        //     return;
+        // }
+        tabs.insert(id,tab {
+             path: path, 
+             focusfolder: ff,
+            history: tabhist});
+    }
+    pub fn gettabs(&self)->Vec<tabinfo>{
+        let mut tvecs=Vec::new();
+        let binding = self.tabs.read().unwrap();
+        let mut hi=binding.iter();
+        while let Some(ei)=hi.next(){
+            tvecs.push(tabinfo{
+                id:ei.0.clone(),
+                path:ei.1.path.clone(),
+                ff:ei.1.focusfolder.clone(),
+                history:ei.1.history.clone()
+            })
+        }
+        tvecs
+        // self.tabs.read().unwrap().clone()
+    }
+    pub fn gettab(&self,id:String)->(String,String){
+        let tab= self.tabs.read().unwrap().get(&id).unwrap().clone();
+        return (tab.path,tab.focusfolder)
+    }
     pub fn new(expiration: u64) -> Self {
         Self {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(HashMap::new()),
             nosize:RwLock::new(true),
-            tabs:Vec::new(),
+            tabs:RwLock::new(HashMap::new()),
             expiration:Duration::from_secs(expiration)
             // app_handle: apphandle
             // size:0

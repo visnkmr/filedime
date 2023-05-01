@@ -117,8 +117,16 @@ const CACHE_EXPIRY:u64=60;
 
 // define a command to list the files and directories in a given path
 #[tauri::command]
-async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinder>) -> Result<(), String> {
+async fn load_tab(oid:String,window: Window, state: State<'_, FileSizeFinder>) -> Result<(), String> {
+  let (path,ff)=state.gettab(oid.clone());
+  println!("loadtab");
+  list_files(oid, path, ff, window, state).await?;
+Ok(())
+}
+#[tauri::command]
+async fn list_files(oid:String,path: String,ff:String, window: Window, state: State<'_, FileSizeFinder>) -> Result<(), String> {
   // println!("{}",path);
+  println!("lfiles");
   let testpath=PathBuf::from(path.clone());
   
 
@@ -135,6 +143,7 @@ async fn list_files(path: String, window: Window, state: State<'_, FileSizeFinde
   if(!testpath.is_dir()){
     return Ok(())
   }
+  state.addtab(oid, path.clone(), ff);
 
   let now = SystemTime::now();
   
@@ -185,7 +194,7 @@ let files_clone = Arc::clone(&files);
 let tfsize=Arc::new(Mutex::<u64>::new(0));
 let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
-let update:Vec<u64>=vec![3,10,20,40,65,90,120];
+let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 // spawn a new thread to print the value of the files vector every 200 milliseconds
 let handle=thread::spawn(move || {
   
@@ -554,9 +563,33 @@ async fn openpath(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn nosize(path:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+async fn nosize(id:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
   state.nosize();
-  list_files(path, window, state).await;
+  list_files(id,path,ff, window, state).await;
+  Ok(())
+}
+
+#[tauri::command]
+async fn addtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.addtab(oid, path, ff);
+
+
+Ok(())
+}
+#[tauri::command]
+async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  let app_handle = window.app_handle();
+  state.addtab(oid, path, ff);
+  println!("{:?}",state.gettabs());
+  app_handle.emit_to(
+    "main",
+    "list-tabs",
+    serde_json::to_string(&state.gettabs()).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+
+  // state.nosize();
+  // list_files(path, window, state).await;
   Ok(())
 }
 use chrono::{DateTime, Local, Utc};
@@ -649,7 +682,9 @@ fn main() {
         loadmarkdown,
         get_path_options,
         openpath,
-        nosize
+        nosize,
+        newtab,
+        load_tab
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
