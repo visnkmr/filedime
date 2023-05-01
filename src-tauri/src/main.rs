@@ -205,7 +205,7 @@ let handle=thread::spawn(move || {
   //           // totsize+=mem::size_of_val(&lmdate);
   //           // totsize+=mem::size_of_val(&timestamp);
   //           // totsize+=mem::size_of_val(&foldercon);
-            println!("{} out of {} \t",files.len(),fcount);
+            println!("{} out of {} \t---{}",files.len(),fcount,files.last().unwrap().name);
             app_handle2.emit_to(
               "main",
               "list-files",

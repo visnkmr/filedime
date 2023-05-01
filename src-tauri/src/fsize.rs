@@ -11,7 +11,10 @@ use std::sync::RwLock;
 
 // Use the gio crate
 // use gio::prelude::*;
-
+pub struct cachestore{
+    size:u64,
+    expirytime: u64,
+}
 // // A function that takes a path to a file or directory and returns its size in bytes
 // fn file_size(path: &str) -> u64 {
 //     // Create a GFile object from the path
@@ -37,9 +40,10 @@ use std::sync::RwLock;
 // }
 // Define a struct that holds the cache and the expiration time
 pub struct FileSizeFinder {
-    cache: RwLock<HashMap<String, u64>>,
-    expiration: Duration,
-    nosize:RwLock<bool>
+    cstore:RwLock<HashMap<String,cachestore>>,
+    nosize:RwLock<bool>,
+    tabs:Vec<String>,
+    expiration:Duration
     // app_handle:AppHandle
     // size:usize
 }
@@ -52,9 +56,10 @@ impl FileSizeFinder {
     pub fn new(expiration: u64) -> Self {
         Self {
             // Wrap the cache in a RwLock
-            cache: RwLock::new(HashMap::new()),
-            expiration: Duration::from_secs(expiration),
-            nosize:RwLock::new(true)
+            cstore:RwLock::new(HashMap::new()),
+            nosize:RwLock::new(true),
+            tabs:Vec::new(),
+            expiration:Duration::from_secs(expiration)
             // app_handle: apphandle
             // size:0
         }
@@ -90,25 +95,29 @@ impl FileSizeFinder {
 
 //    }
 pub fn find_size(&self, path: &str) -> u64 {
+    let cstore=self.cstore.read().unwrap();
+
     // let k=0;
     // if(k==0){
     //     return 0;
     // }
     // Use a single read lock guard to access the cache
-    let mut cache = self.cache.read().unwrap();
+    let cache = cstore;
 
-    if let Some(size) = cache.get(path) {
+    if let Some(cstore) = cache.get(path) {
+        let size=cstore.size;
+        let expirytime=cstore.expirytime;
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();
         let nowtime = duration.as_secs();
         // Use the same lock guard to get the expiry time
-        if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
-            if nowtime < *expirytime {
-                return *size;
+        // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
+            if nowtime < expirytime {
+                return size;
             } else {
                 println!("expired")
             }
-        }
+        // }
     }
 
     // Drop the read lock guard before acquiring a write lock guard
@@ -135,25 +144,29 @@ pub fn find_size(&self, path: &str) -> u64 {
         // entry_path.size_on_disk_fast(&metadata).unwrap_or(0)
     };
 
-    // Use a single write lock guard to update the cache
-    let mut cache = self.cache.write().unwrap();
-    cache.insert(path.to_string(), size);
+    if(size!=0){
+        // Use a single write lock guard to update the cache
+        let  cstore=self.cstore.write().unwrap();
+    
+        let mut cache = cstore;
+        
+        
+        let now = SystemTime::now();
+        
+        let later = now + (self.expiration);
+        
+        let duration = later.duration_since(UNIX_EPOCH).unwrap();
+        
+        let expirytime = duration.as_secs();
+        // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
+        cache.insert(path.to_string(), cachestore { size: size, expirytime: expirytime });
+    }
     
     // Add the size of the key and the value to the total
     // self.size += mem::size_of_val(&path.to_string());
     // self.size += mem::size_of_val(&size);
-       
-
-    let now = SystemTime::now();
-
-    let later = now + (self.expiration);
-
-    let duration = later.duration_since(UNIX_EPOCH).unwrap();
-
-    let expirytime = duration.as_secs();
-    cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
     // self.print_cache_size();
-
+    
     // self.size += mem::size_of_val(&"expiry_".to_string());
     // self.size += mem::size_of_val(&expirytime);
 
@@ -214,15 +227,16 @@ pub fn find_size(&self, path: &str) -> u64 {
     // }
 
     
-    pub fn clear_cache(&mut self) {
+    pub fn clear_cache(&self) {
         
         let now = Instant::now();
 
-        
+    let mut cstore=self.cstore.write().unwrap();
+        let mut cache=cstore;
         // Use write method to get a lock guard
-        self.cache.write().unwrap().retain(|_, &mut v| {
+        cache.retain(|_, v| {
             
-            let duration = Duration::from_secs(v);
+            let duration = Duration::from_secs(v.expirytime);
             
             let instant = now.checked_sub(duration).unwrap();
             
@@ -234,8 +248,10 @@ pub fn find_size(&self, path: &str) -> u64 {
   ->i32
 //   ->(u64,u64) 
   {
+    let cstore=self.cstore.read().unwrap();
+
     // Use a single read lock guard to access the cache
-    let cache = self.cache.read().unwrap();
+    let cache = cstore;
 
     // Initialize a variable to store the total size
     let mut total_size = 0;
@@ -250,6 +266,8 @@ pub fn find_size(&self, path: &str) -> u64 {
     while let Some((key, value)) = cache_iter.next() {
         // Add the size of the key and the value to the total
         total_size += mem::size_of_val(key);
+        total_key_size += mem::size_of_val(&value.expirytime);
+        total_key_size += mem::size_of_val(&value.size);
         // if(!key.contains("expiry")){
         //     total_key_size+=mem::size_of_val(key);
         // }
@@ -292,8 +310,10 @@ pub fn find_size(&self, path: &str) -> u64 {
   ->i32
 //   ->(u64,u64) 
   {
+    let cstore=self.cstore.write().unwrap();
+
     // Use a single read lock guard to access the cache
-    let cache = self.cache.read().unwrap();
+    let cache = cstore;
 
     // Initialize a variable to store the total size
     let mut total_size = 0;
