@@ -26,3 +26,4 @@ dist-ssr
 src-tauri/icons/
 src/assets/
 src-tauri/links.md
+src/file-explorer.js
