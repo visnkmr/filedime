@@ -13,6 +13,12 @@ const reload = document.getElementById("reload") as HTMLButtonElement;
 const newtab = document.getElementById("newtab") as HTMLButtonElement;
 const backButton = document.getElementById("back-button") as HTMLButtonElement;
 const nosize = document.getElementById("no-size") as HTMLButtonElement;
+// Get the name and X elements
+var bname = document.querySelector(".tab-name") as HTMLSpanElement;
+var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
+var thistory:string[]=[];
+var tforward:string[]=[];
+
 // listen for the list-files event from the backend
 // parse the data as JSON
 
@@ -93,26 +99,46 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     //tab clicked
     if (
-      (e.target as HTMLElement).parentNode! === tablist
+      ((e.target as HTMLElement).parentNode!).parentNode === tablist
     ) {
-      tid=e.target.id;
-      console.log(e.target.id);
-      (window as any).__TAURI__.invoke(
-        "load_tab",
-        {
-          oid:tid.toString()
-        }
-      );
-      // (window as any).__TAURI__.invoke(
-      //   "newtab",
-      //   {
-      //   id: tid,
-      //   path: pathInput.value,
-      //   ff: ""
-      // }
-      // );
+      tid=((e.target as HTMLElement).parentNode! as ParentNode).id;
+      console.log("here");
+      // console.log(e.target.id);
+      var pen=(e.target as HTMLElement);
+      if(pen.className === "tab-name"){
+        // Do something when name is clicked
+        console.log("Loadtab");
+        // Stop the event from bubbling up to the button element
+        e.stopPropagation();
+        (window as any).__TAURI__.invoke(
+          "load_tab",
+          {
+            oid:tid.toString()
+          }
+        );
+        // (window as any).__TAURI__.invoke(
+        //   "newtab",
+        //   {
+        //   id: tid,
+        //   path: pathInput.value,
+        //   ff: ""
+        // }
+        // );
+      }
+      else if(pen.className === "tab-close"){
+        // Do something when X is clicked
+        console.log("Close");
+        // Stop the event from bubbling up to the button element
+        e.stopPropagation();
+        (window as any).__TAURI__.invoke(
+          "closetab",
+          {
+            oid:tid.toString()
+          }
+        );
+      }
 
-      pathInput.value = (e.target as HTMLElement).dataset.path!
+      // pathInput.value = (e.target as HTMLElement).dataset.path!
     }
     if (
       (e.target! as HTMLElement).parentNode === menu
@@ -201,24 +227,48 @@ window.addEventListener("DOMContentLoaded", () => {
           });
         break;
       case backButton:
-        if (lastfolder === "")
-          lastfolder = "."
-        pathInput.value = lastfolder
-        htmlbase.innerHTML = "";
-        // check if there is any previous path in the history
         (window as any).__TAURI__.invoke(
-          "list_files",
-          {
-            oid:tid.toString(),
-            path: lastfolder,
-            ff:""
-          });
+          "back", {
+          oid: tid.toString(),
+        })
+          .then((options) => {
+            console.log(options)
+              // Clear the datalist options
+              if (options !== null) {
+                (window as any).__TAURI__.invoke(
+                  "list_files",
+                  {
+                    oid:tid.toString(),
+                    path: options,
+                    ff:"back"
+                  });
+              }
+            })
+            .catch((error) => {
+              // Handle any errors from Rust
+              console.error(error);
+            });
+        // if (lastfolder === "")
+        //   lastfolder = "."
+        // pathInput.value = lastfolder
+        // htmlbase.innerHTML = "";
+        // // check if there is any previous path in the history
+        // (window as any).__TAURI__.invoke(
+        //   "list_files",
+        //   {
+        //     oid:tid.toString(),
+        //     path: lastfolder,
+        //     ff:""
+        //   });
           break;
       
     }
 
   });
   // listen for the list-files event from the backend
+  // (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
+  //     thistory=JSON.parse(data.payload);
+  // });
   (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
     htmlbase.innerHTML=""
     type File = {
@@ -587,7 +637,8 @@ async function openpath(path: string) {
   type tabinfo = {
     oid: number,
     path: string,
-    ff: string
+    ff: string,
+    tabname:string
   };
   let tabs: tabinfo[] = JSON.parse(data.payload);
   // console.log("files")
@@ -598,8 +649,15 @@ async function openpath(path: string) {
   for (let tb of tabs) {
     // create a table row element for each file
     let b = document.createElement("button");
-
-    b.textContent = tb.id.toString();
+    b.className="tab-button"
+    let sn = document.createElement("span");
+    sn.className="tab-name"
+    let sc = document.createElement("span");
+    sc.className="tab-close"
+    sn.textContent = tb.tabname;
+    sc.textContent = "x";
+    b.appendChild(sn);
+    b.appendChild(sc);
     b.id = tb.id.toString();
     b.dataset.path = tb.path;
     b.dataset.ff = tb.ff;

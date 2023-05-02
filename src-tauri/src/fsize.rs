@@ -4,7 +4,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
 use std::mem::{size_of_val, self};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::RwLock;
@@ -63,6 +63,7 @@ pub struct tabinfo{
     id:String,
     path:String,
     ff:String,
+    tabname:String,
     history:Vec<String>
 }
 use crate::{yu, sizeunit};
@@ -72,9 +73,11 @@ impl FileSizeFinder {
         let mut tabhist=Vec::new();
         match(self.tabs.read().unwrap().get(&id)){
             Some(tabi)=>{
-                let tabprevurl=tabi.path.clone();
                 tabhist=tabi.history.clone();
-                tabhist.push(tabprevurl);
+                if(ff!="back" && ff!="newtab"){
+                    let tabprevurl=tabi.path.clone();
+                    tabhist.push(tabprevurl);
+                }
             },
             None=>{
 
@@ -90,7 +93,9 @@ impl FileSizeFinder {
         tabs.insert(id,tab {
              path: path, 
              focusfolder: ff,
-            history: tabhist});
+            history: tabhist
+            }
+        );
     }
     pub fn gettabs(&self)->Vec<tabinfo>{
         let mut tvecs=Vec::new();
@@ -101,15 +106,48 @@ impl FileSizeFinder {
                 id:ei.0.clone(),
                 path:ei.1.path.clone(),
                 ff:ei.1.focusfolder.clone(),
+                tabname:PathBuf::from(ei.1.path.clone()).file_stem().unwrap().to_string_lossy().to_string(),
                 history:ei.1.history.clone()
             })
         }
         tvecs
         // self.tabs.read().unwrap().clone()
     }
-    pub fn gettab(&self,id:String)->(String,String){
+
+    pub fn getlasthistory(&self,id:String)->Option<String>{
+        let gtab= self.tabs.read().unwrap();
+        let path=gtab.get(&id).unwrap().path.clone();
+        let ff=gtab.get(&id).unwrap().focusfolder.clone();
+        let mut tabhist=gtab.get(&id).unwrap().history.clone();
+        let lastval=tabhist.pop();
+        
+        drop(gtab);
+        
+        
+        
+        let mut tabs= self.tabs.write().unwrap();
+        // let mut tabhist=tabs.get(&id).unwrap().history;
+        tabs.insert(
+            id,
+            tab 
+            {
+                path: path, 
+                focusfolder: ff,
+                history: tabhist
+            }
+        );
+        lastval
+
+        // let tabw=tab.get(&id).unwrap();
+        // return tabw.history.last().unwrap().clone()
+    }
+    pub fn gettab(&self,id:String)->(String,String,Vec<String>){
         let tab= self.tabs.read().unwrap().get(&id).unwrap().clone();
-        return (tab.path,tab.focusfolder)
+        return (
+            tab.path,
+            tab.focusfolder,
+            tab.history
+        )
     }
     pub fn new(expiration: u64) -> Self {
         Self {
@@ -153,6 +191,7 @@ impl FileSizeFinder {
 
 //    }
 pub fn find_size(&self, path: &str) -> u64 {
+    // return 0 as u64;
     let cstore=self.cstore.read().unwrap();
 
     // let k=0;
@@ -189,6 +228,7 @@ pub fn find_size(&self, path: &str) -> u64 {
             0 as u64
         }
         else{
+            // 0 as u64
             yu::uio(
                 entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
                 self,

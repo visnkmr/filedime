@@ -117,10 +117,25 @@ const CACHE_EXPIRY:u64=60;
 
 // define a command to list the files and directories in a given path
 #[tauri::command]
+async fn back(oid:String,window: Window, state: State<'_, FileSizeFinder>) -> 
+  Result<String, String> 
+  {
+    match(state.getlasthistory(oid)){
+      Some(val)=>{
+          return Ok(val)
+      },
+      None=>{
+        return Err("no more history".to_string());
+      }
+    }
+    
+  }
+
+#[tauri::command]
 async fn load_tab(oid:String,window: Window, state: State<'_, FileSizeFinder>) -> Result<(), String> {
-  let (path,ff)=state.gettab(oid.clone());
+  let (path,_,_)=state.gettab(oid.clone());
   println!("loadtab");
-  list_files(oid, path, ff, window, state).await?;
+  list_files(oid, path, "newtab".to_string(), window, state).await?;
 Ok(())
 }
 #[tauri::command]
@@ -128,6 +143,8 @@ async fn list_files(oid:String,path: String,ff:String, window: Window, state: St
   // println!("{}",path);
   println!("lfiles");
   let testpath=PathBuf::from(path.clone());
+  // println!("{}",testpath.);
+ 
   
 
   if(path.ends_with(".md")){
@@ -141,9 +158,25 @@ async fn list_files(oid:String,path: String,ff:String, window: Window, state: St
   }
 
   if(!testpath.is_dir()){
+
     return Ok(())
   }
-  state.addtab(oid, path.clone(), ff);
+  else{
+    match(testpath.read_dir()){
+      Ok(mut k)=>{
+        if(k.next().is_none()){
+          println!("path empty.");
+          return Ok(());
+        }
+      },
+      Err(_)=>{
+
+      }
+    }
+  } 
+  // state.addtab(oid, path.clone(), ff);
+  newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+
 
   let now = SystemTime::now();
   
@@ -161,6 +194,13 @@ async fn list_files(oid:String,path: String,ff:String, window: Window, state: St
     "main",
     "start-timer",
     "",
+  )
+  .map_err(|e| e.to_string())?; 
+
+app_handle.emit_to(
+    "main",
+    "load-hist",
+    serde_json::to_string(&state.gettab(oid).2).unwrap(),
   )
   .map_err(|e| e.to_string())?;
 
@@ -215,7 +255,15 @@ let handle=thread::spawn(move || {
   //           // totsize+=mem::size_of_val(&lmdate);
   //           // totsize+=mem::size_of_val(&timestamp);
   //           // totsize+=mem::size_of_val(&foldercon);
-            println!("{} out of {} \t---{}",files.len(),fcount,files.last().unwrap().name);
+            match(files.last()){
+              Some(file)=>{
+                println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+
+              },
+              None=>{
+
+              }
+            }
             app_handle2.emit_to(
               "main",
               "list-files",
@@ -597,17 +645,17 @@ async fn nosize(id:String,path:String,ff:String,window: Window,state: State<'_, 
   Ok(())
 }
 
-#[tauri::command]
-async fn addtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
-  state.addtab(oid, path, ff);
+// #[tauri::command]
+// async fn addtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+//   state.addtab(oid.clone(), path.clone(), ff.clone());
+//   listtabs(oid, path, ff, window, state).await;
 
+// Ok(())
+// }
 
-Ok(())
-}
 #[tauri::command]
-async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+async fn listtabs(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
   let app_handle = window.app_handle();
-  state.addtab(oid, path, ff);
   println!("{:?}",state.gettabs());
   app_handle.emit_to(
     "main",
@@ -615,6 +663,15 @@ async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_,
     serde_json::to_string(&state.gettabs()).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
+Ok(())
+}
+
+#[tauri::command]
+async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.addtab(oid.clone(), path.clone(), ff.clone());
+  listtabs(oid, path, ff, window, state).await;
+  
+  
 
   // state.nosize();
   // list_files(path, window, state).await;
@@ -622,12 +679,15 @@ async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_,
 }
 use chrono::{DateTime, Local, Utc};
 fn lastmodified(path:&str)->(String,i64){
-
+  match(fs::metadata(path.clone())){
+    Ok(mp) => {
+      // let metadata = fs::metadata(path.clone()).unwrap();
+      let modified = mp.modified().unwrap();
+      
+    
     // get the metadata of the path
-    let metadata = fs::metadata(path.clone()).unwrap();
     
     // get the last modification time
-    let modified = metadata.modified().unwrap();
     
     // get the current system time
     let now = SystemTime::now();
@@ -688,6 +748,11 @@ fn lastmodified(path:&str)->(String,i64){
     absolute_date
 };
     (date,timestamp)
+  },
+  Err(_) => {
+    ("".to_string(),0)
+  },
+}
 }
 fn main() {
   let mut g=FileSizeFinder::new(CACHE_EXPIRY);
@@ -712,7 +777,8 @@ fn main() {
         openpath,
         nosize,
         newtab,
-        load_tab
+        load_tab,
+        back
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

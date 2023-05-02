@@ -217,3 +217,33 @@ progress{
 .menu li:hover {
   background-color: #e0e0e0;
 }
+
+/* Style the button as a tab */
+.tab-button {
+  display: inline-block;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid black;
+  /* border-bottom: none; */
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Style the name and X as inline elements */
+.tab-name, .tab-close {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Style the X as a red circle */
+.tab-close {
+  width: 20px;
+  height: 20px;
+  /* border-radius: 50%; */
+  /* circle */
+  /* background-color: red; */
+  color: black;
+  text-align: center;
+  line-height: 20px;
+  margin-left: 10px;
+}
