@@ -253,10 +253,18 @@ let handle=thread::spawn(move || {
     let files: Vec<FileItem>=par_walker
     .into_par_iter()
     .map(|(e)| {
+          
           let name = e.file_name().to_string_lossy().into_owned(); // get their names
+          println!("{}",name);
           let path=e.path().to_string_lossy().into_owned();
           // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
-          let size=state.find_size(&path);
+          let size=
+          if(!e.path().is_symlink()){
+            state.find_size(&path)
+          }
+          else{
+            0
+          };
           // let size=0;
           let foldercon=0;
           // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
@@ -269,6 +277,10 @@ let handle=thread::spawn(move || {
           // }).unwrap_or(0); .
           let mut folderloc=0;
           let mut filetype="Folder".to_string();
+          let issymlink=e.path().is_relative() ||e.path().is_symlink();
+          if(issymlink){
+            filetype+="symlink";
+          }
           if !e.path().is_dir(){
           //   let extension = Path::new(&path)
           //   .extension()
@@ -294,7 +306,23 @@ let handle=thread::spawn(move || {
               },
               None=>{
                 // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
-                filetype="unknown".to_string();
+                if(issymlink){
+                  filetype="symlink".to_string();
+                  match(fs::metadata(path.clone())){
+                    Ok(_) => {
+                      filetype+=" valid"
+                    },
+                    Err(_)=>{
+                      filetype+=" invalid"
+
+                    }
+                  };
+                  
+                }
+                else{
+                  filetype="unknown".to_string();
+                  
+                }
               }
             }
           }
