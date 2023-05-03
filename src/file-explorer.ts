@@ -6,6 +6,7 @@ const pathInput = document.getElementById("path-input") as HTMLInputElement;
 const listButton = document.getElementById("list-button") as HTMLButtonElement;
 const fileList = document.getElementById("file-list") as HTMLTableElement;
 const tablist = document.getElementById("tabs-list") as HTMLTableElement;
+const marklist = document.getElementsByClassName("markslist")[0] as HTMLTableElement;
 const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 const pathline = document.getElementById("path") as HTMLDivElement;
 const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
@@ -19,6 +20,7 @@ var bname = document.querySelector(".tab-name") as HTMLSpanElement;
 var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 var thistory: string[] = [];
 var tforward: string[] = [];
+var frompath=""
 
 var lastfolder = "/home/roger/.cargo/registry/src/github.com-1ecc6299db9ec823/";
 var loaded = 0;
@@ -126,7 +128,7 @@ var loaded = 0;
     let td1 = document.createElement("td");
 
     td1.textContent = file.name;
-    td1.id = "td1";
+    td1.className = "td1";
     td1.dataset.value = file.name;
     td1.dataset.name = file.name;
     td1.dataset.path = file.path;
@@ -155,17 +157,18 @@ var loaded = 0;
     tr.appendChild(td1);
 
     // Add a listener for the contextmenu event
-    td1.addEventListener("contextmenu", function (e) {
-      // Prevent the default menu from showing up
-      e.preventDefault();
+    // td1.addEventListener("contextmenu", function (e) {
+    //   // Prevent the default menu from showing up
+    //   e.preventDefault();
+    //   frompath=(e.target as HTMLElement).dataset.path as string;
 
-      // Show the custom menu
-      menu.style.display = "block";
+    //   // Show the custom menu
+    //   menu.style.display = "block";
 
-      // Position the menu according to the mouse coordinates
-      menu.style.left = e.pageX + "px";
-      menu.style.top = e.pageY + "px";
-    });
+    //   // Position the menu according to the mouse coordinates
+    //   menu.style.left = e.pageX + "px";
+    //   menu.style.top = e.pageY + "px";
+    // });
 
 
     let td4 = document.createElement("td");
@@ -361,6 +364,22 @@ console.log("hui");
 
     // pathInput.value=path
   });
+  document.addEventListener("contextmenu", function (e) {
+    // console.log(e)
+    if((e.target as HTMLElement).className=="td1"){
+      
+      // Prevent the default menu from showing up
+      e.preventDefault();
+      frompath=(e.target as HTMLElement).dataset.path as string;
+  
+      // Show the custom menu
+      menu.style.display = "block";
+  
+      // Position the menu according to the mouse coordinates
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+    }
+  });
 
   // Add a listener for the click event on the document
   document.addEventListener("click", function (e: Event) {
@@ -408,7 +427,7 @@ console.log("hui");
         (window as any).__TAURI__.invoke(
           "closetab",
           {
-            oid: tid.toString()
+            id: tid.toString()
           }
         );
       }
@@ -433,6 +452,18 @@ console.log("hui");
           // Code for option 2
           break;
         case "o3":
+          // console.log("o3")
+          // console.log(e)
+          // Code for option 3
+          break;
+        case "o4":
+          console.log(frompath);
+          (window as any).__TAURI__.invoke(
+            "addmark",
+            {
+              path: frompath
+            }
+          );
           // console.log("o3")
           // console.log(e)
           // Code for option 3
@@ -548,6 +579,25 @@ console.log("hui");
           path: pathtg,
           ff: ""
         });
+    }
+    if((e.target as HTMLElement).className=="mark-button"){
+      var gpath=(e.target as HTMLElement).dataset.path;
+      tid = tid as number + 1;
+      // invoke the list_files command from the backend with the path as argument
+      (window as any).__TAURI__.invoke(
+        "newtab",
+        {
+          oid: tid.toString(),
+          path: gpath,
+          ff: ""
+        }
+      ).await;
+      (window as any).__TAURI__.invoke(
+        "load_tab",
+        {
+          oid: tid.toString()
+        }
+      ).await;
     }
 
   });
@@ -735,5 +785,46 @@ async function openpath(path: string) {
     b.dataset.path = tb.path;
     b.dataset.ff = tb.ff;
     tablist.appendChild(b);
+  }
+});
+(window as any).__TAURI__.event.listen("load-marks", (data: { payload:string }) => {
+  console.log("listmarks ")
+    type mark = {
+      path:string,
+      name:string
+    };
+    // type tabinfo = {
+    //   oid: number,
+    //   path: string,
+    //   ff: string,
+    //   tabname: string
+    // };
+    // let tabs: tabinfo[] = JSON.parse(data.payload);
+    // // console.log("files")
+    // clear the file list
+    marklist.replaceChildren();
+    // console.log(data.payload)
+    let r:mark[]=JSON.parse(data.payload);
+    console.log(r)
+    // loop through the files array
+    // for (let tb of data.payload) {
+    // let i=data.payload;
+    for (var i = 0; i < r.length; i++) {
+    // create a table row element for each file
+    let b = document.createElement("button");
+    b.className = "mark-button"
+    // let sn = document.createElement("span");
+    // sn.className = "tab-name"
+    // let sc = document.createElement("span");
+    // sc.className = "tab-close"
+    b.textContent = r[i].name;
+    b.dataset.path= r[i].path
+    // sc.textContent = "x";
+    // b.appendChild(sn);
+    // b.appendChild(sc);
+    // b.id = tb.id.toString();
+    // b.dataset.path = tb.path;
+    // b.dataset.ff = tb.ff;
+    marklist.appendChild(b);
   }
 });

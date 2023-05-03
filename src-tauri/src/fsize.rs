@@ -11,20 +11,27 @@ use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::RwLock;
 // use dirscan::*;
-
+#[derive(Clone,Debug)]
 // Use the gio crate
 // use gio::prelude::*;
 pub struct cachestore{
     size:u64,
     expirytime: u64,
 }
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,Serialize)]
+// Use the gio crate
+// use gio::prelude::*;
+pub struct marks{
+    path:String,
+    name: String,
+}
+#[derive(Clone,Debug,Serialize)]
 pub struct tab{
     path:String,
     focusfolder:String,
     history:Vec<String>
 }
-
+#[derive(Debug)]
 // // A function that takes a path to a file or directory and returns its size in bytes
 // fn file_size(path: &str) -> u64 {
 //     // Create a GFile object from the path
@@ -53,7 +60,9 @@ pub struct FileSizeFinder {
     cstore:RwLock<FxHashMap<String,cachestore>>,
     nosize:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
-    expiration:Duration
+    expiration:Duration,
+    bookmarks:RwLock<Vec<marks>>,
+    recents:Vec<String>,
     // app_handle:AppHandle
     // size:usize
 }
@@ -70,7 +79,10 @@ pub struct tabinfo{
 }
 use crate::{yu, sizeunit};
 impl FileSizeFinder {
-    pub fn addtab(&self,id:String,path:String,ff:String){
+    pub fn addmark(&self,path:String){
+        self.bookmarks.write().unwrap().push(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
+    }
+    pub fn addtab(&self,id:String,path:String,mut ff:String){
         println!("{}---{}---{}",id,path,ff);
         let mut tabhist=Vec::new();
         match(self.tabs.read().unwrap().get(&id)){
@@ -80,12 +92,15 @@ impl FileSizeFinder {
                     let tabprevurl=tabi.path.clone();
                     tabhist.push(tabprevurl);
                 }
+                else{
+                    ff="".to_string();
+                }
             },
             None=>{
 
             }
         }
-        
+
         // drop(tabi);
         let mut tabs=self.tabs.write().unwrap();
         // let tname=tabs.get(&id).unwrap().path.clone();
@@ -93,11 +108,25 @@ impl FileSizeFinder {
         //     return;
         // }
         tabs.insert(id,tab {
-             path: path, 
-             focusfolder: ff,
+                path: path, 
+                focusfolder: ff,
             history: tabhist
             }
         );
+    }
+    pub fn removetab(&self,id:String){
+        // println!("{}---{}---{}",id,path,ff);
+        
+        let mut tabs=self.tabs.write().unwrap();
+        // let tname=tabs.get(&id).unwrap().path.clone();
+        // if(tname == path){
+        //     return;
+        // }
+        tabs.remove(&id);
+    }
+    pub fn getmarks(&self)->Vec<marks>{
+        self.bookmarks.read().unwrap().clone()
+        // Vec::new()
     }
     pub fn gettabs(&self)->Vec<tabinfo>{
         let mut tvecs=Vec::new();
@@ -157,7 +186,9 @@ impl FileSizeFinder {
             cstore:RwLock::new(FxHashMap::default()),
             nosize:RwLock::new(true),
             tabs:RwLock::new(FxHashMap::default()),
-            expiration:Duration::from_secs(expiration)
+            expiration:Duration::from_secs(expiration),
+            bookmarks:RwLock::new(Vec::new()),
+            recents:Vec::new()
             // app_handle: apphandle
             // size:0
         }

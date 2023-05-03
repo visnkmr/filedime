@@ -4,28 +4,38 @@
     <meta charset="UTF-8" />
     <title>File Explorer</title>
     <link rel="stylesheet" href="styles.css" />
+    <div class="options">
+      <!--<button id="newtab">Newtab</button><!~~ Add a datalist element with some possible paths ~~>-->
+      <button id="reload">Reload</button><!-- Add a datalist element with some possible paths -->
+      <button id="no-size">Hide size</button><!-- Add a datalist element with some possible paths -->
+      <button id="back-button">Back</button><!-- Add a datalist element with some possible paths -->
+      <button id="forward-button">forward</button><!-- Add a datalist element with some possible paths -->
+      <span id="parent-size"></span>
+    </div>
     <div class="popup" id="popup">
       <p>This is a popup window that will close after few seconds.</p>
     </div>
     <ul id="menu" class="menu">
-      <li id="o1">New Tab</li>
+      <li id="o1">Open in New Tab</li>
       <li id="o2">Copy</li>
       <li id="o3">Paste</li>
+      <li id="o4">add bookmark</li>
     </ul>
-    <div id="tabs-list">
-      <button class="tab-button">
-        <span class="tab-name">Tab Name</span>
-        <span class="tab-close">X</span>
+    <div id="">
+      <span id="tabs-list">
+        <button class="tab-button">
+          <span class="tab-name">Tab Name</span>
+          <span class="tab-close">X</span>
+        </button> 
+      </span>
+      <button id="newtab" class="tab-button">
+        +
       </button> 
     </div>
     <nav>
       
       <!-- Add a datalist element with some possible paths -->
-      <button id="newtab">Newtab</button><!-- Add a datalist element with some possible paths -->
-      <button id="reload">Reload</button><!-- Add a datalist element with some possible paths -->
-      <button id="no-size">Hide size</button><!-- Add a datalist element with some possible paths -->
-      <button id="back-button">Back</button><!-- Add a datalist element with some possible paths -->
-      <button id="forward-button">forward</button><!-- Add a datalist element with some possible paths -->
+      
       <datalist id="path-list">
         <!-- <option value="/home/user/Documents" />
         <option value="/home/user/Downloads" />
@@ -43,7 +53,7 @@
 
           </progress>
           <div id="path">
-            
+
           </div>
         </div>
         <!-- <div id="test">
@@ -51,7 +61,7 @@
         </div> -->
       <!-- </div> -->
       <!-- <input id="path-input" type="text"/> -->
-      <p id="parent-size"></p>
+      
       <button id="list-button">Go</button>
       
       <!-- Display the timer in an element -->
@@ -59,6 +69,12 @@
     </nav>
   </head>
   <body>
+    <div class="encompass">
+    <div class="markslist" style="float:left;">
+      <!-- <button class="mark-button">Tab Name</button> 
+      <button class="mark-button">Tab Name</button> 
+      <button class="mark-button">Tab Name</button>  -->
+    </div>
     <div id="htmlbase">
 
     </div>
@@ -67,7 +83,8 @@
     <!-- add a button element to list the files -->
     
     <!-- add an unordered list element to display the files -->
-    <table id="file-list"></table>
+    <table id="file-list" style="display: inline-block;"></table>
+    </div>
     <!-- add a script element to load the js file -->
     <script src="file-explorer.js"></script>
   </body>

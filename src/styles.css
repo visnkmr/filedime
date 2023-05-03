@@ -1,6 +1,14 @@
-/* *{
+*{
   appearance: none;
-} */
+  color: white;
+  background-color: black;
+}
+.markslist {
+  display: flex;
+  flex-direction: column;
+  justify-content:  left;
+  align-items: left;
+}
 /*/~ web app code ~/
 
 /~ add some basic styles ~/
@@ -28,6 +36,10 @@ td {
   padding: 5px;
   border-bottom: 1px solid #ccc;
   cursor: pointer;
+}
+#path{
+  cursor: pointer;
+
 }
 #parent-size{
   margin-left:.5em;
@@ -67,6 +79,7 @@ nav {
 }
 
 
+
 /* Style the input element for the path */
 #path-input {
   flex: 1; /* take up the remaining space */
@@ -75,25 +88,39 @@ nav {
   padding: 5px;
   border-color: #000;
 }
+.emcompass{
+  display: flex;
+}
 /* #test{
   background-color: linear-gradient (to right, black , red );
 } */
 /* Style the button elements */
 #list-button,
-#back-button {
-  height: 30px;
+#back-button,
+#reload,
+#no-size,
+#forward-button {
+  /* height: 30px; */
   margin-right: 10px;
   border: none;
   border-radius: 5px;
   background-color: #007aff;
   color: white;
 }
+#newtab{
+  color: black;
+}
 
 /* Style the timer element */
 #timer {
   margin-left: auto; /* align to the right */
 }
-
+/* table{
+ display: flex;
+}
+thead{
+  display: flex;
+} */
 /* Style the unordered list element for the files */
 #file-list {
   list-style-type: none; /* remove the bullets */
@@ -204,20 +231,32 @@ progress{
 .menu {
   display: none;
   position: absolute;
-  background-color: #f0f0f0;
+  background-color: black;
   border: 1px solid #ccc;
   padding: 10px;
+  /* background-color: gray; */
   list-style: none;
 }
 
 .menu li {
+  background-color: black;
   cursor: pointer;
 }
 
 .menu li:hover {
   background-color: #e0e0e0;
 }
-
+.mark-button{
+  display: inline-block;
+  padding: 10px;
+  /* margin: 10px; */
+  border: 1px solid black;
+  text-align: left;
+  /* border-bottom: none; */
+  background-color: lightblue;
+  color: black;
+  cursor: pointer;
+}
 /* Style the button as a tab */
 .tab-button {
   display: inline-block;
@@ -225,7 +264,8 @@ progress{
   margin: 10px;
   border: 1px solid black;
   /* border-bottom: none; */
-  background-color: white;
+  background-color: darkgray;
+  color: black;
   cursor: pointer;
 }
 
@@ -233,6 +273,8 @@ progress{
 .tab-name, .tab-close {
   display: inline-block;
   vertical-align: middle;
+  background-color: transparent;
+  color: black;
 }
 
 /* Style the X as a red circle */
@@ -242,7 +284,7 @@ progress{
   /* border-radius: 50%; */
   /* circle */
   /* background-color: red; */
-  color: black;
+  color: red;
   text-align: center;
   line-height: 20px;
   margin-left: 10px;

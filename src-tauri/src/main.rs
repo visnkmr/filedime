@@ -176,6 +176,7 @@ async fn list_files(oid:String,path: String,ff:String, window: Window, state: St
   } 
   // state.addtab(oid, path.clone(), ff);
   newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+  
   // convert the path to a PathBuf
   let path = PathBuf::from(path);
 let parent=path.clone();
@@ -656,22 +657,53 @@ async fn nosize(id:String,path:String,window: Window,state: State<'_, FileSizeFi
 // }
 
 #[tauri::command]
-async fn listtabs(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+async fn closetab(id:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.removetab(id);
   let app_handle = window.app_handle();
-  println!("{:?}",state.gettabs());
   app_handle.emit_to(
     "main",
     "list-tabs",
     serde_json::to_string(&state.gettabs()).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
+  Ok(())
+}
+#[tauri::command]
+async fn listtabs(window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  let app_handle = window.app_handle();
+  // println!("{:?}",state);
+  app_handle.emit_to(
+    "main",
+    "list-tabs",
+    serde_json::to_string(&state.gettabs()).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+app_handle.emit_to(
+  "main",
+  "load-marks",
+  serde_json::to_string(&state.getmarks()).unwrap(),
+)
+.map_err(|e| e.to_string()).unwrap();
 Ok(())
 }
 
 #[tauri::command]
+async fn addmark(path:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.addmark(path);
+  let app_handle = window.app_handle();
+  println!("{:?}",state);
+  app_handle.emit_to(
+    "main",
+    "load-marks",
+    serde_json::to_string(&state.getmarks()).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+  Ok(())
+}
+#[tauri::command]
 async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
   state.addtab(oid.clone(), path.clone(), ff.clone());
-  listtabs(oid, path, ff, window, state).await;
+  listtabs(window, state).await;
   
   
 
@@ -780,7 +812,9 @@ fn main() {
         nosize,
         newtab,
         load_tab,
-        back
+        back,
+        addmark,
+        closetab
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
