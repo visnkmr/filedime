@@ -1,6 +1,6 @@
+#![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex}};
 mod yu;
 use filesize::PathExt;
@@ -176,19 +176,28 @@ async fn list_files(oid:String,path: String,ff:String, window: Window, state: St
   } 
   // state.addtab(oid, path.clone(), ff);
   newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+  // convert the path to a PathBuf
+  let path = PathBuf::from(path);
+let parent=path.clone();
+  let app_handle = window.app_handle();
 
-
+  app_handle.emit_to(
+    "main",
+    "parent-loc",
+    parent.to_string_lossy().to_string(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+println!("parent------{:?}",parent.to_string_lossy().to_string());
   let now = SystemTime::now();
   
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   
   let startime = duration.as_secs();
   
-  println!("{}----{}",path,startime);
+  println!("{:?}----{}",parent,startime);
 
   // get the app handle from the window
  
-  let app_handle = window.app_handle();
   let app_handle2 = app_handle.clone();
   app_handle.emit_to(
     "main",
@@ -204,11 +213,9 @@ app_handle.emit_to(
   )
   .map_err(|e| e.to_string())?;
 
-  // convert the path to a PathBuf
-  let path = PathBuf::from(path);
-let parent=path.clone();
+
 let fcount=fs::read_dir(&path).unwrap().count();
-println!("folders---{}",fcount);
+// println!("folders---{}",fcount);
 app_handle.emit_to(
   "main",
   "folder-count",
@@ -222,12 +229,7 @@ app_handle.emit_to(
 )
 .map_err(|e| e.to_string())?;
 
-app_handle.emit_to(
-  "main",
-  "parent-loc",
-  parent.to_string_lossy().to_string(),
-)
-.map_err(|e| e.to_string())?;
+
 // let mut tfsize=0;
 let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
 let files_clone = Arc::clone(&files); 
@@ -257,7 +259,7 @@ let handle=thread::spawn(move || {
   //           // totsize+=mem::size_of_val(&foldercon);
             match(files.last()){
               Some(file)=>{
-                println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+                // println!("{} out of {} \t---{}",files.len(),fcount,file.name);
 
               },
               None=>{
@@ -303,7 +305,7 @@ let handle=thread::spawn(move || {
     .map(|(e)| {
           
           let name = e.file_name().to_string_lossy().into_owned(); // get their names
-          println!("{}",name);
+          // println!("{}",name);
           let path=e.path().to_string_lossy().into_owned();
           // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
           let size=
@@ -347,7 +349,7 @@ let handle=thread::spawn(move || {
               Some(g)=>{
                 if g.to_string_lossy().to_string()=="rs"{
                   folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
-                  println!("{}",folderloc);
+                  // println!("{}",folderloc);
                 }
                 filetype=g.to_string_lossy().to_string();
 
@@ -639,9 +641,9 @@ async fn openpath(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn nosize(id:String,path:String,ff:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+async fn nosize(id:String,path:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
   state.nosize();
-  list_files(id,path,ff, window, state).await;
+  list_files(id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
 
@@ -679,7 +681,7 @@ async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_,
 }
 use chrono::{DateTime, Local, Utc};
 fn lastmodified(path:&str)->(String,i64){
-  match(fs::metadata(path.clone())){
+  match(fs::metadata(path)){
     Ok(mp) => {
       // let metadata = fs::metadata(path.clone()).unwrap();
       let modified = mp.modified().unwrap();

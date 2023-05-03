@@ -7,6 +7,7 @@ const listButton = document.getElementById("list-button") as HTMLButtonElement;
 const fileList = document.getElementById("file-list") as HTMLTableElement;
 const tablist = document.getElementById("tabs-list") as HTMLTableElement;
 const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
+const pathline = document.getElementById("path") as HTMLDivElement;
 const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 const menu = document.getElementById("menu") as HTMLUListElement;
 const reload = document.getElementById("reload") as HTMLButtonElement;
@@ -16,8 +17,268 @@ const nosize = document.getElementById("no-size") as HTMLButtonElement;
 // Get the name and X elements
 var bname = document.querySelector(".tab-name") as HTMLSpanElement;
 var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
-var thistory:string[]=[];
-var tforward:string[]=[];
+var thistory: string[] = [];
+var tforward: string[] = [];
+
+var lastfolder = "/home/roger/.cargo/registry/src/github.com-1ecc6299db9ec823/";
+var loaded = 0;
+
+(window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
+      
+  htmlbase.innerHTML = ""
+  console.log("listfiles")
+  // pathline.innerHTML != "";
+  pathline.replaceChildren();
+
+  
+
+  type File = {
+    name: string;
+    path: string;
+    is_dir: boolean;
+    size: number;
+    rawfs: number;
+    lmdate: number;
+    timestamp: number;
+    foldercon: number;
+    ftype: string;
+  };
+  var arr = pathInput.value.split("/"); // arr is ["a", "b", "c", "d"]
+  var prefixes: string[] = [];
+  var prefix = "";
+  for (var i = 0; i < arr.length; i++) {
+    prefix += arr[i]; // append the current element to the prefix
+    prefixes.push(prefix); // add the prefix to the prefixes array
+    prefix += "/"; // add a slash for the next iteration
+  }
+  var fols=[]
+  console.log(pathInput.value.split("/"))
+  fols = pathInput.value.split("/");
+  console.log(fols.length);
+  for (var i = 0; i < fols.length; i++){ 
+  // fols.forEach(
+    // function (fol, index) {
+      let pathn = document.createElement("span");
+      pathn.id="goloc"
+      pathn.textContent = fols[i] + "\n";
+      pathn.dataset.loc = prefixes[i];
+      pathline?.appendChild(pathn);
+      // // console.log(index)
+    }
+  // );
+  // parse the data as JSON
+  let files: File[] = JSON.parse(data.payload);
+  // // console.log("files")
+  // clear the file list
+  fileList.innerHTML = "";
+  // var lastpsize=""
+  // get the table element by its id
+  // let table = document.getElementById("file-list");
+  // create a table head element and a table body element
+  let thead = document.createElement("thead");
+
+  // create a table row element for the header
+  let tr = document.createElement("tr");
+  // create two table header cells for the filename and filesize columns
+  let th1 = document.createElement("th");
+  let th2 = document.createElement("th");
+  let th3 = document.createElement("th");
+  let th4 = document.createElement("th");
+  // set the text content of the header cells
+  th1.textContent = "Filename";
+  th2.textContent = "Filesize";
+  th3.textContent = "Last modified";
+  th4.textContent = "File type";
+  th1.id = "filename";
+  th2.id = "filesize";
+  th3.id = "lastmod";
+  th4.id = "ftype";
+  // append the header cells to the header row
+  tr.appendChild(th1);
+  tr.appendChild(th4);
+  tr.appendChild(th2);
+  tr.appendChild(th3);
+  // append the header row to the table head
+  thead.appendChild(tr);
+  // append the table head to the table
+  fileList.appendChild(thead);
+
+
+  let tbody = document.createElement("tbody");
+  // console.log(files.length)
+  loaded = files.length;
+  var percomp = (loaded / folcount * 100);
+  var setp = document.getElementById("myprogress") as HTMLProgressElement;
+  setp.value = percomp;
+  if (percomp == 100)
+    setp.className = "hide"
+  else
+    setp.className = "show"
+  // console.log("here" + percomp.toString());
+
+
+  // // console.log(data.payload)
+  // loop through the files array
+  for (let file of files) {
+    // create a table row element for each file
+    let tr = document.createElement("tr");
+    // create two table cell elements for the filename and filesize columns
+    let td1 = document.createElement("td");
+
+    td1.textContent = file.name;
+    td1.id = "td1";
+    td1.dataset.value = file.name;
+    td1.dataset.name = file.name;
+    td1.dataset.path = file.path;
+
+    td1.dataset.isDir = file.is_dir.toString();
+    if (file.is_dir) {
+      td1.id = "folder"
+      if (file.foldercon > 0) {
+        td1.textContent = file.name + " (" + file.foldercon + ")";
+      }
+      else {
+        td1.textContent = file.name;
+
+      }
+    }
+    td1.dataset.size = file.size.toString();
+    // create an anchor element for the filename
+    // let a = document.createElement("a");
+    // // set the text content of the anchor element to the name of the file
+    // a.textContent = file.name;
+    // // set the href attribute of the anchor element to google.com/filename
+    // a.href = "https://google.com/" + file.name;
+    // // append the anchor element to the first table cell
+    // td1.appendChild(a);
+    // set the text content of the second table cell to the size of the file
+    tr.appendChild(td1);
+
+    // Add a listener for the contextmenu event
+    td1.addEventListener("contextmenu", function (e) {
+      // Prevent the default menu from showing up
+      e.preventDefault();
+
+      // Show the custom menu
+      menu.style.display = "block";
+
+      // Position the menu according to the mouse coordinates
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+    });
+
+
+    let td4 = document.createElement("td");
+    td4.textContent = file.ftype;
+    td4.dataset.value = file.ftype;
+    // append the table cells to the table row
+
+    tr.appendChild(td4);
+
+
+    let td2 = document.createElement("td");
+    td2.textContent = file.size.toString();
+    td2.dataset.value = file.rawfs.toString();
+    // append the table cells to the table row
+
+    tr.appendChild(td2);
+
+    let td3 = document.createElement("td");
+    td3.textContent = file.lmdate.toString();
+    td3.dataset.value = file.timestamp.toString();
+    // td3.dataset.value = file.rawfs.toString();
+    // append the table cells to the table row
+
+    tr.appendChild(td3);
+
+
+    // append the table row to the table body
+    tbody.appendChild(tr);
+  }
+  // // append the table body to the table
+  fileList.appendChild(tbody);
+
+  let order = "asc";
+  // create a function to compare two values based on the order
+  function compare(a: number, b: number) {
+    if (order === "asc") {
+      return a < b ? -1 : a > b ? 1 : 0;
+    } else {
+      return a > b ? -1 : a < b ? 1 : 0;
+    }
+  }
+  // create a function to sort the table rows based on the column index
+  function sortTable(index: number) {
+    // get the table rows as an array
+    let rows = Array.from(tbody.rows);
+    // sort the rows based on the cell value at the given index
+    rows.sort(function (a, b) {
+      if (index !== 2)
+        return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
+      else
+        return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string));
+
+    });
+    // append the sorted rows to the table body
+    for (let row of rows) {
+      tbody.appendChild(row);
+    }
+    // toggle the order for the next click
+    order = order === "asc" ? "desc" : "asc";
+  }
+  let filename = document.getElementById("filename") as HTMLTableCellElement;
+  let filesize = document.getElementById("filesize") as HTMLTableCellElement;
+  let lastmod = document.getElementById("lastmod") as HTMLTableCellElement;
+  let ftype = document.getElementById("ftype") as HTMLTableCellElement;
+  // add a click event listener to the filename th element
+  filename.addEventListener("click", function () {
+    // call the sortTable function with index 0
+    sortTable(0);
+  });
+  // add a click event listener to the filesize th element
+  filesize.addEventListener("click", function () {
+    // call the sortTable function with index 1
+    sortTable(2);
+  });
+  // add a click event listener to the lastmod th element
+  lastmod.addEventListener("click", function () {
+    // call the sortTable function with index 1
+    sortTable(3);
+  });
+
+  ftype.addEventListener("click", function () {
+    // call the sortTable function with index 1
+    sortTable(1);
+  });
+});
+(window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
+  console.log("foldersize")
+
+  parentsize.innerHTML = data.payload.toString();
+  // console.log(data.payload.toString())
+});
+
+(window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
+  console.log("grandloc")
+  
+  lastfolder = data.payload.toString();
+  // console.log(data.payload.toString())
+});
+(window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
+  console.log("--------------parentloc---"+data.payload)
+  pathInput.value = data.payload.toString();
+  // console.log(data.payload.toString())
+});
+
+(window as any).__TAURI__.event.listen("start-timer", (data: { payload: string }) => {
+  timer.className = "show"
+  updatetimer();
+});
+
+(window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
+  timer.className = "hide"
+  clearInterval(interval);
+});
 
 // listen for the list-files event from the backend
 // parse the data as JSON
@@ -26,22 +287,37 @@ var tid = 0;
 // web app code
 var interval: number;
 window.addEventListener("DOMContentLoaded", () => {
+console.log("hui");
+  // (window as any).__TAURI__.invoke(
+  //   "newtab",
+  //   {
+  //     oid: tid.toString(),
+  //     path: "/home/roger/.cargo/registry/src/github.com-1ecc6299db9ec823/os_info-3.7.0/src/macos",
+  //     ff: ""
+  //   });
+
+  // (window as any).__TAURI__.invoke(
+  //     "load_tab",
+  //     {
+  //       oid: tid.toString()
+  //     }
+  //   );
 
   (window as any).__TAURI__.invoke(
     "list_files",
     {
-      oid:tid.toString(),
+      oid: tid.toString(),
       path: "/home/roger/.cargo/registry/src/github.com-1ecc6299db9ec823/",
-      ff:""
+      ff: ""
     });
-
-  var lastfolder = "/home/roger/.cargo/registry/src/github.com-1ecc6299db9ec823/"
+    
   // add a click event listener to the back button
   nosize.addEventListener("click", () => {
     // check if there is any previous path in the history
     (window as any).__TAURI__.invoke(
       "nosize",
       {
+        id: tid.toString(),
         path: pathInput.value
       });
   });
@@ -55,9 +331,9 @@ window.addEventListener("DOMContentLoaded", () => {
     await (window as any).__TAURI__.invoke(
       "list_files",
       {
-        oid:tid.toString(),
+        oid: tid.toString(),
         path: path,
-        ff:""
+        ff: ""
       });
     pathInput.value = path
   });
@@ -71,7 +347,7 @@ window.addEventListener("DOMContentLoaded", () => {
     await (window as any).__TAURI__.invoke(
       "newtab",
       {
-        oid:tid.toString(),
+        oid: tid.toString(),
         path: "/home/roger/Downloads/",
         ff: ""
       }
@@ -79,17 +355,16 @@ window.addEventListener("DOMContentLoaded", () => {
     await (window as any).__TAURI__.invoke(
       "load_tab",
       {
-        oid:tid.toString()
+        oid: tid.toString()
       }
     );
 
     // pathInput.value=path
   });
 
-  var loaded = 0;
   // Add a listener for the click event on the document
   document.addEventListener("click", function (e: Event) {
-    console.log(e)
+    // console.log(e)
     // Hide the menu if the user clicks outside of it
     if (
       (e.target as HTMLElement).id !== "td1" &&
@@ -101,19 +376,19 @@ window.addEventListener("DOMContentLoaded", () => {
     if (
       ((e.target as HTMLElement).parentNode!).parentNode === tablist
     ) {
-      tid=((e.target as HTMLElement).parentNode! as ParentNode).id;
-      console.log("here");
-      // console.log(e.target.id);
-      var pen=(e.target as HTMLElement);
-      if(pen.className === "tab-name"){
+      tid = ((e.target as HTMLElement).parentNode! as ParentNode).id;
+      // console.log("here");
+      // // console.log(e.target.id);
+      var pen = (e.target as HTMLElement);
+      if (pen.className === "tab-name") {
         // Do something when name is clicked
-        console.log("Loadtab");
+        // console.log("Loadtab");
         // Stop the event from bubbling up to the button element
         e.stopPropagation();
         (window as any).__TAURI__.invoke(
           "load_tab",
           {
-            oid:tid.toString()
+            oid: tid.toString()
           }
         );
         // (window as any).__TAURI__.invoke(
@@ -125,15 +400,15 @@ window.addEventListener("DOMContentLoaded", () => {
         // }
         // );
       }
-      else if(pen.className === "tab-close"){
+      else if (pen.className === "tab-close") {
         // Do something when X is clicked
-        console.log("Close");
+        // console.log("Close");
         // Stop the event from bubbling up to the button element
         e.stopPropagation();
         (window as any).__TAURI__.invoke(
           "closetab",
           {
-            oid:tid.toString()
+            oid: tid.toString()
           }
         );
       }
@@ -148,82 +423,83 @@ window.addEventListener("DOMContentLoaded", () => {
       // Do something based on the id
       switch (id) {
         case "o1":
-          console.log("o1")
-          console.log(e)
+          // console.log("o1")
+          // console.log(e)
           // Code for option 1
           break;
         case "o2":
-          console.log("o2")
-          console.log(e)
+          // console.log("o2")
+          // console.log(e)
           // Code for option 2
           break;
         case "o3":
-          console.log("o3")
-          console.log(e)
+          // console.log("o3")
+          // console.log(e)
           // Code for option 3
           break;
         default:
-          console.log("o4")
-          console.log(e)
+          // console.log("o4")
+          // console.log(e)
           // Code for other cases
           break;
       }
       menu.style.display = "none";
     }
-    if(
+    if (
       (e.target as HTMLElement).tagName === "TD"
-    ){
-        console.log("here")
-        // get the target element of the event
-        let target = e.target as HTMLElement;
-        console.log(target.tagName);
-        // check if the target is a list item
-        if (target.tagName === "TD") {
-            // get the data attributes of the target
-            console.log(target.dataset)
-            let name = target.dataset.name;
-            let path = target.dataset.path;
-            let isDir = target.dataset.isDir;
-            // check if the target is a directory
-            if (isDir === "true") {
-              console.log("dir")
-              // set the value of the path input to the path of the directory
-              pathInput.value = path!;
-              parentsize.innerHTML = target.dataset.parentsize!;
+    ) {
+      // console.log("here")
+      // get the target element of the event
+      let target = e.target as HTMLElement;
+      // console.log(target.tagName);
+      // check if the target is a list item
+      if (target.tagName === "TD") {
+        // get the data attributes of the target
+        // console.log(target.dataset)
+        let name = target.dataset.name;
+        let path = target.dataset.path;
+        let isDir = target.dataset.isDir;
+        // check if the target is a directory
+        if (isDir === "true") {
+          // console.log("dir")
+          // set the value of the path input to the path of the directory
+          pathInput.value = path!;
+          parentsize.innerHTML = target.dataset.parentsize!;
 
-              // invoke the list_files command from the backend with the path as argument
-              (window as any).__TAURI__.invoke(
-                "list_files",
-                {oid:tid.toString(),
-                  path: path,
-                  ff:""
-                }
-              );
-            } else if ((name as string).toLowerCase().endsWith(".md")) {
-               (window as any).__TAURI__
-                  .invoke("loadmarkdown", { name: path })
-                  
+          // invoke the list_files command from the backend with the path as argument
+          (window as any).__TAURI__.invoke(
+            "list_files",
+            {
+              oid: tid.toString(),
+              path: path,
+              ff: ""
+            }
+          );
+        } else if ((name as string).toLowerCase().endsWith(".md")) {
+          (window as any).__TAURI__
+            .invoke("loadmarkdown", { name: path })
 
-            }
-            else {
-              openpath(path as string);
-            }
-          }
+
+        }
+        else {
+          openpath(path as string);
+        }
+      }
     }
     switch (
     e.target
     ) {
       case reload:
-        console.log("reload")
+        // console.log("reload")
         // get the value of the path input
         let path = pathInput.value;
         // invoke the list_files command from the backend with the path as argument
         (window as any).__TAURI__.invoke(
           "list_files",
           {
-            oid:tid.toString(),
+            oid: tid.toString(),
             path: path,
-            ff:""
+            ff: ""
           });
         break;
       case backButton:
@@ -232,22 +508,22 @@ window.addEventListener("DOMContentLoaded", () => {
           oid: tid.toString(),
         })
           .then((options) => {
-            console.log(options)
-              // Clear the datalist options
-              if (options !== null) {
-                (window as any).__TAURI__.invoke(
-                  "list_files",
-                  {
-                    oid:tid.toString(),
-                    path: options,
-                    ff:"back"
-                  });
-              }
-            })
-            .catch((error) => {
-              // Handle any errors from Rust
-              console.error(error);
-            });
+            // console.log(options)
+            // Clear the datalist options
+            if (options !== null) {
+              (window as any).__TAURI__.invoke(
+                "list_files",
+                {
+                  oid: tid.toString(),
+                  path: options,
+                  ff: "back"
+                });
+            }
+          })
+          .catch((error) => {
+            // Handle any errors from Rust
+            // console.error(error);
+          });
         // if (lastfolder === "")
         //   lastfolder = "."
         // pathInput.value = lastfolder
@@ -260,8 +536,18 @@ window.addEventListener("DOMContentLoaded", () => {
         //     path: lastfolder,
         //     ff:""
         //   });
-          break;
-      
+        break;
+
+    }
+    if((e.target as HTMLElement).id=="goloc"){
+      var pathtg=(e.target as HTMLElement).dataset.loc;
+      (window as any).__TAURI__.invoke(
+        "list_files",
+        {
+          oid: tid.toString(),
+          path: pathtg,
+          ff: ""
+        });
     }
 
   });
@@ -269,204 +555,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
   //     thistory=JSON.parse(data.payload);
   // });
-  (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
-    htmlbase.innerHTML=""
-    type File = {
-      name: string;
-      path: string;
-      is_dir: boolean;
-      size: number;
-      rawfs: number;
-      lmdate: number;
-      timestamp: number;
-      foldercon: number;
-      ftype: string;
-    };
-    // parse the data as JSON
-    let files: File[] = JSON.parse(data.payload);
-    // console.log("files")
-    // clear the file list
-    fileList.innerHTML = "";
-    // var lastpsize=""
-    // get the table element by its id
-    // let table = document.getElementById("file-list");
-    // create a table head element and a table body element
-    let thead = document.createElement("thead");
-
-    // create a table row element for the header
-    let tr = document.createElement("tr");
-    // create two table header cells for the filename and filesize columns
-    let th1 = document.createElement("th");
-    let th2 = document.createElement("th");
-    let th3 = document.createElement("th");
-    let th4 = document.createElement("th");
-    // set the text content of the header cells
-    th1.textContent = "Filename";
-    th2.textContent = "Filesize";
-    th3.textContent = "Last modified";
-    th4.textContent = "File type";
-    th1.id = "filename";
-    th2.id = "filesize";
-    th3.id = "lastmod";
-    th4.id = "ftype";
-    // append the header cells to the header row
-    tr.appendChild(th1);
-    tr.appendChild(th4);
-    tr.appendChild(th2);
-    tr.appendChild(th3);
-    // append the header row to the table head
-    thead.appendChild(tr);
-    // append the table head to the table
-    fileList.appendChild(thead);
-
-
-    let tbody = document.createElement("tbody");
-    console.log(files.length)
-    loaded = files.length;
-    var percomp = (loaded / folcount * 100);
-    var setp = document.getElementById("myprogress") as HTMLProgressElement;
-    setp.value = percomp;
-    if (percomp == 100)
-      setp.className = "hide"
-    else
-      setp.className = "show"
-    console.log("here" + percomp.toString());
-
-
-    // console.log(data.payload)
-    // loop through the files array
-    for (let file of files) {
-      // create a table row element for each file
-      let tr = document.createElement("tr");
-      // create two table cell elements for the filename and filesize columns
-      let td1 = document.createElement("td");
-
-      td1.textContent = file.name;
-      td1.id = "td1";
-      td1.dataset.value = file.name;
-      td1.dataset.name = file.name;
-      td1.dataset.path = file.path;
-
-      td1.dataset.isDir = file.is_dir.toString();
-      if (file.is_dir) {
-        td1.id = "folder"
-        if (file.foldercon > 0) {
-          td1.textContent = file.name + " (" + file.foldercon + ")";
-        }
-        else {
-          td1.textContent = file.name;
-
-        }
-      }
-      td1.dataset.size = file.size.toString();
-      // create an anchor element for the filename
-      // let a = document.createElement("a");
-      // // set the text content of the anchor element to the name of the file
-      // a.textContent = file.name;
-      // // set the href attribute of the anchor element to google.com/filename
-      // a.href = "https://google.com/" + file.name;
-      // // append the anchor element to the first table cell
-      // td1.appendChild(a);
-      // set the text content of the second table cell to the size of the file
-      tr.appendChild(td1);
-
-      // Add a listener for the contextmenu event
-      td1.addEventListener("contextmenu", function (e) {
-        // Prevent the default menu from showing up
-        e.preventDefault();
-
-        // Show the custom menu
-        menu.style.display = "block";
-
-        // Position the menu according to the mouse coordinates
-        menu.style.left = e.pageX + "px";
-        menu.style.top = e.pageY + "px";
-      });
-
-
-      let td4 = document.createElement("td");
-      td4.textContent = file.ftype;
-      td4.dataset.value = file.ftype;
-      // append the table cells to the table row
-
-      tr.appendChild(td4);
-
-
-      let td2 = document.createElement("td");
-      td2.textContent = file.size.toString();
-      td2.dataset.value = file.rawfs.toString();
-      // append the table cells to the table row
-
-      tr.appendChild(td2);
-
-      let td3 = document.createElement("td");
-      td3.textContent = file.lmdate.toString();
-      td3.dataset.value = file.timestamp.toString();
-      // td3.dataset.value = file.rawfs.toString();
-      // append the table cells to the table row
-
-      tr.appendChild(td3);
-
-
-      // append the table row to the table body
-      tbody.appendChild(tr);
-    }
-    // // append the table body to the table
-    fileList.appendChild(tbody);
-
-    let order = "asc";
-    // create a function to compare two values based on the order
-    function compare(a: number, b: number) {
-      if (order === "asc") {
-        return a < b ? -1 : a > b ? 1 : 0;
-      } else {
-        return a > b ? -1 : a < b ? 1 : 0;
-      }
-    }
-    // create a function to sort the table rows based on the column index
-    function sortTable(index: number) {
-      // get the table rows as an array
-      let rows = Array.from(tbody.rows);
-      // sort the rows based on the cell value at the given index
-      rows.sort(function (a, b) {
-        if (index !== 2)
-          return compare(a.cells[index].dataset.value, b.cells[index].dataset.value);
-        else
-          return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string));
-
-      });
-      // append the sorted rows to the table body
-      for (let row of rows) {
-        tbody.appendChild(row);
-      }
-      // toggle the order for the next click
-      order = order === "asc" ? "desc" : "asc";
-    }
-    let filename = document.getElementById("filename") as HTMLTableCellElement;
-    let filesize = document.getElementById("filesize") as HTMLTableCellElement;
-    let lastmod = document.getElementById("lastmod") as HTMLTableCellElement;
-    let ftype = document.getElementById("ftype") as HTMLTableCellElement;
-    // add a click event listener to the filename th element
-    filename.addEventListener("click", function () {
-      // call the sortTable function with index 0
-      sortTable(0);
-    });
-    // add a click event listener to the filesize th element
-    filesize.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(2);
-    });
-    // add a click event listener to the lastmod th element
-    lastmod.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(3);
-    });
-
-    ftype.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(1);
-    });
-  });
+ 
 
   // Get the input element
   // const input = document.getElementById("path-input");
@@ -477,9 +566,9 @@ window.addEventListener("DOMContentLoaded", () => {
   // Add an input event listener to the input element
   pathInput.addEventListener("input", async () => {
     // Get the current value of the input element
-    console.log("here")
+    // console.log("here")
     const path = pathInput.value;
-    console.log(path);
+    // console.log(path);
 
     // Invoke the Rust function with the path as an argument
     await (window as any).__TAURI__.invoke(
@@ -487,7 +576,7 @@ window.addEventListener("DOMContentLoaded", () => {
       path: path,
     })
       .then((options) => {
-        console.log(options)
+        // console.log(options)
         // Clear the datalist options
         if (options !== null) {
 
@@ -497,7 +586,7 @@ window.addEventListener("DOMContentLoaded", () => {
           for (const option of options) {
             // Create a new option element with the option value
             const optionElement = document.createElement("option");
-            // console.log("here#1")
+            // // console.log("here#1")
             optionElement.value = option;
 
             // Append the option element to the datalist element
@@ -512,33 +601,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   (window as any).__TAURI__.event.listen("load-markdown", (data: { payload: string }) => {
+    console.log("loadmarkdown")
+    
     openmarkdown(data.payload)
   });
   // notify();
   // listen for the list-files event from the backend
-  (window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
-    parentsize.innerHTML = data.payload.toString();
-    console.log(data.payload.toString())
-  });
-
-  (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
-    lastfolder = data.payload.toString();
-    console.log(data.payload.toString())
-  });
-  (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
-    pathInput.value = data.payload.toString();
-    console.log(data.payload.toString())
-  });
-
-  (window as any).__TAURI__.event.listen("start-timer", (data: { payload: string }) => {
-    timer.className = "show"
-    updatetimer();
-  });
-
-  (window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
-    timer.className = "hide"
-    clearInterval(interval);
-  });
+ 
   // notify();
   // Get the target element and the menu element
   // var target = document.getElementById("target") ;
@@ -628,32 +697,36 @@ async function openpath(path: string) {
 }
 
 (window as any).__TAURI__.event.listen("folder-count", (data: { payload: number }) => {
+  console.log("folder-count")
+  
   // parentsize.innerHTML=data.payload.toString();.
   folcount = data.payload;
-  console.log(folcount)
-  // console.log("fromhere"+data.payload.toString())
+  // console.log(folcount)
+  // // console.log("fromhere"+data.payload.toString())
 });
 (window as any).__TAURI__.event.listen("list-tabs", (data: { payload: string }) => {
+  console.log("listtabs ")
+
   type tabinfo = {
     oid: number,
     path: string,
     ff: string,
-    tabname:string
+    tabname: string
   };
   let tabs: tabinfo[] = JSON.parse(data.payload);
-  // console.log("files")
+  // // console.log("files")
   // clear the file list
   tablist.innerHTML = "";
-  // console.log(data.payload)
+  // // console.log(data.payload)
   // loop through the files array
   for (let tb of tabs) {
     // create a table row element for each file
     let b = document.createElement("button");
-    b.className="tab-button"
+    b.className = "tab-button"
     let sn = document.createElement("span");
-    sn.className="tab-name"
+    sn.className = "tab-name"
     let sc = document.createElement("span");
-    sc.className="tab-close"
+    sc.className = "tab-close"
     sn.textContent = tb.tabname;
     sc.textContent = "x";
     b.appendChild(sn);
