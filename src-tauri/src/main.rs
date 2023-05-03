@@ -669,6 +669,18 @@ async fn closetab(id:String,window: Window,state: State<'_, FileSizeFinder>)->Re
   Ok(())
 }
 #[tauri::command]
+async fn removemark(path:String,window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
+  state.removemark(path);
+  let app_handle = window.app_handle();
+  app_handle.emit_to(
+    "main",
+    "load-marks",
+    serde_json::to_string(&state.getmarks()).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+  Ok(())
+}
+#[tauri::command]
 async fn listtabs(window: Window,state: State<'_, FileSizeFinder>)->Result<(),()>{
   let app_handle = window.app_handle();
   // println!("{:?}",state);
@@ -814,7 +826,8 @@ fn main() {
         load_tab,
         back,
         addmark,
-        closetab
+        closetab,
+        removemark
         ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

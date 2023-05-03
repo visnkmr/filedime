@@ -397,6 +397,36 @@ console.log("hui");
       menu.style.left = e.pageX + "px";
       menu.style.top = e.pageY + "px";
     }
+    else if((e.target as HTMLElement).className=="mark-button"){
+      
+      // Prevent the default menu from showing up
+      e.preventDefault();
+      frompath=(e.target as HTMLElement).dataset.path as string;
+      menu.replaceChildren();
+      let o1=document.createElement("li")
+      o1.id="o5"
+      o1.textContent="remove bookmark"
+      menu.appendChild(o1);
+    //  let o2=document.createElement("li")
+    //   o2.id="o2"
+    //   o2.textContent="Copy"
+    //   menu.appendChild(o2);
+    //  let o3=document.createElement("li")
+    //   o3.id="o3"
+    //   o3.textContent="paste"
+    //   menu.appendChild(o3);
+    //  let o4=document.createElement("li")
+    //   o4.id="o4"
+    //   o4.textContent="add bookmark"
+    //   menu.appendChild(o4);
+      // Show the custom menu
+      menu.style.display = "block";
+
+  
+      // Position the menu according to the mouse coordinates
+      menu.style.left = e.pageX + "px";
+      menu.style.top = e.pageY + "px";
+    }
   });
 
   // Add a listener for the click event on the document
@@ -478,6 +508,18 @@ console.log("hui");
           console.log(frompath);
           (window as any).__TAURI__.invoke(
             "addmark",
+            {
+              path: frompath
+            }
+          );
+          // console.log("o3")
+          // console.log(e)
+          // Code for option 3
+          break;
+        case "o5":
+          console.log(frompath);
+          (window as any).__TAURI__.invoke(
+            "removemark",
             {
               path: frompath
             }

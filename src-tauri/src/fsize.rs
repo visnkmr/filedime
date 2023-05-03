@@ -124,6 +124,16 @@ impl FileSizeFinder {
         // }
         tabs.remove(&id);
     }
+    pub fn removemark(&self,path:String){
+        // println!("{}---{}---{}",id,path,ff);
+        
+        let mut marks=self.bookmarks.write().unwrap();
+        // let tname=tabs.get(&id).unwrap().path.clone();
+        // if(tname == path){
+        //     return;
+        // }
+        marks.retain(|s| s.path != path);
+    }
     pub fn getmarks(&self)->Vec<marks>{
         self.bookmarks.read().unwrap().clone()
         // Vec::new()
