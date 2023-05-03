@@ -11,6 +11,7 @@ const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 const pathline = document.getElementById("path") as HTMLDivElement;
 const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 const menu = document.getElementById("menu") as HTMLUListElement;
+// const bmenu = document.getElementById("blist-menu") as HTMLUListElement;
 const reload = document.getElementById("reload") as HTMLButtonElement;
 const newtab = document.getElementById("newtab") as HTMLButtonElement;
 const backButton = document.getElementById("back-button") as HTMLButtonElement;
@@ -371,9 +372,26 @@ console.log("hui");
       // Prevent the default menu from showing up
       e.preventDefault();
       frompath=(e.target as HTMLElement).dataset.path as string;
-  
+      menu.replaceChildren();
+      let o1=document.createElement("li")
+      o1.id="o1"
+      o1.textContent="Open in new tab"
+      menu.appendChild(o1);
+     let o2=document.createElement("li")
+      o2.id="o2"
+      o2.textContent="Copy"
+      menu.appendChild(o2);
+     let o3=document.createElement("li")
+      o3.id="o3"
+      o3.textContent="paste"
+      menu.appendChild(o3);
+     let o4=document.createElement("li")
+      o4.id="o4"
+      o4.textContent="add bookmark"
+      menu.appendChild(o4);
       // Show the custom menu
       menu.style.display = "block";
+
   
       // Position the menu according to the mouse coordinates
       menu.style.left = e.pageX + "px";
