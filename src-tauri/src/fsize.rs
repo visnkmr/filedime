@@ -1,3 +1,4 @@
+#![warn(clippy::disallowed_types)]
 // use jwalk::WalkDirGeneric;
 use filesize::PathExt;
 use serde::Serialize;
@@ -5,7 +6,8 @@ use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
 use std::mem::{size_of_val, self};
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
+// use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::RwLock;
 // use dirscan::*;
@@ -48,9 +50,9 @@ pub struct tab{
 // }
 // Define a struct that holds the cache and the expiration time
 pub struct FileSizeFinder {
-    cstore:RwLock<HashMap<String,cachestore>>,
+    cstore:RwLock<FxHashMap<String,cachestore>>,
     nosize:RwLock<bool>,
-    tabs:RwLock<HashMap<String,tab>>,
+    tabs:RwLock<FxHashMap<String,tab>>,
     expiration:Duration
     // app_handle:AppHandle
     // size:usize
@@ -152,9 +154,9 @@ impl FileSizeFinder {
     pub fn new(expiration: u64) -> Self {
         Self {
             // Wrap the cache in a RwLock
-            cstore:RwLock::new(HashMap::new()),
+            cstore:RwLock::new(FxHashMap::default()),
             nosize:RwLock::new(true),
-            tabs:RwLock::new(HashMap::new()),
+            tabs:RwLock::new(FxHashMap::default()),
             expiration:Duration::from_secs(expiration)
             // app_handle: apphandle
             // size:0
