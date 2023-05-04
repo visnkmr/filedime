@@ -2,17 +2,17 @@ use rayon::prelude::*;
 use std::{fs, path::{PathBuf, Path}};
 use walkdir::WalkDir;
 
-use crate::fsize::FileSizeFinder;
+use crate::appstate::AppStateStore;
 
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path,g:&FileSizeFinder) -> u64 {
+fn file_size(path: &std::path::Path,g:&AppStateStore) -> u64 {
     g.find_size(&path.to_string_lossy())
     // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
     // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
+pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
     // Create a walkdir iterator over the directory
     let walker = WalkDir::new(path)
     // .min_depth(1) // skip the root directory
@@ -42,12 +42,4 @@ fn dir_size(path: &String,g:&FileSizeFinder) -> u64 {
         .sum::<u64>();
 
     total_size
-}
-
-// #[test]
-pub fn uio(path:String,g:&FileSizeFinder)->u64 {
-    // Get the current directory path
-    // let path = PathBuf::from("/home/roger/Downloads/github");
-    // Print the total size in bytes
-    dir_size(&path,g)
 }

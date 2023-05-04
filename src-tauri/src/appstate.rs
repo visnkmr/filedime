@@ -1,16 +1,16 @@
 #![warn(clippy::disallowed_types)]
-// use jwalk::WalkDirGeneric;
 use filesize::PathExt;
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
 use std::mem::{size_of_val, self};
 use std::path::{Path, PathBuf};
-// use std::collections::HashMap;
 use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::RwLock;
-// use dirscan::*;
+use rayon::prelude::*;
+use crate::tabinfo::*;
+use crate::bookmarks::*;
 #[derive(Clone,Debug)]
 // Use the gio crate
 // use gio::prelude::*;
@@ -18,19 +18,8 @@ pub struct cachestore{
     size:u64,
     expirytime: u64,
 }
-#[derive(Clone,Debug,Serialize)]
-// Use the gio crate
-// use gio::prelude::*;
-pub struct marks{
-    path:String,
-    name: String,
-}
-#[derive(Clone,Debug,Serialize)]
-pub struct tab{
-    path:String,
-    focusfolder:String,
-    history:Vec<String>
-}
+
+
 #[derive(Debug)]
 // // A function that takes a path to a file or directory and returns its size in bytes
 // fn file_size(path: &str) -> u64 {
@@ -56,7 +45,7 @@ pub struct tab{
 //     bytes.count() as u64
 // }
 // Define a struct that holds the cache and the expiration time
-pub struct FileSizeFinder {
+pub struct AppStateStore {
     cstore:RwLock<FxHashMap<String,cachestore>>,
     nosize:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
@@ -67,18 +56,10 @@ pub struct FileSizeFinder {
     // size:usize
 }
 
-// Import rayon prelude
-use rayon::prelude::*;
-#[derive(Clone,Debug,Serialize)]
-pub struct tabinfo{
-    id:String,
-    path:String,
-    ff:String,
-    tabname:String,
-    history:Vec<String>
-}
-use crate::{yu, sizeunit};
-impl FileSizeFinder {
+
+
+use crate::{dirsize, sizeunit};
+impl AppStateStore {
     pub fn addmark(&self,path:String){
         self.bookmarks.write().unwrap().push(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
     }
@@ -101,12 +82,7 @@ impl FileSizeFinder {
             }
         }
 
-        // drop(tabi);
         let mut tabs=self.tabs.write().unwrap();
-        // let tname=tabs.get(&id).unwrap().path.clone();
-        // if(tname == path){
-        //     return;
-        // }
         tabs.insert(id,tab {
                 path: path, 
                 focusfolder: ff,
@@ -118,25 +94,16 @@ impl FileSizeFinder {
         // println!("{}---{}---{}",id,path,ff);
         
         let mut tabs=self.tabs.write().unwrap();
-        // let tname=tabs.get(&id).unwrap().path.clone();
-        // if(tname == path){
-        //     return;
-        // }
         tabs.remove(&id);
     }
     pub fn removemark(&self,path:String){
         // println!("{}---{}---{}",id,path,ff);
         
         let mut marks=self.bookmarks.write().unwrap();
-        // let tname=tabs.get(&id).unwrap().path.clone();
-        // if(tname == path){
-        //     return;
-        // }
         marks.retain(|s| s.path != path);
     }
     pub fn getmarks(&self)->Vec<marks>{
         self.bookmarks.read().unwrap().clone()
-        // Vec::new()
     }
     pub fn gettabs(&self)->Vec<tabinfo>{
         let mut tvecs=Vec::new();
@@ -179,8 +146,6 @@ impl FileSizeFinder {
         );
         lastval
 
-        // let tabw=tab.get(&id).unwrap();
-        // return tabw.history.last().unwrap().clone()
     }
     pub fn gettab(&self,id:String)->(String,String,Vec<String>){
         let tab= self.tabs.read().unwrap().get(&id).unwrap().clone();
@@ -203,36 +168,7 @@ impl FileSizeFinder {
             // size:0
         }
     }
-    // pub fn navfolder(&self,path:ReadDir)->u64{
-    //     let mut size=0;
-    //     for e in path {
-    //         let e = e;
-    //         let path = e.expect("t").path();
-    //         size+=
-    //         if path.is_dir() {
-    //             self.navfolder(fs::read_dir(path).expect("t"))
-    //         } else 
-    //         if path.is_file() {
-    //             self.find_size(&path.to_string_lossy().to_string())
-    //         }
-    //         else{
-    //             0
-    //         }
-    //     };
-    //     size
-    // }
-//    pub fn addsize(&self, path: &str,size:u64) -> u64{
-//     if let Some(size) = self.cache.read().unwrap().get(path) {
-//         //println!("from cache");
-//         // Return the cached size
-//         return *size;
-//     }
-//     self.cache.write().unwrap().insert(path.to_string(), size);
-//     //println!("added {} to cache", path);
     
-//     size
-
-//    }
 pub fn find_size(&self, path: &str) -> u64 {
     // return 0 as u64;
     let cstore=self.cstore.read().unwrap();
@@ -272,8 +208,8 @@ pub fn find_size(&self, path: &str) -> u64 {
         }
         else{
             // 0 as u64
-            yu::uio(
-                entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
+            dirsize::dir_size(
+                &entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
                 self,
             )
 
@@ -313,59 +249,6 @@ pub fn find_size(&self, path: &str) -> u64 {
 
     size
 }
-    // pub fn find_size3(&self, path: &str) -> u64 {
-        
-    //      // Check if the size is cached
-    //      if let Some(size) = self.cache.read().unwrap().get(path) {
-    //         // Return the cached size
-    //         return *size;
-    //     }
-
-    //     // Get the path of the entry
-    //     let entry_path = Path::new(path);
-
-    //     // Get the size of the entry using filesize crate
-    //     let mut size = entry_path.size_on_disk().unwrap_or(0);
-
-    //     // If the entry is a directory, walk the directory tree in parallel using jwalk
-    //     if entry_path.is_dir() {
-    //         size = fs::read_dir(path).unwrap()
-    //         // .par_bridge()
-    //         .map(|entry| {
-                
-    //             self.find_size( &entry.unwrap().path().to_string_lossy().to_string())
-    //         })
-    //         .sum();
-    //        //     //println!("Name: {}", path.unwrap().path().display())
-           
-    //     }
-    //     //     size += WalkDir::new(entry_path)
-    //     //         .process_read_dir(|_depth, _path, _read_dir_state, children| {
-    //     //             // For each entry in the directory
-    //     //             for entry in children.iter_mut() {
-    //     //                 // Get the path of the entry
-    //     //                 let child_path = entry.path().to_string_lossy().to_string();
-    //     //                 // Recursively find the size of the entry
-    //     //                 let child_size = self.find_size(&child_path);
-    //     //                 // Store the size in the entry state
-    //     //                 entry.state = child_size;
-    //     //                 // Add the size to the total size
-    //     //                 size += child_size;
-    //     //             }
-    //     //         })
-    //     //         .build()
-    //     //         .run(|| ())
-    //     //         .into_iter()
-    //     //         .map(|entry| entry.state)
-    //     //         .sum::<u64>();
-    //     // }
-    //     // //println!("{}--{}",path,size);
-    //     // Use write method to get a lock guard
-    //     self.cache.write().unwrap().insert(path.to_string(), size);
-
-        
-    //     size
-    // }
 
     
     pub fn clear_cache(&self) {
@@ -419,15 +302,6 @@ pub fn find_size(&self, path: &str) -> u64 {
         // }
 
     }
-
-    // self.app_handle.emit_to(
-    //     "main",
-    //     "folder-size",
-    //     {
-    //       sizeunit::size(folsize,true)
-    //     },
-    //   )
-    //   .map_err(|e| e.to_string()).unwrap();
 
     println!("cache:{}----numfolders:{}---onlynamesize:{}",sizeunit::size(total_size as u64,true),cache.len() as u64,sizeunit::size(total_key_size as u64,true));
     cache.len() as i32
@@ -500,32 +374,3 @@ pub fn find_size(&self, path: &str) -> u64 {
     // (total_size as u64,cache.len() as u64)
   }
 }
-
-
-// use std::path::PathBuf;
-// use rayon::prelude::*;
-// // use filesize::PathExt;
-// #[test]
-
-// fn tryu() {
-//     let path = PathBuf::from("/home/roger/Downloads/github");
-//     let total_size = path
-//         .read_dir()
-//         .unwrap()       
-//         .par_bridge()
-//         .filter_map(|entry| {
-//             let path = entry.unwrap().path();
-//             if path.is_file() && !path.is_symlink() {
-//                 Some(path)
-//             } 
-//             // else if path.is_dir() {       
-//             // }
-//             else{
-//                 None
-//             }
-//         })
-//         .filter(|path| !path.starts_with("./.git"))
-//         .map(|path| path.size_on_disk().unwrap())
-//         .sum::<u64>();
-//     //println!("Total size: {}", total_size);
-// }
