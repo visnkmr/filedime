@@ -210,7 +210,18 @@ let handle=thread::spawn(move || {
             
             match(e.path().extension()){
               Some(g)=>{
-                if g.to_string_lossy().to_string()=="ts"{
+                if matches!(g.to_string_lossy().as_ref(),
+                 "ts" | 
+                 "tsx" | 
+                 "js" | 
+                 "rs" | 
+                 "html" |
+                 "kt" |
+                 "java" |
+                 "md" |
+                  "css"
+                )
+                {
                   //add a right click context menu option to do this on the tab name uptop
                   // folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
                   // println!("{}",folderloc);
@@ -256,19 +267,18 @@ let handle=thread::spawn(move || {
               else{
                 "".to_string()
               };
-              if(folderloc>0){
-                tr.clone() + " (" + &folderloc.to_string() + ")" 
-              }
-              else{
                 tr.clone() 
-
-              }
             },
             rawfs:size,    
             lmdate:lmdate.clone(),
             timestamp:timestamp,
             foldercon:foldercon,
-            ftype:filetype,
+            ftype: if(folderloc>0){
+              filetype + " (" + &folderloc.to_string() + ")" 
+            }
+            else{
+              filetype
+            },
         }
       })
       .inspect(|file| { // inspect each file and push it to the files vector

@@ -7,6 +7,7 @@ use crate::{appstate::AppStateStore, sizeunit};
 #[tauri::command]
 pub fn loadfromhtml(name: String, window: Window,g:State<AppStateStore>)
 {
+    
     let mut content=String::new();
     let app_handle = window.app_handle();
     let path=PathBuf::from(name.clone());

@@ -27,14 +27,14 @@ export const tablist = document.getElementById("tabs-list") as HTMLTableElement;
 export const marklist = document.getElementsByClassName("markslist")[0] as HTMLTableElement;
 export const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 export const pathline = document.getElementById("path") as HTMLDivElement;
+export const ousd = document.getElementById("ousd") as HTMLDivElement;
+export const filewatch = document.getElementById("startserve") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
 
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
-export const startserve = document.getElementById("startserve") as HTMLButtonElement;
-export const stopserve = document.getElementById("stopserve") as HTMLButtonElement;
 
 
 
