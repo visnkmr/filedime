@@ -1,4 +1,6 @@
 import { loadmarks } from './bookmarks';
+import { sendlog } from './debug';
+import { watchfile } from './filechangewatcher';
 import { getpathlist } from './getpathoptions';
 import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
@@ -15,6 +17,7 @@ import { starttimer } from './timer';
 // globalThis.frompath=""
 globalThis.frompath="";
 globalThis.tid=0;
+globalThis.startstopfilewatchertoggle=false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
@@ -26,8 +29,15 @@ export const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
 export const pathline = document.getElementById("path") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
+
+
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
+export const startserve = document.getElementById("startserve") as HTMLButtonElement;
+export const stopserve = document.getElementById("stopserve") as HTMLButtonElement;
+
+
+
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
 export const nosize = document.getElementById("no-size") as HTMLButtonElement;
 export const datalist = document.getElementById("path-list") as HTMLDataListElement;
@@ -108,4 +118,6 @@ window.addEventListener("DOMContentLoaded", () => {
 listenforfolcount();
 listtabs();
 loadmarks();
-sendlog();openhtml();
+sendlog();
+watchfile();
+openhtml();

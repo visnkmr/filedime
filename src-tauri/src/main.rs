@@ -15,17 +15,24 @@ mod appstate;
 use appstate::*;
 mod sizeunit;
 mod trie;
+mod filechangewatcher;
+// mod loadjs;
 mod tabinfo;
 mod bookmarks;
+mod openhtml;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 mod markdown;
 mod lastmodcalc;
 mod listfiles;
-use crate::markdown::*;
-use crate::tabinfo::*;
-use crate::bookmarks::*;
+use crate::{
+  markdown::*, 
+  filechangewatcher::*,
+  tabinfo::*,
+  bookmarks::*,
+  listfiles::*,
+  openhtml::*
+};
 mod resync;
-use crate::listfiles::*;
 
 
 
@@ -98,10 +105,12 @@ fn main() {
     // //   });
     //   // set the window flags to remove WS_MAXIMIZEBOX
     //   app_handle.set_window_flags(|flags| flags & !WS_MAXIMIZEBOX)?;
+    
       Ok(())
     })
     .manage(g)
-    .invoke_handler(tauri::generate_handler![
+    .invoke_handler(
+      tauri::generate_handler![
         list_files,
         loadmarkdown,
         get_path_options,
@@ -112,8 +121,12 @@ fn main() {
         back,
         addmark,
         closetab,
-        removemark
-        ])
+        removemark,
+        startserver,
+        loadfromhtml,
+        stopserver
+        ]
+      )
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

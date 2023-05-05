@@ -5,12 +5,15 @@ use tauri::{AppHandle, Manager};
 use std::fs::{ReadDir, self};
 use std::mem::{size_of_val, self};
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::{Sender, Receiver};
+use std::thread;
 use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use std::sync::RwLock;
+use std::sync::{RwLock, mpsc, Mutex, Arc};
 use rayon::prelude::*;
 use crate::tabinfo::*;
 use crate::bookmarks::*;
+use crate::filechangewatcher::*;
 #[derive(Clone,Debug)]
 // Use the gio crate
 // use gio::prelude::*;
@@ -51,7 +54,14 @@ pub struct AppStateStore {
     tabs:RwLock<FxHashMap<String,tab>>,
     expiration:Duration,
     bookmarks:RwLock<Vec<marks>>,
+    messagetothread:RwLock<String>,
     recents:Vec<String>,
+    pub aborted:Arc<Mutex<bool>>,
+    filechanged:Arc<Mutex<bool>>
+    // tx: Mutex<Option<Sender<String>>>,
+    // rx: Mutex<Option<Receiver<String>>>,
+    // tx:(RwLock<Sender<String>>),
+    // rx:RwLock<Receiver<String>>
     // app_handle:AppHandle
     // size:usize
 }
@@ -60,6 +70,28 @@ pub struct AppStateStore {
 
 use crate::{dirsize, sizeunit};
 impl AppStateStore {
+    pub fn new(expiration: u64) -> Self {
+        let (tx, rx) = mpsc::channel::<String>();
+
+        Self {
+            // Wrap the cache in a RwLock
+            cstore:RwLock::new(FxHashMap::default()),
+            nosize:RwLock::new(true),
+            tabs:RwLock::new(FxHashMap::default()),
+            expiration:Duration::from_secs(expiration),
+            bookmarks:RwLock::new(Vec::new()),
+            messagetothread:RwLock::new(String::new()),
+            recents:Vec::new(),
+            aborted:Arc::new(Mutex::new(false)),
+            filechanged:Arc::new(Mutex::new(false))
+            // tx:Mutex::new(Some(tx)),
+            // rx:Mutex::new(Some(rx))
+            // tx:RwLock::new(Some(tx)),
+            // rx:RwLock::new(Some(rx))
+            // app_handle: apphandle
+            // size:0
+        }
+    }
     pub fn addmark(&self,path:String){
         self.bookmarks.write().unwrap().push(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
     }
@@ -114,14 +146,21 @@ impl AppStateStore {
                 id:ei.0.clone(),
                 path:ei.1.path.clone(),
                 ff:ei.1.focusfolder.clone(),
-                tabname:PathBuf::from(ei.1.path.clone()).file_stem().unwrap().to_string_lossy().to_string(),
+                tabname:{
+                    if let Some(h)=PathBuf::from(ei.1.path.clone()).file_stem(){
+                        h.to_string_lossy().to_string()
+                    }
+                    else{
+                        "".to_string()
+                    }
+                },
                 history:ei.1.history.clone()
             })
         }
         tvecs
         // self.tabs.read().unwrap().clone()
     }
-
+    
     pub fn getlasthistory(&self,id:String)->Option<String>{
         let gtab= self.tabs.read().unwrap();
         let path=gtab.get(&id).unwrap().path.clone();
@@ -155,19 +194,7 @@ impl AppStateStore {
             tab.history
         )
     }
-    pub fn new(expiration: u64) -> Self {
-        Self {
-            // Wrap the cache in a RwLock
-            cstore:RwLock::new(FxHashMap::default()),
-            nosize:RwLock::new(true),
-            tabs:RwLock::new(FxHashMap::default()),
-            expiration:Duration::from_secs(expiration),
-            bookmarks:RwLock::new(Vec::new()),
-            recents:Vec::new()
-            // app_handle: apphandle
-            // size:0
-        }
-    }
+    
     
 pub fn find_size(&self, path: &str) -> u64 {
     // return 0 as u64;

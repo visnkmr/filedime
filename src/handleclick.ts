@@ -5,6 +5,62 @@ import { openfile } from './openfile';
 export function handleclicks(e:Event){
     let target = e.target! as HTMLElement;
 
+    if(target==globals.startserve){
+          globalThis.startstopfilewatchertoggle=!globalThis.startstopfilewatchertoggle;
+          if(globalThis.startstopfilewatchertoggle){
+
+            // console.log("startserve");
+            (window as any).__TAURI__.invoke(
+              "startserver",
+              {
+                pathstr:globalThis.frompath
+              }
+              );
+          }
+          // }
+          // else if (target==globals.stopserve){
+          // console.log("stopserve");
+          else{
+          (window as any).__TAURI__.invoke(
+            "stopserver",
+            {
+              path:""
+            }
+          );
+        }
+      }
+    if(target===globals.newtab){
+      // get the value of the path input
+    // let path = pathInput.value;
+    globalThis.tid = globalThis.tid as number + 1;
+    // invoke the list_files command from the backend with the path as argument
+    (window as any).__TAURI__.invoke(
+      "newtab",
+      {
+        oid: globalThis.tid.toString(),
+        path: "/home/roger/Downloads/",
+        ff: ""
+      }
+    );
+    (window as any).__TAURI__.invoke(
+      "load_tab",
+      {
+        oid: globalThis.tid.toString()
+      }
+    );
+    }
+    if(target===globals.nosize){
+      (window as any).__TAURI__.invoke(
+        "nosize",
+        {
+          id: globalThis.tid.toString(),
+          path: globals.pathInput.value
+        });
+    }
+
+    if(target===globals.listButton){
+        openfile(target,globals.pathInput.value,globals.pathInput.value);
+    }
     if (
     (target).id !== "td1" &&
     (target).parentNode !== globals.menu

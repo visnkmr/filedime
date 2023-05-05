@@ -1,22 +1,38 @@
-use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs, sync::{Arc, Mutex}, thread};
+use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex}, thread, io::{BufReader, BufRead}};
 
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
 use walkdir::WalkDir;
 
-use crate::{markdown::loadmarkdown, openpath, tabinfo::newtab, FileItem, sizeunit, lastmodcalc::lastmodified, appstate::AppStateStore};
+use crate::{markdown::loadmarkdown, 
+  openpath, 
+  tabinfo::newtab, 
+  FileItem, sizeunit, 
+  lastmodcalc::lastmodified, 
+  appstate::AppStateStore, openhtml::loadfromhtml, 
+  // loadjs::loadjs
+};
 
 #[tauri::command]
 pub async fn list_files(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   println!("lfiles");
   let testpath=PathBuf::from(path.clone());
- 
-  
 
   if(path.ends_with(".md")){
     loadmarkdown(path,window,state);
     return Ok(());
+  }  
+  
+  if(path.ends_with(".html")
+  ||path.ends_with(".htm")){
+    loadfromhtml(path,window,state);
+    return Ok(());
   }
+  
+  // if(path.ends_with(".js")){
+  //   loadjs(path,window,state);
+  //   return Ok(());
+  // }
 
   if(testpath.is_file()){
     openpath(path).await?;
@@ -54,17 +70,15 @@ let parent=path.clone();
     parent.to_string_lossy().to_string(),
   )
   .map_err(|e| e.to_string()).unwrap();
-println!("parent------{:?}",parent.to_string_lossy().to_string());
-  let now = SystemTime::now();
-  
-  let duration = now.duration_since(UNIX_EPOCH).unwrap();
-  
-  let startime = duration.as_secs();
-  
-  println!("{:?}----{}",parent,startime);
 
+println!("parent------{:?}",parent.to_string_lossy().to_string());
+
+  let now = SystemTime::now();
+  let duration = now.duration_since(UNIX_EPOCH).unwrap();
+  let startime = duration.as_secs();
+  println!("{:?}----{}",parent,startime);
   // get the app handle from the window
- 
+
   let app_handle2 = app_handle.clone();
   app_handle.emit_to(
     "main",
@@ -79,9 +93,11 @@ app_handle.emit_to(
     serde_json::to_string(&state.gettab(oid).2).unwrap(),
   )
   .map_err(|e| e.to_string())?;
-
-
-let fcount=fs::read_dir(&path).unwrap().count();
+  let fcount = fs::read_dir(&path)
+          .unwrap()
+          .par_bridge() // create a parallel iterator from a sequential one
+          .count(); // count the number of items in parallel
+// let fcount=fs::read_dir(&path).unwrap().count();
 // println!("folders---{}",fcount);
 app_handle.emit_to(
   "main",
@@ -116,15 +132,15 @@ let handle=thread::spawn(move || {
           let files = files_clone.lock().unwrap();
             //           // push the file item to the vector
             // totsize+=mem::size_of_val(&file);
-            match(files.last()){
-              Some(file)=>{
-                // println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+            // match(files.last()){
+            //   Some(file)=>{
+            //     // println!("{} out of {} \t---{}",files.len(),fcount,file.name);
 
-              },
-              None=>{
+            //   },
+            //   None=>{
 
-              }
-            }
+            //   }
+            // }
             app_handle2.emit_to(
               "main",
               "list-files",
@@ -194,9 +210,15 @@ let handle=thread::spawn(move || {
             
             match(e.path().extension()){
               Some(g)=>{
-                if g.to_string_lossy().to_string()=="rs"{
-                  folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
+                if g.to_string_lossy().to_string()=="ts"{
+                  //add a right click context menu option to do this on the tab name uptop
+                  // folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
                   // println!("{}",folderloc);
+                  if let Ok(file) = File::open(e.path()){ // open the file
+                  let reader = BufReader::new(file); // create a buffered reader
+                  folderloc=reader.lines().count(); // count the number of lines in the file
+                  // println!("Number of lines: {}", count); 
+                  }// print the count
                 }
                 filetype=g.to_string_lossy().to_string();
 
@@ -211,10 +233,8 @@ let handle=thread::spawn(move || {
                     },
                     Err(_)=>{
                       filetype+=" invalid"
-
                     }
                   };
-                  
                 }
                 else{
                   filetype="unknown".to_string();
@@ -282,12 +302,10 @@ let handle=thread::spawn(move || {
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     
    state.print_cache_size();
-    let now = SystemTime::now();
 
+    let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
-    
     let endtime = duration.as_secs();
-    
     println!("endtime----{}",endtime-startime);
     
     app_handle.emit_to(
