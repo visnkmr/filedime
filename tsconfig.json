@@ -1,5 +1,10 @@
 {
+  "include": ["src/*.d.ts", "src/*.ts"],
   "compilerOptions": {
+    // "typeRoots": [
+    //   "./node_modules/@types",
+    //   "./typings"
+    // ],
     "target": "ES2022",
     "removeComments": true,
     // Allow JavaScript files to be compiled
