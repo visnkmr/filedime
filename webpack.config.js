@@ -19,8 +19,8 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js','.d.ts'], // resolve both TypeScript and JavaScript extensions
   },
-  optimization: {
-    minimize: false, // disable minimization
-  },
+  // optimization: {
+  //   minimize: false, // disable minimization
+  // },
   // devtool: "source-map", 
 };

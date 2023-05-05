@@ -1,4 +1,5 @@
 import * as globals from './file-explorer';
+import { openfile } from './openfile';
 // declare var globalThis.tid:number|string
 // declare var globalThis.frompath:string
 export function handleclicks(e:Event){
@@ -103,23 +104,7 @@ export function handleclicks(e:Event){
   if (
     (target).tagName === "TD"
   ) {
-      // get the data attributes of the target
-      // console.log(target.dataset)
-      // let name = target.dataset.name;
-      let path = target.dataset.path;
-        // set the value of the path input to the path of the directory
-        globals.pathInput.value = path!;
-        globals.parentsize.innerHTML = target.dataset.parentsize!;
-
-        // invoke the list_files command from the backend with the path as argument
-        (window as any).__TAURI__.invoke(
-          "list_files",
-          {
-            oid: globalThis.tid.toString(),
-            path: path,
-            ff: ""
-          }
-        );
+      openfile(target,target.dataset.path!,target.dataset.name!)    
   }
   switch (
   e.target
@@ -145,6 +130,7 @@ export function handleclicks(e:Event){
         .then((options:string) => {
           // console.log(options)
           // Clear the datalist options
+          globalThis.frompath=options;
           if (options !== null) {
             (window as any).__TAURI__.invoke(
               "list_files",
@@ -176,6 +162,7 @@ export function handleclicks(e:Event){
   }
   if((target).id=="goloc"){
     var pathtg=(target).dataset.loc;
+    globalThis.frompath=pathtg!;
     (window as any).__TAURI__.invoke(
       "list_files",
       {

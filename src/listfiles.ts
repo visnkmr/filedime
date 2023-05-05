@@ -19,7 +19,6 @@ export function listenforfiles(){
     globals.htmlbase.innerHTML = ""
     console.log("listfiles")
     // pathline.innerHTML != "";
-    globals.pathline.replaceChildren();
   
     
   
@@ -46,6 +45,8 @@ export function listenforfiles(){
     console.log(globals.pathInput.value.split("/"))
     fols = globals.pathInput.value.split("/");
     console.log(fols.length);
+    globals.pathline.replaceChildren();
+
     for (var i = 0; i < fols.length; i++){ 
     // fols.forEach(
       // function (fol, index) {
