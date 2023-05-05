@@ -5,10 +5,11 @@ export function openfile(target:HTMLElement,path:string,name:string){
 
     // get the data attributes of the target
     // console.log(target.dataset)
-    if ((name).toLowerCase().endsWith(".js")) {
-    openjs(path!);
-    }
-    else{
+    // if ((name).toLowerCase().endsWith(".js")) {
+    // openjs(path!);
+    // }
+    // else
+    {
     // invoke the list_files command from the backend with the path as argument
     (window as any).__TAURI__.invoke(
     "list_files",
@@ -28,6 +29,8 @@ export function openfile(target:HTMLElement,path:string,name:string){
 
 export function openhtml(){
     (window as any).__TAURI__.event.listen("load-html", (data: { payload: string }) => {
+        globals.ousd.style.display="block";
+        globals.filewatch.style.display="block";
         // console.log("grandloc")
         let htmlcode=data.payload;
         globalThis.frompath=globals.pathInput.value;

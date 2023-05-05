@@ -14,8 +14,13 @@ export function listenforfolcount(){
   
 }
 export function listenforfiles(){
+
+  
+
  (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
-      
+  globals.ousd.style.display="none";
+  globals.filewatch.style.display="none";
+
     globals.htmlbase.innerHTML = ""
     console.log("listfiles")
     // pathline.innerHTML != "";
@@ -80,7 +85,7 @@ export function listenforfiles(){
     th1.textContent = "Filename";
     th2.textContent = "Filesize";
     th3.textContent = "Last modified";
-    th4.textContent = "File type";
+    th4.textContent = "File type (LOC)";
     th1.id = "filename";
     th2.id = "filesize";
     th3.id = "lastmod";

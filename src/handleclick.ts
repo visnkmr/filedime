@@ -4,8 +4,15 @@ import { openfile } from './openfile';
 // declare var globalThis.frompath:string
 export function handleclicks(e:Event){
     let target = e.target! as HTMLElement;
-
-    if(target==globals.startserve){
+    if(target==globals.ousd){
+      (window as any).__TAURI__.invoke(
+        "openpath",
+        {
+          path:globalThis.frompath
+        }
+        );
+    }
+    if(target==globals.filewatch){
           globalThis.startstopfilewatchertoggle=!globalThis.startstopfilewatchertoggle;
           if(globalThis.startstopfilewatchertoggle){
 

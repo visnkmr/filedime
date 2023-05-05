@@ -99,7 +99,9 @@ nav {
 #back-button,
 #reload,
 #no-size,
-#forward-button {
+#forward-button,
+#startserve,
+#ousd {
   /* height: 30px; */
   margin-right: 10px;
   border: none;
@@ -237,7 +239,10 @@ progress{
   /* background-color: gray; */
   list-style: none;
 }
-
+#ousd,
+#startserve{
+  display: none;
+}
 .menu li {
   background-color: black;
   cursor: pointer;
