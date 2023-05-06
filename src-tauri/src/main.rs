@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex}, process::Command};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex}, process::Command, collections::HashSet};
 mod dirsize;
 use filesize::PathExt;
 use rayon::prelude::*;
@@ -14,7 +14,6 @@ use tauri::{AppHandle,  Window};
 mod appstate;
 use appstate::*;
 mod sizeunit;
-mod trie;
 mod filechangewatcher;
 // mod loadjs;
 mod tabinfo;
@@ -124,7 +123,8 @@ fn main() {
         removemark,
         startserver,
         loadfromhtml,
-        stopserver
+        stopserver,
+        search_try
         ]
       )
     .run(tauri::generate_context!())
@@ -132,7 +132,7 @@ fn main() {
 }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
-fn get_path_options(mut path: String) -> Vec<String> {
+async fn get_path_options(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<Vec<String>,()> {
   let mut options = Vec::new();
   let pathasbuf=PathBuf::from(path.clone());
   if(!pathasbuf.exists()){
@@ -142,7 +142,7 @@ fn get_path_options(mut path: String) -> Vec<String> {
     }
   }
           // Use substring instead of path
-      if let Ok(entries) = std::fs::read_dir(path) {
+      if let Ok(entries) = std::fs::read_dir(path.clone()) {
         for entry in entries {
           if let Ok(entry) = entry {
             {
@@ -151,6 +151,41 @@ fn get_path_options(mut path: String) -> Vec<String> {
           }
         }
   }
-  println!("{:?}",options);
-  options
+  
+  // println!("{:?}",k.find_all(&path));
+  // println!("{:?}",options);
+  Ok(options)
+}// In Rust, define a function that takes a path as an argument and returns a list of possible paths
+#[tauri::command]
+async fn  search_try(string: String, state: State<'_, AppStateStore>)->Result<(),()>
+//  -> Vec<String> 
+ {
+  
+  // thread::spawn({
+    let st=state.searchtry.clone();
+    let vecj=st.lock().unwrap().clone();
+    drop(st);
+    // move||{
+    let strings=parallel_search(vecj,string);
+    println!("{:?}",strings.len());
+  // }
+//  });
+ Ok(())
+  // strings
+  
+  // println!("{:?}",options);
+  // options
+}
+// Define a function that takes a vector of strings and a string as parameters
+fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
+  // while true{
+
+  // };
+  // Create a parallel iterator over the vector k
+  k.par_iter()
+      // Filter out the elements that do not contain h
+      .filter(|s| s.contains(&h))
+      // Collect the filtered elements into a new vector
+      .cloned()
+      .collect()
 }

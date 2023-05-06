@@ -1,7 +1,7 @@
 *{
   appearance: none;
-  color: white;
-  background-color: black;
+  /* color: white; */
+  /* background-color: black; */
 }
 .markslist {
   display: flex;
@@ -233,7 +233,7 @@ progress{
 .menu {
   display: none;
   position: absolute;
-  background-color: black;
+  /* background-color: black; */
   border: 1px solid #ccc;
   padding: 10px;
   /* background-color: gray; */
@@ -244,7 +244,7 @@ progress{
   display: none;
 }
 .menu li {
-  background-color: black;
+  /* background-color: black; */
   cursor: pointer;
 }
 
@@ -259,7 +259,7 @@ progress{
   text-align: left;
   /* border-bottom: none; */
   background-color: lightblue;
-  color: black;
+  /* color: black; */
   cursor: pointer;
 }
 /* Style the button as a tab */

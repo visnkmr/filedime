@@ -1,7 +1,7 @@
 import { loadmarks } from './bookmarks';
 import { sendlog } from './debug';
 import { watchfile } from './filechangewatcher';
-import { getpathlist } from './getpathoptions';
+import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
 import { listenforfiles, listenforfolcount } from './listfiles';
@@ -21,6 +21,7 @@ globalThis.startstopfilewatchertoggle=false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
+export const searchInput = document.getElementById("search-input") as HTMLInputElement;
 export const listButton = document.getElementById("list-button") as HTMLButtonElement;
 export const fileList = document.getElementById("file-list") as HTMLTableElement;
 export const tablist = document.getElementById("tabs-list") as HTMLTableElement;
@@ -103,6 +104,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Invoke the Rust function with the path as an argument
    getpathlist(path);
+  });
+  
+  searchInput.addEventListener("input", async () => {
+    // Get the current value of the input element
+
+    // Invoke the Rust function with the path as an argument
+   searchforit(searchInput.value);
   });
 
   // Add a listener for the keydown event on the document

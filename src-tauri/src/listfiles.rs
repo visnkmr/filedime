@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex}, thread, io::{BufReader, BufRead}};
+use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
@@ -60,8 +60,8 @@ pub async fn list_files(oid:String,path: String,ff:String, window: Window, state
   newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
   
   // convert the path to a PathBuf
-  let path = PathBuf::from(path);
-let parent=path.clone();
+  // let path = PathBuf::from(path);
+let parent=testpath.clone();
   let app_handle = window.app_handle();
 
   app_handle.emit_to(
@@ -90,7 +90,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
 app_handle.emit_to(
     "main",
     "load-hist",
-    serde_json::to_string(&state.gettab(oid).2).unwrap(),
+    serde_json::to_string(&state.gettab(oid.clone()).2).unwrap(),
   )
   .map_err(|e| e.to_string())?;
   let fcount = fs::read_dir(&path)
@@ -105,12 +105,15 @@ app_handle.emit_to(
   fcount,
 )
 .map_err(|e| e.to_string())?;
-app_handle.emit_to(
+if let Some(granloc)=parent.parent(){
+  app_handle.emit_to(
   "main",
   "grandparent-loc",
-  parent.parent().unwrap().to_string_lossy().to_string(),
+  granloc.to_string_lossy().to_string(),
 )
 .map_err(|e| e.to_string())?;
+}
+
 
 
 // let mut tfsize=0;
@@ -134,7 +137,7 @@ let handle=thread::spawn(move || {
             // totsize+=mem::size_of_val(&file);
             // match(files.last()){
             //   Some(file)=>{
-            //     // println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+            //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
 
             //   },
             //   None=>{
@@ -177,11 +180,26 @@ let handle=thread::spawn(move || {
     let par_walker = walker.par_bridge(); // ignore errors
     let files: Vec<FileItem>=par_walker
     .into_par_iter()
+  //   .filter(
+    //    |entry| {
+    //    let path = entry.path();
+    //    path.is_file() 
+    //    &&
+    //    !path.is_symlink() 
+    //    &&
+    //    !path.to_string_lossy().to_string().contains("/.git")
+  // })
     .map(|(e)| {
-          
+          // if(e.file_name().to_string_lossy().to_string().contains(".git"))
+          // {
+          //   return FileItem{
+              
+          //   };
+          // }
           let name = e.file_name().to_string_lossy().into_owned(); // get their names
           // println!("{}",name);
           let path=e.path().to_string_lossy().into_owned();
+          println!("-----------{}",path.clone());
           // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
           let size=
           if(!e.path().is_symlink()){
@@ -287,7 +305,11 @@ let handle=thread::spawn(move || {
         *tfsize_clone.lock().unwrap()+=file.rawfs;
         files.push(file.clone()); // push a clone of the file to the vector
     })
-      .collect(); // collect into a vec
+      .collect();
+   state.print_cache_size();
+    
+    populate_try(oid, path, ff, window, state).await;
+    
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
     app_handle.emit_to(
@@ -311,7 +333,6 @@ let handle=thread::spawn(move || {
     println!("reachedhere");
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     
-   state.print_cache_size();
 
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
@@ -325,4 +346,52 @@ let handle=thread::spawn(move || {
     )
     .map_err(|e| e.to_string())?;
   Ok(())  
+}
+#[tauri::command]
+pub async fn populate_try(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>){
+  // thread::spawn(
+    // {
+      let st=state.searchtry.clone();
+    
+    // move||{
+        let walker2 = WalkDir::new(&path)
+        .contents_first(true)
+          .min_depth(1) // skip the root directory
+          // .max_depth(1) // only look at the immediate subdirectories
+          .into_iter()
+          
+          .filter_entry(|e| 
+            !e.path_is_symlink() 
+          &&
+          !e.path().to_string_lossy().to_string().contains("/.git")
+            // e.file_type().is_dir()
+          ) 
+          ;
+
+          let now = SystemTime::now();
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        let endtime = duration.as_secs();
+        println!("endtime----{}",endtime);
+
+        let mut count=RwLock::new(0);
+        
+        
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        let k:HashSet<String>=par_walker2
+        // .enumerate()
+        .into_par_iter()  
+        .filter_map(Result::ok)
+        .map(
+          |e| 
+          e.path().to_string_lossy().to_string()
+        )
+        .collect(); // collect into a vec
+        let mut st=st.lock().unwrap();
+        *st=(k);
+        println!("-------c ----{}",count.read().unwrap());
+        drop(st)
+      // }
+    // }
+  // );
+  
 }
