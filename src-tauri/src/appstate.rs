@@ -1,19 +1,15 @@
 #![warn(clippy::disallowed_types)]
 use filesize::PathExt;
-use serde::Serialize;
-use tauri::{AppHandle, Manager};
-use std::fs::{ReadDir, self};
-use std::mem::{size_of_val, self};
+use std::collections::{HashSet, HashMap};
+use std::mem::{self};
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{Sender, Receiver};
-use std::thread;
+// use std::sync::mpsc::{Sender, Receiver};
 use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use std::sync::{RwLock, mpsc, Mutex, Arc};
-use rayon::prelude::*;
-use crate::tabinfo::*;
+use std::sync::{RwLock, Mutex, Arc};
+use crate::trie::TrieNode;
+use crate::{tabinfo::*};
 use crate::bookmarks::*;
-use crate::filechangewatcher::*;
 #[derive(Clone,Debug)]
 // Use the gio crate
 // use gio::prelude::*;
@@ -57,7 +53,10 @@ pub struct AppStateStore {
     messagetothread:RwLock<String>,
     recents:Vec<String>,
     pub aborted:Arc<Mutex<bool>>,
-    filechanged:Arc<Mutex<bool>>
+    filechanged:Arc<Mutex<bool>>,
+    pub searchtry:Arc<Mutex<HashSet<String>>>,
+    pub st:Arc<Mutex<TrieNode>>,
+    pub stl:Arc<Mutex<FxHashMap<String,Vec<String>>>>,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
@@ -71,7 +70,7 @@ pub struct AppStateStore {
 use crate::{dirsize, sizeunit};
 impl AppStateStore {
     pub fn new(expiration: u64) -> Self {
-        let (tx, rx) = mpsc::channel::<String>();
+        // let (tx, rx) = mpsc::channel::<String>();
 
         Self {
             // Wrap the cache in a RwLock
@@ -83,7 +82,11 @@ impl AppStateStore {
             messagetothread:RwLock::new(String::new()),
             recents:Vec::new(),
             aborted:Arc::new(Mutex::new(false)),
-            filechanged:Arc::new(Mutex::new(false))
+            filechanged:Arc::new(Mutex::new(false)),
+            searchtry:Arc::new(Mutex::new(HashSet::new())),
+            st:Arc::new(Mutex::new(TrieNode::new())),
+            stl:Arc::new(Mutex::new(FxHashMap::default())),
+
             // tx:Mutex::new(Some(tx)),
             // rx:Mutex::new(Some(rx))
             // tx:RwLock::new(Some(tx)),
@@ -264,6 +267,7 @@ pub fn find_size(&self, path: &str) -> u64 {
         let expirytime = duration.as_secs();
         // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
         cache.insert(path.to_string(), cachestore { size: size, expirytime: expirytime });
+        
     }
     
     // Add the size of the key and the value to the total
@@ -299,6 +303,7 @@ pub fn find_size(&self, path: &str) -> u64 {
   ->i32
 //   ->(u64,u64) 
   {
+    
     let cstore=self.cstore.read().unwrap();
 
     // Use a single read lock guard to access the cache

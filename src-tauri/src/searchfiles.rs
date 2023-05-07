@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
@@ -14,48 +14,10 @@ use crate::{markdown::loadmarkdown,
 };
 
 #[tauri::command]
-pub async fn list_files(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  println!("lfiles");
+pub async fn searchandlist(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+  println!("snlist");
   let testpath=PathBuf::from(path.clone());
 
-  if(path.ends_with(".md")){
-    loadmarkdown(path,window,state);
-    return Ok(());
-  }  
-  
-  if(path.ends_with(".html")
-  ||path.ends_with(".htm")){
-    loadfromhtml(path,window,state);
-    return Ok(());
-  }
-  
-  // if(path.ends_with(".js")){
-  //   loadjs(path,window,state);
-  //   return Ok(());
-  // }
-
-  if(testpath.is_file()){
-    openpath(path).await?;
-    return Ok(());
-  }
-
-  if(!testpath.is_dir()){
-
-    return Ok(())
-  }
-  else{
-    match(testpath.read_dir()){
-      Ok(mut k)=>{
-        if(k.next().is_none()){
-          println!("path empty.");
-          return Ok(());
-        }
-      },
-      Err(_)=>{
-
-      }
-    }
-  } 
   // state.addtab(oid, path.clone(), ff);
   newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
   
@@ -308,7 +270,7 @@ let handle=thread::spawn(move || {
       .collect();
    state.print_cache_size();
     
-    populate_try(oid, path, ff, window, state).await;
+    // populate_try(oid, path, ff, window, state).await;
     
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
@@ -346,128 +308,4 @@ let handle=thread::spawn(move || {
     )
     .map_err(|e| e.to_string())?;
   Ok(())  
-}
-#[tauri::command]
-pub async fn populate_trie(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>){
-// thread::spawn(
-    // {
-    
-    // move||{
-        let walker2 = WalkDir::new(&path)
-        .contents_first(true)
-          .min_depth(1) // skip the root directory
-          // .max_depth(1) // only look at the immediate subdirectories
-          .into_iter()
-          
-          .filter_entry(|e| 
-            !e.path_is_symlink() 
-          &&
-          
-          !e.path().to_string_lossy().to_string().contains("/.git/")
-            // e.file_type().is_dir()
-          ) 
-          ;
-
-          let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let endtime = duration.as_secs();
-        println!("endtime----{}",endtime);
-
-        let mut count=RwLock::new(0);
-        
-        
-        let par_walker2 = walker2.par_bridge(); // ignore errors
-        let k:Vec<(String,String)>=par_walker2
-        // .enumerate()
-        .into_par_iter()  
-        .filter_map(Result::ok)
-        .map(
-          |e| {
-            // let path = e.path().to_string_lossy().to_string();
-            let path = PathBuf::from(e.path().to_string_lossy().to_string()).file_stem().unwrap().to_string_lossy().to_string();
-            (path.to_lowercase(),e.path().to_string_lossy().to_string().to_lowercase())
-          }
-        )
-        .collect(); // collect into a vec
-      let st=state.st.clone();
-      let mut st=st.lock().unwrap();
-      for (i,j) in k{
-        st.insert(&i,&j);
-        
-      }
-      drop(st);
-      println!("-------c ----{}",count.read().unwrap());
-}
-#[tauri::command]
-pub async fn populate_try(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>){
-  
-  // populate_trie(oid, path, ff, window, state).await;
-  // return ;
-  
-
-  // thread::spawn(
-    // {
-      let st=state.searchtry.clone();
-    
-    // move||{
-        let walker2 = WalkDir::new(&path)
-        .contents_first(true)
-          .min_depth(1) // skip the root directory
-          // .max_depth(1) // only look at the immediate subdirectories
-          .into_iter()
-          
-          .filter_entry(|e| 
-            !e.path_is_symlink() 
-          &&
-          !e.path().to_string_lossy().to_string().contains("/.git/")
-            // e.file_type().is_dir()
-          ) 
-          ;
-
-          let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let endtime = duration.as_secs();
-        println!("endtime----{}",endtime);
-
-        let mut count=RwLock::new(0);
-        
-        
-        let par_walker2 = walker2.par_bridge(); // ignore errors
-        let k:HashSet<String>=par_walker2
-        // .enumerate()
-        .into_par_iter()  
-        .filter_map(Result::ok)
-        .map(
-          |e| 
-          e.path().to_string_lossy().to_string()
-        )
-        .collect(); // collect into a vec
-        // let mut st=st.lock().unwrap();
-        // *st=(k.clone());
-        // println!("-------c ----{}",count.read().unwrap());
-        // drop(st);
-        let mut map=state.stl.lock().unwrap();
-        for i in k{
-          let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
-          map.entry(name).or_insert(Vec::new()).push(i);
-
-        }
-        // let map: HashMap<String, Vec<String>> = par_walker2
-        // .into_par_iter()
-        // .filter_map(Result::ok) // ignore errors
-        // .map(|e| e.path().to_string_lossy().into_owned()) // get path as string
-        // .with_key(|path| {
-        //     PathBuf::from(path) // convert to PathBuf
-        //         .file_name() // get file name
-        //         .unwrap() // unwrap the Option
-        //         .to_string_lossy() // convert to string
-        //         .to_string() // convert to owned string
-        //         .to_lowercase() // convert to lowercase
-        // }) // use custom key function
-        // .into_par_iter() // convert to parallel iterator
-        // .from_par_iter(); // create hashmap from parallel iterator
-      // }
-    // }
-  // );
-  
 }

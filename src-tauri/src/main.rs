@@ -4,6 +4,7 @@
 use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex}, process::Command, collections::HashSet};
 mod dirsize;
 use filesize::PathExt;
+use partialratio::partial_ratio;
 use rayon::prelude::*;
 use tauri::{Manager, api::file::read_string, State, Runtime};
 use walkdir::WalkDir;
@@ -14,6 +15,7 @@ use tauri::{AppHandle,  Window};
 mod appstate;
 use appstate::*;
 mod sizeunit;
+mod searchfiles;
 mod filechangewatcher;
 // mod loadjs;
 mod tabinfo;
@@ -23,6 +25,7 @@ mod openhtml;
 mod markdown;
 mod lastmodcalc;
 mod listfiles;
+mod partialratio;
 use crate::{
   markdown::*, 
   filechangewatcher::*,
@@ -31,6 +34,7 @@ use crate::{
   listfiles::*,
   openhtml::*
 };
+mod trie;
 mod resync;
 
 
@@ -157,17 +161,82 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
   Ok(options)
 }// In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
-async fn  search_try(string: String, state: State<'_, AppStateStore>)->Result<(),()>
+async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
+{
+  let st=state.st.clone();
+      let mut st=st.lock().unwrap();
+  let string=string.to_lowercase();
+  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
+  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
+  // println!("s--------{:?}",st.search(&string));
+  let tl=parallel_search(st.search(&string,path),string);
+  println!("s--------{:?}",tl.len());
+  if(tl.len()<30){
+    println!("{:?}",tl);
+  }
+  Ok(())
+}
+#[tauri::command]
+async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let now = SystemTime::now();
+  let duration = now.duration_since(UNIX_EPOCH).unwrap();
+  let startime = duration.as_secs();
+  println!("hs----{}",startime);
+  let string=string.to_lowercase();
+  // search_trie(path,string, state).await;
+  // return Ok(());
   
   // thread::spawn({
-    let st=state.searchtry.clone();
-    let vecj=st.lock().unwrap().clone();
-    drop(st);
-    // move||{
-    let strings=parallel_search(vecj,string);
-    println!("{:?}",strings.len());
+    // let st=state.searchtry.clone();
+    // let vecj=st.lock().unwrap().clone();
+    // drop(st);
+    // // move||{
+    // let strings=parallel_search(vecj,string);
+    let mut map=state.stl.lock().unwrap();
+    // let mut gh=Vec::new();
+    // let mut ret:HashSet<String>=HashSet::new();
+    let gh:Vec<String>=map.clone().par_iter().
+    filter(|(i,_)|
+      i.contains(&string)).
+    map(|(i,_)|{
+        // if i.contains(&string){
+          i.clone()
+        // }
+      }).collect();
+    // for (i,_) in map.clone(){
+    //   // gh.push(i);
+    //   if i.contains(&string){
+    //     gh.push(i.clone());
+    //   }
+    // }
+    let o=map.clone();
+    let ret:HashSet<String>=gh.par_iter().flat_map(|u|{
+      let y=o.get(u).unwrap();
+      // let f:Vec<String>=
+      y.par_iter()
+      // .map(|t|{
+        // t.clone()
+      // }).collect();
+      // f
+    }).cloned().collect();
+
+    // for i in gh{
+    //   let y=o.get(&i.clone()).unwrap();
+    //   for j in y{
+    //     ret.insert(j.clone());
+    //   }
+    // }
+    println!("{:?}",ret.len());
+    if(ret.len()<10){
+      println!("{:?}",ret);
+    }
+    let now = SystemTime::now();
+    let duration = now.duration_since(UNIX_EPOCH).unwrap();
+    let endtime = duration.as_secs();
+    println!("endtime----{}",endtime-startime);
+
   // }
 //  });
  Ok(())
@@ -184,7 +253,11 @@ fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
   // Create a parallel iterator over the vector k
   k.par_iter()
       // Filter out the elements that do not contain h
-      .filter(|s| s.contains(&h))
+      .filter(|s| 
+        partial_ratio(s, &h)>80
+        // s.contains(&h)
+      )
+      // .filter(|s| s.contains(&h))
       // Collect the filtered elements into a new vector
       .cloned()
       .collect()

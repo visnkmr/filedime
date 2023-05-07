@@ -33,8 +33,12 @@ export async function getpathlist(path:string){
 export async function searchforit(text:string){
     (window as any).__TAURI__.invoke(
     "search_try", {
-    string: text,
-  });
+      path: globals.pathInput.value,
+      string: text
+  })
+  // .error((option:any)=>{
+  //   console.log(option);
+  // });
     // .then((options:string) => {
     //   // console.log(options)
     //   // Clear the datalist options

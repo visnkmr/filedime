@@ -32,7 +32,7 @@ pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
             let path = entry.path();
             path.is_file() &&
              !path.is_symlink() &&
-             !path.to_string_lossy().to_string().contains("/.git")
+             !path.to_string_lossy().to_string().contains("/.git/")
         })
         // Filter out paths that start with "./.git"
         // .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
