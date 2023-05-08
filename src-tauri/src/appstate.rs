@@ -104,7 +104,11 @@ impl AppStateStore {
         match(self.tabs.read().unwrap().get(&id)){
             Some(tabi)=>{
                 tabhist=tabi.history.clone();
-                if(ff!="back" && ff!="newtab"){
+                if(
+                    ff!="back" 
+                    && 
+                    ff!="newtab"
+                ){
                     let tabprevurl=tabi.path.clone();
                     tabhist.push(tabprevurl);
                 }

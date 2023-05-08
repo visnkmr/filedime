@@ -103,18 +103,17 @@ export function listenforfiles(){
   
     let tbody = document.createElement("tbody");
     // console.log(files.length)
-   let loaded = 0;
+    let loaded = 0;
 
-    loaded = files.length;
+      loaded = files.length;
     var percomp = (loaded / foldercount! * 100);
     var setp = document.getElementById("myprogress") as HTMLProgressElement;
-    setp.value = percomp;
+      setp.value = percomp;
     if (percomp == 100)
       setp.className = "hide"
     else
       setp.className = "show"
     // console.log("here" + percomp.toString());
-  
   
     // // console.log(data.payload)
     // loop through the files array

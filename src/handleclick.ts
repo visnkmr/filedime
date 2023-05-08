@@ -187,27 +187,29 @@ export function handleclicks(e:Event){
       break;
     case globals.backButton:
       (window as any).__TAURI__.invoke(
-        "back", {
-        oid: globalThis.tid.toString(),
+        "back", 
+        {
+          oid: globalThis.tid.toString(),
+        }
+      )
+      .then((options:string) => {
+        // console.log(options)
+        // Clear the datalist options
+        globalThis.frompath=options;
+        if (options !== null) {
+          (window as any).__TAURI__.invoke(
+            "list_files",
+            {
+              oid: globalThis.tid.toString(),
+              path: options,
+              ff: "back"
+            });
+        }
       })
-        .then((options:string) => {
-          // console.log(options)
-          // Clear the datalist options
-          globalThis.frompath=options;
-          if (options !== null) {
-            (window as any).__TAURI__.invoke(
-              "list_files",
-              {
-                oid: globalThis.tid.toString(),
-                path: options,
-                ff: "back"
-              });
-          }
-        })
-        .catch((error:string) => {
-          // Handle any errors from Rust
-          console.error(error);
-        });
+      .catch((error:string) => {
+        // Handle any errors from Rust
+        console.error(error);
+      });
       // if (lastfolder === "")
       //   lastfolder = "."
       // pathInput.value = lastfolder

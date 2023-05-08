@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
@@ -9,306 +9,361 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, openhtml::loadfromhtml, trie::TrieNode, 
+  appstate::AppStateStore, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, partialratio::partial_ratio, 
   // loadjs::loadjs
 };
 
 #[tauri::command]
-pub async fn searchandlist(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  println!("snlist");
-  let testpath=PathBuf::from(path.clone());
-
-  // state.addtab(oid, path.clone(), ff);
-  newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
+{
+  let st=state.st.clone();
+      let mut st=st.lock().unwrap();
+  let string=string.to_lowercase();
+  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
+  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
+  // println!("s--------{:?}",st.search(&string));
+  let tl=parallel_search(st.search(&string,path),string);
+  println!("s--------{:?}",tl.len());
+  if(tl.len()<30){
+    println!("{:?}",tl);
+  }
+  Ok(())
+}
+#[tauri::command]
+pub async fn  search_try(path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
+//  -> Vec<String> 
+ {
   
-  // convert the path to a PathBuf
-  // let path = PathBuf::from(path);
-let parent=testpath.clone();
-  let app_handle = window.app_handle();
+    // populate_try(path, &state);
 
-  app_handle.emit_to(
-    "main",
-    "parent-loc",
-    parent.to_string_lossy().to_string(),
-  )
-  .map_err(|e| e.to_string()).unwrap();
-
-println!("parent------{:?}",parent.to_string_lossy().to_string());
-
+  if(string.len()<3){
+    return Ok(());
+  }
+  
   let now = SystemTime::now();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   let startime = duration.as_secs();
-  println!("{:?}----{}",parent,startime);
-  // get the app handle from the window
-
-  let app_handle2 = app_handle.clone();
-  app_handle.emit_to(
-    "main",
-    "start-timer",
-    "",
-  )
-  .map_err(|e| e.to_string())?; 
-
-app_handle.emit_to(
-    "main",
-    "load-hist",
-    serde_json::to_string(&state.gettab(oid.clone()).2).unwrap(),
-  )
-  .map_err(|e| e.to_string())?;
-  let fcount = fs::read_dir(&path)
-          .unwrap()
-          .par_bridge() // create a parallel iterator from a sequential one
-          .count(); // count the number of items in parallel
-// let fcount=fs::read_dir(&path).unwrap().count();
-// println!("folders---{}",fcount);
-app_handle.emit_to(
-  "main",
-  "folder-count",
-  fcount,
-)
-.map_err(|e| e.to_string())?;
-if let Some(granloc)=parent.parent(){
-  app_handle.emit_to(
-  "main",
-  "grandparent-loc",
-  granloc.to_string_lossy().to_string(),
-)
-.map_err(|e| e.to_string())?;
-}
-
-
-
-// let mut tfsize=0;
-let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
-let files_clone = Arc::clone(&files); 
-let tfsize=Arc::new(Mutex::<u64>::new(0));
-let tfsize_clone=tfsize.clone();
-// let (tx, rx) = mpsc::channel();
+  println!("hs----{}",startime);
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
-// spawn a new thread to print the value of the files vector every 200 milliseconds
-let handle=thread::spawn(move || {
+
+  // if(string.len()>3)
+  // {
+
+  //   search_pop(path,string).await;
+  // }
+  // return Ok(());
+
   
+  let string=string.to_lowercase();
+  // search_trie(path,string, state).await;
+  // return Ok(());
+  
+  // thread::spawn({
+    // let st=state.searchtry.clone();
+    // let vecj=st.lock().unwrap().clone();
+    // drop(st);
+    // // move||{
+    // let strings=parallel_search(vecj,string);
+    let map=state.stl.lock().unwrap();
+    // let mut gh=Vec::new();
+    // let mut ret:HashSet<String>=HashSet::new();
+
+
+
+
+    // let ret:HashSet<String>=
+    // map.clone()
+    // .par_iter()
+    // .filter(
+    //   |(i,_)|
+    //   i.contains(&string)
+    // ).
+    // flat_map(
+    //   |(_,y)|
+    //   {
+    //     // if i.contains(&string){
+    //       // i.clone()
+    //       y.par_iter()
+    //     // }
+    //   }
+    // )
+    // .cloned()
+    // .inspect(|o|{
+
+    // })
+    // .collect();
+
+
+    let app_handle = window.app_handle();
+
+
+let m:HashSet<FileItem>=HashSet::new();
+// Create a RwLock wrapped in an Arc to share the hashset
+let ret = Arc::new(RwLock::new(m));
+
+// Create a clone of the Arc for the other thread
+let ret_clone = Arc::clone(&ret);
+
+// Create a boolean flag to indicate whether the search is done or not
+let done = Arc::new(RwLock::new(false));
+
+// Create a clone of the Arc for the other thread
+let done_clone = Arc::clone(&done);
+
+// Spawn another thread to read and print the hashset periodically
+thread::spawn(move || {
   let mut last_print = Instant::now(); // initialize the last print time to the current time
-  loop {
+
+    loop {
+
     let msval=update.iter().next().unwrap_or(&120);
-
       if last_print.elapsed() >= Duration::from_millis(*msval) { 
-        // check if 200 milliseconds have passed since the last print
-          let files = files_clone.lock().unwrap();
-            //           // push the file item to the vector
-            // totsize+=mem::size_of_val(&file);
-            // match(files.last()){
-            //   Some(file)=>{
-            //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
 
-            //   },
-            //   None=>{
-
-            //   }
-            // }
-            app_handle2.emit_to(
-              "main",
-              "list-files",
-              serde_json::to_string(&files.clone()).unwrap(),
-            )
-            .map_err(|e| e.to_string()).unwrap();
-          
-          app_handle2.emit_to(
-              "main",
-              "folder-size",
-              {
-                sizeunit::size(*tfsize.lock().unwrap(),true)
-              },
-            )
-            .map_err(|e| e.to_string()).unwrap();
-          if(fcount==files.len()){
-            break;
-          }
-   // lock the mutex and get a reference to the vector
-          // println!("Files: {:?}", files); // print the vector value
-          last_print = Instant::now(); // update the last print time to the current time
-      }
-      thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
-  }
-});
-//    let mut finder = ;
-  let walker = WalkDir::new(&path)
-      .min_depth(1) // skip the root directory
-      .max_depth(1) // only look at the immediate subdirectories
-      .into_iter()
+        // Read the hashset with a read lock
+        let ret = ret_clone.read().unwrap();
+        
+      app_handle.emit_to(
+          "main",
+          "load-sresults",
+          serde_json::to_string(&ret.clone()).unwrap(),
+        )
+        .map_err(|e| e.to_string()).unwrap();
       
-      // .filter_entry(|e| e.file_type().is_dir()) // only yield directories
-      .filter_map(|e| e.ok());
-    let par_walker = walker.par_bridge(); // ignore errors
-    let files: Vec<FileItem>=par_walker
-    .into_par_iter()
-  //   .filter(
-    //    |entry| {
-    //    let path = entry.path();
-    //    path.is_file() 
-    //    &&
-    //    !path.is_symlink() 
-    //    &&
-    //    !path.to_string_lossy().to_string().contains("/.git")
-  // })
-    .map(|(e)| {
-          // if(e.file_name().to_string_lossy().to_string().contains(".git"))
-          // {
-          //   return FileItem{
-              
-          //   };
-          // }
-          let name = e.file_name().to_string_lossy().into_owned(); // get their names
-          // println!("{}",name);
-          let path=e.path().to_string_lossy().into_owned();
-          println!("-----------{}",path.clone());
-          // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
-          let size=
-          if(!e.path().is_symlink()){
-            state.find_size(&path)
-          }
-          else{
-            0
-          };
-          // let size=0;
-          let foldercon=0;
-          // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
-          let is_dir = fs::metadata(e.path()).map(|m| m.is_dir()).unwrap_or(false); // check if folder
-          let path = e.path().to_string_lossy().into_owned(); // get their path
-          // fs::metadata(e.path()).map(|m|{
-          //   if(!m.is_dir()){
-              
-          //   }
-          // }).unwrap_or(0); .
-          let mut folderloc=0;
-          let mut filetype="Folder".to_string();
-          let issymlink=e.path().is_relative() ||e.path().is_symlink();
-          if(issymlink){
-            filetype+="symlink";
-          }
-          if !e.path().is_dir(){
-            
-            match(e.path().extension()){
-              Some(g)=>{
-                if matches!(g.to_string_lossy().as_ref(),
-                 "xls" | 
-                 "docx" | 
-                 "txt" | 
-                 "ts" | 
-                 "tsx" | 
-                 "js" | 
-                 "rs" | 
-                 "html" |
-                 "kt" |
-                 "java" |
-                 "md" |
-                  "css"
-                )
-                {
-                  //add a right click context menu option to do this on the tab name uptop
-                  // folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
-                  // println!("{}",folderloc);
-                  if let Ok(file) = File::open(e.path()){ // open the file
-                  let reader = BufReader::new(file); // create a buffered reader
-                  folderloc=reader.lines().count(); // count the number of lines in the file
-                  // println!("Number of lines: {}", count); 
-                  }// print the count
-                }
-                filetype=g.to_string_lossy().to_string();
+     
 
-              },
-              None=>{
-                // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
-                if(issymlink){
-                  filetype="symlink".to_string();
-                  match(fs::metadata(path.clone())){
-                    Ok(_) => {
-                      filetype+=" valid"
-                    },
-                    Err(_)=>{
-                      filetype+=" invalid"
-                    }
-                  };
-                }
-                else{
-                  filetype="unknown".to_string();
-                  
-                }
-              }
-            }
-          }
-          let tr;
-          let (lmdate,timestamp)=lastmodified(&path);
-          FileItem { 
-            name:name.clone(),
-            path:path.clone(),
-            is_dir,
-            size:{
-             tr=if(size>1){
-               sizeunit::size(size,true)
-              }
-              else{
-                "".to_string()
-              };
-                tr.clone() 
-            },
-            rawfs:size,    
-            lmdate:lmdate.clone(),
-            timestamp:timestamp,
-            foldercon:foldercon,
-            ftype: if(folderloc>0){
-              filetype + " (" + &folderloc.to_string() + ")" 
-            }
-            else{
-              filetype
-            },
+              
+        // println!("{:?}", *ret);
+        println!("{:?}", ret.len());
+        // Drop the lock before sleeping
+        drop(ret);
+        // Check the flag with a read lock
+        let done = done_clone.read().unwrap();
+        // If the flag is true, break out of the loop
+        if *done {
+          // app_handle.emit_to(
+          //   "main",
+          //   "load-complete",
+          //   "",
+          // )
+          // .map_err(|e| e.to_string()).unwrap();
+        
+            break;
         }
-      })
-      .inspect(|file| { // inspect each file and push it to the files vector
-        let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
-        // let mut tfsize = tfsize.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
-        *tfsize_clone.lock().unwrap()+=file.rawfs;
-        files.push(file.clone()); // push a clone of the file to the vector
-    })
-      .collect();
-   state.print_cache_size();
-    
-    // populate_try(oid, path, ff, window, state).await;
-    
-    // wait for the printing thread to finish (it won't unless you terminate it)
-    handle.join().unwrap();
-    app_handle.emit_to(
-      "main",
-      "list-files",
-      serde_json::to_string(&files.clone()).unwrap(),
-    )
-    .map_err(|e| e.to_string())?;
-  
-  app_handle.emit_to(
-      "main",
-      "folder-size",
-      {
-        sizeunit::size(*tfsize_clone.lock().unwrap(),true)
-      },
-    )
-    .map_err(|e| e.to_string())?;
-    // sort the vector by name
-    // files.sort_by(|a, b| a.name.cmp(&b.name));
-    // emit an event to the frontend with the vector as payload
-    println!("reachedhere");
-    // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
-    
+        // Drop the lock before reading the hashset
+        drop(done);
+        // Sleep for some time
+        last_print = Instant::now(); // update the last print time to the current time
+      }
+        thread::sleep(std::time::Duration::from_millis(30));
+    }
+});
 
+// Populate the hashset using par_iter and inspect
+map.clone()
+    .par_iter()
+    .filter(|(i, _)| i.contains(&string))
+    .flat_map(|(_, y)| y.par_iter())
+    .cloned()
+    .inspect(|o| {
+      let path=Path::new(o);
+      let fname=path.file_name().unwrap().to_string_lossy().to_string();
+        // Write to the hashset with a write lock
+        let mut ret = ret.write().unwrap();
+        ret.insert(populatefileitem(fname, path, &state));
+        // Drop the lock after inserting
+        drop(ret);
+    })
+    .collect::<String>();
+
+  // Set the flag to true with a write lock
+let mut done = done.write().unwrap();
+*done = true;
+
+    // for (i,_) in map.clone(){
+    //   // gh.push(i);
+    //   if i.contains(&string){
+    //     gh.push(i.clone());
+    //   }
+    // }
+    // let o=map.clone();
+    // let ret:HashSet<String>=gh.par_iter().flat_map(|u|{
+    //   let y=o.get(u).unwrap();
+    //   // let f:Vec<String>=
+    //   y.par_iter()
+    //   // .map(|t|{
+    //     // t.clone()
+    //   // }).collect();
+    //   // f
+    // }).cloned().collect();
+
+    // for i in gh{
+    //   let y=o.get(&i.clone()).unwrap();
+    //   for j in y{
+    //     ret.insert(j.clone());
+    //   }
+    // }
+    // let ret = ret.read().unwrap();
+    // println!("{:?}",ret.len());
+    // if(ret.len()<20){
+    //   println!("{:?}",ret);
+    // }
+    // drop(ret);
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
     let endtime = duration.as_secs();
     println!("endtime----{}",endtime-startime);
-    
-    app_handle.emit_to(
-      "main",
-      "stop-timer",
-      "",
-    )
-    .map_err(|e| e.to_string())?;
-  Ok(())  
+
+  // }
+//  });
+ Ok(())
+  // strings
+  
+  // println!("{:?}",options);
+  // options
 }
+// Define a function that takes a vector of strings and a string as parameters
+fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
+  // while true{
+
+  // };
+  // Create a parallel iterator over the vector k
+  k.par_iter()
+      // Filter out the elements that do not contain h
+      .filter(|s| 
+        partial_ratio(s, &h)>80
+        // s.contains(&h)
+      )
+      // .filter(|s| s.contains(&h))
+      // Collect the filtered elements into a new vector
+      .cloned()
+      .collect()
+}
+// pub struct Searchresults{
+//   name:String,
+//   path:String,
+//   is_dir: bool,
+//   size:String,
+//   rawfs:u64,
+//   lmdate:String,
+//   timestamp:i64,
+//   foldercon:i32,
+//   ftype:String
+// }
+
+pub async fn search_pop(path: String,string:String){
+  let string=string.to_lowercase();
+  // populate_trie(oid, path, ff, window, state).await;
+  // return ;
+  
+  let now = SystemTime::now();
+  let duration = now.duration_since(UNIX_EPOCH).unwrap();
+  let startime = duration.as_secs();
+  println!("hs----{}",startime);
+  // thread::spawn(
+    // {
+      // let st=state.searchtry.clone();
+    
+    // move||{
+        let walker2 = WalkDir::new(&path)
+        // .contents_first(true)
+          .min_depth(1) // skip the root directory
+          // .max_depth(1) // only look at the immediate subdirectories
+          .into_iter()
+          
+          .filter_entry(
+            |e| 
+            !e.path_is_symlink() 
+            // &&
+            // !e
+            // .file_name()
+            // .to_str()
+            // .map(|s| s.starts_with("."))
+            // .unwrap_or(false)
+            &&
+            !is_hidden(e)
+            // &&
+            // e.file_name()
+            // .to_string_lossy()
+            // .to_string().to_lowercase()
+            // .contains(&string)
+            // &&
+            // e.file_type().is_file()
+              // e.file_type().is_dir()
+          );
+
+        let mut count=RwLock::new(0);
+        
+        
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        
+        let k:HashSet<String>=
+        par_walker2
+        // .enumerate()
+        .into_par_iter()  
+        .filter_map(
+          |i|
+          {
+          match(i){
+            Ok(i) => {
+              if((i.file_name()
+              .to_string_lossy()
+              .to_string().to_lowercase()
+              .contains(&string))){
+                Some(i.path().to_string_lossy().to_string())
+              }
+              else{
+                None
+              }
+            },
+            Err(_) => None,
+          }
+        }
+        )
+        .map(
+          |e|
+          {
+           e
+          })
+          .collect();
+
+        println!("{}",k.len());
+        if(k.len()<20){
+          println!("{:?}",k);
+        }
+
+        let now = SystemTime::now();
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        let endtime = duration.as_secs();
+        println!("endtime----{}",endtime-startime);
+        
+        // .collect(); // collect into a vec
+        // let mut st=st.lock().unwrap();
+        // *st=(k.clone());
+        // println!("-------c ----{}",count.read().unwrap());
+        // drop(st);
+        
+        // for i in k{
+        //   let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
+        //   map.entry(name).or_insert(Vec::new()).push(i);
+
+        // }
+        // let map: HashMap<String, Vec<String>> = par_walker2
+        // .into_par_iter()
+        // .filter_map(Result::ok) // ignore errors
+        // .map(|e| e.path().to_string_lossy().into_owned()) // get path as string
+        // .with_key(|path| {
+        //     PathBuf::from(path) // convert to PathBuf
+        //         .file_name() // get file name
+        //         .unwrap() // unwrap the Option
+        //         .to_string_lossy() // convert to string
+        //         .to_string() // convert to owned string
+        //         .to_lowercase() // convert to lowercase
+        // }) // use custom key function
+        // .into_par_iter() // convert to parallel iterator
+        // .from_par_iter(); // create hashmap from parallel iterator
+      // }
+    // }
+  // );
+  
+}
+

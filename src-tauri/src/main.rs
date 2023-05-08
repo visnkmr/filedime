@@ -3,6 +3,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
 mod dirsize;
+mod fileitem;
+mod filltrie;
+mod sendtofrontend;
 use filesize::PathExt;
 use partialratio::partial_ratio;
 use rayon::prelude::*;
@@ -32,7 +35,7 @@ use crate::{
   tabinfo::*,
   bookmarks::*,
   listfiles::*,
-  openhtml::*
+  openhtml::*, searchfiles::search_try
 };
 mod trie;
 mod resync;
@@ -40,8 +43,8 @@ mod resync;
 
 
 // define a struct to represent a file or directory
-#[derive(Serialize,Clone,Debug)]
-struct FileItem {
+#[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
+pub struct FileItem {
   name: String,
   path: String,
   is_dir: bool,
@@ -160,209 +163,3 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
   // println!("{:?}",options);
   Ok(options)
 }// In Rust, define a function that takes a path as an argument and returns a list of possible paths
-#[tauri::command]
-async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
-{
-  let st=state.st.clone();
-      let mut st=st.lock().unwrap();
-  let string=string.to_lowercase();
-  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
-  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
-  // println!("s--------{:?}",st.search(&string));
-  let tl=parallel_search(st.search(&string,path),string);
-  println!("s--------{:?}",tl.len());
-  if(tl.len()<30){
-    println!("{:?}",tl);
-  }
-  Ok(())
-}
-#[tauri::command]
-async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
-//  -> Vec<String> 
- {
-  
-    // populate_try(path, &state);
-
-  if(string.len()<3){
-    return Ok(());
-  }
-  
-  let now = SystemTime::now();
-  let duration = now.duration_since(UNIX_EPOCH).unwrap();
-  let startime = duration.as_secs();
-  println!("hs----{}",startime);
-  // if(string.len()>3)
-  // {
-
-  //   search_pop(path,string).await;
-  // }
-  // return Ok(());
-
-  
-  let string=string.to_lowercase();
-  // search_trie(path,string, state).await;
-  // return Ok(());
-  
-  // thread::spawn({
-    // let st=state.searchtry.clone();
-    // let vecj=st.lock().unwrap().clone();
-    // drop(st);
-    // // move||{
-    // let strings=parallel_search(vecj,string);
-    let map=state.stl.lock().unwrap();
-    // let mut gh=Vec::new();
-    // let mut ret:HashSet<String>=HashSet::new();
-
-
-
-
-    // let ret:HashSet<String>=
-    // map.clone()
-    // .par_iter()
-    // .filter(
-    //   |(i,_)|
-    //   i.contains(&string)
-    // ).
-    // flat_map(
-    //   |(_,y)|
-    //   {
-    //     // if i.contains(&string){
-    //       // i.clone()
-    //       y.par_iter()
-    //     // }
-    //   }
-    // )
-    // .cloned()
-    // .inspect(|o|{
-
-    // })
-    // .collect();
-
-
-
-
-let m:HashSet<String>=HashSet::new();
-// Create a RwLock wrapped in an Arc to share the hashset
-let ret = Arc::new(RwLock::new(m));
-
-// Create a clone of the Arc for the other thread
-let ret_clone = Arc::clone(&ret);
-
-// Create a boolean flag to indicate whether the search is done or not
-let done = Arc::new(RwLock::new(false));
-
-// Create a clone of the Arc for the other thread
-let done_clone = Arc::clone(&done);
-
-// Spawn another thread to read and print the hashset periodically
-thread::spawn(move || {
-    loop {
-      // Check the flag with a read lock
-      let done = done_clone.read().unwrap();
-      // If the flag is true, break out of the loop
-      if *done {
-          break;
-      }
-      // Drop the lock before reading the hashset
-      drop(done);
-
-        // Read the hashset with a read lock
-        let ret = ret_clone.read().unwrap();
-        // println!("{:?}", *ret);
-        println!("{:?}", ret.len());
-        // Drop the lock before sleeping
-        drop(ret);
-        // Sleep for some time
-        thread::sleep(std::time::Duration::from_millis(90));
-    }
-});
-
-// Populate the hashset using par_iter and inspect
-map.clone()
-    .par_iter()
-    .filter(|(i, _)| i.contains(&string))
-    .flat_map(|(_, y)| y.par_iter())
-    .cloned()
-    .inspect(|o| {
-        // Write to the hashset with a write lock
-        let mut ret = ret.write().unwrap();
-        ret.insert(o.clone());
-        // Drop the lock after inserting
-        drop(ret);
-    })
-    .collect::<String>();
-
-  // Set the flag to true with a write lock
-let mut done = done.write().unwrap();
-*done = true;
-
-    // for (i,_) in map.clone(){
-    //   // gh.push(i);
-    //   if i.contains(&string){
-    //     gh.push(i.clone());
-    //   }
-    // }
-    // let o=map.clone();
-    // let ret:HashSet<String>=gh.par_iter().flat_map(|u|{
-    //   let y=o.get(u).unwrap();
-    //   // let f:Vec<String>=
-    //   y.par_iter()
-    //   // .map(|t|{
-    //     // t.clone()
-    //   // }).collect();
-    //   // f
-    // }).cloned().collect();
-
-    // for i in gh{
-    //   let y=o.get(&i.clone()).unwrap();
-    //   for j in y{
-    //     ret.insert(j.clone());
-    //   }
-    // }
-    let ret = ret.read().unwrap();
-    println!("{:?}",ret.len());
-    if(ret.len()<20){
-      println!("{:?}",ret);
-    }
-    drop(ret);
-    let now = SystemTime::now();
-    let duration = now.duration_since(UNIX_EPOCH).unwrap();
-    let endtime = duration.as_secs();
-    println!("endtime----{}",endtime-startime);
-
-  // }
-//  });
- Ok(())
-  // strings
-  
-  // println!("{:?}",options);
-  // options
-}
-// Define a function that takes a vector of strings and a string as parameters
-fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
-  // while true{
-
-  // };
-  // Create a parallel iterator over the vector k
-  k.par_iter()
-      // Filter out the elements that do not contain h
-      .filter(|s| 
-        partial_ratio(s, &h)>80
-        // s.contains(&h)
-      )
-      // .filter(|s| s.contains(&h))
-      // Collect the filtered elements into a new vector
-      .cloned()
-      .collect()
-}
-// pub struct Searchresults{
-//   name:String,
-//   path:String,
-//   is_dir: bool,
-//   size:String,
-//   rawfs:u64,
-//   lmdate:String,
-//   timestamp:i64,
-//   foldercon:i32,
-//   ftype:String
-// }

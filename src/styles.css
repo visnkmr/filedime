@@ -294,3 +294,18 @@ progress{
   line-height: 20px;
   margin-left: 10px;
 }
+
+/* Hide the dataset.path by default */
+#flocid::after {
+  content: attr(data-path);
+  display: none;
+}
+
+/* Show the dataset.path when hovering over the td */
+#flocid:hover::after {
+  display: block;
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  padding: 5px;
+}

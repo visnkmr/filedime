@@ -1,5 +1,6 @@
 import * as globals from './file-explorer';
 
+
 export function openmarkdown(htmlfrommd: string) {
   globals.ousd.style.display="block";
   globals.filewatch.style.display="block";
