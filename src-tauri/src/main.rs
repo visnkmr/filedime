@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex}, process::Command, collections::HashSet};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
 mod dirsize;
 use filesize::PathExt;
 use partialratio::partial_ratio;
@@ -180,10 +180,25 @@ async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore
 async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  
+    // populate_try(path, &state);
+
+  if(string.len()<3){
+    return Ok(());
+  }
+  
   let now = SystemTime::now();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   let startime = duration.as_secs();
   println!("hs----{}",startime);
+  // if(string.len()>3)
+  // {
+
+  //   search_pop(path,string).await;
+  // }
+  // return Ok(());
+
+  
   let string=string.to_lowercase();
   // search_trie(path,string, state).await;
   // return Ok(());
@@ -197,27 +212,90 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
     let map=state.stl.lock().unwrap();
     // let mut gh=Vec::new();
     // let mut ret:HashSet<String>=HashSet::new();
-    let ret:HashSet<String>=
-    map.clone()
-    .par_iter()
-    .filter(
-      |(i,_)|
-      i.contains(&string)
-    ).
-    flat_map(
-      |(_,y)|
-      {
-        // if i.contains(&string){
-          // i.clone()
-          y.par_iter()
-        // }
-      }
-    )
-    .cloned()
-    .inspect(|o|{
 
+
+
+
+    // let ret:HashSet<String>=
+    // map.clone()
+    // .par_iter()
+    // .filter(
+    //   |(i,_)|
+    //   i.contains(&string)
+    // ).
+    // flat_map(
+    //   |(_,y)|
+    //   {
+    //     // if i.contains(&string){
+    //       // i.clone()
+    //       y.par_iter()
+    //     // }
+    //   }
+    // )
+    // .cloned()
+    // .inspect(|o|{
+
+    // })
+    // .collect();
+
+
+
+
+let m:HashSet<String>=HashSet::new();
+// Create a RwLock wrapped in an Arc to share the hashset
+let ret = Arc::new(RwLock::new(m));
+
+// Create a clone of the Arc for the other thread
+let ret_clone = Arc::clone(&ret);
+
+// Create a boolean flag to indicate whether the search is done or not
+let done = Arc::new(RwLock::new(false));
+
+// Create a clone of the Arc for the other thread
+let done_clone = Arc::clone(&done);
+
+// Spawn another thread to read and print the hashset periodically
+thread::spawn(move || {
+    loop {
+      // Check the flag with a read lock
+      let done = done_clone.read().unwrap();
+      // If the flag is true, break out of the loop
+      if *done {
+          break;
+      }
+      // Drop the lock before reading the hashset
+      drop(done);
+
+        // Read the hashset with a read lock
+        let ret = ret_clone.read().unwrap();
+        // println!("{:?}", *ret);
+        println!("{:?}", ret.len());
+        // Drop the lock before sleeping
+        drop(ret);
+        // Sleep for some time
+        thread::sleep(std::time::Duration::from_millis(90));
+    }
+});
+
+// Populate the hashset using par_iter and inspect
+map.clone()
+    .par_iter()
+    .filter(|(i, _)| i.contains(&string))
+    .flat_map(|(_, y)| y.par_iter())
+    .cloned()
+    .inspect(|o| {
+        // Write to the hashset with a write lock
+        let mut ret = ret.write().unwrap();
+        ret.insert(o.clone());
+        // Drop the lock after inserting
+        drop(ret);
     })
-    .collect();
+    .collect::<String>();
+
+  // Set the flag to true with a write lock
+let mut done = done.write().unwrap();
+*done = true;
+
     // for (i,_) in map.clone(){
     //   // gh.push(i);
     //   if i.contains(&string){
@@ -241,10 +319,12 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
     //     ret.insert(j.clone());
     //   }
     // }
+    let ret = ret.read().unwrap();
     println!("{:?}",ret.len());
     if(ret.len()<20){
       println!("{:?}",ret);
     }
+    drop(ret);
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
     let endtime = duration.as_secs();
@@ -275,3 +355,14 @@ fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
       .cloned()
       .collect()
 }
+// pub struct Searchresults{
+//   name:String,
+//   path:String,
+//   is_dir: bool,
+//   size:String,
+//   rawfs:u64,
+//   lmdate:String,
+//   timestamp:i64,
+//   foldercon:i32,
+//   ftype:String
+// }

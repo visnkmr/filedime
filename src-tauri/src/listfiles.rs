@@ -196,109 +196,7 @@ let handle=thread::spawn(move || {
               
           //   };
           // }
-          let name = e.file_name().to_string_lossy().into_owned(); // get their names
-          // println!("{}",name);
-          let path=e.path().to_string_lossy().into_owned();
-          // println!("-----------{}",path.clone());
-
-          // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
-          let size=
-          if(!e.path().is_symlink()){
-            state.find_size(&path)
-          }
-          else{
-            0
-          };
-          // let size=0;
-          let foldercon=0;
-          // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
-          let is_dir = fs::metadata(e.path()).map(|m| m.is_dir()).unwrap_or(false); // check if folder
-          let path = e.path().to_string_lossy().into_owned(); // get their path
-          // fs::metadata(e.path()).map(|m|{
-          //   if(!m.is_dir()){
-              
-          //   }
-          // }).unwrap_or(0); .
-          let mut folderloc=0;
-          let mut filetype="Folder".to_string();
-          let issymlink=e.path().is_relative() ||e.path().is_symlink();
-          if(issymlink){
-            filetype+="symlink";
-          }
-          if !e.path().is_dir(){
-            
-            match(e.path().extension()){
-              Some(g)=>{
-                if matches!(g.to_string_lossy().as_ref(),
-                 "ts" | 
-                 "tsx" | 
-                 "js" | 
-                 "rs" | 
-                 "html" |
-                 "kt" |
-                 "java" |
-                 "md" |
-                  "css"
-                )
-                {
-                  //add a right click context menu option to do this on the tab name uptop
-                  // folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
-                  // println!("{}",folderloc);
-                  if let Ok(file) = File::open(e.path()){ // open the file
-                  let reader = BufReader::new(file); // create a buffered reader
-                  folderloc=reader.lines().count(); // count the number of lines in the file
-                  // println!("Number of lines: {}", count); 
-                  }// print the count
-                }
-                filetype=g.to_string_lossy().to_string();
-
-              },
-              None=>{
-                // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
-                if(issymlink){
-                  filetype="symlink".to_string();
-                  match(fs::metadata(path.clone())){
-                    Ok(_) => {
-                      filetype+=" valid"
-                    },
-                    Err(_)=>{
-                      filetype+=" invalid"
-                    }
-                  };
-                }
-                else{
-                  filetype="unknown".to_string();
-                  
-                }
-              }
-            }
-          }
-          let tr;
-          let (lmdate,timestamp)=lastmodified(&path);
-          FileItem { 
-            name:name.clone(),
-            path:path.clone(),
-            is_dir,
-            size:{
-             tr=if(size>1){
-               sizeunit::size(size,true)
-              }
-              else{
-                "".to_string()
-              };
-                tr.clone() 
-            },
-            rawfs:size,    
-            lmdate:lmdate.clone(),
-            timestamp:timestamp,
-            foldercon:foldercon,
-            ftype: if(folderloc>0){
-              filetype + " (" + &folderloc.to_string() + ")" 
-            }
-            else{
-              filetype
-            },
-        }
+          populatefileitem(e,&state)
       })
       .inspect(|file| { // inspect each file and push it to the files vector
         let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -309,7 +207,6 @@ let handle=thread::spawn(move || {
       .collect();
    state.print_cache_size();
     
-    populate_try(oid, path, ff, window, state).await;
     
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
@@ -333,19 +230,21 @@ let handle=thread::spawn(move || {
     // emit an event to the frontend with the vector as payload
     println!("reachedhere");
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
-    
-
-    let now = SystemTime::now();
-    let duration = now.duration_since(UNIX_EPOCH).unwrap();
-    let endtime = duration.as_secs();
-    println!("endtime----{}",endtime-startime);
-    
     app_handle.emit_to(
       "main",
       "stop-timer",
       "",
     )
     .map_err(|e| e.to_string())?;
+  
+    populate_try(path, &state).await;
+
+    let now = SystemTime::now();
+    let duration = now.duration_since(UNIX_EPOCH).unwrap();
+    let endtime = duration.as_secs();
+    println!("endtime----{}",endtime-startime);
+    
+    
   Ok(())  
 }
 #[tauri::command]
@@ -411,7 +310,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
   g
 }
 #[tauri::command]
-pub async fn populate_try(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>){
+pub async fn populate_try(path: String, state: &State<'_, AppStateStore>){
   
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
@@ -513,4 +412,227 @@ pub async fn populate_try(oid:String,path: String,ff:String, window: Window, sta
     // }
   // );
   
+}
+
+pub async fn search_pop(path: String,string:String){
+  let string=string.to_lowercase();
+  // populate_trie(oid, path, ff, window, state).await;
+  // return ;
+  
+  let now = SystemTime::now();
+  let duration = now.duration_since(UNIX_EPOCH).unwrap();
+  let startime = duration.as_secs();
+  println!("hs----{}",startime);
+  // thread::spawn(
+    // {
+      // let st=state.searchtry.clone();
+    
+    // move||{
+        let walker2 = WalkDir::new(&path)
+        // .contents_first(true)
+          .min_depth(1) // skip the root directory
+          // .max_depth(1) // only look at the immediate subdirectories
+          .into_iter()
+          
+          .filter_entry(
+            |e| 
+            !e.path_is_symlink() 
+            // &&
+            // !e
+            // .file_name()
+            // .to_str()
+            // .map(|s| s.starts_with("."))
+            // .unwrap_or(false)
+            &&
+            !is_hidden(e)
+            // &&
+            // e.file_name()
+            // .to_string_lossy()
+            // .to_string().to_lowercase()
+            // .contains(&string)
+            // &&
+            // e.file_type().is_file()
+              // e.file_type().is_dir()
+          );
+
+        let mut count=RwLock::new(0);
+        
+        
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        
+        let k:HashSet<String>=
+        par_walker2
+        // .enumerate()
+        .into_par_iter()  
+        .filter_map(
+          |i|
+          {
+          match(i){
+            Ok(i) => {
+              if((i.file_name()
+              .to_string_lossy()
+              .to_string().to_lowercase()
+              .contains(&string))){
+                Some(i.path().to_string_lossy().to_string())
+              }
+              else{
+                None
+              }
+            },
+            Err(_) => None,
+          }
+        }
+        )
+        .map(
+          |e|
+          {
+           e
+          })
+          .collect();
+
+        println!("{}",k.len());
+        if(k.len()<20){
+          println!("{:?}",k);
+        }
+
+        let now = SystemTime::now();
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        let endtime = duration.as_secs();
+        println!("endtime----{}",endtime-startime);
+        
+        // .collect(); // collect into a vec
+        // let mut st=st.lock().unwrap();
+        // *st=(k.clone());
+        // println!("-------c ----{}",count.read().unwrap());
+        // drop(st);
+        
+        // for i in k{
+        //   let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
+        //   map.entry(name).or_insert(Vec::new()).push(i);
+
+        // }
+        // let map: HashMap<String, Vec<String>> = par_walker2
+        // .into_par_iter()
+        // .filter_map(Result::ok) // ignore errors
+        // .map(|e| e.path().to_string_lossy().into_owned()) // get path as string
+        // .with_key(|path| {
+        //     PathBuf::from(path) // convert to PathBuf
+        //         .file_name() // get file name
+        //         .unwrap() // unwrap the Option
+        //         .to_string_lossy() // convert to string
+        //         .to_string() // convert to owned string
+        //         .to_lowercase() // convert to lowercase
+        // }) // use custom key function
+        // .into_par_iter() // convert to parallel iterator
+        // .from_par_iter(); // create hashmap from parallel iterator
+      // }
+    // }
+  // );
+  
+}
+
+fn populatefileitem(e:DirEntry,state: &State<'_, AppStateStore>)->FileItem{
+  let name = e.file_name().to_string_lossy().into_owned(); // get their names
+  // println!("{}",name);
+  let path=e.path().to_string_lossy().into_owned();
+  // println!("-----------{}",path.clone());
+
+  // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
+  let size=
+  if(!e.path().is_symlink()){
+    state.find_size(&path)
+  }
+  else{
+    0
+  };
+  // let size=0;
+  let foldercon=0;
+  // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
+  let is_dir = fs::metadata(e.path()).map(|m| m.is_dir()).unwrap_or(false); // check if folder
+  let path = e.path().to_string_lossy().into_owned(); // get their path
+  // fs::metadata(e.path()).map(|m|{
+  //   if(!m.is_dir()){
+      
+  //   }
+  // }).unwrap_or(0); .
+  let mut folderloc=0;
+  let mut filetype="Folder".to_string();
+  let issymlink=e.path().is_relative() ||e.path().is_symlink();
+  if(issymlink){
+    filetype+="symlink";
+  }
+  if !e.path().is_dir(){
+    
+    match(e.path().extension()){
+      Some(g)=>{
+        if matches!(g.to_string_lossy().as_ref(),
+         "ts" | 
+         "tsx" | 
+         "js" | 
+         "rs" | 
+         "html" |
+         "kt" |
+         "java" |
+         "md" |
+          "css"
+        )
+        {
+          //add a right click context menu option to do this on the tab name uptop
+          // folderloc=fs::read_to_string(e.path()).expect("Unable to open file").lines().count();
+          // println!("{}",folderloc);
+          if let Ok(file) = File::open(e.path()){ // open the file
+          let reader = BufReader::new(file); // create a buffered reader
+          folderloc=reader.lines().count(); // count the number of lines in the file
+          // println!("Number of lines: {}", count); 
+          }// print the count
+        }
+        filetype=g.to_string_lossy().to_string();
+
+      },
+      None=>{
+        // filetype=infer::get_from_path(e.path()).unwrap().unwrap().extension().to_string();
+        if(issymlink){
+          filetype="symlink".to_string();
+          match(fs::metadata(path.clone())){
+            Ok(_) => {
+              filetype+=" valid"
+            },
+            Err(_)=>{
+              filetype+=" invalid"
+            }
+          };
+        }
+        else{
+          filetype="unknown".to_string();
+          
+        }
+      }
+    }
+  }
+  let tr;
+  let (lmdate,timestamp)=lastmodified(&path);
+  FileItem { 
+    name:name.clone(),
+    path:path.clone(),
+    is_dir,
+    size:{
+     tr=if(size>1){
+       sizeunit::size(size,true)
+      }
+      else{
+        "".to_string()
+      };
+        tr.clone() 
+    },
+    rawfs:size,    
+    lmdate:lmdate.clone(),
+    timestamp:timestamp,
+    foldercon:foldercon,
+    ftype: if(folderloc>0){
+      filetype + " (" + &folderloc.to_string() + ")" 
+    }
+    else{
+      filetype
+    },
+}
 }

@@ -191,6 +191,9 @@ let handle=thread::spawn(move || {
             match(e.path().extension()){
               Some(g)=>{
                 if matches!(g.to_string_lossy().as_ref(),
+                 "xls" | 
+                 "docx" | 
+                 "txt" | 
                  "ts" | 
                  "tsx" | 
                  "js" | 
