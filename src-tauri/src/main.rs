@@ -197,7 +197,7 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
     let map=state.stl.lock().unwrap();
     // let mut gh=Vec::new();
     // let mut ret:HashSet<String>=HashSet::new();
-    let ret:Vec<String>=
+    let ret:HashSet<String>=
     map.clone()
     .par_iter()
     .filter(
@@ -214,6 +214,9 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
       }
     )
     .cloned()
+    .inspect(|o|{
+
+    })
     .collect();
     // for (i,_) in map.clone(){
     //   // gh.push(i);

@@ -1,44 +1,39 @@
 use std::{collections::HashMap, time::SystemTime, path::PathBuf, fs, thread};
 
+use filetime::FileTime;
 use tauri::{Window, State, Manager};
 
 use crate::{appstate::AppStateStore, listfiles::list_files};
 
-pub fn checkifchanged(lopentime:&mut SystemTime,path: &PathBuf)->bool{
+pub fn checkifchanged(lopentime:&mut FileTime,path: &PathBuf)->bool{
    
     let metadata = fs::metadata(&path).expect("failed to read file for metadata.");
-    
-                if let Ok(time) = metadata.modified() {
-                    // println!("{time:?}");
-                    
-                    if(*lopentime!=time){
-                        //reinit
-                        // lopentime[file_name]=format!("{time:?}")
-                        *lopentime=time;
-                        // lopentime.insert(file_name.to_string(),time);
-                    return true;
-                    }
-                    return false;
 
-                    //check if files changed and if changed then else just return already available blist
-                    // blist=&mut Vec::new();
-                } else {
-                    println!("Not supported on this platform");
-                }
-                false
+    // Get the modification time as a FileTime
+    let time = FileTime::from_last_modification_time(&metadata);
+
+    // Compare the seconds and nanoseconds of the FileTime
+    if lopentime.seconds() != time.seconds() || lopentime.nanoseconds() != time.nanoseconds() {
+        // Update the lopentime
+        *lopentime = time;
+        return true;
+    }
+    return false;
 }
-pub fn initinfo(lopentime:&mut SystemTime,path: &PathBuf){
-   println!("{:?}",path);
+pub fn initinfo(lopentime:&mut FileTime,path: &PathBuf){
+    println!("{:?}",path);
     let metadata = fs::metadata(&path).expect("failed to read file for metadata.");
     
- let file_name =&path.file_stem().unwrap().to_str().unwrap().to_string();
-                if let Ok(time) = metadata.modified() {
-                    *lopentime=time;
-                        // lopentime.insert(file_name.to_string(),time);
+//  let file_name =&path.file_stem().unwrap().to_str().unwrap().to_string();
+                // if let Ok(time) = FileTime::from_last_modification_time(&metadata) {
+                //     *lopentime=time;
+                //         // lopentime.insert(file_name.to_string(),time);
                     
-                } else {
-                    println!("Not supported on this platform");
-                }
+                // } else {
+                //     println!("Not supported on this platform");
+                // }
+    *lopentime = FileTime::from_last_modification_time(&metadata);
+                
 }
 #[tauri::command]
 pub async fn sendlog(window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
@@ -67,7 +62,7 @@ pub fn startserver(pathstr:String,window: Window,state: State<'_, AppStateStore>
     let aborted = state.aborted.clone();
     *aborted.lock().unwrap() = false;
     
-    let mut lopentime:SystemTime=SystemTime::now();
+    let mut lopentime=FileTime::now();
   let app_handle = window.app_handle();
 
     let path=PathBuf::from(pathstr);
