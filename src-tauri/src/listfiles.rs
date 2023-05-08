@@ -2,7 +2,7 @@ use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::
 
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
-use walkdir::WalkDir;
+use walkdir::{WalkDir, DirEntry};
 
 use crate::{markdown::loadmarkdown, 
   openpath, 
@@ -199,7 +199,8 @@ let handle=thread::spawn(move || {
           let name = e.file_name().to_string_lossy().into_owned(); // get their names
           // println!("{}",name);
           let path=e.path().to_string_lossy().into_owned();
-          println!("-----------{}",path.clone());
+          // println!("-----------{}",path.clone());
+
           // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
           let size=
           if(!e.path().is_symlink()){
@@ -398,6 +399,17 @@ pub async fn populate_trie(oid:String,path: String,ff:String, window: Window, st
       drop(st);
       println!("-------c ----{}",count.read().unwrap());
 }
+fn is_hidden(entry: &DirEntry) -> bool {
+  let g=entry.file_name()
+    .to_str()
+    .map(|s| s.starts_with("."))
+    .unwrap_or(false);
+        // if(entry.file_name().to_string_lossy().to_string().contains("apps")){
+  // if(!g){
+  //   println!("-----------{:?}==={}",entry.path(),g);
+  // }
+  g
+}
 #[tauri::command]
 pub async fn populate_try(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>){
   
@@ -407,51 +419,82 @@ pub async fn populate_try(oid:String,path: String,ff:String, window: Window, sta
 
   // thread::spawn(
     // {
-      let st=state.searchtry.clone();
+      // let st=state.searchtry.clone();
     
     // move||{
         let walker2 = WalkDir::new(&path)
-        .contents_first(true)
+        // .contents_first(true)
           .min_depth(1) // skip the root directory
           // .max_depth(1) // only look at the immediate subdirectories
           .into_iter()
           
-          .filter_entry(|e| 
+          .filter_entry(
+            |e| 
             !e.path_is_symlink() 
-          &&
-          !e.path().to_string_lossy().to_string().contains("/.git/")
-            // e.file_type().is_dir()
-          ) 
-          ;
-
-          let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let endtime = duration.as_secs();
-        println!("endtime----{}",endtime);
+            // &&
+            // !e
+            // .file_name()
+            // .to_str()
+            // .map(|s| s.starts_with("."))
+            // .unwrap_or(false)
+            &&
+            !is_hidden(e)
+            // &&
+            // e.file_type().is_file()
+              // e.file_type().is_dir()
+          );
 
         let mut count=RwLock::new(0);
         
         
         let par_walker2 = walker2.par_bridge(); // ignore errors
-        let k:HashSet<String>=par_walker2
+        
+        // let k:HashSet<String>=
+        par_walker2
         // .enumerate()
         .into_par_iter()  
         .filter_map(Result::ok)
-        .map(
-          |e| 
-          e.path().to_string_lossy().to_string()
-        )
-        .collect(); // collect into a vec
+        .for_each(
+          |e|
+          {
+          // println!("{:?}",e.path());
+            if(!e.file_type().is_dir()){
+              // println!("{:?}",e.path());
+            // }
+            let i = e.path().to_string_lossy().to_string();
+            let name=e.file_name().to_string_lossy().to_string().to_lowercase();
+            let map=state.stl.clone();
+            let mut map =map.lock().unwrap();
+            if let Some(hs) = map.get_mut(&name) {
+                // If yes, append the value to the existing vector
+                // if(!hs.contains(&i)){
+                  hs.insert(i);
+                // }
+            } else {
+                // If no, create a new vector with the value and insert it into the hashmap
+                map.insert(name, HashSet::from_iter(vec![i]));
+            }
+          // map.entry(name).or_insert(Vec::new()).push(i);
+          } 
+        }
+        );
+
+        let now = SystemTime::now();
+        let duration = now.duration_since(UNIX_EPOCH).unwrap();
+        let endtime = duration.as_secs();
+        println!("endtime----{}",endtime);
+        
+        // .collect(); // collect into a vec
         // let mut st=st.lock().unwrap();
         // *st=(k.clone());
         // println!("-------c ----{}",count.read().unwrap());
         // drop(st);
-        let mut map=state.stl.lock().unwrap();
-        for i in k{
-          let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
-          map.entry(name).or_insert(Vec::new()).push(i);
+        
+        // for i in k{
+        //   let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
+        //   map.entry(name).or_insert(Vec::new()).push(i);
 
-        }
+        // }
         // let map: HashMap<String, Vec<String>> = par_walker2
         // .into_par_iter()
         // .filter_map(Result::ok) // ignore errors

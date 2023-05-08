@@ -56,7 +56,7 @@ pub struct AppStateStore {
     filechanged:Arc<Mutex<bool>>,
     pub searchtry:Arc<Mutex<HashSet<String>>>,
     pub st:Arc<Mutex<TrieNode>>,
-    pub stl:Arc<Mutex<FxHashMap<String,Vec<String>>>>,
+    pub stl:Arc<Mutex<FxHashMap<String,HashSet<String>>>>,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),

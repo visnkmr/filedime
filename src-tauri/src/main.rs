@@ -194,33 +194,43 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
     // drop(st);
     // // move||{
     // let strings=parallel_search(vecj,string);
-    let mut map=state.stl.lock().unwrap();
+    let map=state.stl.lock().unwrap();
     // let mut gh=Vec::new();
     // let mut ret:HashSet<String>=HashSet::new();
-    let gh:Vec<String>=map.clone().par_iter().
-    filter(|(i,_)|
-      i.contains(&string)).
-    map(|(i,_)|{
+    let ret:Vec<String>=
+    map.clone()
+    .par_iter()
+    .filter(
+      |(i,_)|
+      i.contains(&string)
+    ).
+    flat_map(
+      |(_,y)|
+      {
         // if i.contains(&string){
-          i.clone()
+          // i.clone()
+          y.par_iter()
         // }
-      }).collect();
+      }
+    )
+    .cloned()
+    .collect();
     // for (i,_) in map.clone(){
     //   // gh.push(i);
     //   if i.contains(&string){
     //     gh.push(i.clone());
     //   }
     // }
-    let o=map.clone();
-    let ret:HashSet<String>=gh.par_iter().flat_map(|u|{
-      let y=o.get(u).unwrap();
-      // let f:Vec<String>=
-      y.par_iter()
-      // .map(|t|{
-        // t.clone()
-      // }).collect();
-      // f
-    }).cloned().collect();
+    // let o=map.clone();
+    // let ret:HashSet<String>=gh.par_iter().flat_map(|u|{
+    //   let y=o.get(u).unwrap();
+    //   // let f:Vec<String>=
+    //   y.par_iter()
+    //   // .map(|t|{
+    //     // t.clone()
+    //   // }).collect();
+    //   // f
+    // }).cloned().collect();
 
     // for i in gh{
     //   let y=o.get(&i.clone()).unwrap();
@@ -229,7 +239,7 @@ async fn  search_try(path:String,string: String, state: State<'_, AppStateStore>
     //   }
     // }
     println!("{:?}",ret.len());
-    if(ret.len()<10){
+    if(ret.len()<20){
       println!("{:?}",ret);
     }
     let now = SystemTime::now();
