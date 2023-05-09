@@ -1,6 +1,7 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
+// use rust_search::similarity_sort;
 use tauri::{Window, State, Manager};
 use walkdir::WalkDir;
 
@@ -13,22 +14,22 @@ use crate::{markdown::loadmarkdown,
   // loadjs::loadjs
 };
 
-#[tauri::command]
-async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
-{
-  let st=state.st.clone();
-      let mut st=st.lock().unwrap();
-  let string=string.to_lowercase();
-  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
-  // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
-  // println!("s--------{:?}",st.search(&string));
-  let tl=parallel_search(st.search(&string,path),string);
-  println!("s--------{:?}",tl.len());
-  if(tl.len()<30){
-    println!("{:?}",tl);
-  }
-  Ok(())
-}
+// #[tauri::command]
+// async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
+// {
+//   let st=state.st.clone();
+//       let mut st=st.lock().unwrap();
+//   let string=string.to_lowercase();
+//   // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
+//   // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
+//   // println!("s--------{:?}",st.search(&string));
+//   let tl=parallel_search(st.search(&string,path),string);
+//   println!("s--------{:?}",tl.len());
+//   if(tl.len()<30){
+//     println!("{:?}",tl);
+//   }
+//   Ok(())
+// }
 #[tauri::command]
 pub async fn  search_try(path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
@@ -36,14 +37,47 @@ pub async fn  search_try(path:String,string: String,window: Window, state: State
   
     // populate_try(path, &state);
 
-  if(string.len()<3){
-    return Ok(());
-  }
+ 
   
   let now = SystemTime::now();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   let startime = duration.as_secs();
   println!("hs----{}",startime);
+
+
+
+  let map=state.stl.lock().unwrap();
+  if(string.len()<3){
+    return Ok(());
+  }
+  let op=state.st.lock().unwrap().search_trie(&string);
+  println!("{}",op.len());
+  if(op.len()<10)
+  {
+// op.split_off(1);
+    println!("{:?}",op)
+  }
+
+//   let mut results:Vec<String>=map.clone()
+//   .par_iter()
+//   .flat_map(|(_, y)| y.par_iter())
+//   .cloned()
+//   .collect();
+//   // similarity_sort(&mut results, &string);
+
+//   // Print the sorted results
+//   println!("{}",results.len());
+//   // if(results.len()<10)
+//   {
+// results.split_off(1);
+//     for path in results {
+      
+//         println!("{:?}", path);
+//     }
+//   }
+
+ 
+  return Ok(());
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 
   // if(string.len()>3)
@@ -64,7 +98,6 @@ let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
     // drop(st);
     // // move||{
     // let strings=parallel_search(vecj,string);
-    let map=state.stl.lock().unwrap();
     // let mut gh=Vec::new();
     // let mut ret:HashSet<String>=HashSet::new();
 
