@@ -32,7 +32,7 @@ pub fn starttimer(ah:&AppHandle)->Result<(),String>{
 pub fn stoptimer(ah:&AppHandle)->Result<(),String>{
   ah.emit_to(
     "main",
-    "start-timer",
+    "stop-timer",
     "",
   )
   .map_err(|e| e.to_string())?; 
