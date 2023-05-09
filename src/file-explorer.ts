@@ -7,6 +7,7 @@ import { handlerightclick } from './handlerightclick';
 import { listenforfiles, listenforfolcount } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { openhtml } from './openfile';
+import { loadsearchresult } from './searchresult';
 import { listtabs } from './tabs';
 import { starttimer } from './timer';
 // globalThis.tid=globalThis.globalThis.tid;
@@ -57,6 +58,12 @@ var lastfolder = globalThis.defpath;
   // console.log(data.payload.toString())
 });
 
+(window as any).__TAURI__.event.listen("load-complete", (data: { payload: string }) => {
+  console.log("load complete")
+  var setp = document.getElementById("myprogress") as HTMLProgressElement;
+    setp.className = "hide"
+});
+
 (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
   console.log("grandloc")
   
@@ -68,7 +75,7 @@ var lastfolder = globalThis.defpath;
   pathInput.value = data.payload.toString();
   // console.log(data.payload.toString())
 });
-
+loadsearchresult();
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
