@@ -28,33 +28,34 @@ export function loadsearchresult(){
          foldercon: number;
          ftype: string;
        };
-       var arr = globals.pathInput.value.split("/"); // arr is ["a", "b", "c", "d"]
-       var prefixes: string[] = [];
-       var prefix = "";
-       for (var i = 0; i < arr.length; i++) {
-         prefix += arr[i]; // append the current element to the prefix
-         prefixes.push(prefix); // add the prefix to the prefixes array
-         prefix += "/"; // add a slash for the next iteration
-       }
-       var fols=[]
-       console.log(globals.pathInput.value.split("/"))
-       fols = globals.pathInput.value.split("/");
-       console.log(fols.length);
+      //  var arr = globals.pathInput.value.split("/"); // arr is ["a", "b", "c", "d"]
+      //  var prefixes: string[] = [];
+      //  var prefix = "";
+      //  for (var i = 0; i < arr.length; i++) {
+      //    prefix += arr[i]; // append the current element to the prefix
+      //    prefixes.push(prefix); // add the prefix to the prefixes array
+      //    prefix += "/"; // add a slash for the next iteration
+      //  }
+      //  var fols=[]
+      //  console.log(globals.pathInput.value.split("/"))
+      //  fols = globals.pathInput.value.split("/");
+      //  console.log(fols.length);
        globals.pathline.replaceChildren();
    
-       for (var i = 0; i < fols.length; i++){ 
-       // fols.forEach(
-         // function (fol, index) {
-           let pathn = document.createElement("span");
-           pathn.id="goloc"
-           pathn.textContent = fols[i] + "\n";
-           pathn.dataset.loc = prefixes[i];
-           globals.pathline?.appendChild(pathn);
-           // // console.log(index)
-         }
+      //  for (var i = 0; i < fols.length; i++){ 
+      //  // fols.forEach(
+      //    // function (fol, index) {
+      //      let pathn = document.createElement("span");
+      //      pathn.id="goloc"
+      //      pathn.textContent = fols[i] + "\n";
+      //      pathn.dataset.loc = prefixes[i];
+      //      globals.pathline?.appendChild(pathn);
+      //      // // console.log(index)
+      //    }
        // );
        // parse the data as JSON
        let files: File[] = JSON.parse(data.payload);
+       globalThis.rescount=files.length;
        // // console.log("files")
        // clear the file list
        globals.fileList.innerHTML = "";
@@ -244,4 +245,15 @@ export function loadsearchresult(){
        });
      });
      stoptimer();
+   }
+
+   export function searchterm(){
+    (window as any).__TAURI__.event.listen("sterm", (data: { payload: string }) => {
+      globals.pathline.replaceChildren();
+    
+    let pathn = document.createElement("span");
+           pathn.textContent = data.payload+" "+globalThis.rescount+" results found";
+          //  pathn.dataset.loc = prefixes[i];
+           globals.pathline?.appendChild(pathn);
+    });
    }

@@ -57,6 +57,7 @@ pub struct AppStateStore {
     pub searchtry:Arc<Mutex<HashSet<String>>>,
     pub st:Arc<Mutex<TrieNode>>,
     pub stl:Arc<Mutex<FxHashMap<String,HashSet<String>>>>,
+    pub process_count: Arc<Mutex<i32>>,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
@@ -86,6 +87,7 @@ impl AppStateStore {
             searchtry:Arc::new(Mutex::new(HashSet::new())),
             st:Arc::new(Mutex::new(TrieNode::new())),
             stl:Arc::new(Mutex::new(FxHashMap::default())),
+            process_count: Arc::new(Mutex::new(0)),
 
             // tx:Mutex::new(Some(tx)),
             // rx:Mutex::new(Some(rx))
@@ -408,5 +410,10 @@ pub fn find_size(&self, path: &str) -> u64 {
     // Print the total size in bytes
     // println!("The cache size is {} bytes", total_size);
     // (total_size as u64,cache.len() as u64)
+  }
+  fn addthread(&self){
+    let count = self.process_count.clone();
+    *count.lock().unwrap() += 1; // increment the count every time the command is called
+    // let result = count.clone();
   }
 }

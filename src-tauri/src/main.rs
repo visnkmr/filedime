@@ -100,6 +100,8 @@ async fn nosize(id:String,path:String,window: Window,state: State<'_, AppStateSt
 
 fn main() {
   let mut g=AppStateStore::new(CACHE_EXPIRY);
+  // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
+
   tauri::Builder::default()
     .setup(|app| {
       // get an instance of AppHandle

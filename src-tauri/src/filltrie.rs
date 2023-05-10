@@ -67,7 +67,7 @@ use crate::{markdown::loadmarkdown,
 
 #[tauri::command]
 pub async fn populate_try(path: String, state: &State<'_, AppStateStore>){
-  
+  let orig = *state.process_count.lock().unwrap();
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
   
@@ -105,36 +105,43 @@ pub async fn populate_try(path: String, state: &State<'_, AppStateStore>){
         let par_walker2 = walker2.par_bridge(); // ignore errors
         
         // let k:HashSet<String>=
-        let paths:Vec<String>=par_walker2
+        // let paths:Vec<String>=
+        par_walker2
         // .enumerate()
         .into_par_iter()  
         .filter_map(Result::ok)
         .map(
           |e|
           {
-          // // println!("{:?}",e.path());
-          //   if(!e.file_type().is_dir()){
-          //     // println!("{:?}",e.path());
-          //   // }
-          //   let i = e.path().to_string_lossy().to_string();
-          //   let name=e.file_name().to_string_lossy().to_string().to_lowercase();
-          //   let map=state.stl.clone();
-          //   let mut map =map.lock().unwrap();
-          //   if let Some(hs) = map.get_mut(&name) {
-          //       // If yes, append the value to the existing vector
-          //       // if(!hs.contains(&i)){
-          //         hs.insert(i);
-          //       // }
-          //   } else {
-          //       // If no, create a new vector with the value and insert it into the hashmap
-          //       map.insert(name, HashSet::from_iter(vec![i]));
-          //   }
-          // // map.entry(name).or_insert(Vec::new()).push(i);
-          // } 
-          e.path().to_string_lossy().to_string()
+            if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
+              return None; // if yes, it means a new command has been invoked and the old one should be canceled
+            }
+          // println!("{:?}",e.path());
+            if(!e.file_type().is_dir()){
+              
+              // println!("{:?}",e.path());
+            // }
+            let i = e.path().to_string_lossy().to_string();
+            let name=e.file_name().to_string_lossy().to_string().to_lowercase();
+            let map=state.stl.clone();
+            let mut map =map.lock().unwrap();
+            if let Some(hs) = map.get_mut(&name) {
+                // If yes, append the value to the existing vector
+                // if(!hs.contains(&i)){
+                  hs.insert(i);
+                // }
+            } else {
+                // If no, create a new vector with the value and insert it into the hashmap
+                map.insert(name, HashSet::from_iter(vec![i]));
+            }
+          // map.entry(name).or_insert(Vec::new()).push(i);
+          } 
+          Some(())
+          // e.path().to_string_lossy().to_string()
         }
-        ).collect();
-        state.st.lock().unwrap().populate_trie(paths);
+        )
+        .collect::<Option<()>>();
+        // state.st.lock().unwrap().populate_trie(paths);
 
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();

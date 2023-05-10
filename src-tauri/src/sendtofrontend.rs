@@ -1,4 +1,8 @@
+use std::collections::HashSet;
+
 use tauri::{AppHandle, Manager};
+
+use crate::FileItem;
 
 
 pub fn sendparentloc(ah:&AppHandle,parent:String)->Result<(),String>{
@@ -36,6 +40,12 @@ pub fn stoptimer(ah:&AppHandle)->Result<(),String>{
     "",
   )
   .map_err(|e| e.to_string())?; 
+ah.emit_to(
+    "main",
+    "load-complete",
+    "",
+  )
+  .map_err(|e| e.to_string()).unwrap();
     Ok(())
 }
 
@@ -76,5 +86,37 @@ pub fn fileslist(ah:&AppHandle,fl:&String)->Result<(),String>{
         fl,
       )
       .map_err(|e| e.to_string())?;
+      progress(ah);
         Ok(())
+}
+
+
+pub fn slist(ah:&AppHandle,wtr:&HashSet<FileItem>,string:String){
+  ah.emit_to(
+    "main",
+    "load-sresults",
+    serde_json::to_string(&wtr).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+  ah.emit_to(
+    "main",
+    "sterm",
+    string.clone(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+ah.emit_to(
+    "main",
+    "load-complete",
+    "",
+  )
+  .map_err(|e| e.to_string()).unwrap();
+}
+
+pub fn progress(ah:&AppHandle){
+ah.emit_to(
+    "main",
+    "progress",
+    "",
+  )
+  .map_err(|e| e.to_string()).unwrap();
 }

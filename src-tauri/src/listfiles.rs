@@ -20,6 +20,7 @@ use crate::{markdown::loadmarkdown,
 
 #[tauri::command]
 pub async fn list_files(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+  let orig = *state.process_count.lock().unwrap();
   println!("lfiles");
   let testpath=PathBuf::from(path.clone());
 
@@ -95,19 +96,25 @@ if let Some(granloc)=parent.parent(){
   sendgparentloc(&app_handle,granloc.to_string_lossy().to_string())?;
 }
 
-
+// let s1=Arc::new(Mutex::new(state));
+// let s2=Arc::clone(&s1);
 // let mut tfsize=0;
 let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
 let files_clone = Arc::clone(&files); 
 let tfsize=Arc::new(Mutex::<u64>::new(0));
+let mut nootimes=0;
 let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 // spawn a new thread to print the value of the files vector every 200 milliseconds
-let handle=thread::spawn(move || {
-  
+let handle=thread::spawn(move|| {
+  // let state1=state.clone();
   let mut last_print = Instant::now(); // initialize the last print time to the current time
   loop {
+    // if &s2.lock().unwrap().process_count.lock().unwrap().clone().abs_diff(orig)>&0 { // check if the current count value is different from the original one
+    //   break; // if yes, it means a new command has been invoked and the old one should be canceled
+    // }
+    nootimes+=1;
     let msval=update.iter().next().unwrap_or(&120);
 
       if last_print.elapsed() >= Duration::from_millis(*msval) { 
@@ -128,7 +135,8 @@ let handle=thread::spawn(move || {
               fileslist(&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
           folsize(&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
-          if(fcount==files.len()){
+          if(fcount==files.len() || nootimes>20){
+            // handle.abort();
             break;
           }
    // lock the mutex and get a reference to the vector
@@ -137,7 +145,8 @@ let handle=thread::spawn(move || {
       }
       thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
   }
-});
+})
+;
 //    let mut finder = ;
   let walker = WalkDir::new(&path)
       .min_depth(1) // skip the root directory
@@ -147,9 +156,10 @@ let handle=thread::spawn(move || {
       // .filter_entry(|e| e.file_type().is_dir()) // only yield directories
       .filter_map(|e| e.ok());
     let par_walker = walker.par_bridge(); // ignore errors
-    let files: Vec<FileItem>=par_walker
+    // let files: Vec<FileItem> =
+     if let Ok(i)=par_walker
     .into_par_iter()
-  //   .filter(
+    // .filter(
     //    |entry| {
     //    let path = entry.path();
     //    path.is_file() 
@@ -157,36 +167,40 @@ let handle=thread::spawn(move || {
     //    !path.is_symlink() 
     //    &&
     //    !path.to_string_lossy().to_string().contains("/.git")
-  // })
-    .map(|(e)| {
-          // if(e.file_name().to_string_lossy().to_string().contains(".git"))
-          // {
-          //   return FileItem{
-              
-          //   };
-          // }
-          populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&state)
-      })
-      .inspect(|file| { // inspect each file and push it to the files vector
-        let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
-        // let mut tfsize = tfsize.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
-        *tfsize_clone.lock().unwrap()+=file.rawfs;
-        files.push(file.clone()); // push a clone of the file to the vector
-    })
-      .collect();
+    // })
+    .try_for_each(|(e)| {
+          if(e.file_name().to_string_lossy().to_string().contains(".git"))
+          {
+            return Err(()); // return an error to stop the iteration
+          }
+          let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&state);
+          let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+          *tfsize_clone.lock().unwrap()+=file.rawfs;
+          files.push(file.clone()); // push a clone of the file to the vector
+          Ok(()) // return Ok to continue the iteration
+      }){
+
+      }
+      // .collect();
    state.print_cache_size();
     
     
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
     let app_handle=window.app_handle();
-    fileslist(&app_handle.clone(),&serde_json::to_string(&files.clone()).unwrap())?;
+    fileslist(&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
   
     folsize(&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
     // sort the vector by name
     // files.sort_by(|a, b| a.name.cmp(&b.name));
     // emit an event to the frontend with the vector as payload
     println!("reachedhere");
+    app_handle.emit_to(
+        "main",
+        "load-complete",
+        "",
+      )
+      .map_err(|e| e.to_string()).unwrap();
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&app_handle)?;
   

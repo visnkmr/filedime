@@ -1,7 +1,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rayon::prelude::*;
-// use strsim::{normalized_levenshtein, levenshtein};
+use strsim::{normalized_levenshtein, levenshtein};
 
 use crate::appstate;
 

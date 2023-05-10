@@ -1,19 +1,25 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
+use serde::Serialize;
 // use rust_search::similarity_sort;
 use tauri::{Window, State, Manager};
 use walkdir::WalkDir;
 
-use crate::{markdown::loadmarkdown, 
-  openpath, 
-  tabinfo::newtab, 
-  FileItem, sizeunit, 
-  lastmodcalc::lastmodified, 
-  appstate::AppStateStore, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, partialratio::partial_ratio, 
+use crate::{
+  FileItem,
+  appstate::*,
+  fileitem::*, 
+  partialratio::*, 
+  sendtofrontend::*, 
   // loadjs::loadjs
 };
-
+use fuzzy_matcher::{*, clangd::fuzzy_match};
+#[derive(Clone,Debug,Serialize)]
+struct rstr{
+  term:String,
+  files:HashSet<FileItem>
+}
 // #[tauri::command]
 // async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
 // {
@@ -34,9 +40,11 @@ use crate::{markdown::loadmarkdown,
 pub async fn  search_try(path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
-  
-    // populate_try(path, &state);
 
+    // populate_try(path, &state);
+    if(string.len()<3){
+      return Ok(());
+    }
  
   
   let now = SystemTime::now();
@@ -45,39 +53,37 @@ pub async fn  search_try(path:String,string: String,window: Window, state: State
   println!("hs----{}",startime);
 
 
+  
 
   let map=state.stl.lock().unwrap();
-  if(string.len()<3){
-    return Ok(());
-  }
-  let op=state.st.lock().unwrap().search_trie(&string);
-  println!("{}",op.len());
-  if(op.len()<10)
-  {
-// op.split_off(1);
-    println!("{:?}",op)
-  }
-
-//   let mut results:Vec<String>=map.clone()
-//   .par_iter()
-//   .flat_map(|(_, y)| y.par_iter())
-//   .cloned()
-//   .collect();
-//   // similarity_sort(&mut results, &string);
-
-//   // Print the sorted results
-//   println!("{}",results.len());
-//   // if(results.len()<10)
+//   let op=state.st.lock().unwrap().search_trie(&string);
+//   println!("{}",op.len());
+//   if(op.len()<10)
 //   {
-// results.split_off(1);
-//     for path in results {
-      
-//         println!("{:?}", path);
-//     }
+// // op.split_off(1);
+//     println!("{:?}",op)
 //   }
 
+// //   let mut results:Vec<String>=map.clone()
+// //   .par_iter()
+// //   .flat_map(|(_, y)| y.par_iter())
+// //   .cloned()
+// //   .collect();
+// //   // similarity_sort(&mut results, &string);
+
+// //   // Print the sorted results
+// //   println!("{}",results.len());
+// //   // if(results.len()<10)
+// //   {
+// // results.split_off(1);
+// //     for path in results {
+      
+// //         println!("{:?}", path);
+// //     }
+// //   }
+
  
-  return Ok(());
+//   return Ok(());
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 
   // if(string.len()>3)
@@ -136,43 +142,50 @@ let ret = Arc::new(RwLock::new(m));
 
 // Create a clone of the Arc for the other thread
 let ret_clone = Arc::clone(&ret);
+let ret_clone2 = Arc::clone(&ret);
 
 // Create a boolean flag to indicate whether the search is done or not
 let done = Arc::new(RwLock::new(false));
-
+let mut notimes=0;
 // Create a clone of the Arc for the other thread
 let done_clone = Arc::clone(&done);
-
+starttimer(&app_handle);
+let string_clone=string.clone();
 // Spawn another thread to read and print the hashset periodically
 thread::spawn(move || {
+
   let mut last_print = Instant::now(); // initialize the last print time to the current time
-
     loop {
-
-    let msval=update.iter().next().unwrap_or(&120);
-      if last_print.elapsed() >= Duration::from_millis(*msval) { 
+      notimes+=1;
+      let mut msval=1 as u64;
+      let ret = ret_clone.read().unwrap();
+      if(ret.len()!=0){
+        msval=*update.iter().next().unwrap_or(&120);
+        
+      }
+      if last_print.elapsed() >= Duration::from_millis(msval) { 
 
         // Read the hashset with a read lock
-        let ret = ret_clone.read().unwrap();
-        
-      app_handle.emit_to(
-          "main",
-          "load-sresults",
-          serde_json::to_string(&ret.clone()).unwrap(),
-        )
-        .map_err(|e| e.to_string()).unwrap();
+        if(ret.len()!=0){
+
+          slist(&app_handle, &ret, string_clone.clone())
+        }
       
      
 
               
         // println!("{:?}", *ret);
         println!("{:?}", ret.len());
-        // Drop the lock before sleeping
-        drop(ret);
         // Check the flag with a read lock
         let done = done_clone.read().unwrap();
         // If the flag is true, break out of the loop
-        if *done {
+        if *done ||notimes>50 && ret.len()!=0 {
+          // app_handle.emit_to(
+          //   "main",
+          //   "load-sresults",
+          //   serde_json::to_string(&ret.clone()).unwrap(),
+          // )
+          // .map_err(|e| e.to_string()).unwrap();
           // app_handle.emit_to(
           //   "main",
           //   "load-complete",
@@ -182,36 +195,85 @@ thread::spawn(move || {
         
             break;
         }
+        // Drop the lock before sleeping
+        
+        
         // Drop the lock before reading the hashset
         drop(done);
         // Sleep for some time
         last_print = Instant::now(); // update the last print time to the current time
       }
+      drop(ret);
         thread::sleep(std::time::Duration::from_millis(30));
     }
 });
 
 // Populate the hashset using par_iter and inspect
-map.clone()
+let u:HashSet<String>=map.clone()
     .par_iter()
-    .filter(|(i, _)| i.contains(&string))
-    .flat_map(|(_, y)| y.par_iter())
+    .filter(|(i, _)| {
+      fuzzy_match(&i, &string).unwrap_or(0)>0
+      //  i.contains(&string)
+    })
+    .flat_map(|(_, y)| {
+      y.par_iter()
+    })
     .cloned()
-    .inspect(|o| {
-      let path=Path::new(o);
+    // .inspect(|o| {
+    //   // let path=Path::new(o);
+    //   // let fname=path.file_name().unwrap().to_string_lossy().to_string();
+    //   //   // Write to the hashset with a write lock
+    //   //   let mut ret = ret.write().unwrap();
+    //   //   fuzzy_match(&fname, &string);
+    //   //   ret.insert(populatefileitem(fname, path, &state));
+        
+    //   //   // Drop the lock after inserting
+    //   //   drop(ret);
+    // })
+    .collect();
+  println!("{}",u.len());
+  
+  
+  // if(u.len()<2000)
+  {
+    let mut v: Vec<String> = u.into_par_iter().collect(); // Collect into a vector
+    v
+    .par_sort_by_key(|ei| { // Sort by key
+      let path = Path::new(&ei); // Get the path
+      let fname = path.file_name().unwrap().to_string_lossy().to_string(); // Get the file name
+      let score = fuzzy_match(&fname, &string).unwrap(); // Get the score
+      // println!("{}---{}", fname, score); // Print the file name and score
+      score // Return the score as the key
+    });
+    v.reverse();
+    // v.split_off(100);
+    // for (c,ei) in 
+    v.par_iter().enumerate().try_for_each(|(c,ei)|{
+      if c>2000{
+        return None;
+      }
+      // let path=Path::new(&ei);
+      //   let fname=path.file_name().unwrap().to_string_lossy().to_string();
+      //   let score=fuzzy_match(&fname, &string).unwrap();
+      let path=Path::new(&ei);
       let fname=path.file_name().unwrap().to_string_lossy().to_string();
         // Write to the hashset with a write lock
         let mut ret = ret.write().unwrap();
+        fuzzy_match(&fname, &string);
         ret.insert(populatefileitem(fname, path, &state));
+        
         // Drop the lock after inserting
         drop(ret);
-    })
-    .collect::<String>();
-
+      println!("{}",ei);
+      Some(())
+    });
+    let wtr=ret_clone2.read().unwrap().clone();
+    slist(&window.app_handle(), &wtr, string.clone())
+  }
   // Set the flag to true with a write lock
 let mut done = done.write().unwrap();
 *done = true;
-
+stoptimer(&window.app_handle());
     // for (i,_) in map.clone(){
     //   // gh.push(i);
     //   if i.contains(&string){

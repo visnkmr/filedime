@@ -7,7 +7,7 @@ export function listenforfolcount(){
     console.log("folder-count")
     
     // parentsize.innerHTML=data.payload.toString();.
-    foldercount=data.payload;
+    globalThis.total=data.payload;
     // console.log(folcount)
     // // console.log("fromhere"+data.payload.toString())
   });
@@ -65,6 +65,7 @@ export function listenforfiles(){
     // );
     // parse the data as JSON
     let files: File[] = JSON.parse(data.payload);
+    globalThis.loaded=files.length;
     // // console.log("files")
     // clear the file list
     globals.fileList.innerHTML = "";
@@ -103,16 +104,7 @@ export function listenforfiles(){
   
     let tbody = document.createElement("tbody");
     // console.log(files.length)
-    let loaded = 0;
-
-      loaded = files.length;
-    var percomp = (loaded / foldercount! * 100);
-    var setp = document.getElementById("myprogress") as HTMLProgressElement;
-      setp.value = percomp;
-    if (percomp == 100)
-      setp.className = "hide"
-    else
-      setp.className = "show"
+    
     // console.log("here" + percomp.toString());
   
     // // console.log(data.payload)
