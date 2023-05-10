@@ -1,3 +1,4 @@
+import { copyToClipboard } from './ctc';
 import * as globals from './file-explorer';
 import { openfile } from './openfile';
 // declare var globalThis.tid:number|string
@@ -152,6 +153,12 @@ export function handleclicks(e:Event){
             path: globalThis.frompath
           }
         );
+        // console.log("o3")
+        // console.log(e)
+        // Code for option 3
+        break;
+      case "o6":
+        copyToClipboard(globalThis.frompath);
         // console.log("o3")
         // console.log(e)
         // Code for option 3

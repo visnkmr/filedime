@@ -23,6 +23,10 @@ export function handlerightclick(e:MouseEvent){
         o4.id="o4"
         o4.textContent="add bookmark"
         globals.menu.appendChild(o4);
+      let o6=document.createElement("li")
+        o6.id="o6"
+        o6.textContent="copy to clipboard"
+        globals.menu.appendChild(o6);
         // Show the custom menu
         globals.menu.style.display = "block";
   
