@@ -22,6 +22,7 @@ mod searchfiles;
 mod filechangewatcher;
 // mod loadjs;
 mod tabinfo;
+mod recentfiles;
 mod bookmarks;
 mod openhtml;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -35,7 +36,9 @@ use crate::{
   tabinfo::*,
   bookmarks::*,
   listfiles::*,
-  openhtml::*, searchfiles::search_try
+  openhtml::*, 
+  searchfiles::*, 
+  recentfiles::*
 };
 mod trie;
 mod resync;
@@ -133,7 +136,8 @@ fn main() {
         startserver,
         loadfromhtml,
         stopserver,
-        search_try
+        search_try,
+        recent_files
         ]
       )
     .run(tauri::generate_context!())

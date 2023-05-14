@@ -1,6 +1,7 @@
 import { copyToClipboard } from './ctc';
 import * as globals from './file-explorer';
 import { openfile } from './openfile';
+import { recentfiles } from './recent_file';
 // declare var globalThis.tid:number|string
 // declare var globalThis.frompath:string
 export function handleclicks(e:Event){
@@ -179,6 +180,9 @@ export function handleclicks(e:Event){
   switch (
   e.target
   ) {
+    case globals.recent:
+      recentfiles();
+      break;
     case globals.reload:
       // console.log("reload")
       // get the value of the path input
