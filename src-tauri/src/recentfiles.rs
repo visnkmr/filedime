@@ -277,7 +277,7 @@ let u:HashSet<String>=map.clone()
       Some(())
     });
     let wtr=ret_clone2.read().unwrap().clone();
-    slist(&window.app_handle(), &wtr, string.clone())
+    rflist(&window.app_handle(), &wtr)
   }
   // Set the flag to true with a write lock
 let mut done = done.write().unwrap();
