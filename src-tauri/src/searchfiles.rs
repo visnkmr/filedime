@@ -219,6 +219,9 @@ let u:HashSet<String>=map.clone()
       y.par_iter()
     })
     .cloned()
+    .filter(|i|{
+      !i.contains("node_modules")
+    })
     // .inspect(|o| {
     //   // let path=Path::new(o);
     //   // let fname=path.file_name().unwrap().to_string_lossy().to_string();
@@ -249,9 +252,9 @@ let u:HashSet<String>=map.clone()
     // v.split_off(100);
     // for (c,ei) in 
     v.par_iter().enumerate().try_for_each(|(c,ei)|{
-      if c>2000{
-        return None;
-      }
+      // if c>2000{
+      //   return None;
+      // }
       // let path=Path::new(&ei);
       //   let fname=path.file_name().unwrap().to_string_lossy().to_string();
       //   let score=fuzzy_match(&fname, &string).unwrap();
