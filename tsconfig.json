@@ -5,7 +5,7 @@
     //   "./node_modules/@types",
     //   "./typings"
     // ],
-    "target": "ES2022",
+    "target": "ESNext",
     "removeComments": true,
     // Allow JavaScript files to be compiled
     // "allowJs": false,
@@ -32,9 +32,9 @@
     // // Import emit helpers (e.g. '__extends', '__rest', etc..) from tslib
     // "importHelpers": false,
     // Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6)
-    // "moduleResolution": null,
+    "moduleResolution": "node",
     // Do not generate custom helper functions like __extends in compiled output
-    // "module": "commonjs",
+    // "module": "NodeNext",
     // Enable all strict type checking options
     "strict": true,
     // Raise an error on expressions and declarations with an inferred type of any
