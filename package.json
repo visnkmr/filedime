@@ -1,9 +1,8 @@
 {
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.2",
     "@rspack/cli": "^0.1.10",
     "@total-typescript/ts-reset": "^0.4.2",
+    "@types/markdown-it": "^12.2.3",
     "depcheck": "^1.4.3",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
@@ -15,5 +14,6 @@
   },
   "dependencies": {
     "markdown-it": "^13.0.1"
-  }
+  },
+  "postinstall": "npm dedupe"
 }

@@ -10,7 +10,7 @@ use crate::{
   FileItem,
   appstate::*,
   fileitem::*, 
-  partialratio::*, 
+  // partialratio::*, 
   sendtofrontend::*, 
   // loadjs::loadjs
 };
@@ -320,22 +320,22 @@ stoptimer(&window.app_handle());
   // options
 }
 // Define a function that takes a vector of strings and a string as parameters
-fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
-  // while true{
+// fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
+//   // while true{
 
-  // };
-  // Create a parallel iterator over the vector k
-  k.par_iter()
-      // Filter out the elements that do not contain h
-      .filter(|s| 
-        partial_ratio(s, &h)>80
-        // s.contains(&h)
-      )
-      // .filter(|s| s.contains(&h))
-      // Collect the filtered elements into a new vector
-      .cloned()
-      .collect()
-}
+//   // };
+//   // Create a parallel iterator over the vector k
+//   k.par_iter()
+//       // Filter out the elements that do not contain h
+//       .filter(|s| 
+//         partial_ratio(s, &h)>80
+//         // s.contains(&h)
+//       )
+//       // .filter(|s| s.contains(&h))
+//       // Collect the filtered elements into a new vector
+//       .cloned()
+//       .collect()
+// }
 // pub struct Searchresults{
 //   name:String,
 //   path:String,

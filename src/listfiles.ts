@@ -244,6 +244,7 @@ export function listenforfiles(){
       sortTable(1);
     });
     // recentfiles();
+
   });
   stoptimer();
   

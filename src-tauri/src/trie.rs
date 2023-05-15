@@ -4,7 +4,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashMap;
 // use strsim::levenshtein;
 
-use crate::partialratio::partial_ratio;
+// use crate::partialratio::partial_ratio;
 #[derive(Debug,Clone)]
 pub struct indifile{
     index:usize,

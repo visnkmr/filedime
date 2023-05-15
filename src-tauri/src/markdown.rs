@@ -23,9 +23,15 @@ pub fn loadmarkdown(name: String, window: Window,g:State<AppStateStore>) -> Resu
   //     &content ,
   //     &markdown::Options::gfm()
   // ).unwrap();
+  let mut options = ComrakOptions::default();
+  options.render.unsafe_ = true;
+  // options.render.hardbreaks = true;
+
+
+
   let htmformd=markdown_to_html(
     &content ,
-    &ComrakOptions::default());
+    &options);
 
   app_handle.emit_to(
       "main",
@@ -34,6 +40,7 @@ pub fn loadmarkdown(name: String, window: Window,g:State<AppStateStore>) -> Resu
     )
     .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
 
+  // Ok(content)
   Ok(htmformd)
     
 }

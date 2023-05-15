@@ -7,7 +7,6 @@ mod fileitem;
 mod filltrie;
 mod sendtofrontend;
 use filesize::PathExt;
-use partialratio::partial_ratio;
 use rayon::prelude::*;
 use tauri::{Manager, api::file::read_string, State, Runtime};
 use walkdir::WalkDir;
@@ -29,7 +28,7 @@ mod openhtml;
 mod markdown;
 mod lastmodcalc;
 mod listfiles;
-mod partialratio;
+// mod partialratio;
 use crate::{
   markdown::*, 
   filechangewatcher::*,

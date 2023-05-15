@@ -10,7 +10,7 @@ use crate::{
   FileItem,
   appstate::*,
   fileitem::*, 
-  partialratio::*, 
+  // partialratio::*, 
   sendtofrontend::*, lastmodcalc::lastmodified, 
   // loadjs::loadjs
 };
@@ -20,22 +20,6 @@ struct rstr{
   term:String,
   files:HashSet<FileItem>
 }
-// #[tauri::command]
-// async fn  search_trie(path:String,string: String, state: State<'_, AppStateStore>)->Result<(),()>
-// {
-//   let st=state.st.clone();
-//       let mut st=st.lock().unwrap();
-//   let string=string.to_lowercase();
-//   // println!("fs-----{:?}",st.fuzzy_search(&string,2,5));
-//   // println!("fs-----{:?}",st.fuzzy_search(&string,2,5).len());
-//   // println!("s--------{:?}",st.search(&string));
-//   let tl=parallel_search(st.search(&string,path),string);
-//   println!("s--------{:?}",tl.len());
-//   if(tl.len()<30){
-//     println!("{:?}",tl);
-//   }
-//   Ok(())
-// }
 #[tauri::command]
 pub async fn recent_files(string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
@@ -325,151 +309,7 @@ stoptimer(&window.app_handle());
   // println!("{:?}",options);
   // options
 }
-// Define a function that takes a vector of strings and a string as parameters
-fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {
-  // while true{
 
-  // };
-  // Create a parallel iterator over the vector k
-  k.par_iter()
-      // Filter out the elements that do not contain h
-      .filter(|s| 
-        partial_ratio(s, &h)>80
-        // s.contains(&h)
-      )
-      // .filter(|s| s.contains(&h))
-      // Collect the filtered elements into a new vector
-      .cloned()
-      .collect()
-}
-// pub struct Searchresults{
-//   name:String,
-//   path:String,
-//   is_dir: bool,
-//   size:String,
-//   rawfs:u64,
-//   lmdate:String,
-//   timestamp:i64,
-//   foldercon:i32,
-//   ftype:String
-// }
-
-pub async fn search_pop(path: String,string:String){
-  let string=string.to_lowercase();
-  // populate_trie(oid, path, ff, window, state).await;
-  // return ;
-  
-  let now = SystemTime::now();
-  let duration = now.duration_since(UNIX_EPOCH).unwrap();
-  let startime = duration.as_secs();
-  println!("hs----{}",startime);
-  // thread::spawn(
-    // {
-      // let st=state.searchtry.clone();
-    
-    // move||{
-        let walker2 = WalkDir::new(&path)
-        // .contents_first(true)
-          .min_depth(1) // skip the root directory
-          // .max_depth(1) // only look at the immediate subdirectories
-          .into_iter()
-          
-          .filter_entry(
-            |e| 
-            !e.path_is_symlink() 
-            // &&
-            // !e
-            // .file_name()
-            // .to_str()
-            // .map(|s| s.starts_with("."))
-            // .unwrap_or(false)
-            &&
-            !is_hidden(e)
-            // &&
-            // e.file_name()
-            // .to_string_lossy()
-            // .to_string().to_lowercase()
-            // .contains(&string)
-            // &&
-            // e.file_type().is_file()
-              // e.file_type().is_dir()
-          );
-
-        let mut count=RwLock::new(0);
-        
-        
-        let par_walker2 = walker2.par_bridge(); // ignore errors
-        
-        let k:HashSet<String>=
-        par_walker2
-        // .enumerate()
-        .into_par_iter()  
-        .filter_map(
-          |i|
-          {
-          match(i){
-            Ok(i) => {
-              if((i.file_name()
-              .to_string_lossy()
-              .to_string().to_lowercase()
-              .contains(&string))){
-                Some(i.path().to_string_lossy().to_string())
-              }
-              else{
-                None
-              }
-            },
-            Err(_) => None,
-          }
-        }
-        )
-        .map(
-          |e|
-          {
-           e
-          })
-          .collect();
-
-        println!("{}",k.len());
-        if(k.len()<20){
-          println!("{:?}",k);
-        }
-
-        let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let endtime = duration.as_secs();
-        println!("endtime----{}",endtime-startime);
-        
-        // .collect(); // collect into a vec
-        // let mut st=st.lock().unwrap();
-        // *st=(k.clone());
-        // println!("-------c ----{}",count.read().unwrap());
-        // drop(st);
-        
-        // for i in k{
-        //   let name=PathBuf::from(&i).file_name().unwrap().to_string_lossy().to_string().to_lowercase();
-        //   map.entry(name).or_insert(Vec::new()).push(i);
-
-        // }
-        // let map: HashMap<String, Vec<String>> = par_walker2
-        // .into_par_iter()
-        // .filter_map(Result::ok) // ignore errors
-        // .map(|e| e.path().to_string_lossy().into_owned()) // get path as string
-        // .with_key(|path| {
-        //     PathBuf::from(path) // convert to PathBuf
-        //         .file_name() // get file name
-        //         .unwrap() // unwrap the Option
-        //         .to_string_lossy() // convert to string
-        //         .to_string() // convert to owned string
-        //         .to_lowercase() // convert to lowercase
-        // }) // use custom key function
-        // .into_par_iter() // convert to parallel iterator
-        // .from_par_iter(); // create hashmap from parallel iterator
-      // }
-    // }
-  // );
-  
-}
 
 fn is_image_file(file_name: &str) -> bool {
   let extension = Path::new(file_name)
