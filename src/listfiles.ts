@@ -1,4 +1,5 @@
 import * as globals from './file-explorer';
+import { recentfiles } from './recent_file';
 import { stoptimer } from './timer';
 // import {globalvars} from './global';
 var foldercount:number;
@@ -57,14 +58,14 @@ export function listenforfiles(){
       // function (fol, index) {
         let pathn = document.createElement("span");
         pathn.id="goloc"
-        pathn.textContent = fols[i] + "\n";
+        pathn.textContent = fols[i]   + "\n";
         pathn.dataset.loc = prefixes[i];
         globals.pathline?.appendChild(pathn);
         // // console.log(index)
       }
     // );
     // parse the data as JSON
-    let files: File[] = JSON.parse(data.payload);
+    let files: File[] = JSON.parse(data.payload) as File[];
     globalThis.loaded=files.length;
     // // console.log("files")
     // clear the file list
@@ -242,6 +243,9 @@ export function listenforfiles(){
       // call the sortTable function with index 1
       sortTable(1);
     });
+    // recentfiles();
   });
   stoptimer();
+  
+
 }

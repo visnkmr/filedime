@@ -7,9 +7,12 @@ import { handlerightclick } from './handlerightclick';
 import { listenforfiles, listenforfolcount } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { openhtml } from './openfile';
-import { loadsearchresult } from './searchresult';
+import { progress } from './progress';
+import { recentfiles } from './recent_file';
+import { loadsearchresult, searchterm } from './searchresult';
 import { listtabs } from './tabs';
 import { starttimer } from './timer';
+
 // globalThis.tid=globalThis.globalThis.tid;
 // import * from globalsthis;
 // export declare var globalThis.tid:number|string;
@@ -36,6 +39,7 @@ export const menu = document.getElementById("menu") as HTMLUListElement;
 
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
+export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
 
 
@@ -47,7 +51,7 @@ export const datalist = document.getElementById("path-list") as HTMLDataListElem
 // var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
-globalThis.defpath="../src/"
+globalThis.defpath="/home/roger/Downloads/github/notes"
 var lastfolder = globalThis.defpath;
 
 
@@ -76,6 +80,8 @@ var lastfolder = globalThis.defpath;
   // console.log(data.payload.toString())
 });
 loadsearchresult();
+searchterm();
+progress();
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {

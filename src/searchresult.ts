@@ -54,7 +54,7 @@ export function loadsearchresult(){
       //    }
        // );
        // parse the data as JSON
-       let files: File[] = JSON.parse(data.payload);
+       let files: File[] = JSON.parse(data.payload) as File[];
        globalThis.rescount=files.length;
        // // console.log("files")
        // clear the file list

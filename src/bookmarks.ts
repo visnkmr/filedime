@@ -18,7 +18,7 @@ export function loadmarks(){
       // clear the file list
       globals.marklist.replaceChildren();
       // console.log(data.payload)
-      let r:mark[]=JSON.parse(data.payload);
+      let r:mark[]=JSON.parse(data.payload) as mark[];
       console.log(r)
       // loop through the files array
       // for (let tb of data.payload) {

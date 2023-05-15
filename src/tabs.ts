@@ -11,7 +11,7 @@ export function listtabs(){
       tabname: string,
       history:string[]
     };
-    let tabs: tabinfo[] = JSON.parse(data.payload);
+    let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
     // // console.log("files")
     // clear the file list
     globals.tablist.innerHTML = "";

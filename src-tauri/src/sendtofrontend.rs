@@ -120,3 +120,30 @@ ah.emit_to(
   )
   .map_err(|e| e.to_string()).unwrap();
 }
+
+pub fn rflist(ah:&AppHandle,wtr:&HashSet<FileItem>){
+  ah.emit_to(
+    "main",
+    "load-sresults",
+    serde_json::to_string(&wtr).unwrap(),
+  )
+  .map_err(|e| e.to_string()).unwrap();
+  ah.emit_to(
+    "main",
+    "sterm",
+    "Recents",
+  )
+  .map_err(|e| e.to_string()).unwrap();
+ah.emit_to(
+    "main",
+    "load-complete",
+    "",
+  )
+  .map_err(|e| e.to_string()).unwrap();
+ah.emit_to(
+    "main",
+    "sortbydate",
+    "",
+  )
+  .map_err(|e| e.to_string()).unwrap();
+}
