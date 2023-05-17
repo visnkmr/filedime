@@ -12,18 +12,23 @@ import { recentfiles } from './recent_file';
 import { loadsearchresult, searchterm } from './searchresult';
 import { listtabs } from './tabs';
 import { starttimer } from './timer';
-
+import { window as uio } from '@tauri-apps/api';
+export default uio;
+// import { WebviewWindow } from '@tauri-apps/api/window'
 // globalThis.tid=globalThis.globalThis.tid;
 // import * from globalsthis;
 // export declare var globalThis.tid:number|string;
 // globalThis.tid=0;
 // declare var globalThis.frompath:string;
 // globalThis.frompath=""
-globalThis.frompath="";
-globalThis.tid=0;
-globalThis.startstopfilewatchertoggle=false;
+globalThis.frompath = "";
+globalThis.tid = 0;
+globalThis.startstopfilewatchertoggle = false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
+
+
+
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
 export const searchInput = document.getElementById("search-input") as HTMLInputElement;
 export const listButton = document.getElementById("list-button") as HTMLButtonElement;
@@ -51,7 +56,7 @@ export const datalist = document.getElementById("path-list") as HTMLDataListElem
 // var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
-globalThis.defpath="/home/roger/Downloads/github/notes"
+globalThis.defpath = "/home/roger/Downloads/github/notes"
 var lastfolder = globalThis.defpath;
 
 
@@ -65,17 +70,17 @@ var lastfolder = globalThis.defpath;
 (window as any).__TAURI__.event.listen("load-complete", (data: { payload: string }) => {
   console.log("load complete")
   var setp = document.getElementById("myprogress") as HTMLProgressElement;
-    setp.className = "hide"
+  setp.className = "hide"
 });
 
 (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
   console.log("grandloc")
-  
+
   lastfolder = data.payload.toString();
   // console.log(data.payload.toString())
 });
 (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
-  console.log("--------------parentloc---"+data.payload)
+  console.log("--------------parentloc---" + data.payload)
   pathInput.value = data.payload.toString();
   // console.log(data.payload.toString())
 });
@@ -91,11 +96,12 @@ window.addEventListener("DOMContentLoaded", () => {
   (window as any).__TAURI__.invoke(
     "list_files",
     {
+      windowname:uio.appWindow.label,
       oid: globalThis.tid.toString(),
       path: globalThis.defpath,
       ff: ""
     });
-    starttimer();
+  starttimer();
 
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)
@@ -109,21 +115,21 @@ window.addEventListener("DOMContentLoaded", () => {
     handleclicks(e);
 
   });
- 
+
   // Add an input event listener to the input element
   pathInput.addEventListener("input", async () => {
     // Get the current value of the input element
     const path = pathInput.value;
 
     // Invoke the Rust function with the path as an argument
-   getpathlist(path);
+    getpathlist(path);
   });
-  
+
   searchInput.addEventListener("input", async () => {
     // Get the current value of the input element
 
     // Invoke the Rust function with the path as an argument
-   searchforit(searchInput.value);
+    searchforit(searchInput.value);
   });
 
   // Add a listener for the keydown event on the document

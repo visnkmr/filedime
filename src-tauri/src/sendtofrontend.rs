@@ -5,27 +5,37 @@ use tauri::{AppHandle, Manager};
 use crate::FileItem;
 
 
-pub fn sendparentloc(ah:&AppHandle,parent:String)->Result<(),String>{
+pub fn sendparentloc(windowname:&str,ah:&AppHandle,parent:String)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "parent-loc",
         parent,
       )
       .map_err(|e| e.to_string()).unwrap();
     Ok(())
 }
-pub fn sendgparentloc(ah:&AppHandle,gparent:String)->Result<(),String>{
+
+pub fn notifychange(windowname:&str,ah:&AppHandle){
+  ah.emit_to(
+    windowname,
+    "send-log",
+    "changed",
+  )
+  .map_err(|e| e.to_string()).unwrap();
+
+}
+pub fn sendgparentloc(windowname:&str,ah:&AppHandle,gparent:String)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "grandparent-loc",
         gparent,
       )
       .map_err(|e| e.to_string())?;
     Ok(())
 }
-pub fn starttimer(ah:&AppHandle)->Result<(),String>{
+pub fn starttimer(windowname:&str,ah:&AppHandle)->Result<(),String>{
   ah.emit_to(
-    "main",
+    windowname,
     "start-timer",
     "",
   )
@@ -33,15 +43,15 @@ pub fn starttimer(ah:&AppHandle)->Result<(),String>{
     Ok(())
 }
 
-pub fn stoptimer(ah:&AppHandle)->Result<(),String>{
+pub fn stoptimer(windowname:&str,ah:&AppHandle)->Result<(),String>{
   ah.emit_to(
-    "main",
+    windowname,
     "stop-timer",
     "",
   )
   .map_err(|e| e.to_string())?; 
 ah.emit_to(
-    "main",
+    windowname,
     "load-complete",
     "",
   )
@@ -49,9 +59,9 @@ ah.emit_to(
     Ok(())
 }
 
-pub fn loadhistory(ah:&AppHandle,string:String)->Result<(),String>{
+pub fn loadhistory(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "load-hist",
         string,
       )
@@ -59,9 +69,18 @@ pub fn loadhistory(ah:&AppHandle,string:String)->Result<(),String>{
     Ok(())
 }
 
-pub fn folsize(ah:&AppHandle,string:String)->Result<(),String>{
+pub fn loadmarks(windowname:&str,ah:&AppHandle,string:String){
+  ah.emit_to(
+    windowname,
+    "load-marks",
+    string,
+  )
+  .map_err(|e| e.to_string()).unwrap();
+}
+
+pub fn folsize(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "folder-size",
         string,
       )
@@ -69,9 +88,9 @@ pub fn folsize(ah:&AppHandle,string:String)->Result<(),String>{
     Ok(())
 }
 
-pub fn folcount(ah:&AppHandle,fcount:usize)->Result<(),String>{
+pub fn folcount(windowname:&str,ah:&AppHandle,fcount:usize)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "folder-count",
         fcount,
       )
@@ -79,69 +98,68 @@ pub fn folcount(ah:&AppHandle,fcount:usize)->Result<(),String>{
         Ok(())
 }
 
-pub fn fileslist(ah:&AppHandle,fl:&String)->Result<(),String>{
+pub fn fileslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
     ah.emit_to(
-        "main",
+        windowname,
         "list-files",
         fl,
       )
       .map_err(|e| e.to_string())?;
-      progress(ah);
+      progress(windowname,ah);
         Ok(())
 }
 
 
-pub fn slist(ah:&AppHandle,wtr:&HashSet<FileItem>,string:String){
+pub fn slist(windowname:&str,ah:&AppHandle,wtr:&HashSet<FileItem>,string:String){
   ah.emit_to(
-    "main",
+    windowname,
     "load-sresults",
     serde_json::to_string(&wtr).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
   ah.emit_to(
-    "main",
+    windowname,
     "sterm",
     string.clone(),
   )
   .map_err(|e| e.to_string()).unwrap();
-ah.emit_to(
-    "main",
+  loadcomplete(windowname, ah);
+}
+
+pub fn loadcomplete(windowname:&str,ah:&AppHandle){
+  ah.emit_to(
+    windowname,
     "load-complete",
     "",
   )
   .map_err(|e| e.to_string()).unwrap();
 }
 
-pub fn progress(ah:&AppHandle){
+pub fn progress(windowname:&str,ah:&AppHandle){
 ah.emit_to(
-    "main",
+    windowname,
     "progress",
     "",
   )
   .map_err(|e| e.to_string()).unwrap();
 }
 
-pub fn rflist(ah:&AppHandle,wtr:&HashSet<FileItem>){
+pub fn rflist(windowname:&str,ah:&AppHandle,wtr:&HashSet<FileItem>){
   ah.emit_to(
-    "main",
+    windowname,
     "load-sresults",
     serde_json::to_string(&wtr).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
   ah.emit_to(
-    "main",
+    windowname,
     "sterm",
     "Recents",
   )
   .map_err(|e| e.to_string()).unwrap();
+loadcomplete(windowname, ah);
 ah.emit_to(
-    "main",
-    "load-complete",
-    "",
-  )
-  .map_err(|e| e.to_string()).unwrap();
-ah.emit_to(
-    "main",
+    windowname,
     "sortbydate",
     "",
   )

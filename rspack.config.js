@@ -3,17 +3,25 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/file-explorer.ts',
+  // entry: './src/file-explorer.ts',
+  // output: {
+  //   filename: 'file-explorer.js',
+  //   path: path.resolve(__dirname, "./src/"),
+  //   // format: 'iife',
+  // },
+  entry: {
+    "file-explorer": ['./src/file-explorer.ts'],
+    // "file-explorer2": ['./src/tab1/file-explorer2.ts'],
+  },
   output: {
-    filename: 'file-explorer.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, "./src/"),
-    // format: 'iife',
   },
   plugins: [
     // resolve(),
     // commonjs(),
   ],
-  // optimization: {
-  //   minimize: false, // disable minimization
-  // },
+  optimization: {
+    minimize: false, // disable minimization
+  },
 };

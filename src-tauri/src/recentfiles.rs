@@ -21,9 +21,10 @@ struct rstr{
   files:HashSet<FileItem>
 }
 #[tauri::command]
-pub async fn recent_files(string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
+pub async fn recent_files(windowname:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let wname=windowname.clone();
   println!("recents");
 
     // populate_try(path, &state);
@@ -134,7 +135,7 @@ let done = Arc::new(RwLock::new(false));
 let mut notimes=0;
 // Create a clone of the Arc for the other thread
 let done_clone = Arc::clone(&done);
-starttimer(&app_handle);
+starttimer(&windowname,&app_handle);
 let string_clone=string.clone();
 // Spawn another thread to read and print the hashset periodically
 thread::spawn(move || {
@@ -155,7 +156,7 @@ thread::spawn(move || {
         // Read the hashset with a read lock
         if(ret.len()!=0){
 
-          slist(&app_handle, &ret, string_clone.clone())
+          slist(&windowname,&app_handle, &ret, string_clone.clone())
         }
       
      
@@ -261,12 +262,12 @@ let u:HashSet<String>=map.clone()
       Some(())
     });
     let wtr=ret_clone2.read().unwrap().clone();
-    rflist(&window.app_handle(), &wtr)
+    rflist(&wname,&window.app_handle(), &wtr)
   }
   // Set the flag to true with a write lock
 let mut done = done.write().unwrap();
 *done = true;
-stoptimer(&window.app_handle());
+stoptimer(&wname,&window.app_handle());
     // for (i,_) in map.clone(){
     //   // gh.push(i);
     //   if i.contains(&string){

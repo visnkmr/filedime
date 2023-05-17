@@ -7,16 +7,27 @@ license = ""
 repository = ""
 edition = "2021"
 
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"
+lto = true
+panic = "abort"
+
+# [lib]
+# crate-type = ["dylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.2", features = [] }
+tauri-build = { version = "1.3.0", features = [] }
 
 [dependencies]
-tauri = { version = "1.2", features = ["shell-open"] }
+tauri = { version = "1.3.0", features = ["shell-open", "system-tray"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rayon="1.7.0"
+
+fuzzy-matcher="0.3.7"
+
 rustc-hash="1.1.0"
 # tao = { version = "0.19.0"}
 # du="0.1.1"
@@ -26,12 +37,18 @@ filesize = "0.2.0"
 # jwalk="0.8.1"
 # dua-cli="2.19.2"
 # dirscan="1.4.1"
-markdown= {git="https://github.com/wooorm/markdown-rs.git"}
+# markdown= {git="https://github.com/wooorm/markdown-rs.git"}
 opener="0.6.1"
+comrak="0.18.0"
+# contrie="0.1.4"
 chrono="0.4.24"
+# strsim="0.10.0"
+# notify="5.1.0"
 filetime="0.2.21"
+# rust_search = "2.0.0"
 # infer="0.13.0"
-
+# indicatif="0.17.3"
+# radix_trie = "0.2.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

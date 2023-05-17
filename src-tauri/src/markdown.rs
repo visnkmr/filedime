@@ -6,7 +6,7 @@ use tauri::{Window, State, Manager};
 use crate::{appstate::AppStateStore, sizeunit, sendtofrontend::{folsize, sendparentloc}};
 
 #[tauri::command]
-pub fn loadmarkdown(name: String, window: Window,g:State<AppStateStore>) -> Result<String,String> {
+pub fn loadmarkdown(windowname:&str,name: String, window: Window,g:State<AppStateStore>) -> Result<String,String> {
   let mut content=String::new();
   let app_handle = window.app_handle();
   let path=PathBuf::from(name.clone());
@@ -16,8 +16,8 @@ pub fn loadmarkdown(name: String, window: Window,g:State<AppStateStore>) -> Resu
     
   
   
-  folsize(&app_handle,sizeunit::size(g.find_size(&path.to_string_lossy()),true))?;
-  sendparentloc(&app_handle,parent.to_string_lossy().to_string())?;
+  folsize(windowname,&app_handle,sizeunit::size(g.find_size(&path.to_string_lossy()),true))?;
+  sendparentloc(windowname,&app_handle,parent.to_string_lossy().to_string())?;
   file.read_to_string(&mut content).unwrap();
   // let htmformd=markdown::to_html_with_options(
   //     &content ,
@@ -34,7 +34,7 @@ pub fn loadmarkdown(name: String, window: Window,g:State<AppStateStore>) -> Resu
     &options);
 
   app_handle.emit_to(
-      "main",
+      windowname,
       "load-markdown",
       &htmformd,
     )

@@ -1,3 +1,5 @@
+import uio from "./file-explorer";
+
 export function watchfile(){
     (window as any).__TAURI__.event.listen("send-log", (data: { payload: string }) => {
         // console.log("grandloc")
@@ -10,6 +12,7 @@ export function watchfile(){
                 (window as any).__TAURI__.invoke(
                     "list_files",
                     {
+                        windowname:uio.appWindow.label,
                       oid: globalThis.tid.toString(),
                       path: globalThis.frompath,
                       ff: ""

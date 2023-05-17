@@ -1,8 +1,8 @@
-import * as globals from './file-explorer';
+import uio, * as globals from './file-explorer';
 import { openjs } from './openjs';
 
 export function openfile(target:HTMLElement,path:string,name:string){
-
+    console.log("opening")
     // get the data attributes of the target
     // console.log(target.dataset)
     // if ((name).toLowerCase().endsWith(".js")) {
@@ -14,6 +14,7 @@ export function openfile(target:HTMLElement,path:string,name:string){
     (window as any).__TAURI__.invoke(
     "list_files",
     {
+    windowname:uio.appWindow.label,
     oid: globalThis.tid.toString(),
     path: path,
     ff: ""

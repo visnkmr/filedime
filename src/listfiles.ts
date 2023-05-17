@@ -1,6 +1,7 @@
 import * as globals from './file-explorer';
 import { recentfiles } from './recent_file';
 import { stoptimer } from './timer';
+// export const { WebviewWindow } = (window as any).__TAURI__.window;
 // import {globalvars} from './global';
 var foldercount:number;
 export function listenforfolcount(){
@@ -244,9 +245,14 @@ export function listenforfiles(){
       sortTable(1);
     });
     // recentfiles();
+    
 
   });
   stoptimer();
   
 
 }
+// const getWindowLabel = async () => {
+//   const label = await globals.invoke('get_window_label')
+//   console.log("-------->"+label) // prints the label of the Tauri window
+// }

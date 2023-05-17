@@ -1,5 +1,5 @@
 import { copyToClipboard } from './ctc';
-import * as globals from './file-explorer';
+import uio, * as globals from './file-explorer';
 import { openfile } from './openfile';
 import { recentfiles } from './recent_file';
 // declare var globalThis.tid:number|string
@@ -10,6 +10,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "openpath",
         {
+          windowname:uio.appWindow.label,
           path:globalThis.frompath
         }
         );
@@ -22,6 +23,7 @@ export function handleclicks(e:Event){
             (window as any).__TAURI__.invoke(
               "startserver",
               {
+                windowname:uio.appWindow.label,
                 pathstr:globalThis.frompath
               }
               );
@@ -33,6 +35,7 @@ export function handleclicks(e:Event){
           (window as any).__TAURI__.invoke(
             "stopserver",
             {
+              windowname:uio.appWindow.label,
               path:""
             }
           );
@@ -46,6 +49,7 @@ export function handleclicks(e:Event){
     (window as any).__TAURI__.invoke(
       "newtab",
       {
+        windowname:uio.appWindow.label,
         oid: globalThis.tid.toString(),
         path: "/home/roger/Downloads/",
         ff: ""
@@ -54,6 +58,7 @@ export function handleclicks(e:Event){
     (window as any).__TAURI__.invoke(
       "load_tab",
       {
+        windowname:uio.appWindow.label,
         oid: globalThis.tid.toString()
       }
     );
@@ -62,6 +67,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "nosize",
         {
+        windowname:uio.appWindow.label,
           id: globalThis.tid.toString(),
           path: globals.pathInput.value
         });
@@ -92,6 +98,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "load_tab",
         {
+        windowname:uio.appWindow.label,
           oid: globalThis.tid.toString()
         }
       );
@@ -104,6 +111,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "closetab",
         {
+        windowname:uio.appWindow.label,
           id: globalThis.tid.toString()
         }
       );
@@ -139,6 +147,7 @@ export function handleclicks(e:Event){
         (window as any).__TAURI__.invoke(
           "addmark",
           {
+        windowname:uio.appWindow.label,
             path: globalThis.frompath
           }
         );
@@ -151,6 +160,7 @@ export function handleclicks(e:Event){
         (window as any).__TAURI__.invoke(
           "removemark",
           {
+        windowname:uio.appWindow.label,
             path: globalThis.frompath
           }
         );
@@ -191,6 +201,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "list_files",
         {
+        windowname:uio.appWindow.label,
           oid: globalThis.tid.toString(),
           path: path,
           ff: ""
@@ -200,6 +211,7 @@ export function handleclicks(e:Event){
       (window as any).__TAURI__.invoke(
         "back", 
         {
+        windowname:uio.appWindow.label,
           oid: globalThis.tid.toString(),
         }
       )
@@ -211,6 +223,7 @@ export function handleclicks(e:Event){
           (window as any).__TAURI__.invoke(
             "list_files",
             {
+        windowname:uio.appWindow.label,
               oid: globalThis.tid.toString(),
               path: options,
               ff: "back"
@@ -242,6 +255,7 @@ export function handleclicks(e:Event){
     (window as any).__TAURI__.invoke(
       "list_files",
       {
+        windowname:uio.appWindow.label,
         oid: globalThis.tid.toString(),
         path: pathtg,
         ff: ""
@@ -254,6 +268,7 @@ export function handleclicks(e:Event){
     (window as any).__TAURI__.invoke(
       "newtab",
       {
+        windowname:uio.appWindow.label,
         oid: globalThis.tid.toString(),
         path: gpath,
         ff: ""
@@ -262,6 +277,7 @@ export function handleclicks(e:Event){
     (window as any).__TAURI__.invoke(
       "load_tab",
       {
+        windowname:uio.appWindow.label,
         oid: globalThis.tid.toString()
       }
     ).await;

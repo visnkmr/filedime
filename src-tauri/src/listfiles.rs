@@ -19,19 +19,20 @@ use crate::{markdown::loadmarkdown,
 };
 
 #[tauri::command]
-pub async fn list_files(oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+pub async fn list_files(windowname:String,oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   let orig = *state.process_count.lock().unwrap();
   println!("lfiles");
+  let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
   if(path.ends_with(".md")){
-    loadmarkdown(path,window,state);
+    loadmarkdown(&windowname,path,window,state);
     return Ok(());
   }  
   
   if(path.ends_with(".html")
   ||path.ends_with(".htm")){
-    loadfromhtml(path,window,state);
+    loadfromhtml(&windowname,path,window,state);
     return Ok(());
   }
   
@@ -63,13 +64,13 @@ pub async fn list_files(oid:String,path: String,ff:String, window: Window, state
     }
   } 
   // state.addtab(oid, path.clone(), ff);
-  newtab(oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+  newtab(&windowname,oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
   
   // convert the path to a PathBuf
   // let path = PathBuf::from(path);
 let parent=testpath.clone();
   let app_handle = window.app_handle();
-  sendparentloc(&app_handle, parent.to_string_lossy().to_string())?;
+  sendparentloc(&windowname,&app_handle, parent.to_string_lossy().to_string())?;
 println!("parent------{:?}",parent.to_string_lossy().to_string());
 
   let now = SystemTime::now();
@@ -78,8 +79,8 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
   println!("{:?}----{}",parent,startime);
   // get the app handle from the window
 
-  starttimer(&app_handle)?;
-  loadhistory(&app_handle,
+  starttimer(&windowname,&app_handle)?;
+  loadhistory(&windowname,&app_handle,
     serde_json::to_string(
       &state.gettab(oid.clone()).2
     ).unwrap())?;
@@ -90,10 +91,10 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
           .count(); // count the number of items in parallel
 // let fcount=fs::read_dir(&path).unwrap().count();
 // println!("folders---{}",fcount);
-folcount(&app_handle, fcount)?;
+folcount(&windowname,&app_handle, fcount)?;
 
 if let Some(granloc)=parent.parent(){
-  sendgparentloc(&app_handle,granloc.to_string_lossy().to_string())?;
+  sendgparentloc(&windowname,&app_handle,granloc.to_string_lossy().to_string())?;
 }
 
 // let s1=Arc::new(Mutex::new(state));
@@ -132,9 +133,9 @@ let handle=thread::spawn(move|| {
             //   }
             // }
             
-              fileslist(&app_handle,&serde_json::to_string(&files.clone()).unwrap());
+              fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
-          folsize(&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+          folsize(&&windowname,&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
           if(fcount==files.len() || nootimes>20){
             // handle.abort();
             break;
@@ -187,22 +188,18 @@ let handle=thread::spawn(move|| {
     
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
-    let app_handle=window.app_handle();
-    fileslist(&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
   
-    folsize(&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
+    let app_handle=window.app_handle();
+    fileslist(&wname,&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
+  
+    folsize(&wname,&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
     // sort the vector by name
     // files.sort_by(|a, b| a.name.cmp(&b.name));
     // emit an event to the frontend with the vector as payload
     println!("reachedhere");
-    app_handle.emit_to(
-        "main",
-        "load-complete",
-        "",
-      )
-      .map_err(|e| e.to_string()).unwrap();
+    loadcomplete(&wname, &app_handle);
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
-    stoptimer(&app_handle)?;
+    stoptimer(&wname,&app_handle)?;
   
     populate_try(path, &state).await;
 

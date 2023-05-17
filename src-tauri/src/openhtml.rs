@@ -2,10 +2,10 @@ use std::{path::PathBuf, io::Read};
 
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, sizeunit};
+use crate::{appstate::AppStateStore, sizeunit, sendtofrontend::{folsize, sendgparentloc, sendparentloc}};
 
 #[tauri::command]
-pub fn loadfromhtml(name: String, window: Window,g:State<AppStateStore>)
+pub fn loadfromhtml(windowname:&str,name: String, window: Window,g:State<AppStateStore>)
 {
     
     let mut content=String::new();
@@ -16,28 +16,12 @@ pub fn loadfromhtml(name: String, window: Window,g:State<AppStateStore>)
     let mut file = std::fs::File::open(name).unwrap();
     
   
-  app_handle.emit_to(
-      "main",
-      "folder-size",
-      {
+  folsize(windowname, &app_handle,{
         sizeunit::size(g.find_size(&path.to_string_lossy()),true)
-      },
-    )
-    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send file size"));
+      });
   
-  app_handle.emit_to(
-      "main",
-      "grandparent-loc",
-      parent.parent().unwrap().to_string_lossy().to_string(),
-    )
-    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send grandparentloc"));
-  
-  app_handle.emit_to(
-      "main",
-      "parent-loc",
-      parent.to_string_lossy().to_string(),
-    )
-    .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
+  sendgparentloc(windowname, &app_handle,parent.parent().unwrap().to_string_lossy().to_string());
+sendparentloc(windowname, &app_handle, parent.to_string_lossy().to_string());
   
   file.read_to_string(&mut content).unwrap();
   // let htmformd=markdown::to_html_with_options(
@@ -46,7 +30,7 @@ pub fn loadfromhtml(name: String, window: Window,g:State<AppStateStore>)
   // ).unwrap();
 
   app_handle.emit_to(
-      "main",
+      windowname,
       "load-html",
       &content,
     )

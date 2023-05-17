@@ -6,9 +6,10 @@ mod dirsize;
 mod fileitem;
 mod filltrie;
 mod sendtofrontend;
+use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use rayon::prelude::*;
-use tauri::{Manager, api::file::read_string, State, Runtime};
+use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem};
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -92,20 +93,90 @@ async fn openpath(path: String) -> Result<(), String> {
   };
   Ok(())
 }
-
+// #[tauri::command]
+// fn get_window_label() -> String {
+//   let window = tauri::Window::current().unwrap();
+//   window.label().to_string()
+// }
 #[tauri::command]
-async fn nosize(id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn nosize(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.nosize();
-  list_files(id,path,"newtab".to_string(), window, state).await;
+  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
 
 fn main() {
   let mut g=AppStateStore::new(CACHE_EXPIRY);
+
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
 
   tauri::Builder::default()
     .setup(|app| {
+      println!("{:?}",app);
+      
+      // let handle = app.handle();
+    // std::thread::spawn(move || {
+    //   let window = tauri::WindowBuilder::new(
+    //     &handle,
+    //     "label",
+    //     tauri::WindowUrl::App("index.html".into())
+    //   ).build().unwrap();
+    // });
+    // let window = tauri::WindowBuilder::new(app, "label", tauri::WindowUrl::App("index.html".into()))
+    // .build()
+    // .unwrap();
+    let app_handle = app.handle();
+    let tray_id = "my-tray";
+    SystemTray::new()
+      .with_id(tray_id)
+      .with_menu(
+        SystemTrayMenu::new()
+          .add_item(CustomMenuItem::new("quit", "Quit"))
+          .add_item(CustomMenuItem::new("open", "Open"))
+      )
+      .on_event({
+        
+        move |event| {
+        match event{
+            tauri::SystemTrayEvent::MenuItemClick { tray_id, id,.. } => {
+            let mut gk=AppStateStore::new(CACHE_EXPIRY);
+              
+              if(id=="quit"){
+                
+
+                std::process::exit(0);
+              }
+              else{
+                // println!("{:?}",gk);
+                let now = SystemTime::now();
+
+                let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+                let absolute_date = now_date.format("%d%m%H%M%S").to_string();
+                println!("{absolute_date}");
+                tauri::WindowBuilder::new(
+                  &app_handle,
+                  absolute_date,
+                  tauri::WindowUrl::App("index.html".into())
+                ).title("uio").build().unwrap();
+                // tauri::Builder::new()
+                // // .manage(gk)
+                // .invoke_handler(
+                //   tauri::generate_handler![
+                //     list_files,
+                //     ]
+                //   )
+                // .run(tauri::generate_context!())
+                // .expect("error while running tauri application");
+              }  
+            },
+            _ => todo!(),
+        }
+        // let tray_handle = app_handle.tray_handle_by_id(tray_id).unwrap();
+        
+      }
+    })
+      .build(app)?;
+    
       // get an instance of AppHandle
       // let app_handle = app.handle().get_window("main").unwrap();
       // let g=app.state::<FileSizeFinder>();
@@ -136,7 +207,8 @@ fn main() {
         loadfromhtml,
         stopserver,
         search_try,
-        recent_files
+        recent_files,
+        // get_window_label
         ]
       )
     .run(tauri::generate_context!())

@@ -3,7 +3,7 @@ use std::{collections::HashMap, time::SystemTime, path::PathBuf, fs, thread};
 use filetime::FileTime;
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, listfiles::list_files};
+use crate::{appstate::AppStateStore, listfiles::list_files, sendtofrontend::notifychange};
 
 pub fn checkifchanged(lopentime:&mut FileTime,path: &PathBuf)->bool{
    
@@ -36,15 +36,10 @@ pub fn initinfo(lopentime:&mut FileTime,path: &PathBuf){
                 
 }
 #[tauri::command]
-pub async fn sendlog(window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+pub async fn sendlog(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
 //   state.removetab(id);
   let app_handle = window.app_handle();
-  app_handle.emit_to(
-    "main",
-    "send-log",
-    "changed",
-  )
-  .map_err(|e| e.to_string()).unwrap();
+  notifychange(windowname, &app_handle);
   Ok(())
 }
 
@@ -57,7 +52,7 @@ pub fn stopserver(path:String,state: State<'_, AppStateStore>){
 }
 
 #[tauri::command]
-pub fn startserver(pathstr:String,window: Window,state: State<'_, AppStateStore>){
+pub fn startserver(windowname:String,pathstr:String,window: Window,state: State<'_, AppStateStore>){
     println!("start server command recieved");
     let aborted = state.aborted.clone();
     *aborted.lock().unwrap() = false;
@@ -76,12 +71,12 @@ pub fn startserver(pathstr:String,window: Window,state: State<'_, AppStateStore>
         loop{
             if *aborted.lock().unwrap() {
                 println!("stopped");
-                app_handle.emit_to(
-                    "main",
-                    "send-log",
-                    "stopped",
-                  )
-                  .map_err(|e| e.to_string()).unwrap();
+                // app_handle.emit_to(
+                //     &windowname,
+                //     "send-log",
+                //     "stopped",
+                //   )
+                //   .map_err(|e| e.to_string()).unwrap();
                 break;
             }
 
@@ -89,12 +84,7 @@ pub fn startserver(pathstr:String,window: Window,state: State<'_, AppStateStore>
             {
                 println!("started");
                 // list_files(oid, pathstr, "dontcare".to_string(), window, state);
-                app_handle.emit_to(
-                    "main",
-                    "send-log",
-                    "changed",
-                  )
-                  .map_err(|e| e.to_string()).unwrap();
+                notifychange(&windowname, &app_handle);
             }
             std::thread::sleep(std::time::Duration::from_secs(1));
         }

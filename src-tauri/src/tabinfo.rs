@@ -1,7 +1,7 @@
 use serde::Serialize;
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, list_files};
+use crate::{appstate::AppStateStore, list_files, sendtofrontend::loadmarks};
 
 
 #[derive(Clone,Debug,Serialize)]
@@ -21,18 +21,18 @@ pub struct tab{
 }
 
 #[tauri::command]
-pub async fn load_tab(oid:String,window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+pub async fn load_tab(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   let (path,_,_)=state.gettab(oid.clone());
   println!("loadtab");
-  list_files(oid, path, "newtab".to_string(), window, state).await?;
+  list_files(windowname.to_string(),oid, path, "newtab".to_string(), window, state).await?;
 Ok(())
 }
 #[tauri::command]
-pub async fn closetab(id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+pub async fn closetab(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.removetab(id);
   let app_handle = window.app_handle();
   app_handle.emit_to(
-    "main",
+    windowname,
     "list-tabs",
     serde_json::to_string(&state.gettabs()).unwrap(),
   )
@@ -40,26 +40,21 @@ pub async fn closetab(id:String,window: Window,state: State<'_, AppStateStore>)-
   Ok(())
 }
 #[tauri::command]
-pub async fn listtabs(window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+pub async fn listtabs(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   let app_handle = window.app_handle();
   // println!("{:?}",state);
   app_handle.emit_to(
-    "main",
+    windowname,
     "list-tabs",
     serde_json::to_string(&state.gettabs()).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
-app_handle.emit_to(
-  "main",
-  "load-marks",
-  serde_json::to_string(&state.getmarks()).unwrap(),
-)
-.map_err(|e| e.to_string()).unwrap();
+loadmarks(windowname,&app_handle,serde_json::to_string(&state.getmarks()).unwrap());
 Ok(())
 }
 #[tauri::command]
-pub async fn newtab(oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.addtab(oid.clone(), path.clone(), ff.clone());
-  listtabs(window, state).await;
+  listtabs(windowname,window, state).await;
   Ok(())
 }
