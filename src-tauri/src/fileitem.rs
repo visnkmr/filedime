@@ -1,6 +1,7 @@
 
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
+use image::GenericImageView;
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
@@ -38,6 +39,7 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
     //   }
     // }).unwrap_or(0); .
     let mut folderloc=0;
+    let mut filedime="".to_string();
     let mut filetype="Folder".to_string();
     let issymlink=path.is_relative() ||path.is_symlink();
     if(issymlink){
@@ -68,6 +70,13 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
             // println!("Number of lines: {}", count); 
             }// print the count
           }
+          if let Ok(img) = image::open(path)
+            {
+
+              let (width, height) = img.dimensions();
+              filedime=
+              format!("{} x {}", width, height).to_string();
+            }
           filetype=g.to_string_lossy().to_string();
   
         },
@@ -112,6 +121,10 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
       foldercon:foldercon,
       ftype: if(folderloc>0){
         filetype + " (" + &folderloc.to_string() + ")" 
+      }
+      else if !filedime.is_empty() {
+        filetype + " (" + &filedime + ")" 
+        
       }
       else{
         filetype
