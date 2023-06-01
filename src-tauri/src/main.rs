@@ -112,7 +112,7 @@ fn main() {
 
   tauri::Builder::default()
     .setup(|app| {
-      println!("{:?}",app);
+      // println!("{:?}",app);
       
       // let handle = app.handle();
     // std::thread::spawn(move || {

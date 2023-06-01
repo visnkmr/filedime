@@ -170,7 +170,8 @@ let handle=thread::spawn(move|| {
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
     .try_for_each(|(e)| {
-          if(e.file_name().to_string_lossy().to_string().contains(".git"))
+          // println!("{}",e.file_name().to_string_lossy().to_string());
+          if(e.file_name().to_string_lossy().to_string().ends_with(".git"))
           {
             return Err(()); // return an error to stop the iteration
           }
