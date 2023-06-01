@@ -47,6 +47,8 @@ pub struct cachestore{
 pub struct AppStateStore {
     cstore:RwLock<FxHashMap<String,cachestore>>,
     nosize:RwLock<bool>,
+    pub showfolderchildcount:RwLock<bool>,
+    pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
     expiration:Duration,
     bookmarks:RwLock<Vec<marks>>,
@@ -77,6 +79,8 @@ impl AppStateStore {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
             nosize:RwLock::new(true),
+            showfolderchildcount:RwLock::new(false),
+            loadsearchlist:RwLock::new(false),
             tabs:RwLock::new(FxHashMap::default()),
             expiration:Duration::from_secs(expiration),
             bookmarks:RwLock::new(Vec::new()),
@@ -347,7 +351,7 @@ pub fn find_size(&self, path: &str) -> u64 {
     // println!("The cache size is {} bytes", total_size);
     // (total_size as u64,cache.len() as u64)
   }
-  pub fn nosize(&self){
+  pub fn togglenosize(&self){
     let shouldsize;
     {
 
@@ -355,6 +359,33 @@ pub fn find_size(&self, path: &str) -> u64 {
     }
     let mut setsize=self.nosize.write().unwrap();
     *setsize=shouldsize;
+    drop(setsize)
+    // {
+    //     println!("{:?}",*self.nosize.read().unwrap())
+    // }
+  }
+  pub fn togglefolcount(&self){
+    let tempstore;
+    {
+
+        tempstore=!*self.showfolderchildcount.read().unwrap();
+    }
+    let mut setstore=self.showfolderchildcount.write().unwrap();
+    *setstore=tempstore;
+    drop(setstore)
+    // {
+    //     println!("{:?}",*self.nosize.read().unwrap())
+    // }
+  }
+  pub fn togglelsl(&self){
+    let tempstore;
+    {
+
+        tempstore=!*self.loadsearchlist.read().unwrap();
+    }
+    let mut setstore=self.loadsearchlist.write().unwrap();
+    *setstore=tempstore;
+    drop(setstore)
     // {
     //     println!("{:?}",*self.nosize.read().unwrap())
     // }

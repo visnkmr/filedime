@@ -29,7 +29,22 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
       0
     };
     // let size=0;
-    let foldercon=0;
+    let mut foldercon=0;
+    
+    if(*state.showfolderchildcount.read().unwrap()){
+      if(path.is_dir()){
+        let count = WalkDir::new(&path)
+                  .into_iter()
+                  .filter_map(|entry| entry.ok())
+                  .par_bridge()
+                  .filter(|entry| entry.file_type().is_file())
+                  .count();
+                foldercon=count as i32;
+      }
+    }
+
+
+
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
     // let path = path.to_string_lossy().into_owned(); // get their path

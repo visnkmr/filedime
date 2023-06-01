@@ -72,6 +72,26 @@ export function handleclicks(e:Event){
           path: globals.pathInput.value
         });
     }
+    
+    if(target===globals.tsearch){
+      (window as any).__TAURI__.invoke(
+        "loadsearchlist",
+        {
+        windowname:uio.appWindow.label,
+          id: globalThis.tid.toString(),
+          path: globals.pathInput.value
+        });
+    }
+    
+    if(target===globals.folcount){
+      (window as any).__TAURI__.invoke(
+        "folcount",
+        {
+        windowname:uio.appWindow.label,
+          id: globalThis.tid.toString(),
+          path: globals.pathInput.value
+        });
+    }
 
     if(target===globals.listButton){
         openfile(target,globals.pathInput.value,globals.pathInput.value);

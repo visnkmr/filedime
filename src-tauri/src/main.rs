@@ -100,7 +100,21 @@ async fn openpath(path: String) -> Result<(), String> {
 // }
 #[tauri::command]
 async fn nosize(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.nosize();
+  state.togglenosize();
+  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  Ok(())
+}
+
+#[tauri::command]
+async fn folcount(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  state.togglefolcount();
+  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  Ok(())
+}
+
+#[tauri::command]
+async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  state.togglelsl();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
@@ -197,6 +211,8 @@ fn main() {
         get_path_options,
         openpath,
         nosize,
+        folcount,
+        loadsearchlist,
         newtab,
         load_tab,
         back,

@@ -175,6 +175,7 @@ let handle=thread::spawn(move|| {
           {
             return Err(()); // return an error to stop the iteration
           }
+          
           let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&state);
           let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
           *tfsize_clone.lock().unwrap()+=file.rawfs;
@@ -202,7 +203,9 @@ let handle=thread::spawn(move|| {
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&wname,&app_handle)?;
   
-    populate_try(path, &state).await;
+    if(*state.loadsearchlist.read().unwrap()){
+      populate_try(path, &state).await;
+    }
 
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
