@@ -15,6 +15,16 @@ export function handleclicks(e:Event){
         }
         );
     }
+    if(target===globals.newwin){
+    // invoke the list_files command from the backend with the path as argument
+      (window as any).__TAURI__.invoke(
+        "newwindow",
+        {
+          id: globalThis.tid as number + 1,
+          path: "./",
+          ff:""
+        });
+    }
     if(target==globals.filewatch){
           globalThis.startstopfilewatchertoggle=!globalThis.startstopfilewatchertoggle;
           if(globalThis.startstopfilewatchertoggle){
@@ -91,7 +101,8 @@ export function handleclicks(e:Event){
           id: globalThis.tid.toString(),
           path: globals.pathInput.value
         });
-    }
+    } 
+    
 
     if(target===globals.listButton){
         openfile(target,globals.pathInput.value,globals.pathInput.value);
@@ -146,10 +157,24 @@ export function handleclicks(e:Event){
 
     // Do something based on the id
     switch (id) {
-      case "o1":
+      case "o7":
+        // console.log("live--------->"+globalThis.frompath)
+      // invoke the list_files command from the backend with the path as argument
+        (window as any).__TAURI__.invoke(
+          "newwindow",
+          {
+            id: globalThis.tid.toString(),
+            path: globalThis.frompath,
+            ff:""
+          });
         // console.log("o1")
         // console.log(e)
         // Code for option 1
+        break;
+      case "o1":
+      // console.log("o1")
+      // console.log(e)
+      // Code for option 1
         break;
       case "o2":
         // console.log("o2")

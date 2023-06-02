@@ -82,7 +82,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
   starttimer(&windowname,&app_handle)?;
   loadhistory(&windowname,&app_handle,
     serde_json::to_string(
-      &state.gettab(oid.clone()).2
+      &state.gettab(&oid).2
     ).unwrap())?;
 
   let fcount = fs::read_dir(&path)

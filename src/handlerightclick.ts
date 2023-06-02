@@ -7,9 +7,13 @@ export function handlerightclick(e:MouseEvent){
         e.preventDefault();
         globalThis.frompath=(e.target as HTMLElement).dataset.path as string;
         globals.menu.replaceChildren();
-        let o1=document.createElement("li")
+      let o1=document.createElement("li")
         o1.id="o1"
         o1.textContent="Open in new tab"
+        globals.menu.appendChild(o1);
+      o1=document.createElement("li")
+        o1.id="o7"
+        o1.textContent="Open in new window"
         globals.menu.appendChild(o1);
        let o2=document.createElement("li")
         o2.id="o2"

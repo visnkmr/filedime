@@ -17,12 +17,13 @@ pub struct tabinfo{
 pub struct tab{
     pub path:String,
     pub focusfolder:String,
-    pub history:Vec<String>
+    pub history:Vec<String>,
+    pub windowname:String
 }
 
 #[tauri::command]
 pub async fn load_tab(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  let (path,_,_)=state.gettab(oid.clone());
+  let (path,_,_)=state.gettab(&oid);
   println!("loadtab");
   list_files(windowname.to_string(),oid, path, "newtab".to_string(), window, state).await?;
 Ok(())
@@ -54,7 +55,8 @@ Ok(())
 }
 #[tauri::command]
 pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.addtab(oid.clone(), path.clone(), ff.clone());
+  state.addtab(oid.clone(), path.clone(), ff.clone(),windowname.to_string());
+  
   listtabs(windowname,window, state).await;
   Ok(())
 }

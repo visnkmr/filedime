@@ -29,3 +29,7 @@ src-tauri/links.md
 src/file-explorer.js
 src-tauri/clippy_stat.txt
 src-tauri/clippy.toml
+src-tauri/trie
+src/openjs.ts
+src/file-explorer-1.js.map
+src/file-explorer.js.map

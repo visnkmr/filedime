@@ -46,18 +46,29 @@ export const menu = document.getElementById("menu") as HTMLUListElement;
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
+export const newwin = document.getElementById("new_window") as HTMLButtonElement;
 
 
 
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
 export const nosize = document.getElementById("no-size") as HTMLButtonElement;
+export const folcount = document.getElementById("fol-count") as HTMLButtonElement;
+export const tsearch = document.getElementById("t-search") as HTMLButtonElement;
 export const datalist = document.getElementById("path-list") as HTMLDataListElement;
-
+var lastfolder;
 // var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
-globalThis.defpath = "/home/roger/Downloads/github/notes"
-var lastfolder = globalThis.defpath;
+var label=uio.getCurrent().label;
+if (label=="main"){
+  globalThis.defpath = "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents"
+  lastfolder = globalThis.defpath;
+}
+// else{
+
+  
+  
+// }
 
 
 (window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
@@ -92,8 +103,8 @@ progress();
 window.addEventListener("DOMContentLoaded", () => {
   listenforfiles();
   loadmarkdown();
-
-  (window as any).__TAURI__.invoke(
+  if(label==="main"){
+    (window as any).__TAURI__.invoke(
     "list_files",
     {
       windowname:uio.appWindow.label,
@@ -101,7 +112,18 @@ window.addEventListener("DOMContentLoaded", () => {
       path: globalThis.defpath,
       ff: ""
     });
-  starttimer();
+ 
+    starttimer();
+  }
+  else{
+    (window as any).__TAURI__.invoke(
+      "whattoload",
+      {
+        windowname:label,
+        id: globalThis.tid.toString(),
+      });
+      starttimer();
+  }
 
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)

@@ -104,8 +104,9 @@ impl AppStateStore {
     pub fn addmark(&self,path:String){
         self.bookmarks.write().unwrap().push(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
     }
-    pub fn addtab(&self,id:String,path:String,mut ff:String){
+    pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
         println!("{}---{}---{}",id,path,ff);
+        // let id=format!("{}",(id.parse::<i32>().unwrap()+1));
         let mut tabhist=Vec::new();
         match(self.tabs.read().unwrap().get(&id)){
             Some(tabi)=>{
@@ -131,7 +132,8 @@ impl AppStateStore {
         tabs.insert(id,tab {
                 path: path, 
                 focusfolder: ff,
-            history: tabhist
+                history: tabhist,
+                windowname:windowname
             }
         );
     }
@@ -179,6 +181,7 @@ impl AppStateStore {
         let path=gtab.get(&id).unwrap().path.clone();
         let ff=gtab.get(&id).unwrap().focusfolder.clone();
         let mut tabhist=gtab.get(&id).unwrap().history.clone();
+        let mut windowname=gtab.get(&id).unwrap().windowname.clone();
         let lastval=tabhist.pop();
         
         drop(gtab);
@@ -193,14 +196,15 @@ impl AppStateStore {
             {
                 path: path, 
                 focusfolder: ff,
-                history: tabhist
+                history: tabhist,
+                windowname:windowname
             }
         );
         lastval
 
     }
-    pub fn gettab(&self,id:String)->(String,String,Vec<String>){
-        let tab= self.tabs.read().unwrap().get(&id).unwrap().clone();
+    pub fn gettab(&self,id:&String)->(String,String,Vec<String>){
+        let tab= self.tabs.read().unwrap().get(id).unwrap().clone();
         return (
             tab.path,
             tab.focusfolder,

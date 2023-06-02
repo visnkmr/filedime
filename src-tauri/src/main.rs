@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::Path, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
 mod dirsize;
 mod fileitem;
 mod filltrie;
@@ -113,6 +113,31 @@ async fn folcount(windowname:&str,id:String,path:String,window: Window,state: St
 }
 
 #[tauri::command]
+async fn whattoload(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  // state.togglefolcount();
+  // state.addtab(id.clone(),"./".to_string(), "newtab".to_string(),windowname.to_string());//move to where you open new window
+  let whichpath=state.gettab(&id).0;
+  println!("{}",whichpath);
+  list_files(windowname.to_string(),id,whichpath,"".to_string(), window, state).await;
+  Ok(())
+}
+#[tauri::command]
+async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+   let absolute_date=getuniquewindowlabel();
+  state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
+  let filename=PathBuf::from(path.clone());
+  let mut wname="";
+  if let Some(fname)=filename.file_name(){
+    wname=fname.to_str().unwrap();
+  }
+  opennewwindow(&window.app_handle(),&wname,&absolute_date);
+  // listtabs(windowname,window, state).await;
+  // list_files(absolute_date.to_string(),id,path,"".to_string(), window, state).await;
+
+  Ok(())
+}
+
+#[tauri::command]
 async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.togglelsl();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
@@ -162,16 +187,10 @@ fn main() {
               }
               else{
                 // println!("{:?}",gk);
-                let now = SystemTime::now();
+                let absolute_date=getuniquewindowlabel();
+                opennewwindow(&app_handle,"uio",&absolute_date)
 
-                let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
-                let absolute_date = now_date.format("%d%m%H%M%S").to_string();
-                println!("{absolute_date}");
-                tauri::WindowBuilder::new(
-                  &app_handle,
-                  absolute_date,
-                  tauri::WindowUrl::App("index.html".into())
-                ).title("uio").build().unwrap();
+                
                 // tauri::Builder::new()
                 // // .manage(gk)
                 // .invoke_handler(
@@ -221,9 +240,11 @@ fn main() {
         removemark,
         startserver,
         loadfromhtml,
+        whattoload,
         stopserver,
         search_try,
         recent_files,
+        newwindow
         // get_window_label
         ]
       )
@@ -256,3 +277,50 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
   // println!("{:?}",options);
   Ok(options)
 }// In Rust, define a function that takes a path as an argument and returns a list of possible paths
+pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str){
+  println!("{:?}",getwindowlist(app_handle));
+
+  // let INIT_SCRIPT= [r#"
+  //             console.log("poiu");
+  //              let kpg="#,pathtt,r#"
+  //                 "#].concat();
+                tauri::WindowBuilder::new(
+                  app_handle,
+                  label,
+                  tauri::WindowUrl::App("index.html".into())
+                )
+                // .initialization_script(&INIT_SCRIPT)
+                .title(title).build().unwrap();
+}
+// pub fn opennewtab(app_handle:&AppHandle,title:&str,pathtt:&str){
+//                 let now = SystemTime::now();
+                
+
+//                 let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+//                 let absolute_date = now_date.format("%d%m%H%M%S").to_string();
+//                 println!("{absolute_date}");
+//                 tauri::WindowBuilder::new(
+//                   app_handle,
+//                   absolute_date,
+//                   tauri::WindowUrl::App("index.html".into())
+//                 )
+//                 .title(title).build().unwrap();
+// }
+
+pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
+  let iop=app_handle.get_window("main").unwrap();
+  iop.windows().iter().map(|e|{
+    // println!("{}--",e.0);
+    // println!("{}--{:?}",i.0,i.1);
+    e.0.clone()
+  }).collect::<Vec<String>>()
+}
+fn getuniquewindowlabel()->String{
+  let now = SystemTime::now();
+
+                let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+                let absolute_date = now_date.format("%d%m%H%M%S").to_string();
+                // println!("{absolute_date}");
+                absolute_date
+}
+
