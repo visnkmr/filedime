@@ -47,6 +47,7 @@ pub struct cachestore{
 pub struct AppStateStore {
     cstore:RwLock<FxHashMap<String,cachestore>>,
     nosize:RwLock<bool>,
+    pub filesetcollection:RwLock<HashMap<String,i32>>,
     pub showfolderchildcount:RwLock<bool>,
     pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
@@ -79,6 +80,7 @@ impl AppStateStore {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
             nosize:RwLock::new(true),
+            filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),
             loadsearchlist:RwLock::new(false),
             tabs:RwLock::new(FxHashMap::default()),

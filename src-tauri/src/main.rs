@@ -9,7 +9,7 @@ mod sendtofrontend;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use rayon::prelude::*;
-use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem};
+use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem};
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -64,7 +64,7 @@ const CACHE_EXPIRY:u64=60;
 
 // define a command to list the files and directories in a given path
 #[tauri::command]
-async fn back(oid:String,window: Window, state: State<'_, AppStateStore>) -> 
+async fn backbutton(oid:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
   {
     match(state.getlasthistory(oid)){
@@ -91,6 +91,21 @@ async fn openpath(path: String) -> Result<(), String> {
       println!("error opening file")
     }
   };
+  Ok(())
+}
+
+#[tauri::command]
+async fn otb(path: String) -> Result<(), String> {
+  println!("{}",path);
+  let args = format!("exo-open --working-directory {} --launch TerminalEmulator",path);
+  let args: Vec<_> = args.split(" ").collect();
+
+  let output = Command::new(args[0])
+          .args(&args[1..])
+          // .stdout(Stdio::piped())
+          .spawn()
+          .unwrap();
+        println!("{:?}",output);
   Ok(())
 }
 // #[tauri::command]
@@ -145,6 +160,32 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 }
 
 fn main() {
+  let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
+  let reload = CustomMenuItem::new("reload", "Reload".to_string());
+  let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());
+  let toggle_search = CustomMenuItem::new("t-search", "Toggle search".to_string());
+  let hide_child_count = CustomMenuItem::new("fol-count", "Hide child count".to_string());
+  let back = CustomMenuItem::new("back-button", "Back".to_string());
+  let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
+  let recent = CustomMenuItem::new("recent", "Recent".to_string());
+  
+  let menu = Menu::new()
+  .add_submenu(Submenu::new("File", Menu::new()
+      .add_item(open_terminal)
+      .add_item(reload)
+      .add_item(hide_size)
+      
+  )).add_submenu(Submenu::new("Window", Menu::new()
+  .add_item(CustomMenuItem::new("close", "Close"))
+      
+  ))
+  .add_item(CustomMenuItem::new("custom", "Custom"))
+  .add_item(CustomMenuItem::new("quit", "Quit"))
+    .add_item(toggle_search)
+    .add_item(hide_child_count)
+    .add_item(back)
+    .add_item(forward)
+    .add_item(recent);
   let mut g=AppStateStore::new(CACHE_EXPIRY);
 
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
@@ -222,6 +263,21 @@ fn main() {
     
       Ok(())
     })
+    .menu(menu)
+    .on_menu_event(|event| {
+      match event.menu_item_id() {
+        "quit" => {
+          std::process::exit(0);
+        }
+        "close" => {
+          event.window().close().unwrap();
+        }
+        "otb"=>{
+          // otb(event.window())
+        }
+        _ => {}
+      }
+    })
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
@@ -234,7 +290,7 @@ fn main() {
         loadsearchlist,
         newtab,
         load_tab,
-        back,
+        backbutton,
         addmark,
         closetab,
         removemark,
@@ -244,7 +300,8 @@ fn main() {
         stopserver,
         search_try,
         recent_files,
-        newwindow
+        newwindow,
+        otb
         // get_window_label
         ]
       )

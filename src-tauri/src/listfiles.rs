@@ -22,6 +22,8 @@ use crate::{markdown::loadmarkdown,
 pub async fn list_files(windowname:String,oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   let orig = *state.process_count.lock().unwrap();
   println!("lfiles");
+
+  state.filesetcollection.write().unwrap().clear();
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
@@ -136,6 +138,7 @@ let handle=thread::spawn(move|| {
               fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
           folsize(&&windowname,&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+          
           if(fcount==files.len() || nootimes>20){
             // handle.abort();
             break;
@@ -199,6 +202,9 @@ let handle=thread::spawn(move|| {
     // files.sort_by(|a, b| a.name.cmp(&b.name));
     // emit an event to the frontend with the vector as payload
     println!("reachedhere");
+          // let io=fscs.clone();
+          // drop(fscs);
+          sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
     loadcomplete(&wname, &app_handle);
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&wname,&app_handle)?;

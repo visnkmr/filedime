@@ -36,6 +36,7 @@ export const fileList = document.getElementById("file-list") as HTMLTableElement
 export const tablist = document.getElementById("tabs-list") as HTMLTableElement;
 export const marklist = document.getElementsByClassName("markslist")[0] as HTMLTableElement;
 export const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
+export const sow = document.getElementById("setsofwhat") as HTMLDivElement;
 export const pathline = document.getElementById("path") as HTMLDivElement;
 export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
@@ -47,6 +48,7 @@ export const reload = document.getElementById("reload") as HTMLButtonElement;
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
 export const newwin = document.getElementById("new_window") as HTMLButtonElement;
+export const otb = document.getElementById("otb") as HTMLButtonElement;
 
 
 
@@ -82,6 +84,21 @@ if (label=="main"){
   console.log("load complete")
   var setp = document.getElementById("myprogress") as HTMLProgressElement;
   setp.className = "hide"
+});
+type fsc={
+  name:string,
+  count:number
+}
+(window as any).__TAURI__.event.listen("fsc", (data: { payload: string }) => {
+  console.log("-------------__>"+((data.payload)))
+  let fscs = JSON.parse(data.payload) as Map<string,number>;
+  for (let [key, value] of Object.entries(fscs)) {
+    console.log(key + ": " + value);
+  }
+
+  // sow
+  // var setp = document.getElementById("myprogress") as HTMLProgressElement;
+  // setp.className = "hide"
 });
 
 (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {

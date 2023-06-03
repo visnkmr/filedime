@@ -88,6 +88,16 @@ pub fn folsize(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
     Ok(())
 }
 
+pub fn sendfilesetcollection(windowname:&str,ah:&AppHandle,string:&String)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "fsc",
+        string,
+      )
+      .map_err(|e| e.to_string())?; 
+    Ok(())
+}
+
 pub fn folcount(windowname:&str,ah:&AppHandle,fcount:usize)->Result<(),String>{
     ah.emit_to(
         windowname,

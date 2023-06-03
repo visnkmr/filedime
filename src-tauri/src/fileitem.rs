@@ -56,6 +56,7 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
     let mut folderloc=0;
     let mut filedime="".to_string();
     let mut filetype="Folder".to_string();
+    // let mut filesetcollection=HashSet::new();
     let issymlink=path.is_relative() ||path.is_symlink();
     if(issymlink){
       filetype+="symlink";
@@ -93,6 +94,12 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
               format!("{} x {}", width, height).to_string();
             }
           filetype=g.to_string_lossy().to_string();
+          // if(!state.filesetcollection.read().unwrap().contains(&filetype)){
+
+          //   let mut ft=state.filesetcollection.write().unwrap();
+          //   ft.insert(filetype.clone());
+          // }
+          
   
         },
         None=>{
@@ -115,6 +122,8 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
         }
       }
     }
+    let mut hm=state.filesetcollection.write().unwrap();
+          *hm.entry(filetype.clone()).or_insert(0)+=1;
     let tr;
     let (lmdate,timestamp)=lastmodified(&pathtf);
     FileItem { 

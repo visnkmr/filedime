@@ -25,6 +25,16 @@ export function handleclicks(e:Event){
           ff:""
         });
     }
+    if(target===globals.otb){
+      console.log("clicked here");
+    // invoke the list_files command from the backend with the path as argument
+      (window as any).__TAURI__.invoke(
+        "otb",
+        {
+          path: globals.pathInput.value,
+        }
+        );
+    }
     if(target==globals.filewatch){
           globalThis.startstopfilewatchertoggle=!globalThis.startstopfilewatchertoggle;
           if(globalThis.startstopfilewatchertoggle){
@@ -254,7 +264,7 @@ export function handleclicks(e:Event){
       break;
     case globals.backButton:
       (window as any).__TAURI__.invoke(
-        "back", 
+        "backbutton", 
         {
         windowname:uio.appWindow.label,
           oid: globalThis.tid.toString(),
