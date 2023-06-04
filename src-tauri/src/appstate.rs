@@ -213,6 +213,14 @@ impl AppStateStore {
             tab.history
         )
     }
+    pub fn getactivepath(&self,id:&str)->(String,String,Vec<String>){
+        let tab= self.tabs.read().unwrap().get(id).unwrap().clone();
+        return (
+            tab.path,
+            tab.focusfolder,
+            tab.history
+        )
+    }
     
     
 pub fn find_size(&self, path: &str) -> u64 {

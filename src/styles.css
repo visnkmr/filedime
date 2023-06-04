@@ -262,6 +262,9 @@ progress{
   /* color: black; */
   cursor: pointer;
 }
+.fsc{
+  padding-right: 10px;
+}
 /* Style the button as a tab */
 .tab-button {
   display: inline-block;

@@ -9,7 +9,7 @@ mod sendtofrontend;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use rayon::prelude::*;
-use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem};
+use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window};
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -93,9 +93,9 @@ async fn openpath(path: String) -> Result<(), String> {
   };
   Ok(())
 }
-
 #[tauri::command]
-async fn otb(path: String) -> Result<(), String> {
+async fn otb(path:String) {
+  // state.getactivepath(path);
   println!("{}",path);
   let args = format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
@@ -106,7 +106,6 @@ async fn otb(path: String) -> Result<(), String> {
           .spawn()
           .unwrap();
         println!("{:?}",output);
-  Ok(())
 }
 // #[tauri::command]
 // fn get_window_label() -> String {
@@ -120,7 +119,7 @@ async fn nosize(windowname:&str,id:String,path:String,window: Window,state: Stat
   Ok(())
 }
 
-#[tauri::command]
+#[tauri::command] 
 async fn folcount(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.togglefolcount();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
@@ -160,32 +159,34 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 }
 
 fn main() {
-  let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
-  let reload = CustomMenuItem::new("reload", "Reload".to_string());
-  let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());
-  let toggle_search = CustomMenuItem::new("t-search", "Toggle search".to_string());
-  let hide_child_count = CustomMenuItem::new("fol-count", "Hide child count".to_string());
-  let back = CustomMenuItem::new("back-button", "Back".to_string());
-  let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
-  let recent = CustomMenuItem::new("recent", "Recent".to_string());
+  // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
+  // let reload = CustomMenuItem::new("reload", "Reload".to_string());
+  // let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());
+  // let toggle_search = CustomMenuItem::new("t-search", "Toggle search".to_string());
+  // let hide_child_count = CustomMenuItem::new("fol-count", "Hide child count".to_string());
+  // let back = CustomMenuItem::new("back-button", "Back".to_string());
+  // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
+  // let recent = CustomMenuItem::new("recent", "Recent".to_string());
   
   let menu = Menu::new()
-  .add_submenu(Submenu::new("File", Menu::new()
-      .add_item(open_terminal)
-      .add_item(reload)
-      .add_item(hide_size)
+  // .add_submenu(Submenu::new("File", Menu::new()
+  //     .add_item(open_terminal)
+  //     .add_item(reload)
+  //     .add_item(hide_size)
       
-  )).add_submenu(Submenu::new("Window", Menu::new()
+  // ))
+  .add_submenu(Submenu::new("Window", Menu::new()
   .add_item(CustomMenuItem::new("close", "Close"))
       
   ))
   .add_item(CustomMenuItem::new("custom", "Custom"))
   .add_item(CustomMenuItem::new("quit", "Quit"))
-    .add_item(toggle_search)
-    .add_item(hide_child_count)
-    .add_item(back)
-    .add_item(forward)
-    .add_item(recent);
+    // .add_item(toggle_search)
+    // .add_item(hide_child_count)
+    // .add_item(back)
+    // .add_item(forward)
+    // .add_item(recent)
+    ;
   let mut g=AppStateStore::new(CACHE_EXPIRY);
 
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
@@ -273,7 +274,8 @@ fn main() {
           event.window().close().unwrap();
         }
         "otb"=>{
-          // otb(event.window())
+          // otb(event.window().label(),g);
+
         }
         _ => {}
       }

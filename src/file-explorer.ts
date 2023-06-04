@@ -36,7 +36,7 @@ export const fileList = document.getElementById("file-list") as HTMLTableElement
 export const tablist = document.getElementById("tabs-list") as HTMLTableElement;
 export const marklist = document.getElementsByClassName("markslist")[0] as HTMLTableElement;
 export const htmlbase = document.getElementById("htmlbase") as HTMLDivElement;
-export const sow = document.getElementById("setsofwhat") as HTMLDivElement;
+export const sow = document.getElementById("setsofwhat") as HTMLSpanElement;
 export const pathline = document.getElementById("path") as HTMLDivElement;
 export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
@@ -92,9 +92,18 @@ type fsc={
 (window as any).__TAURI__.event.listen("fsc", (data: { payload: string }) => {
   console.log("-------------__>"+((data.payload)))
   let fscs = JSON.parse(data.payload) as Map<string,number>;
+  sow.replaceChildren();
   for (let [key, value] of Object.entries(fscs)) {
-    console.log(key + ": " + value);
+    let filep = document.createElement("span");
+    filep.id=key
+    filep.className="fsc"
+    let filet = document.createElement("p");
+    filet.textContent=key+" ("+value+") "
+    filep.appendChild(filet)
+    sow.appendChild(filep);
+    // console.log(key + ": " + value);
   }
+
 
   // sow
   // var setp = document.getElementById("myprogress") as HTMLProgressElement;
