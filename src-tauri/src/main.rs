@@ -41,7 +41,7 @@ use crate::{
   recentfiles::*
 };
 mod trie;
-mod resync;
+// mod r  esync;
 
 
 
@@ -244,7 +244,9 @@ fn main() {
                 // .expect("error while running tauri application");
               }  
             },
-            _ => todo!(),
+            _ =>{
+              //on right click on tray icon on windows this is triggered.
+            },
         }
         // let tray_handle = app_handle.tray_handle_by_id(tray_id).unwrap();
         

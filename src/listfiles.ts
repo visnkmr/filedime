@@ -40,7 +40,8 @@ export function listenforfiles(){
       foldercon: number;
       ftype: string;
     };
-    var arr = globals.pathInput.value.split("/"); // arr is ["a", "b", "c", "d"]
+    let splitat=  /[\\/]/;
+    var arr = globals.pathInput.value.split(splitat); // arr is ["a", "b", "c", "d"]
     var prefixes: string[] = [];
     var prefix = "";
     for (var i = 0; i < arr.length; i++) {
@@ -49,8 +50,8 @@ export function listenforfiles(){
       prefix += "/"; // add a slash for the next iteration
     }
     var fols=[]
-    console.log(globals.pathInput.value.split("/"))
-    fols = globals.pathInput.value.split("/");
+    console.log(globals.pathInput.value.split(splitat))
+    fols = globals.pathInput.value.split(splitat);
     console.log(fols.length);
     globals.pathline.replaceChildren();
 
