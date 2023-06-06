@@ -7,6 +7,9 @@ license = ""
 repository = ""
 edition = "2021"
 
+[build]
+target-dir="H:\\rust_deps\\"
+
 [profile.release]
 strip = true  # Automatically strip symbols from the binary.
 opt-level = "z"

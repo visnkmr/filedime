@@ -1,4 +1,5 @@
 import { loadmarks } from './bookmarks';
+import  showdialog from './debug';
 // import { sendlog } from './debug';
 import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
@@ -129,6 +130,7 @@ progress();
 window.addEventListener("DOMContentLoaded", () => {
   listenforfiles();
   loadmarkdown();
+
   if(label==="main"){
     (window as any).__TAURI__.invoke(
     "list_files",
@@ -150,6 +152,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
       starttimer();
   }
+  showdialog("opening screen");
 
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)
@@ -193,6 +196,6 @@ window.addEventListener("DOMContentLoaded", () => {
 listenforfolcount();
 listtabs();
 loadmarks();
-sendlog();
+// sendlog();
 watchfile();
 openhtml();

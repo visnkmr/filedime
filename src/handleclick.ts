@@ -314,7 +314,7 @@ export function handleclicks(e:Event){
         oid: globalThis.tid.toString(),
         path: pathtg,
         ff: ""
-      });
+      })
   }
   if((target).className=="mark-button"){
     var gpath=(target).dataset.path;

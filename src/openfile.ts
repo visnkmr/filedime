@@ -1,5 +1,6 @@
+import showdialog from './debug';
 import uio, * as globals from './file-explorer';
-import { openjs } from './openjs';
+// import { openjs } from './openjs';
 
 export function openfile(target:HTMLElement,path:string,name:string){
     console.log("opening")
@@ -19,7 +20,9 @@ export function openfile(target:HTMLElement,path:string,name:string){
     path: path,
     ff: ""
     }
-    );
+    ).then(
+
+        ).catch((e:string)=>{showdialog(e)});
     }
     
     // set the value of the path input to the path of the directory

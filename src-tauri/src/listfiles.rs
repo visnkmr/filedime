@@ -86,11 +86,18 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
     serde_json::to_string(
       &state.gettab(&oid).2
     ).unwrap())?;
-
-  let fcount = fs::read_dir(&path)
-          .unwrap()
-          .par_bridge() // create a parallel iterator from a sequential one
-          .count(); // count the number of items in parallel
+let mut fcount;
+  match(fs::read_dir(&path)){
+    Ok(rv)=>{
+      fcount=rv.par_bridge() // create a parallel iterator from a sequential one
+      .count();
+    },
+    _=>{
+      return Err("Cannot open the file/folder".to_string())
+    }
+    
+  }
+          ; // count the number of items in parallel
 // let fcount=fs::read_dir(&path).unwrap().count();
 // println!("folders---{}",fcount);
 folcount(&windowname,&app_handle, fcount)?;
