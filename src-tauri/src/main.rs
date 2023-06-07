@@ -8,6 +8,7 @@ mod filltrie;
 mod sendtofrontend;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
+use prefstore::*;
 use rayon::prelude::*;
 use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window};
 use walkdir::WalkDir;
@@ -93,11 +94,45 @@ async fn openpath(path: String) -> Result<(), String> {
   };
   Ok(())
 }
+#[cfg(target_os = "windows")]
 #[tauri::command]
-async fn otb(path:String) {
+async fn check_if_installed(appname:&str) -> Result<bool, String> {
+  let output = Command::new("cmd")
+      .args(["/C", appname])
+      .output()
+      .expect("cmd Not found");
+
+  Ok(output.status.success())
+}
+pub fn init(){
+  
+  getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
+  for i in getallcustomwithin("filedime", "custom_scripts","fds"){
+    println!("{:?}",i);
+  }
+}
+#[tauri::command]
+async fn otb(path:String)->Result<(),()> {
+  let folder_path=&path;
   // state.getactivepath(path);
   println!("{}",path);
-  let args = format!("exo-open --working-directory {} --launch TerminalEmulator",path);
+
+//  #[cfg(target_os = "windows")]
+//   Command::new("cmd /C %d && cd %f && start cmd")
+
+//   #[cfg(target_os = "linux")]
+//   Command::new("sh -c gnome-terminal --working-directory=%f")
+
+  // #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+  // Command::new("sh -c open -a Terminal %f")
+
+  if(!Path::new(&path).is_dir()){
+    return Err(())
+  }
+  let mut script1=getcustom("filedime", "custom_scripts/terminal_open.fds", "");
+  script1=script1.replace("%f",&path);
+  let args = script1;
+  // format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
 
   let output = Command::new(args[0])
@@ -106,6 +141,7 @@ async fn otb(path:String) {
           .spawn()
           .unwrap();
         println!("{:?}",output);
+        Ok(())
 }
 // #[tauri::command]
 // fn get_window_label() -> String {
@@ -159,6 +195,7 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 }
 
 fn main() {
+  init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
   // let reload = CustomMenuItem::new("reload", "Reload".to_string());
   // let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());

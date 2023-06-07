@@ -64,7 +64,8 @@ var lastfolder;
 // var tforward: string[] = [];
 var label=uio.getCurrent().label;
 if (label=="main"){
-  globalThis.defpath = "C:/Users/wkramer/Downloads/github"
+  // globalThis.defpath = "C:/Users/wkramer/Downloads/github"
+  globalThis.defpath = "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents"
   lastfolder = globalThis.defpath;
 }
 // else{
