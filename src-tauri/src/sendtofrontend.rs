@@ -5,6 +5,15 @@ use tauri::{AppHandle, Manager};
 use crate::FileItem;
 
 
+pub fn sendbuttonnames(ah:&AppHandle,buttonnames:String)->Result<(),String>{
+    ah.emit_to(
+        "main",
+        "button-names",
+        buttonnames,
+      )
+      .map_err(|e| e.to_string()).unwrap();
+    Ok(())
+}
 pub fn sendparentloc(windowname:&str,ah:&AppHandle,parent:String)->Result<(),String>{
     ah.emit_to(
         windowname,

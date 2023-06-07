@@ -14,7 +14,7 @@ use crate::{markdown::loadmarkdown,
   trie::TrieNode, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, 
+  sendtofrontend::*, startup, 
   // loadjs::loadjs
 };
 
@@ -225,6 +225,7 @@ let handle=thread::spawn(move|| {
     let endtime = duration.as_secs();
     println!("endtime----{}",endtime-startime);
     
+  startup(&window.app_handle());
     
   Ok(())  
 }

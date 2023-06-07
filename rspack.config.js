@@ -11,7 +11,7 @@ module.exports = {
   // },
   entry: {
     "file-explorer": ['./src/file-explorer.ts'],
-    // "file-explorer2": ['./src/tab1/file-explorer2.ts'],
+    "dialog": ['./src/dialog.ts'],
   },
   output: {
     filename: '[name].js',

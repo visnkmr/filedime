@@ -1,5 +1,6 @@
 #![warn(clippy::disallowed_types)]
 use filesize::PathExt;
+use prefstore::getallcustomwithin;
 use std::collections::{HashSet, HashMap};
 use std::mem::{self};
 use std::path::{Path, PathBuf};
@@ -61,6 +62,7 @@ pub struct AppStateStore {
     pub st:Arc<Mutex<TrieNode>>,
     pub stl:Arc<Mutex<FxHashMap<String,HashSet<String>>>>,
     pub process_count: Arc<Mutex<i32>>,
+    pub buttonnames:HashMap<String,String>
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
@@ -94,7 +96,13 @@ impl AppStateStore {
             st:Arc::new(Mutex::new(TrieNode::new())),
             stl:Arc::new(Mutex::new(FxHashMap::default())),
             process_count: Arc::new(Mutex::new(0)),
-
+            buttonnames: {
+               let mut buttonnames=HashMap::new();
+                for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
+                buttonnames.insert(i.clone(),j.clone());
+              }
+              buttonnames
+            }
             // tx:Mutex::new(Some(tx)),
             // rx:Mutex::new(Some(rx))
             // tx:RwLock::new(Some(tx)),
@@ -252,28 +260,26 @@ pub fn find_size(&self, path: &str) -> u64 {
 
     // Drop the read lock guard before acquiring a write lock guard
     drop(cache);
-
     let entry_path = Path::new(path);
+    if(entry_path.is_file()){
 
-    let mut size = if entry_path.is_dir() {
-        let nosize=self.nosize.read().unwrap();
-        if(*nosize){
-            0 as u64
-        }
-        else{
+        return entry_path.size_on_disk().unwrap_or(0)
+    }
+    if !entry_path.is_dir(){
+        return 0;
+    }
+    let nosize=self.nosize.read().unwrap();
+    if(*nosize){
+        return 0
+    }
+    let mut size = {
             // 0 as u64
             dirsize::dir_size(
                 &entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
                 self,
             )
 
-        }
-    } else {
-        entry_path.size_on_disk().unwrap_or(0)
-        
-        // let metadata = entry_path.symlink_metadata().unwrap();
-        // entry_path.size_on_disk_fast(&metadata).unwrap_or(0)
-    };
+        };
 
     if(size!=0){
         // Use a single write lock guard to update the cache

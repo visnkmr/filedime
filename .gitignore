@@ -33,3 +33,5 @@ src-tauri/trie
 src/openjs.ts
 src/file-explorer-1.js.map
 src/file-explorer.js.map
+src/dialog.js.map
+src/dialog.js

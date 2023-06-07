@@ -170,13 +170,34 @@ export function listenforfiles(){
       tr.appendChild(td4);
   
   
-      let td2 = document.createElement("td");
-      td2.textContent = file.size.toString();
-      td2.dataset.value = file.rawfs.toString();
-      // append the table cells to the table row
+      
+      if(file.ftype==="Folder" && file.size.toString()===""){
+
+        let calcsbutton=document.createElement("button");
+        calcsbutton.textContent="FS"
+        calcsbutton.onclick= function () {
+          (window as any).__TAURI__.invoke(
+            "foldersize",
+            {
   
-      tr.appendChild(td2);
-  
+              path: file.path,
+            }
+            ).then(
+              (size:string)=>{calcsbutton.textContent=size}
+            );
+        }
+      tr.appendChild(calcsbutton);
+      }
+      else{
+
+        let td2 = document.createElement("td");
+        td2.textContent = file.size.toString();
+        td2.dataset.value = file.rawfs.toString();
+        // append the table cells to the table row
+    
+        tr.appendChild(td2);
+    
+      }
       let td3 = document.createElement("td");
       td3.textContent = file.lmdate.toString();
       td3.dataset.value = file.timestamp.toString();

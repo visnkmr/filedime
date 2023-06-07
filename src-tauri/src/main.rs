@@ -10,6 +10,7 @@ use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
 use rayon::prelude::*;
+use sendtofrontend::sendbuttonnames;
 use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window};
 use walkdir::WalkDir;
 use std::fs;
@@ -64,6 +65,12 @@ pub struct FileItem {
 const CACHE_EXPIRY:u64=60;
 
 // define a command to list the files and directories in a given path
+async fn sendbuttons(buttonnames:Vec<String>,ah: &AppHandle) -> 
+  Result<String, String>
+  {
+    
+    Ok("".to_string())
+  }
 #[tauri::command]
 async fn backbutton(oid:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
@@ -104,15 +111,21 @@ async fn check_if_installed(appname:&str) -> Result<bool, String> {
 
   Ok(output.status.success())
 }
-pub fn init(){
+fn startup(window: &AppHandle) -> Result<(),()>{
   
   getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
-  for i in getallcustomwithin("filedime", "custom_scripts","fds"){
-    println!("{:?}",i);
+  let mut buttonnames=Vec::new();
+  println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
+  for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
+    buttonnames.push(i.clone());
+    println!("name of file{:?}",i);//filename
+    println!("{:?}",j);//contents
   }
+  sendbuttonnames(&window.app_handle(),serde_json::to_string(&buttonnames).unwrap()).unwrap();
+  Ok(())
 }
 #[tauri::command]
-async fn otb(path:String)->Result<(),()> {
+async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(),()> {
   let folder_path=&path;
   // state.getactivepath(path);
   println!("{}",path);
@@ -129,9 +142,9 @@ async fn otb(path:String)->Result<(),()> {
   if(!Path::new(&path).is_dir()){
     return Err(())
   }
-  let mut script1=getcustom("filedime", "custom_scripts/terminal_open.fds", "");
-  script1=script1.replace("%f",&path);
-  let args = script1;
+  // let mut script1=getcustom("filedime", "custom_scripts/terminal_open.fds", "");
+  let mut args = state.buttonnames.get(&bname).unwrap().clone();
+  args=args.replace("%f",&path);
   // format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
 
@@ -188,6 +201,15 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
 }
 
 #[tauri::command]
+async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
+  let sizetosend=
+  dirsize::dir_size(
+      &path.to_string(),
+      &state,
+  );
+  Ok(sizeunit::size(sizetosend,true))
+}
+#[tauri::command]
 async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.togglelsl();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
@@ -195,7 +217,7 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 }
 
 fn main() {
-  init();
+  // init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
   // let reload = CustomMenuItem::new("reload", "Reload".to_string());
   // let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());
@@ -244,6 +266,13 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
+    opendialogwindow(&app_handle, "dialog",&getuniquewindowlabel() );
+    let ss=startup(&app_handle).is_ok();
+    if ss {
+      println!("loaded buttons successfully.")
+    }else{
+      println!("loading buttons failed")
+    }
     let tray_id = "my-tray";
     SystemTray::new()
       .with_id(tray_id)
@@ -342,11 +371,13 @@ fn main() {
         search_try,
         recent_files,
         newwindow,
-        otb
+        otb,
+        foldersize
         // get_window_label
         ]
       )
     .run(tauri::generate_context!())
+    // .and_then(|a|{Ok(())})
     .expect("error while running tauri application");
 }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
@@ -389,6 +420,26 @@ pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str){
                 )
                 // .initialization_script(&INIT_SCRIPT)
                 .title(title).build().unwrap();
+}
+pub fn opendialogwindow(app_handle:&AppHandle,title:&str,label:&str){
+  println!("{:?}",getwindowlist(app_handle));
+  let menu = Menu::new();
+
+  // let INIT_SCRIPT= [r#"
+  //             console.log("poiu");
+  //              let kpg="#,pathtt,r#"
+  //                 "#].concat();
+                tauri::WindowBuilder::new(
+                  app_handle,
+                  label,
+                  tauri::WindowUrl::App("dialog.html".into())
+                )
+                .inner_size(320.0, 320.0)
+                .menu(menu)
+                // .initialization_script(&INIT_SCRIPT)
+                .title(title)
+                .build()
+                .unwrap();
 }
 // pub fn opennewtab(app_handle:&AppHandle,title:&str,pathtt:&str){
 //                 let now = SystemTime::now();

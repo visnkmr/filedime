@@ -123,6 +123,27 @@ type fsc={
   pathInput.value = data.payload.toString();
   // console.log(data.payload.toString())
 });
+(window as any).__TAURI__.event.listen("button-names", (data: { payload: string }) => {
+  let blis=document.getElementsByClassName("additional_buttons")[0] as HTMLSpanElement;
+  blis.replaceChildren()
+  let r:string[]=JSON.parse(data.payload) as string[];
+  r.forEach((value, index) =>{
+
+    let addb=document.createElement("button");
+    addb.textContent=value
+    addb.onclick= function () {
+      (window as any).__TAURI__.invoke(
+        "otb",
+        {
+          bname: value,
+          path: pathInput.value,
+        }
+        );
+  }
+    blis.appendChild(addb)
+  });
+  console.log("winnames: "+data.payload.toString())
+});
 loadsearchresult();
 searchterm();
 progress();
