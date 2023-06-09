@@ -19,7 +19,11 @@ use crate::{markdown::loadmarkdown,
 };
 
 #[tauri::command]
-pub async fn list_files(windowname:String,oid:String,path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+  // Pathresolver::new()
+  if(path=="./"){
+    path="/home/roger/Downloads/github/notes/".to_string();
+  }
   let orig = *state.process_count.lock().unwrap();
   println!("lfiles");
 
@@ -52,19 +56,20 @@ pub async fn list_files(windowname:String,oid:String,path: String,ff:String, win
 
     return Ok(())
   }
-  else{
-    match(testpath.read_dir()){
-      Ok(mut k)=>{
-        if(k.next().is_none()){
-          println!("path empty.");
-          return Ok(());
-        }
-      },
-      Err(_)=>{
+  // else{
+  //   match(testpath.read_dir()){
+  //     Ok(mut k)=>{
+  //       if(k.next().is_none()){
+  //         println!("path empty.");
+  //         showdialog(&windowname,&window.app_handle(),"path empty");
+  //         return Ok(());
+  //       }
+  //     },
+  //     Err(_)=>{
 
-      }
-    }
-  } 
+  //     }
+  //   }
+  // } 
   // state.addtab(oid, path.clone(), ff);
   newtab(&windowname,oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
   
@@ -89,10 +94,22 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
 let mut fcount;
   match(fs::read_dir(&path)){
     Ok(rv)=>{
-      fcount=rv.par_bridge() // create a parallel iterator from a sequential one
+      fcount=rv.par_bridge()
+      .filter(|e|{
+        match(e){
+          Ok(rv)=>{
+            !rv.file_name().to_string_lossy().to_string().ends_with(".git")
+          },
+          Err(_)=>{
+            false
+          }
+        }
+      }) // create a parallel iterator from a sequential one
       .count();
     },
     _=>{
+      println!("failed to read file");
+      stoptimer(&windowname, &window.app_handle())?;
       return Err("Cannot open the file/folder".to_string())
     }
     
@@ -112,6 +129,8 @@ if let Some(granloc)=parent.parent(){
 let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
 let files_clone = Arc::clone(&files); 
 let tfsize=Arc::new(Mutex::<u64>::new(0));
+let doneornot=Arc::new(Mutex::<bool>::new(false));
+let doneornot_clone=doneornot.clone();
 let mut nootimes=0;
 let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
@@ -130,6 +149,8 @@ let handle=thread::spawn(move|| {
       if last_print.elapsed() >= Duration::from_millis(*msval) { 
         // check if 200 milliseconds have passed since the last print
           let files = files_clone.lock().unwrap();
+          let don = doneornot.lock().unwrap();
+          // println!("{}------{}----{}",nootimes,files.len(),fcount);
             //           // push the file item to the vector
             // totsize+=mem::size_of_val(&file);
             // match(files.last()){
@@ -146,8 +167,9 @@ let handle=thread::spawn(move|| {
           
           folsize(&&windowname,&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
           
-          if(fcount==files.len() || nootimes>20){
+          if *don || fcount==files.len() || nootimes>20{
             // handle.abort();
+            // stoptimer(&windowname, &window.app_handle());
             break;
           }
    // lock the mutex and get a reference to the vector
@@ -165,11 +187,18 @@ let handle=thread::spawn(move|| {
       .into_iter()
       
       // .filter_entry(|e| e.file_type().is_dir()) // only yield directories
-      .filter_map(|e| e.ok());
+      .filter_map(|e|{
+
+        e.ok()
+      }
+      );
     let par_walker = walker.par_bridge(); // ignore errors
     // let files: Vec<FileItem> =
-     if let Ok(i)=par_walker
+     let i=par_walker
     .into_par_iter()
+    .filter(|rv|{
+          !rv.file_name().to_string_lossy().to_string().ends_with(".git")
+    })
     // .filter(
     //    |entry| {
     //    let path = entry.path();
@@ -179,21 +208,31 @@ let handle=thread::spawn(move|| {
     //    &&
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
-    .try_for_each(|(e)| {
+    .for_each(|(e)| {
+
           // println!("{}",e.file_name().to_string_lossy().to_string());
-          if(e.file_name().to_string_lossy().to_string().ends_with(".git"))
-          {
-            return Err(()); // return an error to stop the iteration
-          }
+        //  println!("{:?}",e);
+          // if(e.file_name().to_string_lossy().to_string().ends_with(".git"))
+          // {
+          //   println!(".git folder found. skipping it");
+          //   return Err("error"); // return an error to stop the iteration
+          // }
           
           let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&state);
           let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+          // println!("{:?}",file);
+          // println!("added--->{:?}",e);
           *tfsize_clone.lock().unwrap()+=file.rawfs;
           files.push(file.clone()); // push a clone of the file to the vector
-          Ok(()) // return Ok to continue the iteration
-      }){
-
-      }
+          
+          // Ok(()) // return Ok to continue the iteration
+      })
+      ;
+      // println!("{:?}",i);
+      // if let Err(e) = i {
+      //     println!("Error: {:?}", e);
+      // }
+      *doneornot_clone.lock().unwrap()=true;
       // .collect();
    state.print_cache_size();
     
@@ -212,7 +251,7 @@ let handle=thread::spawn(move|| {
           // let io=fscs.clone();
           // drop(fscs);
           sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
-    loadcomplete(&wname, &app_handle);
+    // loadcomplete(&wname, &app_handle);
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&wname,&app_handle)?;
   

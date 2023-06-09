@@ -1,6 +1,6 @@
 import * as globals from './file-explorer';
 import { recentfiles } from './recent_file';
-import { stoptimer } from './timer';
+import { stoptimer, stoptmr } from './timer';
 // export const { WebviewWindow } = (window as any).__TAURI__.window;
 // import {globalvars} from './global';
 var foldercount:number;
@@ -15,11 +15,22 @@ export function listenforfolcount(){
   });
   
 }
-export function listenforfiles(){
-
+export async function listenforfiles(){
+  let nooftimes=0;
+  globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
   
 
- (window as any).__TAURI__.event.listen("list-files", (data: { payload: string }) => {
+ (window as any).__TAURI__.event.listen("list-files", async (data: { payload: string }) => {
+  globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
+
+  if(globalThis.latestimefilesloaded-globalThis.lastimefilesloaded>120){
+    nooftimes+=1;
+    if(nooftimes>2){
+      stoptmr();
+      nooftimes=0;
+    }
+  }
+  globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
 

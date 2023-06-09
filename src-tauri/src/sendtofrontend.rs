@@ -5,11 +5,20 @@ use tauri::{AppHandle, Manager};
 use crate::FileItem;
 
 
-pub fn sendbuttonnames(ah:&AppHandle,buttonnames:String)->Result<(),String>{
+pub fn showdialog(windowname:&str,ah:&AppHandle,wtr:&str)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "showdialog",
+        wtr,
+      )
+      .map_err(|e| e.to_string()).unwrap();
+    Ok(())
+}
+pub fn sendbuttonnames(ah:&AppHandle,buttonnames:&Vec<String>)->Result<(),String>{
     ah.emit_to(
         "main",
         "button-names",
-        buttonnames,
+        serde_json::to_string(buttonnames).unwrap(),
       )
       .map_err(|e| e.to_string()).unwrap();
     Ok(())
@@ -59,12 +68,7 @@ pub fn stoptimer(windowname:&str,ah:&AppHandle)->Result<(),String>{
     "",
   )
   .map_err(|e| e.to_string())?; 
-ah.emit_to(
-    windowname,
-    "load-complete",
-    "",
-  )
-  .map_err(|e| e.to_string()).unwrap();
+  loadcomplete(windowname, ah);
     Ok(())
 }
 
@@ -170,6 +174,7 @@ pub fn rflist(windowname:&str,ah:&AppHandle,wtr:&HashSet<FileItem>){
     serde_json::to_string(&wtr).unwrap(),
   )
   .map_err(|e| e.to_string()).unwrap();
+if(wtr.len()>0){
   ah.emit_to(
     windowname,
     "sterm",
@@ -183,4 +188,6 @@ ah.emit_to(
     "",
   )
   .map_err(|e| e.to_string()).unwrap();
+}
+  
 }

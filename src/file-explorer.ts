@@ -1,5 +1,6 @@
 import { loadmarks } from './bookmarks';
-import  showdialog from './debug';
+import setsendpath, { resetpaste, setpasteclick } from './copynpaste';
+import  showdialog, { listendialog } from './debug';
 // import { sendlog } from './debug';
 import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
@@ -46,6 +47,14 @@ export const menu = document.getElementById("menu") as HTMLUListElement;
 
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
+globalThis.sendpath=[]
+// let sendpath="";
+export const copy = document.getElementById("copy") as HTMLButtonElement;
+copy.onclick= function () {
+  setsendpath(pathInput.value);
+}
+export const paste = document.getElementById("paste") as HTMLButtonElement;
+setpasteclick();
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
 export const newwin = document.getElementById("new_window") as HTMLButtonElement;
@@ -147,9 +156,11 @@ type fsc={
 loadsearchresult();
 searchterm();
 progress();
+globalThis.lastimefilesloaded=0;
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
+  listendialog();
   listenforfiles();
   loadmarkdown();
 
@@ -174,7 +185,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
       starttimer();
   }
-  showdialog("opening screen");
+  // showdialog("opening screen");
 
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)

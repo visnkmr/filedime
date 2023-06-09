@@ -5,3 +5,6 @@ declare var startstopfilewatchertoggle:boolean;
 declare var rescount:number;
 declare var loaded:number;
 declare var total:number;
+declare var lastimefilesloaded:number;
+declare var latestimefilesloaded:number;
+declare var sendpath:string[];

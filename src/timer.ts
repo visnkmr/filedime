@@ -33,7 +33,10 @@ function updatetimer() {
       timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
   }
-
+export function stoptmr(){
+  timer.className = "hide"
+        clearInterval(interval);
+}
  export function stoptimer(){
 
      (window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {

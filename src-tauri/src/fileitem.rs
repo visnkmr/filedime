@@ -86,13 +86,20 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
             // println!("Number of lines: {}", count); 
             }// print the count
           }
-          if let Ok(img) = image::open(path)
-            {
-
-              let (width, height) = img.dimensions();
-              filedime=
-              format!("{} x {}", width, height).to_string();
-            }
+          else if matches!(g.to_string_lossy().as_ref(),
+          "jpg" | "jpeg" | "png" | "gif" | "bmp" | "svg" | "tif" | "tiff" | "webp"
+          )
+          {
+            // println!("image found");
+            if let Ok(img) = image::image_dimensions(path)
+              {
+                
+                let (width, height) = img;
+                filedime=
+                format!("{} x {}", width, height).to_string();
+                println!("{filedime}")
+              }
+          }
           filetype=g.to_string_lossy().to_string();
           // if(!state.filesetcollection.read().unwrap().contains(&filetype)){
 
@@ -126,6 +133,22 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
           *hm.entry(filetype.clone()).or_insert(0)+=1;
     let tr;
     let (lmdate,timestamp)=lastmodified(&pathtf);
+  //   let samplestring="".to_string();
+  // let samplebool=false;
+  // let sampleu64=0 as u64;
+  // let samplei64=0 as i64;
+  // let samplei32=0;
+  // FileItem { 
+    // name:samplestring.clone(),
+        // path: samplestring.clone(),
+        // is_dir: samplebool,
+        // size: samplestring.clone(),
+        // rawfs: sampleu64,
+        // lmdate: samplestring.clone(),
+        // timestamp: samplei64,
+        // foldercon: samplei32,
+        // ftype: samplestring, 
+      // }
     FileItem { 
       name:name.clone(),
       path:pathtf.clone(),

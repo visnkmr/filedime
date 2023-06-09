@@ -1,3 +1,4 @@
+import setsendpath from './copynpaste';
 import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
 import { openfile } from './openfile';
@@ -181,15 +182,13 @@ export function handleclicks(e:Event){
         // console.log(e)
         // Code for option 1
         break;
+      case "o2":
+        setsendpath(globalThis.frompath)
+        break;
       case "o1":
       // console.log("o1")
       // console.log(e)
       // Code for option 1
-        break;
-      case "o2":
-        // console.log("o2")
-        // console.log(e)
-        // Code for option 2
         break;
       case "o3":
         // console.log("o3")

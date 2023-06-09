@@ -19,10 +19,10 @@ export function handlerightclick(e:MouseEvent){
         o2.id="o2"
         o2.textContent="Copy"
         globals.menu.appendChild(o2);
-       let o3=document.createElement("li")
-        o3.id="o3"
-        o3.textContent="paste"
-        globals.menu.appendChild(o3);
+      //  let o3=document.createElement("li")
+      //   o3.id="o3"
+      //   o3.textContent="paste in folder"
+      //   globals.menu.appendChild(o3);
        let o4=document.createElement("li")
         o4.id="o4"
         o4.textContent="add bookmark"

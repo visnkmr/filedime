@@ -8,6 +8,9 @@ export function loadsearchresult(){
   
 
     (window as any).__TAURI__.event.listen("load-sresults", (data: { payload: string }) => {
+      let files: File[] = JSON.parse(data.payload) as File[];
+      if(files.length===0)
+        return
      globals.ousd.style.display="none";
      globals.filewatch.style.display="none";
    
@@ -54,7 +57,6 @@ export function loadsearchresult(){
       //    }
        // );
        // parse the data as JSON
-       let files: File[] = JSON.parse(data.payload) as File[];
        globalThis.rescount=files.length;
        // // console.log("files")
        // clear the file list

@@ -64,13 +64,7 @@ pub struct FileItem {
 }
 const CACHE_EXPIRY:u64=60;
 
-// define a command to list the files and directories in a given path
-async fn sendbuttons(buttonnames:Vec<String>,ah: &AppHandle) -> 
-  Result<String, String>
-  {
-    
-    Ok("".to_string())
-  }
+
 #[tauri::command]
 async fn backbutton(oid:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
@@ -115,13 +109,13 @@ fn startup(window: &AppHandle) -> Result<(),()>{
   
   getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
   let mut buttonnames=Vec::new();
-  println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
+  // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
   for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
     buttonnames.push(i.clone());
-    println!("name of file{:?}",i);//filename
-    println!("{:?}",j);//contents
+    // println!("name of file{:?}",i);//filename
+    // println!("{:?}",j);//contents
   }
-  sendbuttonnames(&window.app_handle(),serde_json::to_string(&buttonnames).unwrap()).unwrap();
+  sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
   Ok(())
 }
 #[tauri::command]
@@ -153,7 +147,7 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
           // .stdout(Stdio::piped())
           .spawn()
           .unwrap();
-        println!("{:?}",output);
+        // println!("{:?}",output);
         Ok(())
 }
 // #[tauri::command]
@@ -162,10 +156,52 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
 //   window.label().to_string()
 // }
 #[tauri::command]
+fn get_timestamp() -> String {
+    let timestamp = format!("{}", chrono::Utc::now().timestamp_millis());
+    println!("{}",timestamp); 
+    timestamp
+}
+#[tauri::command]
 async fn nosize(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.togglenosize();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
+}
+//manually test using ramdisk
+//copies files from source to destination based on if there are any changes present
+#[tauri::command]
+async fn duplicatefile(source:String,dest:String,window: Window,state: State<'_, AppStateStore>)->Result<String,String>{
+  let source = std::path::Path::new(&source);
+  let destination = std::path::Path::new(&dest);
+  fs::copy(source, destination);
+  Ok("".to_string())
+}
+#[tauri::command]
+async fn copynpaste(source:Vec<String>,dest:String,window: Window,state: State<'_, AppStateStore>)->Result<String,String>{
+  // or any struct that implements the ProgressInfo trait
+  
+  let mut options = rusync::SyncOptions::default();
+  options.preserve_permissions=false;
+  for i in source{
+    let console_info = rusync::ConsoleProgressInfo::new();
+    println!("copying from {} to {}",i,dest);
+    
+  let source = std::path::Path::new(&i);
+  let destination = std::path::Path::new(&dest);
+  // println!("{:?}",source);
+  // println!("{:?}",destination);
+  let syncer = rusync::Syncer::new(&source, &destination, options, Box::new(console_info));
+  let stats = syncer.sync();
+  return match stats {
+      Err(err) => {
+          Err(format!("Error when syncing: {}", err))
+      }
+      Ok(stats) => {
+          Ok(format!("Transfered {} files", stats.copied))
+      }
+  }
+  }  
+  Ok("".to_string())
 }
 
 #[tauri::command] 
@@ -372,7 +408,9 @@ fn main() {
         recent_files,
         newwindow,
         otb,
-        foldersize
+        foldersize,
+        copynpaste,
+        get_timestamp
         // get_window_label
         ]
       )
