@@ -57,6 +57,8 @@ filetime="0.2.21"
 # indicatif="0.17.3"
 # radix_trie = "0.2.1"
 rusync="0.7.2"
+libc="0.2.144"
+sysinfo="0.29.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

@@ -12,7 +12,7 @@ import { openhtml } from './openfile';
 import { progress } from './progress';
 import { recentfiles } from './recent_file';
 import { loadsearchresult, searchterm } from './searchresult';
-import { listtabs } from './tabs';
+import { addtab, lfat, listtabs } from './tabs';
 import { starttimer } from './timer';
 import { window as uio } from '@tauri-apps/api';
 export default uio;
@@ -29,8 +29,7 @@ globalThis.startstopfilewatchertoggle = false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 
-
-
+globalThis.activetab="";
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
 export const searchInput = document.getElementById("search-input") as HTMLInputElement;
 export const listButton = document.getElementById("list-button") as HTMLButtonElement;
@@ -53,7 +52,7 @@ export const copy = document.getElementById("copy") as HTMLButtonElement;
 copy.onclick= function () {
   setsendpath(pathInput.value);
 }
-export const paste = document.getElementById("paste") as HTMLButtonElement;
+export const sync = document.getElementById("sync") as HTMLButtonElement;
 setpasteclick();
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
@@ -160,11 +159,13 @@ globalThis.lastimefilesloaded=0;
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
+  lfat();
   listendialog();
   listenforfiles();
   loadmarkdown();
 
   if(label==="main"){
+    addtab(uio.appWindow.label,globalThis.defpath);
     (window as any).__TAURI__.invoke(
     "list_files",
     {
@@ -173,16 +174,30 @@ window.addEventListener("DOMContentLoaded", () => {
       path: globalThis.defpath,
       ff: ""
     });
- 
     starttimer();
   }
   else{
-    (window as any).__TAURI__.invoke(
+    console.log(label+"------"+globalThis.tid);
+      (window as any).__TAURI__.invoke(
       "whattoload",
       {
         windowname:label,
-        id: globalThis.tid.toString(),
+      })
+      .then((path:string)=>{
+        addtab(label,path)
       });
+      
+      //addtab here TODO
+      // (window as any).__TAURI__.invoke(
+      //   "getpathfromid",
+      //   {
+      //     id:globalThis.tid.toString()
+      //   }).then(
+      //     (returned:string)=>{
+      //       addtab(uio.appWindow.label,returned);
+      //       console.log(returned)
+      //     }
+      //   );
       starttimer();
   }
   // showdialog("opening screen");

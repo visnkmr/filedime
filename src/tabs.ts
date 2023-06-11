@@ -1,3 +1,4 @@
+import { invoke, path } from '@tauri-apps/api';
 import * as globals from './file-explorer';
 
 export function listtabs(){
@@ -19,10 +20,34 @@ export function listtabs(){
     // loop through the files array
     for (let tb of tabs) {
       // create a table row element for each file
-      let b = document.createElement("button");
-      b.className = "tab-button"
+      // let border=document.createElement("span");
+      // border.className="border-bx"
+      // globals.tablist.appendChild(border);
+      // let tbt=document.createElement("span");
+      // tbt.className="tbt"
+
+      let b = document.createElement("div");
+      b.className = "tab-button";
+      if(tb.path===globalThis.activetab){
+        b.classList.add("active");
+        b.classList.remove("inactive");
+      }
+      else{
+        b.classList.add("inactive");
+        b.classList.remove("active");
+      }
+     (window as any).__TAURI__.invoke(
+        "getuniquewindowlabel",
+        {
+          
+        }
+        ).then((returned:string)=>{
+          b.dataset.ul=returned;
+        })
+
       let sn = document.createElement("span");
       sn.className = "tab-name"
+      
       let sc = document.createElement("span");
       sc.className = "tab-close"
       sn.textContent = tb.tabname;
@@ -32,7 +57,63 @@ export function listtabs(){
       b.id = tb.id.toString();
       b.dataset.path = tb.path;
       b.dataset.ff = tb.ff;
+      // b.appendChild(tbt)
       globals.tablist.appendChild(b);
     }
   });
+}
+export function lfat(){
+  
+  (window as any).__TAURI__.event.listen("lfat", (data: { wname: string,path:string }) => {
+    console.log("new------_______>"+data);
+    addtab(data.wname,data.path)
+  });
+}
+export function addtab(wname:string,path:string){
+    // get the value of the path input
+    // let path = pathInput.value;
+    globalThis.tid = globalThis.tid as number + 1;
+    // invoke the list_files command from the backend with the path as argument
+    (window as any).__TAURI__.invoke(
+      "newtab",
+      {
+        windowname:wname,
+        oid: globalThis.tid.toString(),
+        path: path,
+        ff: ""
+      }
+    );
+    globals.tablist.childNodes.forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        (child as HTMLDivElement).classList.add('inactive');
+        (child as HTMLDivElement).classList.remove('active');
+      }
+    });
+    let b = document.createElement("div");
+      b.classList.add( "tab-button");
+      
+      b.classList.add( "active");
+      // b.className="inactive"
+      let sn = document.createElement("span");
+      sn.className = "tab-name"
+      
+      let sc = document.createElement("span");
+      sc.className = "tab-close";
+       (window as any).__TAURI__.invoke(
+        "tabname",
+        {
+          path:path,
+        }
+      ).then((returned:string)=>{
+        sn.textContent =returned
+      });
+      sc.textContent = "x";
+      b.appendChild(sn);
+      b.appendChild(sc);
+      b.id = globalThis.tid.toString();
+      b.dataset.path = path;
+      b.dataset.ff = "";
+      // b.appendChild(tbt)
+      globals.tablist.appendChild(b);
+      
 }

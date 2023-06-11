@@ -6,11 +6,13 @@ mod dirsize;
 mod fileitem;
 mod filltrie;
 mod sendtofrontend;
+mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
 use rayon::prelude::*;
-use sendtofrontend::sendbuttonnames;
+use sendtofrontend::{sendbuttonnames, lfat};
+use serde_json::json;
 use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window};
 use walkdir::WalkDir;
 use std::fs;
@@ -212,13 +214,17 @@ async fn folcount(windowname:&str,id:String,path:String,window: Window,state: St
 }
 
 #[tauri::command]
-async fn whattoload(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
+  state.gettab(&id).0
+}
+#[tauri::command]
+async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
   // state.togglefolcount();
   // state.addtab(id.clone(),"./".to_string(), "newtab".to_string(),windowname.to_string());//move to where you open new window
-  let whichpath=state.gettab(&id).0;
-  println!("{}",whichpath);
-  list_files(windowname.to_string(),id,whichpath,"".to_string(), window, state).await;
-  Ok(())
+  let whichpath=state.gettabfromwinlabel(&windowname.to_string()).unwrap();
+  println!("{}",whichpath.0);
+  list_files(windowname.to_string(),whichpath.1,whichpath.0.clone(),"".to_string(), window, state).await.unwrap();
+  Ok(whichpath.0)
 }
 #[tauri::command]
 async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
@@ -229,13 +235,24 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
   if let Some(fname)=filename.file_name(){
     wname=fname.to_str().unwrap();
   }
-  opennewwindow(&window.app_handle(),&wname,&absolute_date);
+  let nwindow=opennewwindow(&window.app_handle(),&wname,&absolute_date);
+  println!("new winodw==============");
+  // whattoload(&absolute_date, id, nwindow, state).await;
   // listtabs(windowname,window, state).await;
   // list_files(absolute_date.to_string(),id,path,"".to_string(), window, state).await;
 
   Ok(())
 }
 
+#[tauri::command]
+fn tabname(path:String)->String{
+  if let Some(h)=PathBuf::from(path).file_stem(){
+    h.to_string_lossy().to_string()
+}
+else{
+    "".to_string()
+}
+}
 #[tauri::command]
 async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
   let sizetosend=
@@ -332,7 +349,7 @@ fn main() {
               else{
                 // println!("{:?}",gk);
                 let absolute_date=getuniquewindowlabel();
-                opennewwindow(&app_handle,"uio",&absolute_date)
+                opennewwindow(&app_handle,"uio",&absolute_date);
 
                 
                 // tauri::Builder::new()
@@ -387,9 +404,12 @@ fn main() {
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
+        getpathfromid,
+        tabname,
         list_files,
         loadmarkdown,
         get_path_options,
+        getuniquewindowlabel,
         openpath,
         nosize,
         folcount,
@@ -444,7 +464,7 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
   // println!("{:?}",options);
   Ok(options)
 }// In Rust, define a function that takes a path as an argument and returns a list of possible paths
-pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str){
+pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
   println!("{:?}",getwindowlist(app_handle));
 
   // let INIT_SCRIPT= [r#"
@@ -457,7 +477,7 @@ pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str){
                   tauri::WindowUrl::App("index.html".into())
                 )
                 // .initialization_script(&INIT_SCRIPT)
-                .title(title).build().unwrap();
+                .title(title).build().unwrap()
 }
 pub fn opendialogwindow(app_handle:&AppHandle,title:&str,label:&str){
   println!("{:?}",getwindowlist(app_handle));
@@ -502,6 +522,7 @@ pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
     e.0.clone()
   }).collect::<Vec<String>>()
 }
+#[tauri::command]
 fn getuniquewindowlabel()->String{
   let now = SystemTime::now();
 

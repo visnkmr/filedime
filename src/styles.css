@@ -111,6 +111,14 @@ nav {
 }
 #newtab{
   color: black;
+  display: inline-block;
+  /* padding: 10px; */
+  margin: 10px;
+  border: none;
+  /* border-bottom: none; */
+  background-color: white;
+  color: black;
+  cursor: pointer;
 }
 
 /* Style the timer element */
@@ -269,20 +277,40 @@ progress{
 .tab-button {
   display: inline-block;
   padding: 10px;
-  margin: 10px;
+
+  
+  margin-right: 0px;
+  border:none;
   border: 1px solid black;
+  margin: 10px 10px 10px 1px;
   /* border-bottom: none; */
-  background-color: darkgray;
+  background-color: white;
   color: black;
   cursor: pointer;
 }
-
+/* *{
+  overflow: hidden;
+} */
+.inactive{
+  background: gray;
+}
+.tbt{
+  padding: 10px;
+  margin: 10px 10px 10px 1px;
+}
+.border-bx{
+  border: 1px solid black;
+}
 /* Style the name and X as inline elements */
 .tab-name, .tab-close {
   display: inline-block;
   vertical-align: middle;
   background-color: transparent;
   color: black;
+}
+.tab-close{
+  padding-bottom: 1px;
+  align-items: center;
 }
 
 /* Style the X as a red circle */

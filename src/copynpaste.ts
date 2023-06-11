@@ -6,15 +6,15 @@ export default function setsendpath(wt:string){
     globalThis.sendpath.push(wt)
     console.log(globalThis.sendpath)
     // console.log(globals.paste)
-    globals.paste.textContent=`Paste (${sendpath.length})`
+    globals.sync.textContent=`Sync (${sendpath.length})`
 }
 export function resetpaste(){
     globalThis.sendpath=[];
-    globals.paste.textContent=`Paste`;
+    globals.sync.textContent=`Sync`;
 }
 
 export function setpasteclick(){
-    globals.paste.onclick= function () {
+    globals.sync.onclick= function () {
         (window as any).__TAURI__.invoke(
           "copynpaste",
           {

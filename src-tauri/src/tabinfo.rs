@@ -32,12 +32,12 @@ Ok(())
 pub async fn closetab(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.removetab(id);
   let app_handle = window.app_handle();
-  app_handle.emit_to(
-    windowname,
-    "list-tabs",
-    serde_json::to_string(&state.gettabs()).unwrap(),
-  )
-  .map_err(|e| e.to_string()).unwrap();
+  // app_handle.emit_to(
+  //   windowname,
+  //   "list-tabs",
+  //   serde_json::to_string(&state.gettabs()).unwrap(),
+  // )
+  // .map_err(|e| e.to_string()).unwrap();
   Ok(())
 }
 #[tauri::command]
@@ -57,6 +57,6 @@ Ok(())
 pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.addtab(oid.clone(), path.clone(), ff.clone(),windowname.to_string());
   
-  listtabs(windowname,window, state).await;
+  // listtabs(windowname,window, state).await;
   Ok(())
 }

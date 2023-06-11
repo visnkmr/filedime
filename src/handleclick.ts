@@ -3,6 +3,7 @@ import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
 import { openfile } from './openfile';
 import { recentfiles } from './recent_file';
+import { addtab } from './tabs';
 // declare var globalThis.tid:number|string
 // declare var globalThis.frompath:string
 export function handleclicks(e:Event){
@@ -63,19 +64,7 @@ export function handleclicks(e:Event){
         }
       }
     if(target===globals.newtab){
-      // get the value of the path input
-    // let path = pathInput.value;
-    globalThis.tid = globalThis.tid as number + 1;
-    // invoke the list_files command from the backend with the path as argument
-    (window as any).__TAURI__.invoke(
-      "newtab",
-      {
-        windowname:uio.appWindow.label,
-        oid: globalThis.tid.toString(),
-        path: "/home/roger/Downloads/",
-        ff: ""
-      }
-    );
+    addtab(uio.appWindow.label,"/home/roger/Downloads/");
     (window as any).__TAURI__.invoke(
       "load_tab",
       {
@@ -133,6 +122,17 @@ export function handleclicks(e:Event){
     // // console.log(e.target.id);
     var pen = (target);
     if (pen.className === "tab-name") {
+      globalThis.activetab=(pen.parentNode as HTMLDivElement).dataset.path!;
+      
+      globals.tablist.childNodes.forEach(child => {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          (child as HTMLDivElement).classList.add('inactive');
+          (child as HTMLDivElement).classList.remove('active');
+        }
+      });
+      (pen.parentNode as HTMLDivElement).classList.add("active");
+      (pen.parentNode as HTMLDivElement).classList.remove("inactive");
+
       // Do something when name is clicked
       // console.log("Loadtab");
       // Stop the event from bubbling up to the button element
@@ -157,6 +157,7 @@ export function handleclicks(e:Event){
           id: globalThis.tid.toString()
         }
       );
+      (pen.parentNode as HTMLDivElement).remove()
     }
 
     // pathInput.value = (target).dataset.path!
@@ -174,10 +175,11 @@ export function handleclicks(e:Event){
         (window as any).__TAURI__.invoke(
           "newwindow",
           {
-            id: globalThis.tid.toString(),
+            id: (globalThis.tid as number + 1).toString(),
             path: globalThis.frompath,
             ff:""
           });
+          // addtab()
         // console.log("o1")
         // console.log(e)
         // Code for option 1
@@ -316,18 +318,8 @@ export function handleclicks(e:Event){
       })
   }
   if((target).className=="mark-button"){
-    var gpath=(target).dataset.path;
-    globalThis.tid = globalThis.tid as number + 1;
-    // invoke the list_files command from the backend with the path as argument
-    (window as any).__TAURI__.invoke(
-      "newtab",
-      {
-        windowname:uio.appWindow.label,
-        oid: globalThis.tid.toString(),
-        path: gpath,
-        ff: ""
-      }
-    ).await;
+    var gpath=(target).dataset.path!;
+    addtab(uio.appWindow.label,gpath);
     (window as any).__TAURI__.invoke(
       "load_tab",
       {

@@ -221,6 +221,15 @@ impl AppStateStore {
             tab.history
         )
     }
+    pub fn gettabfromwinlabel(&self,winlabel:&String)->Option<(String,String)>{
+        let elements=self.tabs.read().unwrap().clone();
+        for (id,others) in elements{
+            if(others.windowname==winlabel.clone()){
+            return Some((others.path,id))
+            }
+        }
+        None
+    }
     pub fn getactivepath(&self,id:&str)->(String,String,Vec<String>){
         let tab= self.tabs.read().unwrap().get(id).unwrap().clone();
         return (

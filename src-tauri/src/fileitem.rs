@@ -1,7 +1,11 @@
 
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File, OpenOptions}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+#[cfg(unix)]
+use std::os::unix::fs::OpenOptionsExt;
 
-use image::GenericImageView;
+#[cfg(windows)]
+use std::os::windows::fs::OpenOptionsExt;
+use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
@@ -90,8 +94,30 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
           "jpg" | "jpeg" | "png" | "gif" | "bmp" | "svg" | "tif" | "tiff" | "webp"
           )
           {
+            #[cfg(windows)]
+    let f = 
+    
+    BufReader::new(
+      OpenOptions::new()
+      .read(true)
+      .custom_flags( libc::FILE_FLAG_OVERLAPPED 
+    )
+      .open(path).unwrap());
+    #[cfg(unix)]
+    let f = 
+    
+    BufReader::new(
+      OpenOptions::new()
+      .read(true)
+      .custom_flags({ libc::O_NONBLOCK } 
+    )
+      .open(path).unwrap());
+ 
+    let mut reader = image::io::Reader::new(f);
             // println!("image found");
-            if let Ok(img) = image::image_dimensions(path)
+            if let Ok(img) = 
+            // image::image_dimensions(path)
+           reader.into_dimensions()
               {
                 
                 let (width, height) = img;

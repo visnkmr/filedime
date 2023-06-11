@@ -5,6 +5,15 @@ use tauri::{AppHandle, Manager};
 use crate::FileItem;
 
 
+pub fn lfat(windowname:&str,ah:&AppHandle,wtr:&str)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "lfat",
+        wtr,
+      )
+      .map_err(|e| e.to_string()).unwrap();
+    Ok(())
+}
 pub fn showdialog(windowname:&str,ah:&AppHandle,wtr:&str)->Result<(),String>{
     ah.emit_to(
         windowname,
