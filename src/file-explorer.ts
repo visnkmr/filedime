@@ -6,7 +6,7 @@ import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
-import { listenforfiles, listenforfolcount } from './listfiles';
+import { listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { menuapilistener } from './menu_apis';
 import { openhtml } from './openfile';
@@ -44,7 +44,7 @@ export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
-export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
+// export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
 
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
@@ -181,7 +181,7 @@ window.addEventListener("DOMContentLoaded", () => {
       path: globalThis.defpath,
       ff: ""
     });
-    loader.hidden=false;
+    // loader.hidden=false;
     starttimer();
   }
   else{

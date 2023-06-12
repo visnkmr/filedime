@@ -1,4 +1,5 @@
 import uio, * as globals from './file-explorer';
+import { settableandtbody } from './listfiles';
 import { recentfiles } from './recent_file';
 
 
@@ -40,6 +41,8 @@ export function menuapilistener(){
         break;
         case 'tsearch': populatesearchlist();
         break;
+        case "resettable":settableandtbody();
+          break;
         default: {
           // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
           // console.log(statusofpar.message)

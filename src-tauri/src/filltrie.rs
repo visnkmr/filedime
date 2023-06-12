@@ -114,10 +114,11 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
         .map(
           |e|
           {
-            window.emit("reloadlist",json!({
-              "message": "pariter5",
-              "status": "running",
-          }));
+            eprintln!("addedtosearch");
+          //   window.emit("reloadlist",json!({
+          //     "message": "pariter5",
+          //     "status": "running",
+          // }));
             if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
               return None; // if yes, it means a new command has been invoked and the old one should be canceled
             }

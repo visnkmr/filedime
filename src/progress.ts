@@ -12,19 +12,19 @@ export function progress(){
       else
         setp.className = "show"
     });
-    type statusmesg={
-      message:string,
-      status:string
-      }
-    (window as any).__TAURI__.event.listen("infiniteloader", (data: { payload: string }) => {
-        // globalThis.loaded=data.payload;
-        let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
+    // type statusmesg={
+    //   message:string,
+    //   status:string
+    //   }
+    // (window as any).__TAURI__.event.listen("infiniteloader", (data: { payload: string }) => {
+    //     // globalThis.loaded=data.payload;
+    //     let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
        
-        switch(statusofpar.status){
-            case "start":globals.loader.hidden = false;
-            break;
-            case "stop":globals.loader.hidden=true;
-            break;
-          }
-    });
+    //     switch(statusofpar.status){
+    //         case "start":globals.loader.hidden = false;
+    //         break;
+    //         case "stop":globals.loader.hidden=true;
+    //         break;
+    //       }
+    // });
    }

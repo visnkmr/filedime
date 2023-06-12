@@ -27,14 +27,18 @@ type File = {
   ftype: string;
 };
 export async function listenforfiles(){
+  
   let nooftimes=0;
   globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
 
  (window as any).__TAURI__.event.listen("list-files", async (data: { payload: string }) => {
+  setautocompletepath();
+  console.log("settingpath");
+
   globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
 
   if(globalThis.latestimefilesloaded-globalThis.lastimefilesloaded>120){
-    globals.loader.hidden=true;
+    // globals.loader.hidden=true;
     nooftimes+=1;
     if(nooftimes>2){
       stoptmr();
@@ -44,28 +48,30 @@ export async function listenforfiles(){
   globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
+// Get the element by id
+let element = document.getElementById("listoffiles");
 
+// Check if it exists
+if (element!==null) {
+  eachfile(JSON.parse(data.payload) as File);
+  // The element exists
+  console.log("The element exists");
+} else {
+  settableandtbody();
+  // The element does not exist
+  console.log("The element does not exist");
+}
     // globals.htmlbase.innerHTML = ""
     console.log("listfiles")
     // pathline.innerHTML != "";
-  setautocompletepath();
+  
     // );
     // parse the data as JSON
-    let files: File[] = JSON.parse(data.payload) as File[];
-    globalThis.loaded=files.length;
+    // let files: File[] = JSON.parse(data.payload) as File[];
+    // globalThis.loaded=files.length;
     // // console.log("files")
     // clear the file list
-    settableandtbody();
-    // console.log(files.length)
-    // console.log("here" + percomp.toString());
-    // // console.log(data.payload)
-    // loop through the files array
-    for (let file of files) {
-      // append the table row to the table body
-      (eachfile(file));
-    }
-    // // append the table body to the table
-    // recentfiles();
+    
   });
   stoptimer();
 }
@@ -75,6 +81,7 @@ export async function listenforfiles(){
 // }
 
 export function eachfile(file:File){
+  console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
   let tr = document.createElement("tr");

@@ -1,6 +1,7 @@
 import setsendpath from './copynpaste';
 import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
+import { settableandtbody } from './listfiles';
 import { loader } from './loader';
 import { populateimmediatechildcount, populatesearchlist, reloadlist, reloadsize } from './menu_apis';
 import { openfile } from './openfile';
@@ -289,7 +290,7 @@ export function handleclicks(e:Event){
         path: pathtg,
         ff: ""
       })
-      globals.loader.hidden=false
+      // globals.loader.hidden=false
   }
   if((target).className=="mark-button"){
     var gpath=(target).dataset.path!;

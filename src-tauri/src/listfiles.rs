@@ -65,6 +65,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
     opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&getuniquewindowlabel());
     return Ok(())
   }
+  window.emit("reloadlist","resettable").unwrap();
   let orig = *state.process_count.lock().unwrap();
 
   state.filesetcollection.write().unwrap().clear();
@@ -148,6 +149,7 @@ let mut nootimes=0;
 let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
 let window2=window.clone();
+let windowname2=windowname.clone();
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 // spawn a new thread to print the value of the files vector every 200 milliseconds
 let handle=thread::spawn(move|| {
@@ -177,9 +179,9 @@ let handle=thread::spawn(move|| {
             //   }
             // }
             
-              fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
+              // fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
-          folsize(&&windowname,&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+          folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
           
           if *don || fcount==files.len() {
             // window2.emit("infiniteloader",
@@ -248,7 +250,7 @@ let handle=thread::spawn(move|| {
           // println!("added--->{:?}",e);
           *tfsize_clone.lock().unwrap()+=file.rawfs;
           files.push(file.clone()); // push a clone of the file to the vector
-          // fileslist(&&windowname,&app_handle,&serde_json::to_string(&file.clone()).unwrap());
+          fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
           // Ok(()) // return Ok to continue the iteration
       })
       ;
@@ -265,7 +267,7 @@ let handle=thread::spawn(move|| {
     handle.join().unwrap();
   
     let app_handle=window.clone().app_handle();
-    fileslist(&wname,&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
+    // fileslist(&wname,&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
   
     folsize(&wname,&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
     // sort the vector by name
