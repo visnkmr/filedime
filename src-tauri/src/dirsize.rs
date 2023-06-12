@@ -29,7 +29,7 @@ pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
     let total_size = par_walker
         // Filter out directories and symlinks
         .filter(|entry| {
-            
+            eprintln!("checking size");
             let path = entry.path();
             path.is_file() &&
              !path.is_symlink() &&

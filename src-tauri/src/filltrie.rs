@@ -1,6 +1,7 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use rayon::prelude::*;
+use serde_json::json;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
 
@@ -66,7 +67,7 @@ use crate::{markdown::loadmarkdown,
 // }
 
 #[tauri::command]
-pub async fn populate_try(path: String, state: &State<'_, AppStateStore>){
+pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStateStore>){
   let orig = *state.process_count.lock().unwrap();
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
@@ -113,6 +114,10 @@ pub async fn populate_try(path: String, state: &State<'_, AppStateStore>){
         .map(
           |e|
           {
+            window.emit("reloadlist",json!({
+              "message": "pariter5",
+              "status": "running",
+          }));
             if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
               return None; // if yes, it means a new command has been invoked and the old one should be canceled
             }

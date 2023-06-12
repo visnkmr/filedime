@@ -1,6 +1,7 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use rayon::prelude::*;
+use serde_json::json;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
 
@@ -14,12 +15,13 @@ use crate::{markdown::loadmarkdown,
   trie::TrieNode, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, startup, 
+  sendtofrontend::*, startup, opendialogwindow, 
   // loadjs::loadjs
 };
 
 #[tauri::command]
 pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+  
   // Pathresolver::new()
   if(path=="./"){
     path="/home/roger/Downloads/github/notes/".to_string();
@@ -31,6 +33,10 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
+  if(!testpath.exists()){
+    opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.");
+    return Ok(())
+  }
   if(path.ends_with(".md")){
     loadmarkdown(&windowname,path,window,state);
     return Ok(());
@@ -53,7 +59,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   }
 
   if(!testpath.is_dir()){
-
+    opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type");
     return Ok(())
   }
   // else{
@@ -209,6 +215,10 @@ let handle=thread::spawn(move|| {
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
     .for_each(|(e)| {
+      window.emit("reloadlist",json!({
+        "message": "pariter1",
+        "status": "running",
+    }));
 
           // println!("{}",e.file_name().to_string_lossy().to_string());
         //  println!("{:?}",e);
@@ -218,7 +228,7 @@ let handle=thread::spawn(move|| {
           //   return Err("error"); // return an error to stop the iteration
           // }
           
-          let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&state);
+          let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
           let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
           // println!("{:?}",file);
           // println!("added--->{:?}",e);
@@ -256,7 +266,7 @@ let handle=thread::spawn(move|| {
     stoptimer(&wname,&app_handle)?;
   
     if(*state.loadsearchlist.read().unwrap()){
-      populate_try(path, &state).await;
+      populate_try(path, &window,&state).await;
     }
 
     let now = SystemTime::now();

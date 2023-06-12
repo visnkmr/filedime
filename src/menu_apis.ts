@@ -36,9 +36,14 @@ export function menuapilistener(){
         break;
         case 'tsearch': populatesearchlist();
         break;
-        default:reloadlist();
+        default: {
+          let statusofpar=JSON.stringify(data.payload);
+          console.log(statusofpar)
+          console.log(statusofpar.)
+        }
+        // default:reloadlist();
       }
-       reloadlist();
+      //  reloadlist();
       });
     
 }

@@ -7,6 +7,7 @@ use std::os::unix::fs::OpenOptionsExt;
 use std::os::windows::fs::OpenOptionsExt;
 use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
+use serde_json::json;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
 
@@ -19,7 +20,7 @@ use crate::{markdown::loadmarkdown,
   // loadjs::loadjs
 };
 
-pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)->FileItem{
+pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, AppStateStore>)->FileItem{
     // println!("{}",name);
     let pathtf=path.to_string_lossy().into_owned();
     // println!("-----------{}",path.clone());
@@ -41,7 +42,13 @@ pub fn populatefileitem(name:String,path:&Path,state: &State<'_, AppStateStore>)
                   .into_iter()
                   .filter_map(|entry| entry.ok())
                   .par_bridge()
-                  .filter(|entry| entry.file_type().is_file())
+                  .filter(|entry| {
+                    window.emit("reloadlist",json!({
+                      "message": "pariter6",
+                      "status": "running",
+                  }));
+                    entry.file_type().is_file()
+                  })
                   .count();
                 foldercon=count as i32;
       }

@@ -2,6 +2,7 @@ use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duratio
 
 use rayon::prelude::*;
 use serde::Serialize;
+use serde_json::json;
 // use rust_search::similarity_sort;
 use tauri::{Window, State, Manager};
 use walkdir::WalkDir;
@@ -216,6 +217,10 @@ let u:HashSet<String>=map.clone()
       //  i.contains(&string)
     })
     .flat_map(|(_, y)| {
+      window.emit("reloadlist",json!({
+        "message": "pariter2",
+        "status": "running",
+    }));
       y.par_iter()
     })
     .cloned()
@@ -252,6 +257,10 @@ let u:HashSet<String>=map.clone()
     // v.split_off(100);
     // for (c,ei) in 
     v.par_iter().enumerate().try_for_each(|(c,ei)|{
+      window.emit("reloadlist",json!({
+        "message": "pariter3",
+        "status": "running",
+    }));
       // if c>2000{
       //   return None;
       // }
@@ -263,7 +272,7 @@ let u:HashSet<String>=map.clone()
         // Write to the hashset with a write lock
         let mut ret = ret.write().unwrap();
         fuzzy_match(&fname, &string);
-        ret.insert(populatefileitem(fname, path, &state));
+        ret.insert(populatefileitem(fname, path,&window, &state));
         
         // Drop the lock after inserting
         drop(ret);
@@ -401,6 +410,7 @@ pub async fn search_pop(path: String,string:String){
         .filter_map(
           |i|
           {
+            
           match(i){
             Ok(i) => {
               if((i.file_name()
@@ -420,6 +430,10 @@ pub async fn search_pop(path: String,string:String){
         .map(
           |e|
           {
+          //   window.emit("reloadlist",json!({
+          //     "message": "pariter8",
+          //     "status": "running",
+          // }));
            e
           })
           .collect();
