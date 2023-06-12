@@ -1,18 +1,20 @@
 use rayon::prelude::*;
+use serde_json::json;
+use tauri::{Window, State};
 use std::{fs, path::{PathBuf, Path}};
 use walkdir::WalkDir;
 
-use crate::appstate::AppStateStore;
+use crate::{appstate::AppStateStore, sizeunit::find_size};
 
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path,g:&AppStateStore) -> u64 {
-    g.find_size(&path.to_string_lossy())
+fn file_size(path: &std::path::Path,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
+    find_size(&path.to_string_lossy(),w,g)
     // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
     // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
+pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
     // Create a walkdir iterator over the directory
     let walker = WalkDir::new(path)
     // .min_depth(1) // skip the root directory
@@ -29,7 +31,8 @@ pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
     let total_size = par_walker
         // Filter out directories and symlinks
         .filter(|entry| {
-            eprintln!("checking size");
+            // eprintln!("checking size");
+            
             let path = entry.path();
             path.is_file() &&
              !path.is_symlink() &&
@@ -38,9 +41,24 @@ pub fn dir_size(path: &String,g:&AppStateStore) -> u64 {
         // Filter out paths that start with "./.git"
         // .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
         // Map each path to its file size
-        .map(|entry| file_size(entry.path(),g))
+        .map(|entry| {
+            // println!("parthread");
+            
+            // w.emit("reloadlist",json!({
+            //     "message": "pariter8",
+            //     // "status": entry.path(),
+            //     "status": "running",
+            // }));
+            file_size(entry.path(),w,g)
+        })
         // Sum up all file sizes
         .sum::<u64>();
+    w.emit("infiniteloader",
+      json!({
+          "message": "lfiles",
+          "status": "stop",
+          })
+      );
 
     total_size
 }

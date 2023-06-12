@@ -258,6 +258,7 @@ async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)-
   let sizetosend=
   dirsize::dir_size(
       &path.to_string(),
+      &window,
       &state,
   );
   Ok(sizeunit::size(sizetosend,true))
@@ -346,7 +347,7 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
-    opendialogwindow(&app_handle, "dialog",&getuniquewindowlabel() );
+    opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {
       println!("loaded buttons successfully.")
@@ -569,7 +570,7 @@ pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
                 // .initialization_script(&INIT_SCRIPT)
                 .title(title).build().unwrap()
 }
-pub fn opendialogwindow(app_handle:&AppHandle,title:&str,label:&str){
+pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str){
   println!("{:?}",getwindowlist(app_handle));
   let menu = Menu::new();
 

@@ -14,7 +14,7 @@ use walkdir::{WalkDir, DirEntry};
 use crate::{markdown::loadmarkdown, 
   openpath, 
   tabinfo::newtab, 
-  FileItem, sizeunit, 
+  FileItem, sizeunit::{self, find_size}, 
   lastmodcalc::lastmodified, 
   appstate::AppStateStore, openhtml::loadfromhtml, trie::TrieNode, 
   // loadjs::loadjs
@@ -28,7 +28,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size=
     if(!path.is_symlink()){
-      state.find_size(&pathtf)
+      find_size(&pathtf,window,state)
     }
     else{
       0

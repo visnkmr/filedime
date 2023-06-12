@@ -15,8 +15,8 @@ use crate::bookmarks::*;
 // Use the gio crate
 // use gio::prelude::*;
 pub struct cachestore{
-    size:u64,
-    expirytime: u64,
+    pub size:u64,
+    pub expirytime: u64,
 }
 
 
@@ -46,13 +46,13 @@ pub struct cachestore{
 // }
 // Define a struct that holds the cache and the expiration time
 pub struct AppStateStore {
-    cstore:RwLock<FxHashMap<String,cachestore>>,
-    nosize:RwLock<bool>,
+    pub cstore:RwLock<FxHashMap<String,cachestore>>,
+    pub nosize:RwLock<bool>,
     pub filesetcollection:RwLock<HashMap<String,i32>>,
     pub showfolderchildcount:RwLock<bool>,
     pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
-    expiration:Duration,
+    pub expiration:Duration,
     
     bookmarks:RwLock<HashSet<marks>>,
     messagetothread:RwLock<String>,
@@ -241,85 +241,85 @@ impl AppStateStore {
     }
     
     
-pub fn find_size(&self, path: &str) -> u64 {
-    // return 0 as u64;
-    let cstore=self.cstore.read().unwrap();
+// pub fn find_size(&self, path: &str) -> u64 {
+//     // return 0 as u64;
+//     let cstore=self.cstore.read().unwrap();
 
-    // let k=0;
-    // if(k==0){
-    //     return 0;
-    // }
-    // Use a single read lock guard to access the cache
-    let cache = cstore;
+//     // let k=0;
+//     // if(k==0){
+//     //     return 0;
+//     // }
+//     // Use a single read lock guard to access the cache
+//     let cache = cstore;
 
-    if let Some(cstore) = cache.get(path) {
-        let size=cstore.size;
-        let expirytime=cstore.expirytime;
-        let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let nowtime = duration.as_secs();
-        // Use the same lock guard to get the expiry time
-        // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
-            if nowtime < expirytime {
-                return size;
-            } else {
-                println!("expired")
-            }
-        // }
-    }
+//     if let Some(cstore) = cache.get(path) {
+//         let size=cstore.size;
+//         let expirytime=cstore.expirytime;
+//         let now = SystemTime::now();
+//         let duration = now.duration_since(UNIX_EPOCH).unwrap();
+//         let nowtime = duration.as_secs();
+//         // Use the same lock guard to get the expiry time
+//         // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
+//             if nowtime < expirytime {
+//                 return size;
+//             } else {
+//                 println!("expired")
+//             }
+//         // }
+//     }
 
-    // Drop the read lock guard before acquiring a write lock guard
-    drop(cache);
-    let entry_path = Path::new(path);
-    if(entry_path.is_file()){
+//     // Drop the read lock guard before acquiring a write lock guard
+//     drop(cache);
+//     let entry_path = Path::new(path);
+//     if(entry_path.is_file()){
 
-        return entry_path.size_on_disk().unwrap_or(0)
-    }
-    if !entry_path.is_dir(){
-        return 0;
-    }
-    let nosize=self.nosize.read().unwrap();
-    if(*nosize){
-        return 0
-    }
-    let mut size = {
-            // 0 as u64
-            dirsize::dir_size(
-                &entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
-                self,
-            )
+//         return entry_path.size_on_disk().unwrap_or(0)
+//     }
+//     if !entry_path.is_dir(){
+//         return 0;
+//     }
+//     let nosize=self.nosize.read().unwrap();
+//     if(*nosize){
+//         return 0
+//     }
+//     let mut size = {
+//             // 0 as u64
+//             dirsize::dir_size(
+//                 &entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
+//                 self,
+//             )
 
-        };
+//         };
 
-    if(size!=0){
-        // Use a single write lock guard to update the cache
-        let  cstore=self.cstore.write().unwrap();
+//     if(size!=0){
+//         // Use a single write lock guard to update the cache
+//         let  cstore=self.cstore.write().unwrap();
     
-        let mut cache = cstore;
+//         let mut cache = cstore;
         
         
-        let now = SystemTime::now();
+//         let now = SystemTime::now();
         
-        let later = now + (self.expiration);
+//         let later = now + (self.expiration);
         
-        let duration = later.duration_since(UNIX_EPOCH).unwrap();
+//         let duration = later.duration_since(UNIX_EPOCH).unwrap();
         
-        let expirytime = duration.as_secs();
-        // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
-        cache.insert(path.to_string(), cachestore { size: size, expirytime: expirytime });
+//         let expirytime = duration.as_secs();
+//         // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
+//         cache.insert(path.to_string(), cachestore { size: size, expirytime: expirytime });
         
-    }
+//     }
     
-    // Add the size of the key and the value to the total
-    // self.size += mem::size_of_val(&path.to_string());
-    // self.size += mem::size_of_val(&size);
-    // self.print_cache_size();
+//     // Add the size of the key and the value to the total
+//     // self.size += mem::size_of_val(&path.to_string());
+//     // self.size += mem::size_of_val(&size);
+//     // self.print_cache_size();
     
-    // self.size += mem::size_of_val(&"expiry_".to_string());
-    // self.size += mem::size_of_val(&expirytime);
+//     // self.size += mem::size_of_val(&"expiry_".to_string());
+//     // self.size += mem::size_of_val(&expirytime);
 
-    size
-}
+//     size
+// }
 
     
     pub fn clear_cache(&self) {

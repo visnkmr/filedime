@@ -3,7 +3,7 @@ use std::{path::PathBuf, io::Read};
 use comrak::{markdown_to_html, ComrakOptions};
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, sizeunit, sendtofrontend::{folsize, sendparentloc}};
+use crate::{appstate::AppStateStore, sizeunit::{self, find_size}, sendtofrontend::{folsize, sendparentloc}};
 
 #[tauri::command]
 pub fn loadmarkdown(windowname:&str,name: String, window: Window,g:State<AppStateStore>) -> Result<String,String> {
@@ -16,7 +16,7 @@ pub fn loadmarkdown(windowname:&str,name: String, window: Window,g:State<AppStat
     
   
   
-  folsize(windowname,&app_handle,sizeunit::size(g.find_size(&path.to_string_lossy()),true))?;
+  folsize(windowname,&app_handle,sizeunit::size(find_size(&path.to_string_lossy(),&window,&g),true))?;
   sendparentloc(windowname,&app_handle,parent.to_string_lossy().to_string())?;
   file.read_to_string(&mut content).unwrap();
   // let htmformd=markdown::to_html_with_options(

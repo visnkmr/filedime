@@ -15,15 +15,26 @@ export function listenforfolcount(){
   });
   
 }
+type File = {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size: number;
+  rawfs: number;
+  lmdate: number;
+  timestamp: number;
+  foldercon: number;
+  ftype: string;
+};
 export async function listenforfiles(){
   let nooftimes=0;
   globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
-  
 
  (window as any).__TAURI__.event.listen("list-files", async (data: { payload: string }) => {
   globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
 
   if(globalThis.latestimefilesloaded-globalThis.lastimefilesloaded>120){
+    globals.loader.hidden=true;
     nooftimes+=1;
     if(nooftimes>2){
       stoptmr();
@@ -34,56 +45,136 @@ export async function listenforfiles(){
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
 
-    globals.htmlbase.innerHTML = ""
+    // globals.htmlbase.innerHTML = ""
     console.log("listfiles")
     // pathline.innerHTML != "";
-  
-    
-  
-    type File = {
-      name: string;
-      path: string;
-      is_dir: boolean;
-      size: number;
-      rawfs: number;
-      lmdate: number;
-      timestamp: number;
-      foldercon: number;
-      ftype: string;
-    };
-    let splitat=  /[\\/]/;
-    var arr = globals.pathInput.value.split(splitat); // arr is ["a", "b", "c", "d"]
-    var prefixes: string[] = [];
-    var prefix = "";
-    for (var i = 0; i < arr.length; i++) {
-      prefix += arr[i]; // append the current element to the prefix
-      prefixes.push(prefix); // add the prefix to the prefixes array
-      prefix += "/"; // add a slash for the next iteration
-    }
-    var fols=[]
-    console.log(globals.pathInput.value.split(splitat))
-    fols = globals.pathInput.value.split(splitat);
-    console.log(fols.length);
-    globals.pathline.replaceChildren();
-
-    for (var i = 0; i < fols.length; i++){ 
-    // fols.forEach(
-      // function (fol, index) {
-        let pathn = document.createElement("span");
-        pathn.id="goloc"
-        pathn.textContent = fols[i]   + "\n";
-        pathn.dataset.loc = prefixes[i];
-        globals.pathline?.appendChild(pathn);
-        // // console.log(index)
-      }
+  setautocompletepath();
     // );
     // parse the data as JSON
     let files: File[] = JSON.parse(data.payload) as File[];
     globalThis.loaded=files.length;
     // // console.log("files")
     // clear the file list
-    globals.fileList.innerHTML = "";
-    // var lastpsize=""
+    settableandtbody();
+    // console.log(files.length)
+    // console.log("here" + percomp.toString());
+    // // console.log(data.payload)
+    // loop through the files array
+    for (let file of files) {
+      // append the table row to the table body
+      (eachfile(file));
+    }
+    // // append the table body to the table
+    // recentfiles();
+  });
+  stoptimer();
+}
+// const getWindowLabel = async () => {
+//   const label = await globals.invoke('get_window_label')
+//   console.log("-------->"+label) // prints the label of the Tauri window
+// }
+
+export function eachfile(file:File){
+  let tbody=document.getElementById("listoffiles") as HTMLTableElement;
+  // create a table row element for each file
+  let tr = document.createElement("tr");
+  // create two table cell elements for the filename and filesize columns
+  let td1 = document.createElement("td");
+
+  td1.textContent = file.name;
+  td1.className = "td1";
+  td1.dataset.value = file.name;
+  td1.dataset.name = file.name;
+  td1.dataset.path = file.path;
+
+  td1.dataset.isDir = file.is_dir.toString();
+  if (file.is_dir) {
+    td1.id = "folder"
+    if (file.foldercon > 0) {
+      td1.textContent = file.name + " (" + file.foldercon + ")";
+    }
+    else {
+      td1.textContent = file.name;
+
+    }
+  }
+  td1.dataset.size = file.size.toString();
+  // create an anchor element for the filename
+  // let a = document.createElement("a");
+  // // set the text content of the anchor element to the name of the file
+  // a.textContent = file.name;
+  // // set the href attribute of the anchor element to google.com/filename
+  // a.href = "https://google.com/" + file.name;
+  // // append the anchor element to the first table cell
+  // td1.appendChild(a);
+  // set the text content of the second table cell to the size of the file
+  tr.appendChild(td1);
+
+  // Add a listener for the contextmenu event
+  // td1.addEventListener("contextmenu", function (e) {
+  //   // Prevent the default menu from showing up
+  //   e.preventDefault();
+  //   frompath=(e.target as HTMLElement).dataset.path as string;
+
+  //   // Show the custom menu
+  //   menu.style.display = "block";
+
+  //   // Position the menu according to the mouse coordinates
+  //   menu.style.left = e.pageX + "px";
+  //   menu.style.top = e.pageY + "px";
+  // });
+
+
+  let td4 = document.createElement("td");
+  td4.textContent = file.ftype;
+  td4.dataset.value = file.ftype;
+  // append the table cells to the table row
+
+  tr.appendChild(td4);
+
+
+  
+  if(file.ftype==="Folder" && file.size.toString()===""){
+
+    let calcsbutton=document.createElement("button");
+    calcsbutton.textContent="FS"
+    calcsbutton.onclick= function () {
+      (window as any).__TAURI__.invoke(
+        "foldersize",
+        {
+
+          path: file.path,
+        }
+        ).then(
+          (size:string)=>{calcsbutton.textContent=size}
+        );
+    }
+  tr.appendChild(calcsbutton);
+  }
+  else{
+
+    let td2 = document.createElement("td");
+    td2.textContent = file.size.toString();
+    td2.dataset.value = file.rawfs.toString();
+    // append the table cells to the table row
+
+    tr.appendChild(td2);
+
+  }
+  let td3 = document.createElement("td");
+  td3.textContent = file.lmdate.toString();
+  td3.dataset.value = file.timestamp.toString();
+  // td3.dataset.value = file.rawfs.toString();
+  // append the table cells to the table row
+
+  tr.appendChild(td3);
+  tbody.appendChild(tr);
+  settableheaderandsort();
+}
+
+//add table head
+export function addtablehead(){
+  // var lastpsize=""
     // get the table element by its id
     // let table = document.getElementById("file-list");
     // create a table head element and a table body element
@@ -114,117 +205,21 @@ export async function listenforfiles(){
     thead.appendChild(tr);
     // append the table head to the table
     globals.fileList.appendChild(thead);
+}
+
+//init detail list
+export function settableandtbody(){
+  globals.fileList.replaceChildren();
+    addtablehead();
   
   
     let tbody = document.createElement("tbody");
-    // console.log(files.length)
-    
-    // console.log("here" + percomp.toString());
-  
-    // // console.log(data.payload)
-    // loop through the files array
-    for (let file of files) {
-      // create a table row element for each file
-      let tr = document.createElement("tr");
-      // create two table cell elements for the filename and filesize columns
-      let td1 = document.createElement("td");
-  
-      td1.textContent = file.name;
-      td1.className = "td1";
-      td1.dataset.value = file.name;
-      td1.dataset.name = file.name;
-      td1.dataset.path = file.path;
-  
-      td1.dataset.isDir = file.is_dir.toString();
-      if (file.is_dir) {
-        td1.id = "folder"
-        if (file.foldercon > 0) {
-          td1.textContent = file.name + " (" + file.foldercon + ")";
-        }
-        else {
-          td1.textContent = file.name;
-  
-        }
-      }
-      td1.dataset.size = file.size.toString();
-      // create an anchor element for the filename
-      // let a = document.createElement("a");
-      // // set the text content of the anchor element to the name of the file
-      // a.textContent = file.name;
-      // // set the href attribute of the anchor element to google.com/filename
-      // a.href = "https://google.com/" + file.name;
-      // // append the anchor element to the first table cell
-      // td1.appendChild(a);
-      // set the text content of the second table cell to the size of the file
-      tr.appendChild(td1);
-  
-      // Add a listener for the contextmenu event
-      // td1.addEventListener("contextmenu", function (e) {
-      //   // Prevent the default menu from showing up
-      //   e.preventDefault();
-      //   frompath=(e.target as HTMLElement).dataset.path as string;
-  
-      //   // Show the custom menu
-      //   menu.style.display = "block";
-  
-      //   // Position the menu according to the mouse coordinates
-      //   menu.style.left = e.pageX + "px";
-      //   menu.style.top = e.pageY + "px";
-      // });
-  
-  
-      let td4 = document.createElement("td");
-      td4.textContent = file.ftype;
-      td4.dataset.value = file.ftype;
-      // append the table cells to the table row
-  
-      tr.appendChild(td4);
-  
-  
-      
-      if(file.ftype==="Folder" && file.size.toString()===""){
-
-        let calcsbutton=document.createElement("button");
-        calcsbutton.textContent="FS"
-        calcsbutton.onclick= function () {
-          (window as any).__TAURI__.invoke(
-            "foldersize",
-            {
-  
-              path: file.path,
-            }
-            ).then(
-              (size:string)=>{calcsbutton.textContent=size}
-            );
-        }
-      tr.appendChild(calcsbutton);
-      }
-      else{
-
-        let td2 = document.createElement("td");
-        td2.textContent = file.size.toString();
-        td2.dataset.value = file.rawfs.toString();
-        // append the table cells to the table row
-    
-        tr.appendChild(td2);
-    
-      }
-      let td3 = document.createElement("td");
-      td3.textContent = file.lmdate.toString();
-      td3.dataset.value = file.timestamp.toString();
-      // td3.dataset.value = file.rawfs.toString();
-      // append the table cells to the table row
-  
-      tr.appendChild(td3);
-  
-  
-      // append the table row to the table body
-      tbody.appendChild(tr);
-    }
-    // // append the table body to the table
+    tbody.id="listoffiles"
     globals.fileList.appendChild(tbody);
-  
-    let order = "asc";
+}
+
+export function settableheaderandsort(){
+  let order = "asc";
     // create a function to compare two values based on the order
     function compare(a: number|string, b: number|string) {
       if (order === "asc") {
@@ -233,6 +228,7 @@ export async function listenforfiles(){
         return a > b ? -1 : a < b ? 1 : 0;
       }
     }
+    let tbody=document.getElementById("listoffiles") as HTMLTableElement;
     // create a function to sort the table rows based on the column index
     function sortTable(index: number) {
       // get the table rows as an array
@@ -277,15 +273,32 @@ export async function listenforfiles(){
       // call the sortTable function with index 1
       sortTable(1);
     });
-    // recentfiles();
-    
-
-  });
-  stoptimer();
-  
-
 }
-// const getWindowLabel = async () => {
-//   const label = await globals.invoke('get_window_label')
-//   console.log("-------->"+label) // prints the label of the Tauri window
-// }
+
+function setautocompletepath() {
+  let splitat=  /[\\/]/;
+  var arr = globals.pathInput.value.split(splitat); // arr is ["a", "b", "c", "d"]
+  var prefixes: string[] = [];
+  var prefix = "";
+  for (var i = 0; i < arr.length; i++) {
+    prefix += arr[i]; // append the current element to the prefix
+    prefixes.push(prefix); // add the prefix to the prefixes array
+    prefix += "/"; // add a slash for the next iteration
+  }
+  var fols=[]
+  console.log(globals.pathInput.value.split(splitat))
+  fols = globals.pathInput.value.split(splitat);
+  console.log(fols.length);
+  globals.pathline.replaceChildren();
+
+  for (var i = 0; i < fols.length; i++){ 
+  // fols.forEach(
+    // function (fol, index) {
+      let pathn = document.createElement("span");
+      pathn.id="goloc"
+      pathn.textContent = fols[i]   + "\n";
+      pathn.dataset.loc = prefixes[i];
+      globals.pathline?.appendChild(pathn);
+      // // console.log(index)
+    }
+}

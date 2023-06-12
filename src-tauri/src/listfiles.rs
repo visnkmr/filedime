@@ -15,26 +15,29 @@ use crate::{markdown::loadmarkdown,
   trie::TrieNode, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, startup, opendialogwindow, 
+  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, 
   // loadjs::loadjs
 };
 
 #[tauri::command]
 pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  
+  // window.emit("infiniteloader",
+  //       json!({
+  //           "message": "lfiles",
+  //           "status": "start",
+  //           })
+  //       );
   // Pathresolver::new()
   if(path=="./"){
     path="/home/roger/Downloads/github/notes/".to_string();
   }
-  let orig = *state.process_count.lock().unwrap();
   println!("lfiles");
 
-  state.filesetcollection.write().unwrap().clear();
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
   if(!testpath.exists()){
-    opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.");
+    opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.",&getuniquewindowlabel());
     return Ok(())
   }
   if(path.ends_with(".md")){
@@ -59,9 +62,13 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   }
 
   if(!testpath.is_dir()){
-    opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type");
+    opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&getuniquewindowlabel());
     return Ok(())
   }
+  let orig = *state.process_count.lock().unwrap();
+
+  state.filesetcollection.write().unwrap().clear();
+
   // else{
   //   match(testpath.read_dir()){
   //     Ok(mut k)=>{
@@ -140,6 +147,7 @@ let doneornot_clone=doneornot.clone();
 let mut nootimes=0;
 let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
+let window2=window.clone();
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 // spawn a new thread to print the value of the files vector every 200 milliseconds
 let handle=thread::spawn(move|| {
@@ -173,7 +181,13 @@ let handle=thread::spawn(move|| {
           
           folsize(&&windowname,&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
           
-          if *don || fcount==files.len() || nootimes>20{
+          if *don || fcount==files.len() {
+            // window2.emit("infiniteloader",
+            //   json!({
+            //       "message": "lfiles",
+            //       "status": "stop",
+            //       })
+            //   );
             // handle.abort();
             // stoptimer(&windowname, &window.app_handle());
             break;
@@ -216,9 +230,9 @@ let handle=thread::spawn(move|| {
     // })
     .for_each(|(e)| {
       window.emit("reloadlist",json!({
-        "message": "pariter1",
-        "status": "running",
-    }));
+          "message": "pariter1",
+          "status": "running",
+      }));
 
           // println!("{}",e.file_name().to_string_lossy().to_string());
         //  println!("{:?}",e);
@@ -234,7 +248,7 @@ let handle=thread::spawn(move|| {
           // println!("added--->{:?}",e);
           *tfsize_clone.lock().unwrap()+=file.rawfs;
           files.push(file.clone()); // push a clone of the file to the vector
-          
+          // fileslist(&&windowname,&app_handle,&serde_json::to_string(&file.clone()).unwrap());
           // Ok(()) // return Ok to continue the iteration
       })
       ;
@@ -250,7 +264,7 @@ let handle=thread::spawn(move|| {
     // wait for the printing thread to finish (it won't unless you terminate it)
     handle.join().unwrap();
   
-    let app_handle=window.app_handle();
+    let app_handle=window.clone().app_handle();
     fileslist(&wname,&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
   
     folsize(&wname,&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
@@ -258,6 +272,12 @@ let handle=thread::spawn(move|| {
     // files.sort_by(|a, b| a.name.cmp(&b.name));
     // emit an event to the frontend with the vector as payload
     println!("reachedhere");
+    // window.emit("infiniteloader",
+    //     json!({
+    //         "message": "lfiles",
+    //         "status": "stop",
+    //         })
+    //     );
           // let io=fscs.clone();
           // drop(fscs);
           sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());

@@ -23,6 +23,10 @@ export function reloadsize(){
       path: globals.pathInput.value
     });
 }
+type statusmesg={
+message:string,
+status:string
+}
 export function menuapilistener(){
     (window as any).__TAURI__.event.listen("reloadlist", (data: { payload: string }) => {
       switch(data.payload){
@@ -37,9 +41,10 @@ export function menuapilistener(){
         case 'tsearch': populatesearchlist();
         break;
         default: {
-          let statusofpar=JSON.stringify(data.payload);
-          console.log(statusofpar)
-          console.log(statusofpar.)
+          // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
+          // console.log(statusofpar.message)
+          console.log(JSON.stringify(data.payload))
+          // console.log(JSON.stringify(data.payload)+"-------->"+statusofpar.message)
         }
         // default:reloadlist();
       }

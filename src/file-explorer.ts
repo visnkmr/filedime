@@ -44,6 +44,7 @@ export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
+export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
 
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
@@ -163,6 +164,7 @@ globalThis.lastimefilesloaded=0;
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
+  // window.find();
   lfat();
   menuapilistener();
   listendialog();
@@ -179,6 +181,7 @@ window.addEventListener("DOMContentLoaded", () => {
       path: globalThis.defpath,
       ff: ""
     });
+    loader.hidden=false;
     starttimer();
   }
   else{
