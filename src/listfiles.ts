@@ -1,6 +1,6 @@
 import * as globals from './file-explorer';
 import { recentfiles } from './recent_file';
-import { stoptimer, stoptmr } from './timer';
+import { stoptmr } from './timer';
 // export const { WebviewWindow } = (window as any).__TAURI__.window;
 // import {globalvars} from './global';
 var foldercount:number;
@@ -54,12 +54,8 @@ let element = document.getElementById("listoffiles");
 // Check if it exists
 if (element!==null) {
   eachfile(JSON.parse(data.payload) as File);
-  // The element exists
-  console.log("The element exists");
 } else {
   settableandtbody();
-  // The element does not exist
-  console.log("The element does not exist");
 }
     // globals.htmlbase.innerHTML = ""
     console.log("listfiles")
@@ -73,7 +69,7 @@ if (element!==null) {
     // clear the file list
     
   });
-  stoptimer();
+  
 }
 // const getWindowLabel = async () => {
 //   const label = await globals.invoke('get_window_label')

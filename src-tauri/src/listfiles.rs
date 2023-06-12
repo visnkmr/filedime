@@ -251,6 +251,8 @@ let handle=thread::spawn(move|| {
           *tfsize_clone.lock().unwrap()+=file.rawfs;
           files.push(file.clone()); // push a clone of the file to the vector
           fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
+            progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
+
           // Ok(()) // return Ok to continue the iteration
       })
       ;

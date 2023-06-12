@@ -39,15 +39,18 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     if(*state.showfolderchildcount.read().unwrap()){
       if(path.is_dir()){
         let count = WalkDir::new(&path)
+                  // .min_depth(1) // skip the root directory
+                  .max_depth(1)
                   .into_iter()
                   .filter_map(|entry| entry.ok())
                   .par_bridge()
                   .filter(|entry| {
-                    window.emit("reloadlist",json!({
-                      "message": "pariter6",
-                      "status": "running",
-                  }));
-                    entry.file_type().is_file()
+                  //   window.emit("reloadlist",json!({
+                  //     "message": "immediatechildcount",
+                  //     "status": "running",
+                  // }));
+                    // entry.file_type().is_file()
+                    true
                   })
                   .count();
                 foldercon=count as i32;

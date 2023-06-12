@@ -10,3 +10,4 @@ declare var lastimefilesloaded:number;
 declare var latestimefilesloaded:number;
 declare var sendpath:string[];
 declare var timeouts:number[];
+declare var interval:NodeJS.Timer;

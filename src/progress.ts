@@ -3,8 +3,9 @@ import * as globals from './file-explorer';
 
 export function progress(){
     (window as any).__TAURI__.event.listen("progress", (data: { payload: number }) => {
-        // globalThis.loaded=data.payload;
-      var percomp = (globalThis.loaded / globalThis.total! * 100);
+        globalThis.loaded=data.payload;
+        var percomp = (globalThis.loaded / globalThis.total! * 100);
+        console.log(globalThis.loaded+" "+percomp)
       var setp = document.getElementById("myprogress") as HTMLProgressElement;
         setp.value = percomp;
       if (percomp == 100)

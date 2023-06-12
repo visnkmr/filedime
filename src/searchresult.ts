@@ -1,5 +1,4 @@
 import * as globals from './file-explorer';
-import { stoptimer } from './timer';
 // import {globalvars} from './global';
 var foldercount:number;
 
@@ -246,7 +245,6 @@ export function loadsearchresult(){
          sortTable(1);
        });
      });
-     stoptimer();
    }
 
    export function searchterm(){

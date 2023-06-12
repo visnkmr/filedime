@@ -1,4 +1,4 @@
-import { stoptimer } from "./timer";
+import { stoptmr } from "./timer";
 
 export default function showdialog(e:string){
     var _dialog = document.getElementById('dialogExample') as HTMLDialogElement;
@@ -9,7 +9,7 @@ export default function showdialog(e:string){
     hdbutton.onclick= function () {
         _dialog.close();
     }
-    stoptimer();
+    stoptmr();
 }
 
 

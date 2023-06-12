@@ -1,10 +1,10 @@
-var interval:NodeJS.Timer;
-// Declare the type of the timer element
+import * as globals from './file-explorer'
 type TimerElement = HTMLElement & {
-    textContent: string;
-  };
-  let timer = document.getElementById("timer") as TimerElement;
-  timer.className = "hide"
+  textContent: string;
+};
+const timer = document.getElementById("timer") as TimerElement;
+
+  // timer.className = "hide"
 // Declare the type of the interval variableZ
 function updatetimer() {
     // Get the timer element
@@ -14,7 +14,7 @@ function updatetimer() {
     let startTime = new Date();
   
     // Update the timer every second
-    interval = setInterval(function () {
+    globalThis.interval = setInterval(function () {
       // Get the current time
       let currentTime = new Date();
   
@@ -32,23 +32,22 @@ function updatetimer() {
       // Display the elapsed time
       timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
-    console.log("interval------>"+interval);
+    console.log("interval------>"+globalThis.interval);
   }
 export function stoptmr(){
-  timer.className = "hide"
-        clearInterval(interval);
+  // globals.timer.className = "hide"
+  clearInterval(globalThis.interval);
 }
  export function stoptimer(){
 
      (window as any).__TAURI__.event.listen("stop-timer", (data: { payload: string }) => {
-        timer.className = "hide"
-        clearInterval(interval);
+        stoptmr();
       });
  } 
 
  export function starttimer(){
     (window as any).__TAURI__.event.listen("start-timer", (data: { payload: string }) => {
-        timer.className = "show"
+        timer.hidden=false;
         updatetimer();
       });
  }

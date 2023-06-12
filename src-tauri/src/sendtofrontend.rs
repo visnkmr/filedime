@@ -137,7 +137,6 @@ pub fn fileslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
         fl,
       )
       .map_err(|e| e.to_string())?;
-      progress(windowname,ah);
         Ok(())
 }
 
@@ -167,11 +166,11 @@ pub fn loadcomplete(windowname:&str,ah:&AppHandle){
   .map_err(|e| e.to_string()).unwrap();
 }
 
-pub fn progress(windowname:&str,ah:&AppHandle){
+pub fn progress(windowname:&str,ah:&AppHandle,len:i32){
 ah.emit_to(
     windowname,
     "progress",
-    "",
+    len,
   )
   .map_err(|e| e.to_string()).unwrap();
 }

@@ -14,7 +14,7 @@ import { progress } from './progress';
 import { recentfiles } from './recent_file';
 import { loadsearchresult, searchterm } from './searchresult';
 import { addtab, lfat, listtabs } from './tabs';
-import { starttimer } from './timer';
+import { starttimer, stoptimer } from './timer';
 import { window as uio } from '@tauri-apps/api';
 export default uio;
 // import { WebviewWindow } from '@tauri-apps/api/window'
@@ -45,30 +45,26 @@ export const filewatch = document.getElementById("startserve") as HTMLDivElement
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
 // export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
-
+// Declare the type of the timer element
 
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 globalThis.sendpath=[]
 // let sendpath="";
-export const copy = document.getElementById("copy") as HTMLButtonElement;
-copy.onclick= function () {
-  setsendpath(pathInput.value);
-}
-export const sync = document.getElementById("sync") as HTMLButtonElement;
-setpasteclick();
+
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
 export const newwin = document.getElementById("new_window") as HTMLButtonElement;
 export const otb = document.getElementById("otb") as HTMLButtonElement;
 
-
+export const copy = document.getElementById("copy") as HTMLButtonElement;
+  export const sync = document.getElementById("sync") as HTMLButtonElement;
 
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
 export const nosize = document.getElementById("no-size") as HTMLButtonElement;
 export const folcount = document.getElementById("fol-count") as HTMLButtonElement;
 export const tsearch = document.getElementById("t-search") as HTMLButtonElement;
 export const datalist = document.getElementById("path-list") as HTMLDataListElement;
-var lastfolder;
+// var lastfolder;
 
  // an array to store the timer IDs
 
@@ -76,11 +72,10 @@ var lastfolder;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
 var label=uio.getCurrent().label;
-if (label=="main"){
-  // globalThis.defpath = "C:/Users/wkramer/Downloads/github"
-  globalThis.defpath = "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents"
-  lastfolder = globalThis.defpath;
-}
+// if (label=="main"){
+//   // globalThis.defpath = "C:/Users/wkramer/Downloads/github"
+//   // lastfolder = globalThis.defpath;
+// }
 // else{
 
   
@@ -88,90 +83,20 @@ if (label=="main"){
 // }
 
 
-(window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
-  console.log("foldersize")
 
-  parentsize.innerHTML = data.payload.toString();
-  // console.log(data.payload.toString())
-});
-
-(window as any).__TAURI__.event.listen("load-complete", (data: { payload: string }) => {
-  console.log("load complete")
-  var setp = document.getElementById("myprogress") as HTMLProgressElement;
-  setp.className = "hide"
-});
-type fsc={
-  name:string,
-  count:number
-}
-(window as any).__TAURI__.event.listen("fsc", (data: { payload: string }) => {
-  console.log("-------------__>"+((data.payload)))
-  let fscs = JSON.parse(data.payload) as Map<string,number>;
-  sow.replaceChildren();
-  for (let [key, value] of Object.entries(fscs)) {
-    let filep = document.createElement("span");
-    filep.id=key
-    filep.className="fsc"
-    let filet = document.createElement("p");
-    filet.textContent=key+" ("+value+") "
-    filep.appendChild(filet)
-    sow.appendChild(filep);
-    // console.log(key + ": " + value);
-  }
-
-
-  // sow
-  // var setp = document.getElementById("myprogress") as HTMLProgressElement;
-  // setp.className = "hide"
-});
-
-(window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
-  console.log("grandloc")
-
-  lastfolder = data.payload.toString();
-  // console.log(data.payload.toString())
-});
-(window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
-  console.log("--------------parentloc---" + data.payload)
-  pathInput.value = data.payload.toString();
-  // console.log(data.payload.toString())
-});
-(window as any).__TAURI__.event.listen("button-names", (data: { payload: string }) => {
-  let blis=document.getElementsByClassName("additional_buttons")[0] as HTMLSpanElement;
-  blis.replaceChildren()
-  let r:string[]=JSON.parse(data.payload) as string[];
-  r.forEach((value, index) =>{
-
-    let addb=document.createElement("button");
-    addb.textContent=value
-    addb.onclick= function () {
-      (window as any).__TAURI__.invoke(
-        "otb",
-        {
-          bname: value,
-          path: pathInput.value,
-        }
-        );
-  }
-    blis.appendChild(addb)
-  });
-  console.log("winnames: "+data.payload.toString())
-});
-loadsearchresult();
-searchterm();
-progress();
 globalThis.lastimefilesloaded=0;
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
-  // window.find();
-  lfat();
-  menuapilistener();
-  listendialog();
   listenforfiles();
-  loadmarkdown();
+  starttimer();
+  menuapilistener();
+
+  // window.find();
+
 
   if(label==="main"){
+  globalThis.defpath = "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents"
     addtab(uio.appWindow.label,globalThis.defpath);
     (window as any).__TAURI__.invoke(
     "list_files",
@@ -182,7 +107,6 @@ window.addEventListener("DOMContentLoaded", () => {
       ff: ""
     });
     // loader.hidden=false;
-    starttimer();
   }
   else{
     console.log(label+"------"+globalThis.tid);
@@ -206,10 +130,10 @@ window.addEventListener("DOMContentLoaded", () => {
       //       console.log(returned)
       //     }
       //   );
-      starttimer();
   }
   // showdialog("opening screen");
-
+  // lfat();
+  
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)
     handlerightclick(e);
@@ -246,12 +170,96 @@ window.addEventListener("DOMContentLoaded", () => {
       menu.style.display = "none";
     }
   });
+  
+
+  copy.onclick= function () {
+    setsendpath(pathInput.value);
+  }
+  setpasteclick();
 
 });
-
+listendialog();
+loadmarkdown();
+listeningapi();
 listenforfolcount();
 listtabs();
 loadmarks();
 // sendlog();
 watchfile();
 openhtml();
+
+function listeningapi() {
+  (window as any).__TAURI__.event.listen("folder-size", (data: { payload: string }) => {
+    console.log("foldersize")
+  
+    parentsize.innerHTML = data.payload.toString();
+    // console.log(data.payload.toString())
+  });
+  
+  (window as any).__TAURI__.event.listen("load-complete", (data: { payload: string }) => {
+    console.log("load complete")
+    var setp = document.getElementById("myprogress") as HTMLProgressElement;
+    setp.className = "hide"
+  });
+  type fsc={
+    name:string,
+    count:number
+  }
+  (window as any).__TAURI__.event.listen("fsc", (data: { payload: string }) => {
+    console.log("-------------__>"+((data.payload)))
+    let fscs = JSON.parse(data.payload) as Map<string,number>;
+    sow.replaceChildren();
+    for (let [key, value] of Object.entries(fscs)) {
+      let filep = document.createElement("span");
+      filep.id=key
+      filep.className="fsc"
+      let filet = document.createElement("p");
+      filet.textContent=key+" ("+value+") "
+      filep.appendChild(filet)
+      sow.appendChild(filep);
+      // console.log(key + ": " + value);
+    }
+  
+  
+    // sow
+    // var setp = document.getElementById("myprogress") as HTMLProgressElement;
+    // setp.className = "hide"
+  });
+  
+  (window as any).__TAURI__.event.listen("grandparent-loc", (data: { payload: string }) => {
+    console.log("grandloc")
+  
+    // lastfolder = data.payload.toString();
+    // console.log(data.payload.toString())
+  });
+  (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
+    console.log("--------------parentloc---" + data.payload)
+    pathInput.value = data.payload.toString();
+    // console.log(data.payload.toString())
+  });
+  (window as any).__TAURI__.event.listen("button-names", (data: { payload: string }) => {
+    let blis=document.getElementsByClassName("additional_buttons")[0] as HTMLSpanElement;
+    blis.replaceChildren()
+    let r:string[]=JSON.parse(data.payload) as string[];
+    r.forEach((value, index) =>{
+  
+      let addb=document.createElement("button");
+      addb.textContent=value
+      addb.onclick= function () {
+        (window as any).__TAURI__.invoke(
+          "otb",
+          {
+            bname: value,
+            path: pathInput.value,
+          }
+          );
+    }
+      blis.appendChild(addb)
+    });
+    console.log("winnames: "+data.payload.toString())
+  });
+  loadsearchresult();
+  searchterm();
+  progress();
+  stoptimer();
+}

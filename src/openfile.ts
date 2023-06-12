@@ -2,7 +2,7 @@ import showdialog from './debug';
 import uio, * as globals from './file-explorer';
 import { settableandtbody } from './listfiles';
 import { progress } from './progress';
-import { stoptimer } from './timer';
+import { stoptmr } from './timer';
 // import { openjs } from './openjs';
 
 export function openfile(target:HTMLElement,path:string,name:string){
@@ -26,7 +26,7 @@ export function openfile(target:HTMLElement,path:string,name:string){
     ).then(
 
         ).catch((e:string)=>{
-            stoptimer();
+            stoptmr();
             showdialog(e);
             
         });
