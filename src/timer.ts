@@ -32,6 +32,7 @@ function updatetimer() {
       // Display the elapsed time
       timer.textContent = paddedMinutes + ":" + paddedSeconds;
     }, 1000);
+    console.log("interval------>"+interval);
   }
 export function stoptmr(){
   timer.className = "hide"

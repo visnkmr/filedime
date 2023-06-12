@@ -8,6 +8,7 @@ import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
 import { listenforfiles, listenforfolcount } from './listfiles';
 import { loadmarkdown } from './markdown';
+import { menuapilistener } from './menu_apis';
 import { openhtml } from './openfile';
 import { progress } from './progress';
 import { recentfiles } from './recent_file';
@@ -67,6 +68,9 @@ export const folcount = document.getElementById("fol-count") as HTMLButtonElemen
 export const tsearch = document.getElementById("t-search") as HTMLButtonElement;
 export const datalist = document.getElementById("path-list") as HTMLDataListElement;
 var lastfolder;
+
+ // an array to store the timer IDs
+
 // var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
@@ -160,6 +164,7 @@ globalThis.lastimefilesloaded=0;
 
 window.addEventListener("DOMContentLoaded", () => {
   lfat();
+  menuapilistener();
   listendialog();
   listenforfiles();
   loadmarkdown();

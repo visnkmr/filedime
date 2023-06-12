@@ -9,3 +9,4 @@ declare var total:number;
 declare var lastimefilesloaded:number;
 declare var latestimefilesloaded:number;
 declare var sendpath:string[];
+declare var timeouts:number[];

@@ -13,7 +13,7 @@ use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat};
 use serde_json::json;
-use tauri::{Manager, api::file::read_string, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window};
+use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent};
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -272,39 +272,66 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 fn main() {
   // init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
-  // let reload = CustomMenuItem::new("reload", "Reload".to_string());
-  // let hide_size = CustomMenuItem::new("no-size", "Hide size".to_string());
-  // let toggle_search = CustomMenuItem::new("t-search", "Toggle search".to_string());
-  // let hide_child_count = CustomMenuItem::new("fol-count", "Hide child count".to_string());
+  let reload = CustomMenuItem::new("reload", "Reload".to_string());
+  let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
+  let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
+  let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
   // let back = CustomMenuItem::new("back-button", "Back".to_string());
   // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
-  // let recent = CustomMenuItem::new("recent", "Recent".to_string());
+  let recent = CustomMenuItem::new("recent", "Recent".to_string());
   
   let menu = Menu::new()
-  // .add_submenu(Submenu::new("File", Menu::new()
-  //     .add_item(open_terminal)
-  //     .add_item(reload)
-  //     .add_item(hide_size)
-      
-  // ))
-  .add_submenu(Submenu::new("Window", Menu::new()
-  .add_item(CustomMenuItem::new("close", "Close"))
+  .add_submenu(Submenu::new("File", Menu::new()
+      // .add_item(open_terminal)
+      .add_item(hide_size)
+      .add_item(reload)
+      .add_item(toggle_search)
+      .add_item(hide_child_count)
       
   ))
-  .add_item(CustomMenuItem::new("custom", "Custom"))
+  
+  .add_submenu(Submenu::new("Window", Menu::new()
+  .add_item(CustomMenuItem::new("close", "Close"))
+ 
+      
+  ))
+
+  .add_item(CustomMenuItem::new("Learn More", "Learn More"))
   .add_item(CustomMenuItem::new("quit", "Quit"))
-    // .add_item(toggle_search)
-    // .add_item(hide_child_count)
+   
     // .add_item(back)
     // .add_item(forward)
-    // .add_item(recent)
+    .add_item(recent)
     ;
   let mut g=AppStateStore::new(CACHE_EXPIRY);
 
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
 
-  tauri::Builder::default()
+  let app=tauri::Builder::default()
     .setup(|app| {
+      
+      // let main_window=app.get_window("main").unwrap();
+      // main_window
+      // .on_menu_event(|event| {
+      //   match event.menu_item_id() {
+      //     "reload" => {
+      //       std::process::exit(0);
+      //     }
+      //     "close" => {
+      //       // main_window.close();
+      //       // event.window().close().unwrap();
+      //     }
+      //     "otb"=>{
+      //       // otb(event.window().label(),g);
+  
+      //     }
+      //     "Learn More" => {
+      //         let url = "https://github.com/visnkmr/iomer";
+      //         // shell::open(&event.shell_scope(), url.to_string(), None).unwrap();
+      //       }
+      //     _ => {}
+      //   }
+      // });
       // println!("{:?}",app);
       
       // let handle = app.handle();
@@ -394,13 +421,32 @@ fn main() {
         "close" => {
           event.window().close().unwrap();
         }
-        "otb"=>{
+        "reload"=>{
+          event.window().emit("reloadlist","reload").unwrap();
           // otb(event.window().label(),g);
-
         }
+        "nosize"=>{
+          event.window().emit("reloadlist","nosize").unwrap();
+          // otb(event.window().label(),g);
+        }
+        "folcount"=>{
+          event.window().emit("reloadlist","folcount").unwrap();
+        }
+        "recent"=>{
+          event.window().emit("reloadlist","recent").unwrap();
+        }
+        "tsearch"=>{
+          event.window().emit("reloadlist","tsearch").unwrap();
+        }
+        "Learn More" => {
+            let url = "https://github.com/visnkmr/iomer";
+            shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
+          }
         _ => {}
       }
     })
+    .on_window_event(on_window_event)
+
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
@@ -434,10 +480,54 @@ fn main() {
         // get_window_label
         ]
       )
-    .run(tauri::generate_context!())
-    // .and_then(|a|{Ok(())})
-    .expect("error while running tauri application");
+    .build(tauri::generate_context!())
+    .expect("Failed to start app");
+  
+  app.run(|app_handle, e| match e {
+    
+    tauri::RunEvent::ExitRequested { api, .. } => {
+      api.prevent_exit();
+      
+    }
+    tauri::RunEvent::WindowEvent { event, .. } => match event {
+
+      //when closed with knowledge
+      tauri::WindowEvent::CloseRequested { api, .. } => {
+      
+      //   // api.prevent_close();
+      //   // hide(app_handle.app_handle());
+      }
+      _ => {}
+    },
+    _ => {}
+  });
 }
+fn on_window_event(event: GlobalWindowEvent) {
+  if let WindowEvent::CloseRequested {
+      #[cfg(not(target_os = "linux"))]
+      api,
+      ..
+  } = event.event()
+  {
+
+      // #[cfg(target_os = "macos")]
+      // {
+      //     app.hide().unwrap();
+      //     api.prevent_close();
+      // }
+  }
+}
+//for testing to prevent the window from autoclosing
+// fn hide(app: AppHandle) {
+//   let window = app.get_window("main").unwrap();
+//   window.unminimize().unwrap();
+//   window.hide().unwrap();
+//   #[cfg(target_os = "macos")]
+//   {
+//     app.hide().unwrap();
+//     set_is_accessory_policy(true);
+//   }
+// }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
 async fn get_path_options(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<Vec<String>,()> {
@@ -515,12 +605,20 @@ pub fn opendialogwindow(app_handle:&AppHandle,title:&str,label:&str){
 // }
 
 pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
-  let iop=app_handle.get_window("main").unwrap();
-  iop.windows().iter().map(|e|{
-    // println!("{}--",e.0);
-    // println!("{}--{:?}",i.0,i.1);
-    e.0.clone()
-  }).collect::<Vec<String>>()
+  match(app_handle.get_window("main")){
+    Some(iop) => {
+      iop.windows().iter().map(|e|{
+        // println!("{}--",e.0);
+        // println!("{}--{:?}",i.0,i.1);
+        e.0.clone()
+      }).collect::<Vec<String>>()
+      
+    },
+    None => {
+      vec![]
+    },
+}
+  
 }
 #[tauri::command]
 fn getuniquewindowlabel()->String{

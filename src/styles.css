@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   justify-content:  left;
+  width: 20%;
+  overflow: hidden;
   align-items: left;
 }
 /*/~ web app code ~/
@@ -39,7 +41,13 @@ td {
 }
 #path{
   cursor: pointer;
+  display: flex;
+  width: 30%;
 
+}
+#goloc{
+  padding-right: 5px;
+  
 }
 #parent-size{
   margin-left:.5em;
@@ -64,7 +72,11 @@ nav {
 /* * {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 } */
-
+.options{
+  display: flex;
+  height: 25px;
+  /* overflow: hidden; */
+}
 /* Use a flexbox layout for the navigation bar */
 nav {
   display: flex;
@@ -136,6 +148,9 @@ thead{
   list-style-type: none; /* remove the bullets */
   margin: 0; /* remove the default margin */
   padding: 0; /* remove the default padding */
+  width: 80%;
+  /* overflow-x: scroll; */
+  /* overflow: hidden; */
 }
 
 /* Style the list item elements for the files */
@@ -269,6 +284,10 @@ progress{
   background-color: lightblue;
   /* color: black; */
   cursor: pointer;
+}
+p{
+  padding: 5px 5px 5px 5px;
+  margin:0px;
 }
 .fsc{
   padding-right: 10px;

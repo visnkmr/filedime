@@ -3,7 +3,7 @@ use tauri::{Window, State, Manager};
 
 use crate::{appstate::AppStateStore, sendtofrontend::loadmarks};
 
-#[derive(Clone,Debug,Serialize)]
+#[derive(Clone,Debug,Serialize,Eq, Hash, PartialEq)]
 pub struct marks{
     pub path:String,
     pub name: String,

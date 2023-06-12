@@ -53,7 +53,8 @@ pub struct AppStateStore {
     pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
     expiration:Duration,
-    bookmarks:RwLock<Vec<marks>>,
+    
+    bookmarks:RwLock<HashSet<marks>>,
     messagetothread:RwLock<String>,
     recents:Vec<String>,
     pub aborted:Arc<Mutex<bool>>,
@@ -87,7 +88,7 @@ impl AppStateStore {
             loadsearchlist:RwLock::new(false),
             tabs:RwLock::new(FxHashMap::default()),
             expiration:Duration::from_secs(expiration),
-            bookmarks:RwLock::new(Vec::new()),
+            bookmarks:RwLock::new(HashSet::new()),
             messagetothread:RwLock::new(String::new()),
             recents:Vec::new(),
             aborted:Arc::new(Mutex::new(false)),
@@ -112,7 +113,7 @@ impl AppStateStore {
         }
     }
     pub fn addmark(&self,path:String){
-        self.bookmarks.write().unwrap().push(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
+        self.bookmarks.write().unwrap().insert(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
     }
     pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
         println!("{}---{}---{}",id,path,ff);
@@ -159,32 +160,32 @@ impl AppStateStore {
         let mut marks=self.bookmarks.write().unwrap();
         marks.retain(|s| s.path != path);
     }
-    pub fn getmarks(&self)->Vec<marks>{
+    pub fn getmarks(&self)->HashSet<marks>{
         self.bookmarks.read().unwrap().clone()
     }
-    pub fn gettabs(&self)->Vec<tabinfo>{
-        let mut tvecs=Vec::new();
-        let binding = self.tabs.read().unwrap();
-        let mut hi=binding.iter();
-        while let Some(ei)=hi.next(){
-            tvecs.push(tabinfo{
-                id:ei.0.clone(),
-                path:ei.1.path.clone(),
-                ff:ei.1.focusfolder.clone(),
-                tabname:{
-                    if let Some(h)=PathBuf::from(ei.1.path.clone()).file_stem(){
-                        h.to_string_lossy().to_string()
-                    }
-                    else{
-                        "".to_string()
-                    }
-                },
-                history:ei.1.history.clone()
-            })
-        }
-        tvecs
-        // self.tabs.read().unwrap().clone()
-    }
+    // pub fn gettabs(&self)->Vec<tabinfo>{
+    //     let mut tvecs=Vec::new();
+    //     let binding = self.tabs.read().unwrap();
+    //     let mut hi=binding.iter();
+    //     while let Some(ei)=hi.next(){
+    //         tvecs.push(tabinfo{
+    //             id:ei.0.clone(),
+    //             path:ei.1.path.clone(),
+    //             ff:ei.1.focusfolder.clone(),
+    //             tabname:{
+    //                 if let Some(h)=PathBuf::from(ei.1.path.clone()).file_stem(){
+    //                     h.to_string_lossy().to_string()
+    //                 }
+    //                 else{
+    //                     "".to_string()
+    //                 }
+    //             },
+    //             history:ei.1.history.clone()
+    //         })
+    //     }
+    //     tvecs
+    //     // self.tabs.read().unwrap().clone()
+    // }
     
     pub fn getlasthistory(&self,id:String)->Option<String>{
         let gtab= self.tabs.read().unwrap();

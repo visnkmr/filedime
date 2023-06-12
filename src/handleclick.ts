@@ -1,6 +1,7 @@
 import setsendpath from './copynpaste';
 import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
+import { populateimmediatechildcount, populatesearchlist, reloadlist, reloadsize } from './menu_apis';
 import { openfile } from './openfile';
 import { recentfiles } from './recent_file';
 import { addtab } from './tabs';
@@ -27,16 +28,16 @@ export function handleclicks(e:Event){
           ff:""
         });
     }
-    if(target===globals.otb){
-      console.log("clicked here");
-    // invoke the list_files command from the backend with the path as argument
-      (window as any).__TAURI__.invoke(
-        "otb",
-        {
-          path: globals.pathInput.value,
-        }
-        );
-    }
+    // if(target===globals.otb){
+    //   console.log("clicked here");
+    // // invoke the list_files command from the backend with the path as argument
+    //   (window as any).__TAURI__.invoke(
+    //     "otb",
+    //     {
+    //       path: globals.pathInput.value,
+    //     }
+    //     );
+    // }
     if(target==globals.filewatch){
           globalThis.startstopfilewatchertoggle=!globalThis.startstopfilewatchertoggle;
           if(globalThis.startstopfilewatchertoggle){
@@ -74,33 +75,15 @@ export function handleclicks(e:Event){
     );
     }
     if(target===globals.nosize){
-      (window as any).__TAURI__.invoke(
-        "nosize",
-        {
-        windowname:uio.appWindow.label,
-          id: globalThis.tid.toString(),
-          path: globals.pathInput.value
-        });
+      reloadsize();
     }
     
     if(target===globals.tsearch){
-      (window as any).__TAURI__.invoke(
-        "loadsearchlist",
-        {
-        windowname:uio.appWindow.label,
-          id: globalThis.tid.toString(),
-          path: globals.pathInput.value
-        });
+      populatesearchlist();
     }
     
     if(target===globals.folcount){
-      (window as any).__TAURI__.invoke(
-        "folcount",
-        {
-        windowname:uio.appWindow.label,
-          id: globalThis.tid.toString(),
-          path: globals.pathInput.value
-        });
+      populateimmediatechildcount();
     } 
     
 
@@ -250,18 +233,7 @@ export function handleclicks(e:Event){
       recentfiles();
       break;
     case globals.reload:
-      // console.log("reload")
-      // get the value of the path input
-      let path = globals.pathInput.value;
-      // invoke the list_files command from the backend with the path as argument
-      (window as any).__TAURI__.invoke(
-        "list_files",
-        {
-        windowname:uio.appWindow.label,
-          oid: globalThis.tid.toString(),
-          path: path,
-          ff: ""
-        });
+      reloadlist();
       break;
     case globals.backButton:
       (window as any).__TAURI__.invoke(
