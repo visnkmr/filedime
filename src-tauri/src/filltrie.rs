@@ -67,7 +67,7 @@ use crate::{markdown::loadmarkdown,
 // }
 
 #[tauri::command]
-pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStateStore>){
+pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),()>{
   let orig = *state.process_count.lock().unwrap();
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
@@ -182,5 +182,5 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       // }
     // }
   // );
-  
+  Ok(())
 }
