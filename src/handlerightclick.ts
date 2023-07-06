@@ -2,11 +2,15 @@ import * as globals from './file-explorer';
 
 export function handlerightclick(e:MouseEvent){
     if((e.target as HTMLElement).className=="td1"){
-      
+
         // Prevent the default menu from showing up
         e.preventDefault();
         globalThis.frompath=(e.target as HTMLElement).dataset.path as string;
         globals.menu.replaceChildren();
+        let cs=document.createElement("p")
+        cs.className="cf";
+        cs.textContent=(e.target! as HTMLTableCellElement).dataset.value!;
+        globals.menu.appendChild(cs);
       let o1=document.createElement("li")
         o1.id="o1"
         o1.textContent="Open in new tab"

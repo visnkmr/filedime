@@ -253,10 +253,13 @@ progress{
 }
 
 /* Style for the custom context menu */
+.cf{
+  color: gray;
+}
 .menu {
   display: none;
   position: absolute;
-  /* background-color: black; */
+  background-color: white;
   border: 1px solid #ccc;
   padding: 10px;
   /* background-color: gray; */
