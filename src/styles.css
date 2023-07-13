@@ -272,6 +272,7 @@ progress{
 .menu li {
   /* background-color: black; */
   cursor: pointer;
+  padding: 0.5rem;
 }
 
 .menu li:hover {

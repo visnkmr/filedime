@@ -114,7 +114,7 @@ window.addEventListener("DOMContentLoaded", () => {
       "whattoload",
       {
         windowname:label,
-      })
+      })  
       .then((path:string)=>{
         addtab(label,path)
       });

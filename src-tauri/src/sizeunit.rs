@@ -1,4 +1,4 @@
-use std::{time::{SystemTime, UNIX_EPOCH}, path::Path};
+use std::{time::{SystemTime, UNIX_EPOCH}, path::Path, fs::Metadata};
 
 use filesize::PathExt;
 use serde_json::json;
@@ -66,8 +66,16 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> 
     drop(cache);
     let entry_path = Path::new(path);
     if(entry_path.is_file()){
-
-        return entry_path.size_on_disk_fast(&entry_path.metadata().unwrap()).unwrap_or(0)
+        // println!("{:?}",entry_path);
+       match(entry_path.metadata()){
+            Ok(md)=>{
+                return entry_path.size_on_disk_fast(&md).unwrap_or(0)
+            },
+            Err(e)=>{
+                println!("{:?}",entry_path);
+                return 0
+            }
+        };
     }
     if !entry_path.is_dir(){
         return 0;
