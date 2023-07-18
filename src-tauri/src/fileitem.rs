@@ -104,15 +104,15 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
           "jpg" | "jpeg" | "png" | "gif" | "bmp" | "svg" | "tif" | "tiff" | "webp"
           )
           {
-            #[cfg(windows)]
-    let f = 
+    // #[cfg(windows)]
+    // let f = 
     
-    BufReader::new(
-      OpenOptions::new()
-      .read(true)
-      .custom_flags( libc::FILE_FLAG_OVERLAPPED 
-    )
-      .open(path).unwrap());
+    // BufReader::new(
+    //   OpenOptions::new()
+    //   .read(true)
+    //   .custom_flags( libc::FILE_FLAG_OVERLAPPED 
+    // )
+    //   .open(path).unwrap());
     #[cfg(unix)]
     let f = 
     
