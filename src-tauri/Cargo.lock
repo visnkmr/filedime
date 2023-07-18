@@ -2457,6 +2457,7 @@ checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 [[package]]
 name = "prefstore"
 version = "0.8.0"
+source = "git+https://github.com/visnkmr/prefstore.git#ce001108805d7cba4a63839b338ffc6fdd15cf4b"
 dependencies = [
  "dirs",
  "glob",
