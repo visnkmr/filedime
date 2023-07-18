@@ -951,6 +951,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "filedime"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "comrak",
+ "filesize",
+ "filetime",
+ "fuzzy-matcher",
+ "image",
+ "libc",
+ "opener",
+ "prefstore",
+ "rayon",
+ "rustc-hash",
+ "rusync",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tauri",
+ "tauri-build",
+ "walkdir",
+]
+
+[[package]]
 name = "filesize"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2009,30 +2033,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec60c60a693226186f5d6edf073232bfb6464ed97eb22cf3b01c1e8198fd97f5"
 dependencies = [
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "notes"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "comrak",
- "filesize",
- "filetime",
- "fuzzy-matcher",
- "image",
- "libc",
- "opener",
- "prefstore",
- "rayon",
- "rustc-hash",
- "rusync",
- "serde",
- "serde_json",
- "sysinfo",
- "tauri",
- "tauri-build",
- "walkdir",
 ]
 
 [[package]]

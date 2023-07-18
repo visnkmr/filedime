@@ -1,4 +1,7 @@
 {
+  "name": "filedime",
+  "version": "0.1",
+  "private": true,
   "devDependencies": {
     "@rspack/cli": "^0.1.10",
     "@total-typescript/ts-reset": "^0.4.2",

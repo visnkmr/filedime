@@ -583,6 +583,7 @@ pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str
                   label,
                   tauri::WindowUrl::App("dialog.html".into())
                 )
+                
                 .inner_size(320.0, 320.0)
                 .menu(menu)
                 // .initialization_script(&INIT_SCRIPT)

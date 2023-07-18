@@ -12,7 +12,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "V File explorer",
+    "productName": "filedime",
     "version": "0.1.0"
   },
   "tauri": {
