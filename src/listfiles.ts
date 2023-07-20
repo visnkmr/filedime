@@ -26,6 +26,15 @@ type File = {
   foldercon: number;
   ftype: string;
 };
+type DriveItem = {
+  name: string,
+  mount_point: string,
+  total: string,
+  free: string,
+  is_removable: boolean,
+  disk_type: string,
+  file_system: string,
+}
 export async function listenforfiles(){
   
   let nooftimes=0;
@@ -53,7 +62,11 @@ let element = document.getElementById("listoffiles");
 
 // Check if it exists
 if (element!==null) {
-  eachfile(JSON.parse(data.payload) as File);
+  if(JSON.parse(data.payload) instanceof File)
+    eachfile(JSON.parse(data.payload) as File);
+    else{
+      eachdrive(JSON.parse(data.payload) as DriveItem);
+    }
 } else {
   settableandtbody();
 }
@@ -75,7 +88,74 @@ if (element!==null) {
 //   const label = await globals.invoke('get_window_label')
 //   console.log("-------->"+label) // prints the label of the Tauri window
 // }
+function eachdrive(drive:DriveItem){
+  console.log(drive)
+  let tbody=document.getElementById("listoffiles") as HTMLTableElement;
+  // create a table row element for each file
+  let tr = document.createElement("tr");
+  // create two table cell elements for the filename and filesize columns
+  let td1 = document.createElement("td");
 
+  td1.textContent = drive.mount_point;
+  td1.className = "td1";
+  td1.dataset.value = drive.name;
+  td1.dataset.name = drive.mount_point;
+  td1.dataset.path = drive.mount_point;
+
+  // td1.dataset.isDir = drive.is_removable.toString();
+  if (!drive.is_removable) {
+    td1.id = "folder"
+    
+  }
+  td1.dataset.size = drive.total.toString();
+  tr.appendChild(td1);
+
+
+  let td4 = document.createElement("td");
+  td4.textContent = drive.file_system;
+  td4.dataset.value = drive.file_system;
+  // append the table cells to the table row
+
+  tr.appendChild(td4);
+
+
+  
+  // if(file.ftype==="Folder" && file.size.toString()===""){
+
+  //   let calcsbutton=document.createElement("button");
+  //   calcsbutton.textContent="FS"
+  //   calcsbutton.onclick= function () {
+  //     (window as any).__TAURI__.invoke(
+  //       "foldersize",
+  //       {
+
+  //         path: file.path,
+  //       }
+  //       ).then(
+  //         (size:string)=>{calcsbutton.textContent=size}
+  //       );
+  //   }
+  // tr.appendChild(calcsbutton);
+  // }
+  // else
+  // {
+
+    let td2 = document.createElement("td");
+    td2.textContent = drive.total.toString();
+    td2.dataset.value = drive.total.toString();
+    // append the table cells to the table row
+
+    tr.appendChild(td2);
+
+  // }
+  let td3 = document.createElement("td");
+  td3.textContent = drive.free.toString();
+  td3.dataset.value = drive.free.toString();
+
+  tr.appendChild(td3);
+  tbody.appendChild(tr);
+  settableheaderandsort();
+}
 export function eachfile(file:File){
   console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;

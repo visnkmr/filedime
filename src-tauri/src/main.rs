@@ -6,7 +6,8 @@ mod dirsize;
 mod fileitem;
 mod filltrie;
 mod sendtofrontend;
-// mod drivelist;
+
+mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
