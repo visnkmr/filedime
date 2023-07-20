@@ -62,11 +62,11 @@ let element = document.getElementById("listoffiles");
 
 // Check if it exists
 if (element!==null) {
-  if(JSON.parse(data.payload) instanceof File)
+  // if(JSON.parse(data.payload) instanceof File)
     eachfile(JSON.parse(data.payload) as File);
-    else{
-      eachdrive(JSON.parse(data.payload) as DriveItem);
-    }
+    // else{
+      // eachdrive(JSON.parse(data.payload) as DriveItem);
+    // }
 } else {
   settableandtbody();
 }
@@ -154,7 +154,7 @@ function eachdrive(drive:DriveItem){
 
   tr.appendChild(td3);
   tbody.appendChild(tr);
-  settableheaderandsort();
+  // settableheaderandsort();
 }
 export function eachfile(file:File){
   console.log(file)
