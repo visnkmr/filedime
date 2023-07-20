@@ -54,7 +54,7 @@ pub fn get_drives() -> Result<Drives, String> {
 
                 let mut caption = mount_point.clone();
                 caption.pop();
-                if total_space < available_space && cfg!(target_os = "windows") {
+                if total < free && cfg!(target_os = "windows") {
                     let wmic_process = Command::new("cmd")
                         .args([
                             "/C",
@@ -67,7 +67,7 @@ pub fn get_drives() -> Result<Drives, String> {
                         wmic_process_output.split("\r\r\n").collect::<Vec<&str>>()[1].to_string();
     
                     if let Ok(n) = parsed_size.trim().parse::<u64>() {
-                        total_space = n;
+                        total = n;
                     }
                 }
             }
