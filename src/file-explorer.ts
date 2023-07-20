@@ -234,9 +234,32 @@ function listeningapi() {
     // lastfolder = data.payload.toString();
     // console.log(data.payload.toString())
   });
+  type Parentloc={
+    path:String;
+    tabid:String;
+  }
   (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
     console.log("--------------parentloc---" + data.payload)
-    pathInput.value = data.payload.toString();
+    let r:Parentloc=JSON.parse(data.payload) as Parentloc;
+    let tabid=r.tabid;
+    tablist.childNodes.forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        console.log("1........."+((child as HTMLDivElement)).id);
+        if(((child as HTMLDivElement)).id==tabid){
+          (window as any).__TAURI__.invoke(
+            "tabname",
+            {
+              path:r.path,
+            }
+          ).then((returned:string)=>{
+            // console.log("what was returned....."+returned)
+            ((child as HTMLDivElement).firstChild as HTMLSpanElement).textContent =returned
+          });
+          
+        }
+      }
+    });
+    pathInput.value = r.path.toString();
     // console.log(data.payload.toString())
   });
   (window as any).__TAURI__.event.listen("button-names", (data: { payload: string }) => {

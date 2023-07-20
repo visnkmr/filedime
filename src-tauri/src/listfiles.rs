@@ -119,7 +119,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   // let path = PathBuf::from(path);
 let parent=testpath.clone();
   let app_handle = window.app_handle();
-  sendparentloc(&windowname,&app_handle, parent.to_string_lossy().to_string())?;
+  sendparentloc(&windowname,&app_handle, parent.to_string_lossy().to_string(),&oid)?;
 println!("parent------{:?}",parent.to_string_lossy().to_string());
 
   let now = SystemTime::now();

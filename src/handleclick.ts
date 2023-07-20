@@ -108,6 +108,16 @@ export function handleclicks(e:Event){
     var pen = (target);
     if (pen.className === "tab-name") {
       globalThis.activetab=(pen.parentNode as HTMLDivElement).dataset.path!;
+      // let sn = pen as HTMLSpanElement;
+      // (window as any).__TAURI__.invoke(
+      //   "tabname",
+      //   {
+      //     path:(pen.parentNode as HTMLDivElement).dataset.path!,
+      //   }
+      // ).then((returned:string)=>{
+      //   console.log("what was returned....."+returned)
+      //   sn.textContent =returned
+      // });
       
       globals.tablist.childNodes.forEach(child => {
         if (child.nodeType === Node.ELEMENT_NODE) {

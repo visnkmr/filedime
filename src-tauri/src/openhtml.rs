@@ -21,7 +21,7 @@ pub fn loadfromhtml(windowname:&str,name: String, window: Window,g:State<AppStat
       });
   
   sendgparentloc(windowname, &app_handle,parent.parent().unwrap().to_string_lossy().to_string());
-sendparentloc(windowname, &app_handle, parent.to_string_lossy().to_string());
+sendparentloc(windowname, &app_handle, parent.to_string_lossy().to_string(),&("").to_string());
   
   file.read_to_string(&mut content).unwrap();
   // let htmformd=markdown::to_html_with_options(
