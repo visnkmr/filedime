@@ -347,7 +347,7 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
-    opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
+    // opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {
       println!("loaded buttons successfully.")
