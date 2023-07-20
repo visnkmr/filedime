@@ -53,6 +53,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   //       );
   // Pathresolver::new()
   if(path=="drives://"){
+    sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
     driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
     return Ok(())
   }

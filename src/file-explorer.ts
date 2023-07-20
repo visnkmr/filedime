@@ -98,7 +98,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if(label==="main"){
     
-  globalThis.defpath =dev? "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents":"/";
+  // globalThis.defpath =dev? "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents":"/";
+  globalThis.defpath="drives://"
     addtab(uio.appWindow.label,globalThis.defpath);
     (window as any).__TAURI__.invoke(
     "list_files",
