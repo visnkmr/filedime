@@ -67,7 +67,7 @@ pub fn get_drives() -> Result<Drives, String> {
                         wmic_process_output.split("\r\r\n").collect::<Vec<&str>>()[1].to_string();
     
                     if let Ok(n) = parsed_size.trim().parse::<u64>() {
-                        total = n;
+                        total = n.to_string();
                     }
                 }
             }

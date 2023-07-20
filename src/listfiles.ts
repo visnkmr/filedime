@@ -84,77 +84,65 @@ if (element!==null) {
   });
   
 }
+export async function listenfordrives(){
+  
+  let nooftimes=0;
+  globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
+
+ (window as any).__TAURI__.event.listen("list-drives", async (data: { payload: string }) => {
+  setautocompletepath();
+  console.log("settingpath");
+
+  globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
+
+  if(globalThis.latestimefilesloaded-globalThis.lastimefilesloaded>120){
+    // globals.loader.hidden=true;
+    nooftimes+=1;
+    if(nooftimes>2){
+      stoptmr();
+      nooftimes=0;
+    }
+  }
+  globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
+  globals.ousd.style.display="none";
+  globals.filewatch.style.display="none";
+  
+  let dl=document.getElementById("drive-list") as HTMLParagraphElement;
+  dl.textContent+=
+    JSON.stringify(data.payload);
+// Get the element by id
+let element = document.getElementById("listoffiles");
+
+// Check if it exists
+if (element!==null) {
+  // if(JSON.parse(data.payload) instanceof File)
+  
+    // else{
+      // eachdrive(JSON.parse(data.payload) as DriveItem);
+    // }
+} else {
+  settableandtbody();
+}
+    // globals.htmlbase.innerHTML = ""
+    console.log("listfiles")
+    // pathline.innerHTML != "";
+  
+    // );
+    // parse the data as JSON
+    // let files: File[] = JSON.parse(data.payload) as File[];
+    // globalThis.loaded=files.length;
+    // // console.log("files")
+    // clear the file list
+    
+  });
+  
+}
 // const getWindowLabel = async () => {
 //   const label = await globals.invoke('get_window_label')
 //   console.log("-------->"+label) // prints the label of the Tauri window
 // }
 function eachdrive(drive:DriveItem){
   console.log(drive)
-  let tbody=document.getElementById("listoffiles") as HTMLTableElement;
-  // create a table row element for each file
-  let tr = document.createElement("tr");
-  // create two table cell elements for the filename and filesize columns
-  let td1 = document.createElement("td");
-
-  td1.textContent = drive.mount_point;
-  td1.className = "td1";
-  td1.dataset.value = drive.name;
-  td1.dataset.name = drive.mount_point;
-  td1.dataset.path = drive.mount_point;
-
-  // td1.dataset.isDir = drive.is_removable.toString();
-  if (!drive.is_removable) {
-    td1.id = "folder"
-    
-  }
-  td1.dataset.size = drive.total.toString();
-  tr.appendChild(td1);
-
-
-  let td4 = document.createElement("td");
-  td4.textContent = drive.file_system;
-  td4.dataset.value = drive.file_system;
-  // append the table cells to the table row
-
-  tr.appendChild(td4);
-
-
-  
-  // if(file.ftype==="Folder" && file.size.toString()===""){
-
-  //   let calcsbutton=document.createElement("button");
-  //   calcsbutton.textContent="FS"
-  //   calcsbutton.onclick= function () {
-  //     (window as any).__TAURI__.invoke(
-  //       "foldersize",
-  //       {
-
-  //         path: file.path,
-  //       }
-  //       ).then(
-  //         (size:string)=>{calcsbutton.textContent=size}
-  //       );
-  //   }
-  // tr.appendChild(calcsbutton);
-  // }
-  // else
-  // {
-
-    let td2 = document.createElement("td");
-    td2.textContent = drive.total.toString();
-    td2.dataset.value = drive.total.toString();
-    // append the table cells to the table row
-
-    tr.appendChild(td2);
-
-  // }
-  let td3 = document.createElement("td");
-  td3.textContent = drive.free.toString();
-  td3.dataset.value = drive.free.toString();
-
-  tr.appendChild(td3);
-  tbody.appendChild(tr);
-  // settableheaderandsort();
 }
 export function eachfile(file:File){
   console.log(file)

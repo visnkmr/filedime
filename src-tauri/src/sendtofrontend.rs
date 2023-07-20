@@ -139,6 +139,15 @@ pub fn fileslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
       .map_err(|e| e.to_string())?;
         Ok(())
 }
+pub fn driveslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "list-drives",
+        fl,
+      )
+      .map_err(|e| e.to_string())?;
+        Ok(())
+}
 
 
 pub fn slist(windowname:&str,ah:&AppHandle,wtr:&HashSet<FileItem>,string:String){

@@ -6,7 +6,7 @@ import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
-import { listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
+import { listenfordrives, listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { menuapilistener } from './menu_apis';
 import { openhtml } from './openfile';
@@ -89,6 +89,7 @@ globalThis.lastimefilesloaded=0;
 
 window.addEventListener("DOMContentLoaded", () => {
   listenforfiles();
+  listenfordrives();
   starttimer();
   menuapilistener();
 
