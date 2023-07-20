@@ -247,11 +247,12 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
 
 #[tauri::command]
 fn tabname(path:String)->String{
-  if let Some(h)=PathBuf::from(path).file_stem(){
-    h.to_string_lossy().to_string()
+  if let Some(h)=PathBuf::from(&path).file_stem(){
+    let tabname=h.to_string_lossy().to_string();
+    if(tabname==""){path}else{tabname}
 }
 else{
-    "".to_string()
+    path
 }
 }
 #[tauri::command]
