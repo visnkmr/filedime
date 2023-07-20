@@ -6,7 +6,8 @@ mod dirsize;
 mod fileitem;
 mod filltrie;
 mod sendtofrontend;
-// mod drivelist;
+
+mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
@@ -246,11 +247,12 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
 
 #[tauri::command]
 fn tabname(path:String)->String{
-  if let Some(h)=PathBuf::from(path).file_stem(){
-    h.to_string_lossy().to_string()
+  if let Some(h)=PathBuf::from(&path).file_stem(){
+    let tabname=h.to_string_lossy().to_string();
+    if(tabname==""){path}else{tabname}
 }
 else{
-    "".to_string()
+    path
 }
 }
 #[tauri::command]
@@ -347,7 +349,7 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
-    opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
+    // opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {
       println!("loaded buttons successfully.")

@@ -6,7 +6,7 @@ import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
 import { handlerightclick } from './handlerightclick';
-import { listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
+import { listenfordrives, listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { menuapilistener } from './menu_apis';
 import { openhtml } from './openfile';
@@ -89,14 +89,17 @@ globalThis.lastimefilesloaded=0;
 
 window.addEventListener("DOMContentLoaded", () => {
   listenforfiles();
+  listenfordrives();
   starttimer();
   menuapilistener();
 
   // window.find();
-
+  var dev=false;
 
   if(label==="main"){
-  globalThis.defpath = "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents"
+    
+  // globalThis.defpath =dev? "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents":"/";
+  globalThis.defpath="drives://"
     addtab(uio.appWindow.label,globalThis.defpath);
     (window as any).__TAURI__.invoke(
     "list_files",
@@ -232,9 +235,32 @@ function listeningapi() {
     // lastfolder = data.payload.toString();
     // console.log(data.payload.toString())
   });
+  type Parentloc={
+    path:String;
+    tabid:String;
+  }
   (window as any).__TAURI__.event.listen("parent-loc", (data: { payload: string }) => {
     console.log("--------------parentloc---" + data.payload)
-    pathInput.value = data.payload.toString();
+    let r:Parentloc=JSON.parse(data.payload) as Parentloc;
+    let tabid=r.tabid;
+    tablist.childNodes.forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        console.log("1........."+((child as HTMLDivElement)).id);
+        if(((child as HTMLDivElement)).id==tabid){
+          (window as any).__TAURI__.invoke(
+            "tabname",
+            {
+              path:r.path,
+            }
+          ).then((returned:string)=>{
+            // console.log("what was returned....."+returned)
+            ((child as HTMLDivElement).firstChild as HTMLSpanElement).textContent =returned
+          });
+          
+        }
+      }
+    });
+    pathInput.value = r.path.toString();
     // console.log(data.payload.toString())
   });
   (window as any).__TAURI__.event.listen("button-names", (data: { payload: string }) => {

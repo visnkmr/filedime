@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
 use crate::FileItem;
@@ -32,11 +33,20 @@ pub fn sendbuttonnames(ah:&AppHandle,buttonnames:&Vec<String>)->Result<(),String
       .map_err(|e| e.to_string()).unwrap();
     Ok(())
 }
-pub fn sendparentloc(windowname:&str,ah:&AppHandle,parent:String)->Result<(),String>{
+#[derive(Clone,Debug,Serialize,Eq, Hash, PartialEq)]
+struct Parent{
+  path:String,
+  tabid:String
+}
+pub fn sendparentloc(windowname:&str,ah:&AppHandle,parent:String,oid:&String)->Result<(),String>{
     ah.emit_to(
         windowname,
         "parent-loc",
-        parent,
+        serde_json::to_string(&Parent{
+          path:parent,
+          tabid:oid.to_string()
+        }).unwrap()
+        ,
       )
       .map_err(|e| e.to_string()).unwrap();
     Ok(())
@@ -134,6 +144,15 @@ pub fn fileslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
     ah.emit_to(
         windowname,
         "list-files",
+        fl,
+      )
+      .map_err(|e| e.to_string())?;
+        Ok(())
+}
+pub fn driveslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "list-drives",
         fl,
       )
       .map_err(|e| e.to_string())?;

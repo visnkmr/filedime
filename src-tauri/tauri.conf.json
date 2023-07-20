@@ -1,10 +1,10 @@
 {
   "build": {
     "beforeDevCommand": {
-      "script": ""
+      "script": "yarn rspack build"
     },
     "beforeBuildCommand": {
-      "script": ""
+      "script": "yarn rspack build"
     },
     
     "devPath": "../src",

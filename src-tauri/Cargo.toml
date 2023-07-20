@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "fastest file explorer on earth."
 authors = ["visnk"]
 license = ""
-repository = ""
+repository = "https://github.com/visnkmr/filedime"
 edition = "2021"
 
 # [build]

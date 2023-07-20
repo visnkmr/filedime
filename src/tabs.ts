@@ -72,7 +72,7 @@ export function lfat(){
 export function addtab(wname:string,path:string){
     // get the value of the path input
     // let path = pathInput.value;
-    globalThis.tid = globalThis.tid as number + 1;
+    globalThis.tid = globalThis.tid as number + 1 as number;
     // invoke the list_files command from the backend with the path as argument
     (window as any).__TAURI__.invoke(
       "newtab",
@@ -105,6 +105,7 @@ export function addtab(wname:string,path:string){
           path:path,
         }
       ).then((returned:string)=>{
+        console.log("what was returned....."+returned)
         sn.textContent =returned
       });
       sc.textContent = "x";

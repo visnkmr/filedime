@@ -1,6 +1,7 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use rayon::prelude::*;
+use serde::Serialize;
 use serde_json::json;
 use tauri::{Window, State, Manager};
 use walkdir::{WalkDir, DirEntry};
@@ -15,10 +16,33 @@ use crate::{markdown::loadmarkdown,
   trie::TrieNode, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, 
+  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, drivelist::get_drives, 
   // loadjs::loadjs
 };
-
+#[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
+struct DriveItem{
+  pub name: String,
+  pub mount_point: String,
+  pub total: String,
+  pub free: String,
+  pub is_removable: bool,
+  pub disk_type: String,
+  pub file_system: String,
+}
+fn populatedrivelist()->Vec<DriveItem>{
+  get_drives().unwrap().array_of_drives.iter().map(|ed|{
+    
+    return DriveItem { 
+      name:ed.name.clone(),
+      mount_point:ed.mount_point.clone(),
+      total:ed.total.clone(),
+      free:ed.free.clone(),
+      is_removable:ed.is_removable.clone(),
+      disk_type:ed.disk_type.clone(),
+      file_system:ed.file_system.clone(),
+  }
+  }).collect::<Vec<DriveItem>>()
+}
 #[tauri::command]
 pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   // window.emit("infiniteloader",
@@ -28,9 +52,14 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   //           })
   //       );
   // Pathresolver::new()
-  if(path=="./"){
-    path="/home/roger/Downloads/github/notes/".to_string();
+  if(path=="drives://"){
+    sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
+    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    return Ok(())
   }
+  // if(path=="./"){
+  //   path="/home/roger/Downloads/github/notes/".to_string();
+  // }
   println!("lfiles");
 
   let wname=windowname.clone();
@@ -91,7 +120,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   // let path = PathBuf::from(path);
 let parent=testpath.clone();
   let app_handle = window.app_handle();
-  sendparentloc(&windowname,&app_handle, parent.to_string_lossy().to_string())?;
+  sendparentloc(&windowname,&app_handle, parent.to_string_lossy().to_string(),&oid)?;
 println!("parent------{:?}",parent.to_string_lossy().to_string());
 
   let now = SystemTime::now();

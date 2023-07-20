@@ -26,6 +26,15 @@ type File = {
   foldercon: number;
   ftype: string;
 };
+type DriveItem = {
+  name: string,
+  mount_point: string,
+  total: string,
+  free: string,
+  is_removable: boolean,
+  disk_type: string,
+  file_system: string,
+}
 export async function listenforfiles(){
   
   let nooftimes=0;
@@ -53,7 +62,64 @@ let element = document.getElementById("listoffiles");
 
 // Check if it exists
 if (element!==null) {
-  eachfile(JSON.parse(data.payload) as File);
+  // if(JSON.parse(data.payload) instanceof File)
+    eachfile(JSON.parse(data.payload) as File);
+    // else{
+      // eachdrive(JSON.parse(data.payload) as DriveItem);
+    // }
+} else {
+  settableandtbody();
+}
+    // globals.htmlbase.innerHTML = ""
+    console.log("listfiles")
+    // pathline.innerHTML != "";
+  
+    // );
+    // parse the data as JSON
+    // let files: File[] = JSON.parse(data.payload) as File[];
+    // globalThis.loaded=files.length;
+    // // console.log("files")
+    // clear the file list
+    
+  });
+  
+}
+export async function listenfordrives(){
+  
+  let nooftimes=0;
+  globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
+
+ (window as any).__TAURI__.event.listen("list-drives", async (data: { payload: string }) => {
+  setautocompletepath();
+  console.log("settingpath");
+
+  globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
+
+  if(globalThis.latestimefilesloaded-globalThis.lastimefilesloaded>120){
+    // globals.loader.hidden=true;
+    nooftimes+=1;
+    if(nooftimes>2){
+      stoptmr();
+      nooftimes=0;
+    }
+  }
+  globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
+  globals.ousd.style.display="none";
+  globals.filewatch.style.display="none";
+  setdrivetableandtbody();
+// Get the element by id
+let element = document.getElementById("listoffiles");
+
+// Check if it exists
+if (element!==null) {
+  // if(JSON.parse(data.payload) instanceof File)
+  for (let ed of JSON.parse(data.payload) as DriveItem[]) {
+    eachdrive(ed);
+  }
+  
+    // else{
+      // eachdrive(JSON.parse(data.payload) as DriveItem);
+    // }
 } else {
   settableandtbody();
 }
@@ -75,7 +141,74 @@ if (element!==null) {
 //   const label = await globals.invoke('get_window_label')
 //   console.log("-------->"+label) // prints the label of the Tauri window
 // }
+function eachdrive(drive:DriveItem){
+  console.log(drive)
+  let tbody=document.getElementById("listoffiles") as HTMLTableElement;
+  // create a table row element for each file
+  let tr = document.createElement("tr");
+  // create two table cell elements for the filename and filesize columns
+  let td1 = document.createElement("td");
 
+  td1.textContent = drive.mount_point;
+  td1.className = "td1";
+  td1.dataset.value = drive.name;
+  td1.dataset.name = drive.mount_point;
+  td1.dataset.path = drive.mount_point;
+
+  // td1.dataset.isDir = drive.is_removable.toString();
+  if (!drive.is_removable) {
+    td1.id = "folder"
+    
+  }
+  td1.dataset.size = drive.total.toString();
+  tr.appendChild(td1);
+
+
+  let td4 = document.createElement("td");
+  td4.textContent = drive.file_system;
+  td4.dataset.value = drive.file_system;
+  // append the table cells to the table row
+
+  tr.appendChild(td4);
+
+
+  
+  // if(file.ftype==="Folder" && file.size.toString()===""){
+
+  //   let calcsbutton=document.createElement("button");
+  //   calcsbutton.textContent="FS"
+  //   calcsbutton.onclick= function () {
+  //     (window as any).__TAURI__.invoke(
+  //       "foldersize",
+  //       {
+
+  //         path: file.path,
+  //       }
+  //       ).then(
+  //         (size:string)=>{calcsbutton.textContent=size}
+  //       );
+  //   }
+  // tr.appendChild(calcsbutton);
+  // }
+  // else
+  // {
+
+    let td2 = document.createElement("td");
+    td2.textContent = drive.total.toString();
+    td2.dataset.value = drive.total.toString();
+    // append the table cells to the table row
+
+    tr.appendChild(td2);
+
+  // }
+  let td3 = document.createElement("td");
+  td3.textContent = drive.free.toString();
+  td3.dataset.value = drive.free.toString();
+
+  tr.appendChild(td3);
+  tbody.appendChild(tr);
+  // settableheaderandsort();
+}
 export function eachfile(file:File){
   console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
@@ -209,11 +342,53 @@ export function addtablehead(){
     // append the table head to the table
     globals.fileList.appendChild(thead);
 }
+export function adddrivestablehead(){
+  // var lastpsize=""
+    // get the table element by its id
+    // let table = document.getElementById("file-list");
+    // create a table head element and a table body element
+    let thead = document.createElement("thead");
+  
+    // create a table row element for the header
+    let tr = document.createElement("tr");
+    // create two table header cells for the filename and filesize columns
+    let th1 = document.createElement("th");
+    let th2 = document.createElement("th");
+    let th3 = document.createElement("th");
+    let th4 = document.createElement("th");
+    // set the text content of the header cells
+    th1.textContent = "Filename";
+    th2.textContent = "Filesystem";
+    th3.textContent = "Total Diskspace";
+    th4.textContent = "Free DiskSpace";
+    // th1.id = "filename";
+    // th2.id = "filesize";
+    // th3.id = "lastmod";
+    // th4.id = "ftype";
+    // append the header cells to the header row
+    tr.appendChild(th1);
+    tr.appendChild(th4);
+    tr.appendChild(th2);
+    tr.appendChild(th3);
+    // append the header row to the table head
+    thead.appendChild(tr);
+    // append the table head to the table
+    globals.fileList.appendChild(thead);
+}
 
 //init detail list
 export function settableandtbody(){
   globals.fileList.replaceChildren();
     addtablehead();
+  
+  
+    let tbody = document.createElement("tbody");
+    tbody.id="listoffiles"
+    globals.fileList.appendChild(tbody);
+}
+export function setdrivetableandtbody(){
+  globals.fileList.replaceChildren();
+    adddrivestablehead();
   
   
     let tbody = document.createElement("tbody");
