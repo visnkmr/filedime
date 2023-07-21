@@ -1,5 +1,6 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
+use ignore::{Walk, WalkBuilder};
 use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State, Manager};
@@ -78,27 +79,36 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       // let st=state.searchtry.clone();
     
     // move||{
-        let walker2 = WalkDir::new(&path)
-        // .contents_first(true)
-          .min_depth(1) // skip the root directory
-          // .max_depth(1) // only look at the immediate subdirectories
-          .into_iter()
+        let walker2 = 
+        WalkBuilder::new(&path)
+        .hidden(true) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        .git_exclude(true)
+        .ignore(true) // Disable the default ignore rules
+        .git_ignore(true) // Respect the .gitignore file
+        .build();
+      // WalkDir::new(&path)
+      //   .contents_first(true)
+      //     .min_depth(1) // skip the root directory
+      //     // .max_depth(1) // only look at the immediate subdirectories
+      //     .into_iter()
           
-          .filter_entry(
-            |e| 
-            !e.path_is_symlink() 
-            // &&
-            // !e
-            // .file_name()
-            // .to_str()
-            // .map(|s| s.starts_with("."))
-            // .unwrap_or(false)
-            &&
-            !is_hidden(e)
-            // &&
-            // e.file_type().is_file()
-              // e.file_type().is_dir()
-          );
+      //     .filter_entry(
+      //       |e| 
+      //       !e.path_is_symlink() 
+      //       // &&
+      //       // !e
+      //       // .file_name()
+      //       // .to_str()
+      //       // .map(|s| s.starts_with("."))
+      //       // .unwrap_or(false)
+      //       &&
+      //       !is_hidden(e)
+      //       // &&
+      //       // e.file_type().is_file()
+      //         // e.file_type().is_dir()
+      //     );
 
         let mut count=RwLock::new(0);
         
@@ -123,7 +133,10 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
               return None; // if yes, it means a new command has been invoked and the old one should be canceled
             }
           // println!("{:?}",e.path());
-            if(!e.file_type().is_dir()){
+          if let Some(eft)=(e.file_type()){
+
+            if(!eft.is_dir())
+            {
               
               // println!("{:?}",e.path());
             // }
@@ -142,6 +155,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
             }
           // map.entry(name).or_insert(Vec::new()).push(i);
           } 
+          }
           Some(())
           // e.path().to_string_lossy().to_string()
         }
