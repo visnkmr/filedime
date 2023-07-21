@@ -110,7 +110,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     BufReader::new(
       OpenOptions::new()
       .read(true)
-      // .custom_flags( libc::FILE_FLAG_OVERLAPPED 
+    //   .custom_flags( libc::O_NONBLOCK 
     // )
       .open(path).unwrap());
     #[cfg(unix)]

@@ -358,8 +358,8 @@ export function adddrivestablehead(){
     let th4 = document.createElement("th");
     // set the text content of the header cells
     th1.textContent = "Filename";
-    th2.textContent = "Filesystem";
-    th3.textContent = "Total Diskspace";
+    th2.textContent = "Total Diskspace";
+    th3.textContent = "Filesystem";
     th4.textContent = "Free DiskSpace";
     // th1.id = "filename";
     // th2.id = "filesize";

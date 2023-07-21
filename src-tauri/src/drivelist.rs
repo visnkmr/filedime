@@ -49,28 +49,6 @@ pub fn get_drives() -> Result<Drives, String> {
                 sysinfo::DiskKind::HDD => "HDD".to_string(),
                 _ => "Removable Disk".to_string(),
             };
-            #[cfg(windows)]
-            {
-
-                let mut caption = mount_point.clone();
-                caption.pop();
-                if total < free && cfg!(target_os = "windows") {
-                    let wmic_process = Command::new("cmd")
-                        .args([
-                            "/C",
-                            &format!("wmic logical disk where Caption='{caption}' get Size"),
-                        ])
-                        .output()
-                        .expect("failed to execute process");
-                    let wmic_process_output = String::from_utf8(wmic_process.stdout).unwrap();
-                    let parsed_size =
-                        wmic_process_output.split("\r\r\n").collect::<Vec<&str>>()[1].to_string();
-    
-                    if let Ok(n) = parsed_size.trim().parse::<u64>() {
-                        total = n.to_string();
-                    }
-                }
-            }
 
             DriveInformation {
                 name,
