@@ -19,7 +19,7 @@ Features implemented:
 - [x] System Tray icons for opening new window and access recent files.
 - [ ] rsync based copy, cut, move, etc.
 
-Subtile features
+Subtle features
 - [x] show name of right click file above context menu
 - [x] search toggle to enable and disable populating filelist of subtree of current folder for indexing. 
 
