@@ -16,9 +16,12 @@ Features implemented:
 - [x] no of each file type in present location.
 - [x] optionally show immediate sub folder count of a folder.
 - [x] show image dimension along with file type.
-- [x|] System Tray icons for opening new window and access recent files.
+- [x] System Tray icons for opening new window and access recent files.
 - [ ] rsync based copy, cut, move, etc.
-- [ ]  
+
+Subtile features
+- [x] show name of right click file above context menu
+- [x] search toggle to enable and disable populating filelist of subtree of current folder for indexing. 
 
 Thanks Tauri, Typescript, Webpack->RSPack, 
 
