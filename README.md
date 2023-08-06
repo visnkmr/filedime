@@ -31,10 +31,10 @@ Thanks Tauri, Typescript, Webpack->RSPack,
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 ## Build from source
-
-clone the repo 
-npm i
-npm run watch
-in a new terminal window "cargo tauri dev" for testing.
-in a new terminal window "cargo tauri build" for making .exe.
+  
+clone the repo  
+npm i  
+npm run watch  
+in a new terminal window "cargo tauri dev" for testing.  
+in a new terminal window "cargo tauri build" for making .exe.  
 
