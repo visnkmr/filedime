@@ -208,10 +208,42 @@ thread::spawn(move || {
         thread::sleep(std::time::Duration::from_millis(30));
     }
 });
+set_enum_value(&state.whichthread, wThread::Searching);
+let stop_flag_local = Arc::new(AtomicBool::new(true));
+
+let stop_flag_ref = Arc::clone(&stop_flag_local);
+thread::spawn(move || {
+  thread::sleep(Duration::from_secs(1));
+  stop_flag_ref.store(false, Ordering::SeqCst);
+  // println!("Stop threads from now on");
+  // thread::sleep(Duration::from_secs(3));
+  // println!("Start threads from now on");
+  // stop_flag_ref.store(true, Ordering::SeqCst);
+
+});
 
 // Populate the hashset using par_iter and inspect
 let u:HashSet<String>=map.clone()
     .par_iter()
+    .filter(|(_,_)|{
+
+      let local_thread_controller=stop_flag_local.clone();
+      let mut global_thread_controller= true;
+        if let wThread::Searching = get_enum_value(&state.whichthread) 
+        { global_thread_controller= true; } 
+        else 
+        { global_thread_controller= false; }
+      if(!local_thread_controller.load(Ordering::Relaxed)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
+      if !global_thread_controller {
+        local_thread_controller.store(false, Ordering::Relaxed);
+        eprintln!("thread stopped by global controller");
+        return false;
+    }
+    return true;
+    })
     .filter(|(i, _)| {
       fuzzy_match(&i, &string).unwrap_or(0)>0
       //  i.contains(&string)
@@ -254,7 +286,6 @@ let u:HashSet<String>=map.clone()
       score // Return the score as the key
     });
     v.reverse();
-    let stop_flag_local = Arc::new(AtomicBool::new(true));
 
     // v.split_off(100);
     // for (c,ei) in 
@@ -433,7 +464,8 @@ pub async fn search_pop(path: String,string:String){
         let k:HashSet<String>=
         par_walker2
         // .enumerate()
-        .into_par_iter()  
+        .into_par_iter()
+          
         .filter_map(
           |i|
           {
