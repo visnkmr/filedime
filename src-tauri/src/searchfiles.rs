@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering}}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use serde::Serialize;
@@ -254,9 +254,36 @@ let u:HashSet<String>=map.clone()
       score // Return the score as the key
     });
     v.reverse();
+    let stop_flag_local = Arc::new(AtomicBool::new(true));
+
     // v.split_off(100);
     // for (c,ei) in 
-    v.par_iter().enumerate().try_for_each(|(c,ei)|{
+    v
+    .par_iter()
+    .enumerate()
+    // .filter(|(_)|{
+    //   if let wThread::Searching = get_enum_value(&state.whichthread) { return true; } else { return false; }
+    // })
+    .filter(|(_,_)|{
+
+      let local_thread_controller=stop_flag_local.clone();
+      let mut global_thread_controller= true;
+        if let wThread::Searching = get_enum_value(&state.whichthread) 
+        { global_thread_controller= true; } 
+        else 
+        { global_thread_controller= false; }
+      if(!local_thread_controller.load(Ordering::Relaxed)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
+      if !global_thread_controller {
+        local_thread_controller.store(false, Ordering::Relaxed);
+        eprintln!("thread stopped by global controller");
+        return false;
+    }
+    return true;
+    })
+    .try_for_each(|(c,ei)|{
       window.emit("reloadlist",json!({
         "message": "pariter3",
         "status": "running",

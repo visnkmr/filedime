@@ -11,7 +11,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, 
+  appstate::{AppStateStore, get_enum_value, wThread, set_enum_value}, 
   openhtml::loadfromhtml, 
   trie::TrieNode, 
   fileitem::populatefileitem, 
@@ -231,6 +231,12 @@ let handle=thread::spawn(move|| {
   }
 })
 ;
+
+set_enum_value(&state.whichthread, wThread::Listing);
+// thread::spawn(move || {
+//   thread::sleep(Duration::from_secs(1));
+//   set_enum_value((&state.whichthread), wThread::None)
+// });
 //    let mut finder = ;
   let walker = WalkDir::new(&path)
       .min_depth(1) // skip the root directory
@@ -247,6 +253,9 @@ let handle=thread::spawn(move|| {
     // let files: Vec<FileItem> =
      let i=par_walker
     .into_par_iter()
+    .filter(|(_)|{
+      if let wThread::Listing = get_enum_value(&state.whichthread) { return true; } else { return false; }
+    })
     .filter(|rv|{
           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
     })
@@ -259,11 +268,17 @@ let handle=thread::spawn(move|| {
     //    &&
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
-    .for_each(|(e)| {
-      window.emit("reloadlist",json!({
-          "message": "pariter1",
-          "status": "running",
-      }));
+    .for_each_with(Arc::clone(&state.whichthread),|(threadcontroller),e| {
+          window.emit("reloadlist",json!({
+              "message": "pariter1",
+              "status": "running",
+          }));
+          if let wThread::Listing= get_enum_value(&threadcontroller){
+            
+          }
+          else{
+            return
+          }
 
           // println!("{}",e.file_name().to_string_lossy().to_string());
         //  println!("{:?}",e);
