@@ -88,23 +88,25 @@ globalThis.lastimefilesloaded=0;
 // web app code
 
 window.addEventListener("DOMContentLoaded", () => {
-  listenforfiles();
+  // console.log("downloaded")
   listenfordrives();
+  listenforfiles();
   starttimer();
   menuapilistener();
 
   // window.find();
   var dev=false;
-
+  console.log("1....."+label);
   if(label==="main"){
+    console.log("main")
     
   // globalThis.defpath =dev? "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents":"/";
   globalThis.defpath="drives://"
-    addtab(uio.appWindow.label,globalThis.defpath);
+    addtab("main",globalThis.defpath);
     (window as any).__TAURI__.invoke(
     "list_files",
     {
-      windowname:uio.appWindow.label,
+      windowname:"main",
       oid: globalThis.tid.toString(),
       path: globalThis.defpath,
       ff: ""
@@ -245,7 +247,7 @@ function listeningapi() {
     let tabid=r.tabid;
     tablist.childNodes.forEach(child => {
       if (child.nodeType === Node.ELEMENT_NODE) {
-        console.log("1........."+((child as HTMLDivElement)).id);
+        // console.log("1........."+((child as HTMLDivElement)).id);
         if(((child as HTMLDivElement)).id==tabid){
           (window as any).__TAURI__.invoke(
             "tabname",
