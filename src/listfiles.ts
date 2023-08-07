@@ -36,11 +36,12 @@ type DriveItem = {
   file_system: string,
 }
 export async function listenforfiles(){
-  
+  console.log("here")
   let nooftimes=0;
   globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
 
  (window as any).__TAURI__.event.listen("list-files", async (data: { payload: string }) => {
+
   setautocompletepath();
   console.log("settingpath");
 
@@ -84,13 +85,12 @@ if (element!==null) {
   });
   
 }
-export async function listenfordrives(){
-  
+export function listenfordrives(){
+  // console.log("listdrives")
   let nooftimes=0;
-  globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
+  // globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
 
  (window as any).__TAURI__.event.listen("list-drives", async (data: { payload: string }) => {
-  setautocompletepath();
   console.log("settingpath");
 
   globalThis.latestimefilesloaded=await globals.invoke('get_timestamp');
@@ -146,14 +146,14 @@ function eachdrive(drive:DriveItem){
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
   let tr = document.createElement("tr");
+  tr.dataset.value = drive.name;
+  tr.dataset.name = drive.mount_point;
+  tr.dataset.path = drive.mount_point;
   // create two table cell elements for the filename and filesize columns
   let td1 = document.createElement("td");
 
   td1.textContent = drive.mount_point;
   td1.className = "td1";
-  td1.dataset.value = drive.name;
-  td1.dataset.name = drive.mount_point;
-  td1.dataset.path = drive.mount_point;
 
   // td1.dataset.isDir = drive.is_removable.toString();
   if (!drive.is_removable) {
@@ -215,13 +215,13 @@ export function eachfile(file:File){
   // create a table row element for each file
   let tr = document.createElement("tr");
   // create two table cell elements for the filename and filesize columns
+  tr.dataset.value = file.name;
+  tr.dataset.name = file.name;
+  tr.dataset.path = file.path;
   let td1 = document.createElement("td");
 
   td1.textContent = file.name;
   td1.className = "td1";
-  td1.dataset.value = file.name;
-  td1.dataset.name = file.name;
-  td1.dataset.path = file.path;
 
   td1.dataset.isDir = file.is_dir.toString();
   if (file.is_dir) {

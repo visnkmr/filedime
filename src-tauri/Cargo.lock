@@ -977,6 +977,7 @@ dependencies = [
  "filesize",
  "filetime",
  "fuzzy-matcher",
+ "ignore",
  "image",
  "libc",
  "opener",

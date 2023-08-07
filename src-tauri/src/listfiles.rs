@@ -45,6 +45,13 @@ fn populatedrivelist()->Vec<DriveItem>{
 }
 #[tauri::command]
 pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+  println!("lfiles");
+
+  if(path=="drives://"){
+    sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
+    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    return Ok(())
+  } 
   // window.emit("infiniteloader",
   //       json!({
   //           "message": "lfiles",
@@ -52,20 +59,15 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   //           })
   //       );
   // Pathresolver::new()
-  if(path=="drives://"){
-    sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
-    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
-    return Ok(())
-  }
+  
   // if(path=="./"){
   //   path="/home/roger/Downloads/github/notes/".to_string();
   // }
-  println!("lfiles");
 
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
-  if(!testpath.exists()){
+  if(!testpath.exists() && path!="drives://"){
     opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.",&getuniquewindowlabel());
     return Ok(())
   }
@@ -90,11 +92,12 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
     return Ok(());
   }
 
-  if(!testpath.is_dir()){
+  if(!testpath.is_dir()  && path!="drives://"){
     opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&getuniquewindowlabel());
     return Ok(())
   }
   window.emit("reloadlist","resettable").unwrap();
+  
   let orig = *state.process_count.lock().unwrap();
 
   state.filesetcollection.write().unwrap().clear();
@@ -115,7 +118,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   // } 
   // state.addtab(oid, path.clone(), ff);
   newtab(&windowname,oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
-  
+ 
   // convert the path to a PathBuf
   // let path = PathBuf::from(path);
 let parent=testpath.clone();

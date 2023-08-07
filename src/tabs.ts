@@ -105,7 +105,7 @@ export function addtab(wname:string,path:string){
           path:path,
         }
       ).then((returned:string)=>{
-        console.log("what was returned....."+returned)
+        // console.log("what was returned....."+returned)
         sn.textContent =returned
       });
       sc.textContent = "x";
