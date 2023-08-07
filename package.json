@@ -1,6 +1,6 @@
 {
   "name": "filedime",
-  "version": "0.21",
+  "version": "0.22.2",
   "private": true,
   "devDependencies": {
     "@rspack/cli": "^0.1.10",

@@ -87,10 +87,10 @@ pub fn set_enum_value(atomic_enum: &AtomicI8, value: wThread) {
     };
 
 
-    atomic_enum.store(mapped_value, Ordering::Relaxed);
+    atomic_enum.store(mapped_value, Ordering::SeqCst);
 }
 pub fn get_enum_value(atomic_enum: &AtomicI8)->wThread {
-    match atomic_enum.load(Ordering::Relaxed) {
+    match atomic_enum.load(Ordering::SeqCst) {
         0 => wThread::None,
         1 => wThread::Populating ,
         2 => wThread::Searching,

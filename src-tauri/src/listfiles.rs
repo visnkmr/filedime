@@ -168,7 +168,7 @@ folcount(&windowname,&app_handle, fcount)?;
 if let Some(granloc)=parent.parent(){
   sendgparentloc(&windowname,&app_handle,granloc.to_string_lossy().to_string())?;
 }
-
+set_enum_value(&state.whichthread, wThread::Listing);
 // let s1=Arc::new(Mutex::new(state));
 // let s2=Arc::clone(&s1);
 // let mut tfsize=0;

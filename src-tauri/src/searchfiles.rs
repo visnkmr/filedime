@@ -228,17 +228,17 @@ let u:HashSet<String>=map.clone()
     .filter(|(_,_)|{
 
       let local_thread_controller=stop_flag_local.clone();
+      if(!local_thread_controller.load(Ordering::SeqCst)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
       let mut global_thread_controller= true;
         if let wThread::Searching = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 
         else 
         { global_thread_controller= false; }
-      if(!local_thread_controller.load(Ordering::Relaxed)){
-        eprintln!("thread stopped by local controller");
-        return false;
-      }
       if !global_thread_controller {
-        local_thread_controller.store(false, Ordering::Relaxed);
+        local_thread_controller.store(false, Ordering::SeqCst);
         eprintln!("thread stopped by global controller");
         return false;
     }
@@ -298,17 +298,17 @@ let u:HashSet<String>=map.clone()
     .filter(|(_,_)|{
 
       let local_thread_controller=stop_flag_local.clone();
+      if(!local_thread_controller.load(Ordering::SeqCst)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
       let mut global_thread_controller= true;
         if let wThread::Searching = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 
         else 
         { global_thread_controller= false; }
-      if(!local_thread_controller.load(Ordering::Relaxed)){
-        eprintln!("thread stopped by local controller");
-        return false;
-      }
       if !global_thread_controller {
-        local_thread_controller.store(false, Ordering::Relaxed);
+        local_thread_controller.store(false, Ordering::SeqCst);
         eprintln!("thread stopped by global controller");
         return false;
     }

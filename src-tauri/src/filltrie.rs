@@ -11,7 +11,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, 
+  appstate::{AppStateStore, set_enum_value, wThread}, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, 
   // loadjs::loadjs
 };
 
@@ -111,7 +111,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       //     );
 
         let mut count=RwLock::new(0);
-        
+        set_enum_value(&state.whichthread, wThread::Populating);
         
         let par_walker2 = walker2.par_bridge(); // ignore errors
         
