@@ -229,19 +229,19 @@ let u:HashSet<String>=map.clone()
 
       let local_thread_controller=stop_flag_local.clone();
       if(!local_thread_controller.load(Ordering::SeqCst)){
-        eprintln!("thread stopped by local controller");
+        println!("thread stopped by local controller");
         return false;
       }
       let mut global_thread_controller= true;
         if let wThread::Searching = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 
         else 
-        { global_thread_controller= false; }
-      if !global_thread_controller {
-        local_thread_controller.store(false, Ordering::SeqCst);
-        eprintln!("thread stopped by global controller");
-        return false;
-    }
+        { 
+          global_thread_controller= false; 
+          local_thread_controller.store(false, Ordering::SeqCst);
+          println!("thread stopped by global controller");
+          return false;
+        }
     return true;
     })
     .filter(|(i, _)| {

@@ -72,6 +72,7 @@ pub struct AppStateStore {
     // app_handle:AppHandle
     // size:usize
 }
+#[derive(Debug)]
 pub enum wThread {
     None,
     Populating,

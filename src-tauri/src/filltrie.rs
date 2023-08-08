@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use ignore::{Walk, WalkBuilder};
 use rayon::prelude::*;
@@ -11,7 +11,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::{AppStateStore, set_enum_value, wThread}, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, 
+  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, 
   // loadjs::loadjs
 };
 
@@ -112,25 +112,62 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
 
         let mut count=RwLock::new(0);
         set_enum_value(&state.whichthread, wThread::Populating);
+        let stop_flag_local = Arc::new(AtomicBool::new(true));
         
         let par_walker2 = walker2.par_bridge(); // ignore errors
         
         // let k:HashSet<String>=
         // let paths:Vec<String>=
         par_walker2
+        
         // .enumerate()
-        .into_par_iter()  
+        .into_par_iter()
+        .filter(|(_)|{
+
+          let local_thread_controller=stop_flag_local.clone();
+          if(!local_thread_controller.load(Ordering::SeqCst)){
+            eprintln!("thread stopped by local controller");
+            return false;
+          }
+            // println!("{:?}",get_enum_value(&state.whichthread) );
+
+            if let wThread::Populating = get_enum_value(&state.whichthread) 
+            {
+              // eprintln!("addedtosearch"); 
+            } 
+            else 
+            { 
+              local_thread_controller.store(false, Ordering::SeqCst);
+              eprintln!("thread stopped by global controller");
+              return false;
+            }
+        return true;
+        })
         .filter_map(Result::ok)
-        .map(
+        .for_each(
           |e|
           {
-            eprintln!("addedtosearch");
+            // let local_thread_controller=stop_flag_local.clone();
+            // if(!local_thread_controller.load(Ordering::SeqCst)){
+            //   eprintln!("thread stopped by local controller");
+            //   return ;
+            // }
+            //   if let wThread::Populating = get_enum_value(&state.whichthread) 
+            //   { eprintln!("addedtosearch");} 
+            //   else 
+            //   { 
+            //     local_thread_controller.store(false, Ordering::SeqCst);
+            //     eprintln!("thread stopped by global controller");
+            //     return ;
+            //   }
+          // return true;
+            
           //   window.emit("reloadlist",json!({
           //     "message": "pariter5",
           //     "status": "running",
           // }));
             if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
-              return None; // if yes, it means a new command has been invoked and the old one should be canceled
+              return ; // if yes, it means a new command has been invoked and the old one should be canceled
             }
           // println!("{:?}",e.path());
           if let Some(eft)=(e.file_type()){
@@ -156,13 +193,14 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
           // map.entry(name).or_insert(Vec::new()).push(i);
           } 
           }
-          Some(())
-          // e.path().to_string_lossy().to_string()
+// return true;           // e.path().to_string_lossy().to_string()
         }
-        )
-        .collect::<Option<()>>();
+        );
+        // .collect();
         // state.st.lock().unwrap().populate_trie(paths);
-
+        if(!stop_flag_local.load(Ordering::SeqCst)){
+          return Ok(())
+        }
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();
         let endtime = duration.as_secs();

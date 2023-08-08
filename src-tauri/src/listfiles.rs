@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use rayon::prelude::*;
 use serde::Serialize;
@@ -236,6 +236,8 @@ let handle=thread::spawn(move|| {
 ;
 
 set_enum_value(&state.whichthread, wThread::Listing);
+let stop_flag_local = Arc::new(AtomicBool::new(true));
+
 // thread::spawn(move || {
 //   thread::sleep(Duration::from_secs(1));
 //   set_enum_value((&state.whichthread), wThread::None)
@@ -257,7 +259,25 @@ set_enum_value(&state.whichthread, wThread::Listing);
      let i=par_walker
     .into_par_iter()
     .filter(|(_)|{
-      if let wThread::Listing = get_enum_value(&state.whichthread) { return true; } else { return false; }
+
+      let local_thread_controller=stop_flag_local.clone();
+      if(!local_thread_controller.load(Ordering::SeqCst)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
+      let mut global_thread_controller= true;
+      println!("{:?}",get_enum_value(&state.whichthread) );
+
+        if let wThread::Listing = get_enum_value(&state.whichthread) 
+        { global_thread_controller= true; } 
+        else 
+        { global_thread_controller= false; }
+      if !global_thread_controller {
+        local_thread_controller.store(false, Ordering::SeqCst);
+        eprintln!("thread stopped by global controller");
+        return false;
+    }
+    return true;
     })
     .filter(|rv|{
           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
@@ -272,16 +292,16 @@ set_enum_value(&state.whichthread, wThread::Listing);
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
     .for_each_with(Arc::clone(&state.whichthread),|(threadcontroller),e| {
-          window.emit("reloadlist",json!({
-              "message": "pariter1",
-              "status": "running",
-          }));
-          if let wThread::Listing= get_enum_value(&threadcontroller){
+      // if let wThread::Listing= get_enum_value(&threadcontroller){
+            window.emit("reloadlist",json!({
+                "message": "pariter1",
+                "status": "running",
+            }));
             
-          }
-          else{
-            return
-          }
+          // }
+          // else{
+          //   return
+          // }
 
           // println!("{}",e.file_name().to_string_lossy().to_string());
         //  println!("{:?}",e);
