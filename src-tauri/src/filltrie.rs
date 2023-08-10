@@ -147,6 +147,8 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
         .for_each(
           |e|
           {
+            thread::sleep(Duration::from_secs(1));
+            println!("Populating");
             // let local_thread_controller=stop_flag_local.clone();
             // if(!local_thread_controller.load(Ordering::SeqCst)){
             //   eprintln!("thread stopped by local controller");
@@ -166,33 +168,33 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
           //     "message": "pariter5",
           //     "status": "running",
           // }));
-            if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
-              return ; // if yes, it means a new command has been invoked and the old one should be canceled
-            }
-          // println!("{:?}",e.path());
-          if let Some(eft)=(e.file_type()){
+          //   if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one
+          //     return ; // if yes, it means a new command has been invoked and the old one should be canceled
+          //   }
+          // // println!("{:?}",e.path());
+          // if let Some(eft)=(e.file_type()){
 
-            if(!eft.is_dir())
-            {
+          //   if(!eft.is_dir())
+          //   {
               
-              // println!("{:?}",e.path());
-            // }
-            let i = e.path().to_string_lossy().to_string();
-            let name=e.file_name().to_string_lossy().to_string().to_lowercase();
-            let map=state.stl.clone();
-            let mut map =map.lock().unwrap();
-            if let Some(hs) = map.get_mut(&name) {
-                // If yes, append the value to the existing vector
-                // if(!hs.contains(&i)){
-                  hs.insert(i);
-                // }
-            } else {
-                // If no, create a new vector with the value and insert it into the hashmap
-                map.insert(name, HashSet::from_iter(vec![i]));
-            }
-          // map.entry(name).or_insert(Vec::new()).push(i);
-          } 
-          }
+          //     // println!("{:?}",e.path());
+          //   // }
+          //   let i = e.path().to_string_lossy().to_string();
+          //   let name=e.file_name().to_string_lossy().to_string().to_lowercase();
+          //   let map=state.stl.clone();
+          //   let mut map =map.lock().unwrap();
+          //   if let Some(hs) = map.get_mut(&name) {
+          //       // If yes, append the value to the existing vector
+          //       // if(!hs.contains(&i)){
+          //         hs.insert(i);
+          //       // }
+          //   } else {
+          //       // If no, create a new vector with the value and insert it into the hashmap
+          //       map.insert(name, HashSet::from_iter(vec![i]));
+          //   }
+          // // map.entry(name).or_insert(Vec::new()).push(i);
+          // } 
+          // }
 // return true;           // e.path().to_string_lossy().to_string()
         }
         );

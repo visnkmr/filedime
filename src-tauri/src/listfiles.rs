@@ -133,11 +133,13 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
   // get the app handle from the window
 
   starttimer(&windowname,&app_handle)?;
+  println!("start timer");
   loadhistory(&windowname,&app_handle,
     serde_json::to_string(
       &state.gettab(&oid).2
     ).unwrap())?;
-let mut fcount;
+    println!("load history");
+    let mut fcount;
   match(fs::read_dir(&path)){
     Ok(rv)=>{
       fcount=rv.par_bridge()
@@ -160,10 +162,14 @@ let mut fcount;
     }
     
   }
+  println!("read dir done on path");
+
           ; // count the number of items in parallel
 // let fcount=fs::read_dir(&path).unwrap().count();
 // println!("folders---{}",fcount);
 folcount(&windowname,&app_handle, fcount)?;
+println!("folcount sent");
+
 
 if let Some(granloc)=parent.parent(){
   sendgparentloc(&windowname,&app_handle,granloc.to_string_lossy().to_string())?;
