@@ -4,6 +4,7 @@ use prefstore::getallcustomwithin;
 use std::collections::{HashSet, HashMap};
 use std::mem::{self};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicI8, Ordering};
 // use std::sync::mpsc::{Sender, Receiver};
 use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -53,7 +54,7 @@ pub struct AppStateStore {
     pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashMap<String,tab>>,
     pub expiration:Duration,
-    
+    pub whichthread:Arc<AtomicI8>,
     bookmarks:RwLock<HashSet<marks>>,
     messagetothread:RwLock<String>,
     recents:Vec<String>,
@@ -71,8 +72,33 @@ pub struct AppStateStore {
     // app_handle:AppHandle
     // size:usize
 }
+#[derive(Debug)]
+pub enum wThread {
+    None,
+    Populating,
+    Searching,
+    Listing
+}
+pub fn set_enum_value(atomic_enum: &AtomicI8, value: wThread) {
+    let mapped_value = match value {
+        wThread::None => 0,
+        wThread::Populating => 1,
+        wThread::Searching => 2,
+        wThread::Listing => 3,
+    };
 
 
+    atomic_enum.store(mapped_value, Ordering::SeqCst);
+}
+pub fn get_enum_value(atomic_enum: &AtomicI8)->wThread {
+    match atomic_enum.load(Ordering::SeqCst) {
+        0 => wThread::None,
+        1 => wThread::Populating ,
+        2 => wThread::Searching,
+        3 => wThread::Listing,
+        _ => wThread::None
+    }
+}
 
 use crate::{dirsize, sizeunit};
 impl AppStateStore {
@@ -82,6 +108,7 @@ impl AppStateStore {
         Self {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
+            whichthread:Arc::new(AtomicI8::new(0)),
             nosize:RwLock::new(true),
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),

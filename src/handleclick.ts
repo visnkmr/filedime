@@ -236,9 +236,9 @@ export function handleclicks(e:Event){
   if (
     (target).tagName === "TD"
   ) {
-   let clicksource=target.parentNode as HTMLTableRowElement;
+    let clicksource=target.parentNode as HTMLTableRowElement;
     // console.log("tryopen--------->"+JSON.stringify(target.parentNode.dataset))
-      openfile(clicksource,clicksource.dataset.path!,clicksource.dataset.name!)    
+      openfile(clicksource,clicksource.dataset.path!,clicksource.dataset.name!)     
   }
   switch (
   e.target

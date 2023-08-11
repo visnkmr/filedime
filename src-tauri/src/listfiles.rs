@@ -1,5 +1,6 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
+use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
@@ -11,7 +12,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, 
+  appstate::{AppStateStore, get_enum_value, wThread, set_enum_value}, 
   openhtml::loadfromhtml, 
   trie::TrieNode, 
   fileitem::populatefileitem, 
@@ -133,42 +134,99 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
   // get the app handle from the window
 
   starttimer(&windowname,&app_handle)?;
+  println!("start timer");
   loadhistory(&windowname,&app_handle,
     serde_json::to_string(
       &state.gettab(&oid).2
     ).unwrap())?;
-let mut fcount;
-  match(fs::read_dir(&path)){
-    Ok(rv)=>{
-      fcount=rv.par_bridge()
-      .filter(|e|{
-        match(e){
-          Ok(rv)=>{
-            !rv.file_name().to_string_lossy().to_string().ends_with(".git")
-          },
-          Err(_)=>{
-            false
-          }
-        }
-      }) // create a parallel iterator from a sequential one
-      .count();
-    },
-    _=>{
-      println!("failed to read file");
-      stoptimer(&windowname, &window.app_handle())?;
-      return Err("Cannot open the file/folder".to_string())
-    }
+    println!("load history");
+    // let mut fcount;
+
+    let walker2 = 
+        WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        
+        .hidden(true) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        
+        .git_exclude(true)
+        .ignore(true) // Disable the default ignore rules
+        .git_ignore(true) // Respect the .gitignore file
+        .build();
+      // WalkDir::new(&path)
+      //   .contents_first(true)
+      //     .min_depth(1) // skip the root directory
+      //     // .max_depth(1) // only look at the immediate subdirectories
+      //     .into_iter()
+          
+      //     .filter_entry(
+      //       |e| 
+      //       !e.path_is_symlink() 
+      //       // &&
+      //       // !e
+      //       // .file_name()
+      //       // .to_str()
+      //       // .map(|s| s.starts_with("."))
+      //       // .unwrap_or(false)
+      //       &&
+      //       !is_hidden(e)
+      //       // &&
+      //       // e.file_type().is_file()
+      //         // e.file_type().is_dir()
+      //     );
+
+        
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        
+        // let k:HashSet<String>=
+        // let paths:Vec<String>=
+        let fcount=par_walker2
+        
+        // .enumerate()
+        .into_par_iter()
+        
+        .filter_map(
+          {
+            println!("reading to list files...");
+          Result::ok
+})
+        .count();
+  // match(fs::read_dir(&path)){
+  //   Ok(rv)=>{
+  //     fcount=rv.par_bridge()
+  //     .filter(|e|{
+  //       match(e){
+  //         Ok(rv)=>{
+  //           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
+  //         },
+  //         Err(_)=>{
+  //           false
+  //         }
+  //       }
+  //     }) // create a parallel iterator from a sequential one
+  //     .count();
+  //   },
+  //   _=>{
+  //     println!("failed to read file");
+  //     stoptimer(&windowname, &window.app_handle())?;
+  //     return Err("Cannot open the file/folder".to_string())
+  //   }
     
-  }
+  // }
+  println!("read dir done on path");
+
           ; // count the number of items in parallel
 // let fcount=fs::read_dir(&path).unwrap().count();
 // println!("folders---{}",fcount);
 folcount(&windowname,&app_handle, fcount)?;
+println!("folcount sent");
+
 
 if let Some(granloc)=parent.parent(){
   sendgparentloc(&windowname,&app_handle,granloc.to_string_lossy().to_string())?;
 }
-
+set_enum_value(&state.whichthread, wThread::Listing);
 // let s1=Arc::new(Mutex::new(state));
 // let s2=Arc::clone(&s1);
 // let mut tfsize=0;
@@ -234,6 +292,14 @@ let handle=thread::spawn(move|| {
   }
 })
 ;
+
+set_enum_value(&state.whichthread, wThread::Listing);
+let stop_flag_local = Arc::new(AtomicBool::new(true));
+
+// thread::spawn(move || {
+//   thread::sleep(Duration::from_secs(1));
+//   set_enum_value((&state.whichthread), wThread::None)
+// });
 //    let mut finder = ;
   let walker = WalkDir::new(&path)
       .min_depth(1) // skip the root directory
@@ -250,6 +316,27 @@ let handle=thread::spawn(move|| {
     // let files: Vec<FileItem> =
      let i=par_walker
     .into_par_iter()
+    .filter(|(_)|{
+
+      let local_thread_controller=stop_flag_local.clone();
+      if(!local_thread_controller.load(Ordering::SeqCst)){
+        eprintln!("thread stopped by local controller");
+        return false;
+      }
+      let mut global_thread_controller= true;
+      println!("{:?}",get_enum_value(&state.whichthread) );
+
+        if let wThread::Listing = get_enum_value(&state.whichthread) 
+        { global_thread_controller= true; } 
+        else 
+        { global_thread_controller= false; }
+      if !global_thread_controller {
+        local_thread_controller.store(false, Ordering::SeqCst);
+        eprintln!("thread stopped by global controller");
+        return false;
+    }
+    return true;
+    })
     .filter(|rv|{
           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
     })
@@ -262,11 +349,17 @@ let handle=thread::spawn(move|| {
     //    &&
     //    !path.to_string_lossy().to_string().contains("/.git")
     // })
-    .for_each(|(e)| {
-      window.emit("reloadlist",json!({
-          "message": "pariter1",
-          "status": "running",
-      }));
+    .for_each_with(Arc::clone(&state.whichthread),|(threadcontroller),e| {
+      // if let wThread::Listing= get_enum_value(&threadcontroller){
+            window.emit("reloadlist",json!({
+                "message": "pariter1",
+                "status": "running",
+            }));
+            
+          // }
+          // else{
+          //   return
+          // }
 
           // println!("{}",e.file_name().to_string_lossy().to_string());
         //  println!("{:?}",e);
