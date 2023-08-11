@@ -70,8 +70,13 @@ use crate::{markdown::loadmarkdown,
 #[tauri::command]
 pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),()>{
   let orig = *state.process_count.lock().unwrap();
+  let data_clone = Arc::clone(&state.messagetofilltrie);
+  println!("populate to search");
+  let mut write_lock = data_clone.write().unwrap();
+    *write_lock=path.clone();
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
+  println!("lock acquired and wrote");
   
 
   // thread::spawn(
@@ -92,12 +97,16 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       .git_ignore(true) // Respect the .gitignore file
       .build_parallel()
       .run(|| {
+  let data_clone = Arc::clone(&state.messagetofilltrie);
+            let pth=path.clone();
             println!("Populating");
 
           // let total_bytes = total_bytes.clone();
           // let database = database.clone();
           // let root = root.as_ref().to_owned();
           Box::new(move |entry| {
+            // let read_lock = data_clone.read().unwrap();
+            // println!("populating {}",read_lock);
             match(entry){
               Ok(e)=>{
                 if let Some(eft)=(e.file_type()){
@@ -147,9 +156,18 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
               //         .unwrap()
               //         .insert(short_path.to_owned(), result);
               // }
-              WalkState::Continue
+              // if(*read_lock!=pth.clone()){
+              //     let map=state.stl.clone();
+              //     let mut map =map.lock().unwrap();
+              //     map.clear();
+              //     println!("Quit Load {}",pth.clone());
+              //     return WalkState::Quit;
+              // }
+              return WalkState::Continue;
           })
       });
+  println!("populated");
+
 //         let walker2 = 
 //         WalkBuilder::new(&path)
 //         .hidden(true) // Include hidden files and directories
@@ -279,7 +297,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();
         let endtime = duration.as_secs();
-        println!("endtime----{}",endtime);
+        println!("endtime for search about {}----{}",path,endtime);
         
         // .collect(); // collect into a vec
         // let mut st=st.lock().unwrap();

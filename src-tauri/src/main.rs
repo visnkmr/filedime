@@ -10,6 +10,7 @@ mod sendtofrontend;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
+use filltrie::populate_try;
 use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat};
@@ -268,7 +269,9 @@ async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)-
 #[tauri::command]
 async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.togglelsl();
-  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+      populate_try(path, &window,&state).await;
+  
   Ok(())
 }
 

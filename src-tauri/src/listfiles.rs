@@ -320,7 +320,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
 
       let local_thread_controller=stop_flag_local.clone();
       if(!local_thread_controller.load(Ordering::SeqCst)){
-        eprintln!("thread stopped by local controller");
+        eprintln!("thread stopped by local controller in listfiles");
         return false;
       }
       let mut global_thread_controller= true;
@@ -332,7 +332,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
         { global_thread_controller= false; }
       if !global_thread_controller {
         local_thread_controller.store(false, Ordering::SeqCst);
-        eprintln!("thread stopped by global controller");
+        eprintln!("thread stopped by global controller in listfiles");
         return false;
     }
     return true;

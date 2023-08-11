@@ -47,7 +47,9 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
       return Ok(());
     }
  
-  
+    let data_clone = Arc::clone(&state.messagetothread);
+    let mut write_lock = data_clone.write().unwrap();
+      *write_lock=string.clone();
   let now = SystemTime::now();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   let startime = duration.as_secs();
@@ -226,12 +228,16 @@ thread::spawn(move || {
 let u:HashSet<String>=map.clone()
     .par_iter()
     .filter(|(_,_)|{
-
-      let local_thread_controller=stop_flag_local.clone();
-      if(!local_thread_controller.load(Ordering::SeqCst)){
-        println!("thread stopped by local controller");
+      let read_lock = data_clone.read().unwrap();
+      if(*read_lock!=string){
         return false;
       }
+      let local_thread_controller=stop_flag_local.clone();
+      if(!local_thread_controller.load(Ordering::SeqCst)){
+        println!("thread stopped by local controller in searchfiles in searchiter");
+        return false;
+      }
+      println!("convert list of search files to par iter {:?}",get_enum_value(&state.whichthread));
       let mut global_thread_controller= true;
         if let wThread::Searching = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 
@@ -239,7 +245,7 @@ let u:HashSet<String>=map.clone()
         { 
           global_thread_controller= false; 
           local_thread_controller.store(false, Ordering::SeqCst);
-          println!("thread stopped by global controller");
+          println!("thread stopped by global controller in searchfiles");
           return false;
         }
     return true;
@@ -296,12 +302,19 @@ let u:HashSet<String>=map.clone()
     //   if let wThread::Searching = get_enum_value(&state.whichthread) { return true; } else { return false; }
     // })
     .filter(|(_,_)|{
+      let read_lock = data_clone.read().unwrap();
+      if(*read_lock!=string){
+        return false;
+      }
+      println!("convert list of search files to par iter {:?}",get_enum_value(&state.whichthread));
 
       let local_thread_controller=stop_flag_local.clone();
       if(!local_thread_controller.load(Ordering::SeqCst)){
-        eprintln!("thread stopped by local controller");
+        eprintln!("thread stopped by local controller in searchfiles sendresp");
         return false;
       }
+      println!("loadlist after search complete {:?}",get_enum_value(&state.whichthread));
+
       let mut global_thread_controller= true;
         if let wThread::Searching = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 
@@ -309,7 +322,7 @@ let u:HashSet<String>=map.clone()
         { global_thread_controller= false; }
       if !global_thread_controller {
         local_thread_controller.store(false, Ordering::SeqCst);
-        eprintln!("thread stopped by global controller");
+        eprintln!("thread stopped by global controller in searchfiles");
         return false;
     }
     return true;
