@@ -79,10 +79,14 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       // let st=state.searchtry.clone();
     
     // move||{
+      let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
+
+
         let walker2 = 
         WalkBuilder::new(&path)
         .hidden(true) // Include hidden files and directories
         .follow_links(false)
+        // .threads(n)
         .parents(true)
         .git_exclude(true)
         .ignore(true) // Disable the default ignore rules
