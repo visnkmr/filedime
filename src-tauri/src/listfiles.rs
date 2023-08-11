@@ -1,5 +1,6 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
+use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
@@ -139,29 +140,80 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
       &state.gettab(&oid).2
     ).unwrap())?;
     println!("load history");
-    let mut fcount;
-  match(fs::read_dir(&path)){
-    Ok(rv)=>{
-      fcount=rv.par_bridge()
-      .filter(|e|{
-        match(e){
-          Ok(rv)=>{
-            !rv.file_name().to_string_lossy().to_string().ends_with(".git")
-          },
-          Err(_)=>{
-            false
-          }
-        }
-      }) // create a parallel iterator from a sequential one
-      .count();
-    },
-    _=>{
-      println!("failed to read file");
-      stoptimer(&windowname, &window.app_handle())?;
-      return Err("Cannot open the file/folder".to_string())
-    }
+    // let mut fcount;
+
+    let walker2 = 
+        WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        
+        .hidden(true) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        
+        .git_exclude(true)
+        .ignore(true) // Disable the default ignore rules
+        .git_ignore(true) // Respect the .gitignore file
+        .build();
+      // WalkDir::new(&path)
+      //   .contents_first(true)
+      //     .min_depth(1) // skip the root directory
+      //     // .max_depth(1) // only look at the immediate subdirectories
+      //     .into_iter()
+          
+      //     .filter_entry(
+      //       |e| 
+      //       !e.path_is_symlink() 
+      //       // &&
+      //       // !e
+      //       // .file_name()
+      //       // .to_str()
+      //       // .map(|s| s.starts_with("."))
+      //       // .unwrap_or(false)
+      //       &&
+      //       !is_hidden(e)
+      //       // &&
+      //       // e.file_type().is_file()
+      //         // e.file_type().is_dir()
+      //     );
+
+        
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        
+        // let k:HashSet<String>=
+        // let paths:Vec<String>=
+        let fcount=par_walker2
+        
+        // .enumerate()
+        .into_par_iter()
+        
+        .filter_map(
+          {
+            println!("reading to list files...");
+          Result::ok
+})
+        .count();
+  // match(fs::read_dir(&path)){
+  //   Ok(rv)=>{
+  //     fcount=rv.par_bridge()
+  //     .filter(|e|{
+  //       match(e){
+  //         Ok(rv)=>{
+  //           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
+  //         },
+  //         Err(_)=>{
+  //           false
+  //         }
+  //       }
+  //     }) // create a parallel iterator from a sequential one
+  //     .count();
+  //   },
+  //   _=>{
+  //     println!("failed to read file");
+  //     stoptimer(&windowname, &window.app_handle())?;
+  //     return Err("Cannot open the file/folder".to_string())
+  //   }
     
-  }
+  // }
   println!("read dir done on path");
 
           ; // count the number of items in parallel
