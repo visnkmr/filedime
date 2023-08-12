@@ -36,8 +36,10 @@ type DriveItem = {
   file_system: string,
 }
 export function listfilteredlist(sq:string){
-  setautocompletepath();
+  let tryele = document.getElementById("listoffiles");
+  tryele?.replaceChildren();
   console.log("settingpath");
+  // globals.fileList.replaceChildren()
 
   
   globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
