@@ -980,6 +980,7 @@ dependencies = [
  "ignore",
  "image",
  "libc",
+ "num_cpus",
  "opener",
  "prefstore",
  "rayon",

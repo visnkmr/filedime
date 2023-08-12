@@ -414,9 +414,9 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&wname,&app_handle)?;
   
-    if(*state.loadsearchlist.read().unwrap()){
+    // if(*state.loadsearchlist.read().unwrap()){
       populate_try(path, &window,&state).await;
-    }
+    // }
 
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();

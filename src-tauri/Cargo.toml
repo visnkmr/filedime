@@ -34,7 +34,7 @@ image = "0.24.6"
 # image = {git="https://codeberg.org/visnk/image-rs.git"}
 
 fuzzy-matcher="0.3.7"
-
+num_cpus="1.15.0"
 rustc-hash="1.1.0"
 # tao = { version = "0.19.0"}
 # du="0.1.1"

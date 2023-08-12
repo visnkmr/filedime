@@ -1,3 +1,5 @@
+// import {File} from "./listfiles";
+
 declare var tid: number | string                ; // declare tid as a number or string variable
 declare var frompath: string; // declare tid as a number or string variable
 declare var activetab: string; // declare tid as a number or string variable
@@ -11,3 +13,4 @@ declare var latestimefilesloaded:number;
 declare var sendpath:string[];
 declare var timeouts:number[];
 declare var interval:NodeJS.Timer;
+declare var lastpopfilelist:import("/tmp/new/filedime/src/listfiles").File[];

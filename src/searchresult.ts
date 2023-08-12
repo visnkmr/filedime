@@ -111,9 +111,9 @@ export function loadsearchresult(){
      
          td1.textContent = file.name;
          td1.className = "td1";
-         td1.dataset.value = file.name;
-         td1.dataset.name = file.name;
-         td1.dataset.path = file.path;
+         tr.dataset.value = file.name;
+         tr.dataset.name = file.name;
+         tr.dataset.path = file.path;
      
          td1.dataset.isDir = file.is_dir.toString();
          if (file.is_dir) {

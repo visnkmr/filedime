@@ -1,6 +1,7 @@
 import setsendpath from './copynpaste';
 import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
+import { wholesearch } from './getpathoptions';
 import { settableandtbody } from './listfiles';
 import { loader } from './loader';
 import { populateimmediatechildcount, populatesearchlist, reloadlist, reloadsize } from './menu_apis';
@@ -245,6 +246,9 @@ export function handleclicks(e:Event){
   ) {
     case globals.recent:
       recentfiles();
+      break;
+    case document.getElementById("wholesearch") as HTMLButtonElement:
+      wholesearch(globals.searchInput.value);
       break;
     case globals.reload:
       reloadlist();
