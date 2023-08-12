@@ -1,4 +1,5 @@
 import uio, * as globals from './file-explorer';
+import { listfilteredlist } from './listfiles';
 
 export async function getpathlist(path:string){
     await (window as any).__TAURI__.invoke(
@@ -33,12 +34,14 @@ export async function getpathlist(path:string){
 }
 
 export async function searchforit(text:string){
-    (window as any).__TAURI__.invoke(
-    "search_try", {
-      windowname:uio.appWindow.label,
-      path: globals.pathInput.value,
-      string: text
-  })
+  //   (window as any).__TAURI__.invoke(
+  //   "search_try", {
+  //     windowname:uio.appWindow.label,
+  //     path: globals.pathInput.value,
+  //     string: text
+  // })
+  listfilteredlist(text);
+  console.log(globalThis.lastpopfilelist);
   // .error((option:any)=>{
   //   console.log(option);
   // });

@@ -15,7 +15,7 @@ export function listenforfolcount(){
   });
   
 }
-type File = {
+export type File = {
   name: string;
   path: string;
   is_dir: boolean;
@@ -35,8 +35,43 @@ type DriveItem = {
   disk_type: string,
   file_system: string,
 }
+export function listfilteredlist(sq:string){
+  setautocompletepath();
+  console.log("settingpath");
+
+  
+  globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
+  globals.ousd.style.display="none";
+  globals.filewatch.style.display="none";
+// Get the element by id
+let element = document.getElementById("listoffiles");
+
+// Check if it exists
+for (var ef in globalThis.lastpopfilelist) {
+    if(globalThis.lastpopfilelist[ef].name.includes(sq)){
+      
+      if (element!==null) {
+        // if(JSON.parse(data.payload) instanceof File)
+  
+      // console.log(JSON.stringify(globalThis.lastpopfilelist))
+  
+        eachfile(globalThis.lastpopfilelist[ef]);
+        // else{
+          // eachdrive(JSON.parse(data.payload) as DriveItem);
+        // }
+      } else {
+        // console.log(JSON.stringify(globalThis.lastpopfilelist))
+        settableandtbody();
+      }
+    }
+  }
+    // globals.htmlbase.innerHTML = ""
+    console.log("listfiles")
+}
 export async function listenforfiles(){
   console.log("here")
+  globalThis.lastpopfilelist=[];
+
   let nooftimes=0;
   globalThis.lastimefilesloaded=await globals.invoke('get_timestamp');
 
@@ -64,11 +99,16 @@ let element = document.getElementById("listoffiles");
 // Check if it exists
 if (element!==null) {
   // if(JSON.parse(data.payload) instanceof File)
+  globalThis.lastpopfilelist.push(JSON.parse(data.payload) as File)
+  console.log(JSON.stringify(globalThis.lastpopfilelist))
+
     eachfile(JSON.parse(data.payload) as File);
     // else{
       // eachdrive(JSON.parse(data.payload) as DriveItem);
     // }
 } else {
+  globalThis.lastpopfilelist=[];
+  console.log(JSON.stringify(globalThis.lastpopfilelist))
   settableandtbody();
 }
     // globals.htmlbase.innerHTML = ""
@@ -378,6 +418,8 @@ export function adddrivestablehead(){
 
 //init detail list
 export function settableandtbody(){
+  globalThis.lastpopfilelist=[];
+
   globals.fileList.replaceChildren();
     addtablehead();
   

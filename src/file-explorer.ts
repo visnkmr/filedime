@@ -31,6 +31,7 @@ export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 
 globalThis.activetab="";
+
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
 export const searchInput = document.getElementById("search-input") as HTMLInputElement;
 export const listButton = document.getElementById("list-button") as HTMLButtonElement;
