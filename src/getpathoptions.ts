@@ -32,7 +32,14 @@ export async function getpathlist(path:string){
       console.error(error);
     });
 }
-
+export async function wholesearch(text:string){
+     (window as any).__TAURI__.invoke(
+    "search_try", {
+      windowname:uio.appWindow.label,
+      path: globals.pathInput.value,
+      string: text
+  })
+}
 export async function searchforit(text:string){
   //   (window as any).__TAURI__.invoke(
   //   "search_try", {
