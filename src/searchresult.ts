@@ -7,14 +7,16 @@ export function loadsearchresult(){
   
 
     (window as any).__TAURI__.event.listen("load-sresults", (data: { payload: string }) => {
-      let files: File[] = JSON.parse(data.payload) as File[];
-      if(files.length===0)
-        return
+      let files: File = JSON.parse(data.payload) as File;
+
+      globalThis.lastpopfilelist=JSON.parse(data.payload) as File[]
+      // if(files.length===0)
+      //   return
      globals.ousd.style.display="none";
      globals.filewatch.style.display="none";
    
        globals.htmlbase.innerHTML = ""
-       console.log("listfiles")
+       console.log("list_search_result_files");
        // pathline.innerHTML != "";
      
        

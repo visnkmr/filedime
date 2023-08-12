@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering}}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering, AtomicI16}}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use serde::Serialize;
@@ -41,6 +41,11 @@ struct rstr{
 pub async fn  search_try(windowname:String,path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let counter = &state.searchcounter;
+  let local_counter = Arc::new(AtomicI16::new(0));
+  local_counter.store(0, Ordering::SeqCst);
+
+
   let wname=windowname.clone();
     // populate_try(path, &state);
     if(string.len()<3){
@@ -169,7 +174,7 @@ thread::spawn(move || {
         // Read the hashset with a read lock
         if(ret.len()!=0){
 
-          slist(&windowname,&app_handle, &ret, string_clone.clone())
+          // slist(&windowname,&app_handle, &ret, string_clone.clone())
         }
       
      
@@ -225,6 +230,18 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
 // Populate the hashset using par_iter and inspect
 let u:HashSet<String>=map.clone()
     .par_iter()
+    .filter(|_|{
+      let counter = Arc::clone(&counter);
+      let local_counter = Arc::clone(&local_counter);
+      let val=counter.load(Ordering::SeqCst);
+      let localaval=local_counter.load(Ordering::SeqCst);
+      if(val==localaval){
+
+        return true;
+      }
+      local_counter.store(val+1, Ordering::SeqCst);
+      return false;
+    })
     // .filter(|(_,_)|{
 
     //   let local_thread_controller=stop_flag_local.clone();
@@ -249,10 +266,10 @@ let u:HashSet<String>=map.clone()
       //  i.contains(&string)
     })
     .flat_map(|(_, y)| {
-      window.emit("reloadlist",json!({
-        "message": "pariter2",
-        "status": "running",
-    }));
+    //   window.emit("reloadlist",json!({
+    //     "message": "pariter2",
+    //     "status": "running",
+    // }));
       y.par_iter()
     })
     .cloned()
@@ -276,8 +293,21 @@ let u:HashSet<String>=map.clone()
   
   // if(u.len()<2000)
   {
-    let mut v: Vec<String> = u.into_par_iter().collect(); // Collect into a vector
+    let mut v: Vec<String> = u.into_par_iter().filter(|_|{
+      let counter = Arc::clone(&counter);
+      let local_counter = Arc::clone(&local_counter);
+      let val=counter.load(Ordering::SeqCst);
+      let localaval=local_counter.load(Ordering::SeqCst);
+      if(val==localaval){
+
+        return true;
+      }
+      local_counter.store(val+1, Ordering::SeqCst);
+      panic!("Stopping iteration");
+      return false;
+    }).collect(); // Collect into a vector
     v
+    
     .par_sort_by_key(|ei| { // Sort by key
       let path = Path::new(&ei); // Get the path
       let fname = path.file_name().unwrap().to_string_lossy().to_string(); // Get the file name
@@ -315,10 +345,10 @@ let u:HashSet<String>=map.clone()
     // return true;
     // })
     .try_for_each(|(c,ei)|{
-      window.emit("reloadlist",json!({
-        "message": "pariter3",
-        "status": "running",
-    }));
+    //   window.emit("reloadlist",json!({
+    //     "message": "pariter3",
+    //     "status": "running",
+    // }));
       // if c>2000{
       //   return None;
       // }
@@ -328,17 +358,18 @@ let u:HashSet<String>=map.clone()
       let path=Path::new(&ei);
       let fname=path.file_name().unwrap().to_string_lossy().to_string();
         // Write to the hashset with a write lock
-        let mut ret = ret.write().unwrap();
-        fuzzy_match(&fname, &string);
-        ret.insert(populatefileitem(fname, path,&window, &state));
+        // let mut ret = ret.write().unwrap();
+        // fuzzy_match(&fname, &string);
+        // ret.insert(populatefileitem(fname, path,&window, &state));
+        slist(&windowname,&app_handle, &populatefileitem(fname, path,&window, &state), string_clone.clone());
         
         // Drop the lock after inserting
-        drop(ret);
+        // drop(ret);
       println!("{}",ei);
       Some(())
     });
-    let wtr=ret_clone2.read().unwrap().clone();
-    slist(&wname,&window.app_handle(), &wtr, string.clone())
+    // let wtr=ret_clone2.read().unwrap().clone();
+    // slist(&wname,&window.app_handle(), &wtr, string.clone())
   }
   // Set the flag to true with a write lock
 let mut done = done.write().unwrap();
