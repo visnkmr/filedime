@@ -43,9 +43,12 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
  {
   window.emit("reloadlist","resettable").unwrap();
 
+
   let counter = &state.searchcounter;
+  let currentcoutnervalue=counter.load(Ordering::SeqCst);
+  state.searchcounter.store(currentcoutnervalue+1, Ordering::SeqCst);
   let local_counter = Arc::new(AtomicI16::new(0));
-  local_counter.store(0, Ordering::SeqCst);
+  local_counter.store(currentcoutnervalue+1, Ordering::SeqCst);
 
 
   let wname=windowname.clone();
@@ -53,6 +56,7 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
     if(string.len()<3){
       return Ok(());
     }
+ 
  
   
   let now = SystemTime::now();
@@ -241,7 +245,8 @@ let u:HashSet<String>=map.clone()
 
         return true;
       }
-      local_counter.store(val+1, Ordering::SeqCst);
+      // local_counter.store(val+1, Ordering::SeqCst);
+      panic!("Stopping iteration");
       return false;
     })
     // .filter(|(_,_)|{
@@ -304,7 +309,7 @@ let u:HashSet<String>=map.clone()
 
         return true;
       }
-      local_counter.store(val+1, Ordering::SeqCst);
+      // local_counter.store(val+1, Ordering::SeqCst);
       panic!("Stopping iteration");
       return false;
     }).collect(); // Collect into a vector
