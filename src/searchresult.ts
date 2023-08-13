@@ -8,11 +8,18 @@ export function loadsearchresult(){
   
 
     (window as any).__TAURI__.event.listen("load-sresults", (data: { payload: string }) => {
-      let onresfile: File = JSON.parse(data.payload) as File;
+      let fileList: File[] = JSON.parse(data.payload) as File[];
 
-      globalThis.lastpopfilelist.push(onresfile)
-      if(globalThis.lastpopfilelist.length>10)
-      return
+      globalThis.lastpopfilelist=fileList
+      // if(globalThis.lastpopfilelist.length>10)
+      // return
+      if (fileList.length>100){
+        return
+      }
+      fileList.forEach(function(ef){
+        eachfile(ef)
+      });
+
       // if(files.length===0)
       //   return
     //  globals.ousd.style.display="none";
@@ -30,27 +37,28 @@ export function loadsearchresult(){
        globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
        globals.ousd.style.display="none";
        globals.filewatch.style.display="none";
+       
      // Get the element by id
-     let element = document.getElementById("listoffiles");
-       // Check if it exists
-      // for (var ef in globalThis.lastpopfilelist) {
-        // if(globalThis.lastpopfilelist[ef].name.includes(sq))
-        {
+    //  let element = document.getElementById("listoffiles");
+    //    // Check if it exists
+    //   // for (var ef in globalThis.lastpopfilelist) {
+    //     // if(globalThis.lastpopfilelist[ef].name.includes(sq))
+    //     {
           
-          if (element!==null) {
-            // if(JSON.parse(data.payload) instanceof File)
+    //       if (element!==null) {
+    //         // if(JSON.parse(data.payload) instanceof File)
 
-          // console.log(JSON.stringify(globalThis.lastpopfilelist))
+    //       // console.log(JSON.stringify(globalThis.lastpopfilelist))
 
-            eachfile(onresfile);
-            // else{
-              // eachdrive(JSON.parse(data.payload) as DriveItem);
-            // }
-          } else {
-            // console.log(JSON.stringify(globalThis.lastpopfilelist))
-            settableandtbody();
-          }
-        }
+    //         eachfile(onresfile);
+    //         // else{
+    //           // eachdrive(JSON.parse(data.payload) as DriveItem);
+    //         // }
+    //       } else {
+    //         // console.log(JSON.stringify(globalThis.lastpopfilelist))
+    //         settableandtbody();
+    //       }
+    //     }
       // }
   // globals.htmlbase.innerHTML = ""
   console.log("listfiles")

@@ -161,7 +161,7 @@ pub fn driveslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
 }
 
 
-pub fn slist(windowname:&str,ah:&AppHandle,wtr:&FileItem,string:String){
+pub fn slist(windowname:&str,ah:&AppHandle,wtr:&Vec<FileItem>,string:String){
   ah.emit_to(
     windowname,
     "load-sresults",
