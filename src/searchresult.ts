@@ -14,7 +14,7 @@ export function loadsearchresult(){
       // if(globalThis.lastpopfilelist.length>10)
       // return
       if (fileList.length>100){
-        return
+        fileList=fileList.slice(0,100)
       }
       fileList.forEach(function(ef){
         eachfile(ef)
