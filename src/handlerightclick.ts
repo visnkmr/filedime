@@ -2,23 +2,28 @@ import * as globals from './file-explorer';
 
 export function handlerightclick(e:MouseEvent){
     if((e.target as HTMLElement).className=="td1"){
+    let clicksource=(e.target as HTMLElement).parentNode as HTMLTableRowElement;
 
         // Prevent the default menu from showing up
         e.preventDefault();
-        globalThis.frompath=(e.target as HTMLElement).dataset.path as string;
+        globalThis.frompath=clicksource.dataset.path as string;
         globals.menu.replaceChildren();
         let cs=document.createElement("p")
         cs.className="cf";
-        cs.textContent=(e.target! as HTMLTableCellElement).dataset.value!;
+        cs.textContent=(clicksource).dataset.value!;
+        globals.menu.appendChild(cs);
+      cs=document.createElement("p")
+        cs.className="cf";
+        cs.textContent=(clicksource).dataset.path!;
         globals.menu.appendChild(cs);
       let o1=document.createElement("li")
         o1.id="o1"
         o1.textContent="Open in new tab"
         globals.menu.appendChild(o1);
-      o1=document.createElement("li")
-        o1.id="o7"
-        o1.textContent="Open in new window"
-        globals.menu.appendChild(o1);
+      let o5=document.createElement("li")
+        o5.id="o7"
+        o5.textContent="Open in new window"
+        globals.menu.appendChild(o5);
        let o2=document.createElement("li")
         o2.id="o2"
         o2.textContent="Copy"

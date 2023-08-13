@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering}}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering, AtomicI16}}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use rayon::prelude::*;
 use serde::Serialize;
@@ -41,12 +41,96 @@ struct rstr{
 pub async fn  search_try(windowname:String,path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let orig = *state.process_count.lock().unwrap();
+  
+  window.emit("reloadlist","resettable").unwrap();
+
+
+  let counter = &state.searchcounter;
+  let currentcoutnervalue=counter.load(Ordering::SeqCst);
+  state.searchcounter.store(currentcoutnervalue+1, Ordering::SeqCst);
+  let local_counter = Arc::new(AtomicI16::new(0));
+  local_counter.store(currentcoutnervalue+1, Ordering::SeqCst);
+
+
   let wname=windowname.clone();
     // populate_try(path, &state);
     if(string.len()<3){
       return Ok(());
     }
- 
+  state.filesetcollection.write().unwrap().clear();
+
+    sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
+    let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
+    let files_clone = Arc::clone(&files); 
+    let tfsize=Arc::new(Mutex::<u64>::new(0));
+    let doneornot=Arc::new(Mutex::<bool>::new(false));
+    let doneornot_clone=doneornot.clone();
+    let mut nootimes=0;
+    let tfsize_clone=tfsize.clone();
+    // let (tx, rx) = mpsc::channel();
+    let window2=window.clone();
+    let app_handle = window.app_handle();
+    let string2=string.clone();
+
+    let windowname2=windowname.clone();
+    let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
+    // spawn a new thread to print the value of the files vector every 200 milliseconds
+    let handle=thread::spawn(move|| {
+      // let state1=state.clone();
+      let mut last_print = Instant::now(); // initialize the last print time to the current time
+      loop {
+        // let string=string.clone();
+        // if &s2.lock().unwrap().process_count.lock().unwrap().clone().abs_diff(orig)>&0 { // check if the current count value is different from the original one
+        //   break; // if yes, it means a new command has been invoked and the old one should be canceled
+        // }
+        nootimes+=1;
+        let msval=update.iter().next().unwrap_or(&120);
+    
+          if last_print.elapsed() >= Duration::from_millis(*msval) { 
+            // check if 200 milliseconds have passed since the last print
+              let files = files_clone.lock().unwrap();
+              let don = doneornot.lock().unwrap();
+              // println!("{}------{}----{}",nootimes,files.len(),fcount);
+                //           // push the file item to the vector
+                // totsize+=mem::size_of_val(&file);
+                // match(files.last()){
+                //   Some(file)=>{
+                //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+    
+                //   },
+                //   None=>{
+    
+                //   }
+                // }
+                slist(&windowname,&app_handle,&files.clone(),string2.clone());
+                
+                // folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+                
+                if *don 
+                // || nootimes>10
+                // || fcount==files.len() 
+                {
+                println!("total {} files found",files.len());
+                // window2.emit("infiniteloader",
+                //   json!({
+                //       "message": "lfiles",
+                //       "status": "stop",
+                //       })
+                //   );
+                // handle.abort();
+                // stoptimer(&windowname, &window.app_handle());
+                break;
+              }
+       // lock the mutex and get a reference to the vector
+              // println!("Files: {:?}", files); // print the vector value
+              last_print = Instant::now(); // update the last print time to the current time
+          }
+          thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
+      }
+    })
+    ;
   
   let now = SystemTime::now();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
@@ -56,7 +140,9 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
 
   
 
-  let map=state.stl.lock().unwrap();
+  let searchthrough=state.stl.lock().unwrap();
+  let map=searchthrough.clone();
+  drop(searchthrough);
 //   let op=state.st.lock().unwrap().search_trie(&string);
 //   println!("{}",op.len());
 //   if(op.len()<10)
@@ -85,7 +171,7 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
 
  
 //   return Ok(());
-let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
+// let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 
   // if(string.len()>3)
   // {
@@ -137,77 +223,77 @@ let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
     let app_handle = window.app_handle();
 
 
-let m:HashSet<FileItem>=HashSet::new();
-// Create a RwLock wrapped in an Arc to share the hashset
-let ret = Arc::new(RwLock::new(m));
+// let m:HashSet<FileItem>=HashSet::new();
+// // Create a RwLock wrapped in an Arc to share the hashset
+// let ret = Arc::new(RwLock::new(m));
 
-// Create a clone of the Arc for the other thread
-let ret_clone = Arc::clone(&ret);
-let ret_clone2 = Arc::clone(&ret);
+// // Create a clone of the Arc for the other thread
+// let ret_clone = Arc::clone(&ret);
+// let ret_clone2 = Arc::clone(&ret);
 
-// Create a boolean flag to indicate whether the search is done or not
-let done = Arc::new(RwLock::new(false));
-let mut notimes=0;
-// Create a clone of the Arc for the other thread
-let done_clone = Arc::clone(&done);
-starttimer(&windowname,&app_handle);
-let string_clone=string.clone();
+// // Create a boolean flag to indicate whether the search is done or not
+// let done = Arc::new(RwLock::new(false));
+// let mut notimes=0;
+// // Create a clone of the Arc for the other thread
+// let done_clone = Arc::clone(&done);
+starttimer(&windowname2,&app_handle);
+// let string_clone=string.clone();
 // Spawn another thread to read and print the hashset periodically
-thread::spawn(move || {
+// thread::spawn(move || {
 
-  let mut last_print = Instant::now(); // initialize the last print time to the current time
-    loop {
-      notimes+=1;
-      let mut msval=1 as u64;
-      let ret = ret_clone.read().unwrap();
-      if(ret.len()!=0){
-        msval=*update.iter().next().unwrap_or(&120);
+//   let mut last_print = Instant::now(); // initialize the last print time to the current time
+//     loop {
+//       notimes+=1;
+//       let mut msval=1 as u64;
+//       let ret = ret_clone.read().unwrap();
+//       if(ret.len()!=0){
+//         msval=*update.iter().next().unwrap_or(&120);
         
-      }
-      if last_print.elapsed() >= Duration::from_millis(msval) { 
+//       }
+//       if last_print.elapsed() >= Duration::from_millis(msval) { 
 
-        // Read the hashset with a read lock
-        if(ret.len()!=0){
+//         // Read the hashset with a read lock
+//         if(ret.len()!=0){
 
-          slist(&windowname,&app_handle, &ret, string_clone.clone())
-        }
+//           // slist(&windowname,&app_handle, &ret, string_clone.clone())
+//         }
       
      
 
               
-        // println!("{:?}", *ret);
-        println!("{:?}", ret.len());
-        // Check the flag with a read lock
-        let done = done_clone.read().unwrap();
-        // If the flag is true, break out of the loop
-        if *done ||notimes>50 && ret.len()!=0 {
-          // app_handle.emit_to(
-          //   "main",
-          //   "load-sresults",
-          //   serde_json::to_string(&ret.clone()).unwrap(),
-          // )
-          // .map_err(|e| e.to_string()).unwrap();
-          // app_handle.emit_to(
-          //   "main",
-          //   "load-complete",
-          //   "",
-          // )
-          // .map_err(|e| e.to_string()).unwrap();
+//         // println!("{:?}", *ret);
+//         println!("{:?}", ret.len());
+//         // Check the flag with a read lock
+//         let done = done_clone.read().unwrap();
+//         // If the flag is true, break out of the loop
+//         if *done ||notimes>50 && ret.len()!=0 {
+//           // app_handle.emit_to(
+//           //   "main",
+//           //   "load-sresults",
+//           //   serde_json::to_string(&ret.clone()).unwrap(),
+//           // )
+//           // .map_err(|e| e.to_string()).unwrap();
+//           // app_handle.emit_to(
+//           //   "main",
+//           //   "load-complete",
+//           //   "",
+//           // )
+//           // .map_err(|e| e.to_string()).unwrap();
         
-            break;
-        }
-        // Drop the lock before sleeping
+//             break;
+//         }
+//         // Drop the lock before sleeping
         
         
-        // Drop the lock before reading the hashset
-        drop(done);
-        // Sleep for some time
-        last_print = Instant::now(); // update the last print time to the current time
-      }
-      drop(ret);
-        thread::sleep(std::time::Duration::from_millis(30));
-    }
-});
+//         // Drop the lock before reading the hashset
+//         drop(done);
+//         // Sleep for some time
+//         last_print = Instant::now(); // update the last print time to the current time
+//       }
+//       drop(ret);
+//         thread::sleep(std::time::Duration::from_millis(30));
+//     }
+// });
 set_enum_value(&state.whichthread, wThread::Searching);
 let stop_flag_local = Arc::new(AtomicBool::new(true));
 
@@ -225,6 +311,19 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
 // Populate the hashset using par_iter and inspect
 let u:HashSet<String>=map.clone()
     .par_iter()
+    .filter(|_|{
+      let counter = Arc::clone(&counter);
+      let local_counter = Arc::clone(&local_counter);
+      let val=counter.load(Ordering::SeqCst);
+      let localaval=local_counter.load(Ordering::SeqCst);
+      if(val==localaval){
+
+        return true;
+      }
+      // local_counter.store(val+1, Ordering::SeqCst);
+      // panic!("Stopping iteration");
+      return false;
+    })
     // .filter(|(_,_)|{
 
     //   let local_thread_controller=stop_flag_local.clone();
@@ -245,14 +344,14 @@ let u:HashSet<String>=map.clone()
     // return true;
     // })
     .filter(|(i, _)| {
-      fuzzy_match(&i, &string).unwrap_or(0)>0
-      //  i.contains(&string)
+      // fuzzy_match(&i, &string).unwrap_or(0)>0
+       i.contains(&string)
     })
     .flat_map(|(_, y)| {
-      window.emit("reloadlist",json!({
-        "message": "pariter2",
-        "status": "running",
-    }));
+    //   window.emit("reloadlist",json!({
+    //     "message": "pariter2",
+    //     "status": "running",
+    // }));
       y.par_iter()
     })
     .cloned()
@@ -276,8 +375,22 @@ let u:HashSet<String>=map.clone()
   
   // if(u.len()<2000)
   {
-    let mut v: Vec<String> = u.into_par_iter().collect(); // Collect into a vector
+    let mut v: Vec<String> = u.into_par_iter().filter(|_|{
+      let counter = Arc::clone(&counter);
+      let local_counter = Arc::clone(&local_counter);
+      let val=counter.load(Ordering::SeqCst);
+      let localaval=local_counter.load(Ordering::SeqCst);
+      if(val==localaval){
+
+        return true;
+      }
+      // // local_counter.store(val+1, Ordering::SeqCst);
+      // panic!("Stopping iteration");
+      return false;
+    })
+    .collect(); // Collect into a vector
     v
+    
     .par_sort_by_key(|ei| { // Sort by key
       let path = Path::new(&ei); // Get the path
       let fname = path.file_name().unwrap().to_string_lossy().to_string(); // Get the file name
@@ -315,10 +428,10 @@ let u:HashSet<String>=map.clone()
     // return true;
     // })
     .try_for_each(|(c,ei)|{
-      window.emit("reloadlist",json!({
-        "message": "pariter3",
-        "status": "running",
-    }));
+    //   window.emit("reloadlist",json!({
+    //     "message": "pariter3",
+    //     "status": "running",
+    // }));
       // if c>2000{
       //   return None;
       // }
@@ -328,21 +441,35 @@ let u:HashSet<String>=map.clone()
       let path=Path::new(&ei);
       let fname=path.file_name().unwrap().to_string_lossy().to_string();
         // Write to the hashset with a write lock
-        let mut ret = ret.write().unwrap();
-        fuzzy_match(&fname, &string);
-        ret.insert(populatefileitem(fname, path,&window, &state));
+        // let mut ret = ret.write().unwrap();
+        // fuzzy_match(&fname, &string);
+        // ret.insert(populatefileitem(fname, path,&window, &state));
+        let file = populatefileitem(fname,path,&window,&state);
+          let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+          // println!("{:?}",file);
+          // println!("added--->{:?}",e);
+          *tfsize_clone.lock().unwrap()+=file.rawfs;
+          files.push(file.clone()); // push a clone of the file to the vector
+          // if files.len()<100
+          // {
+            // fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
+            // progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
+        // slist(&windowname,&app_handle, &populatefileitem(fname, path,&window, &state), string_clone.clone());
         
         // Drop the lock after inserting
-        drop(ret);
+        // drop(ret);
       println!("{}",ei);
       Some(())
     });
-    let wtr=ret_clone2.read().unwrap().clone();
-    slist(&wname,&window.app_handle(), &wtr, string.clone())
+    // let wtr=ret_clone2.read().unwrap().clone();
+    // slist(&wname,&window.app_handle(), &wtr, string.clone())
   }
+  *doneornot_clone.lock().unwrap()=true;
+  sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
   // Set the flag to true with a write lock
-let mut done = done.write().unwrap();
-*done = true;
+// let mut done = done.write().unwrap();
+// *done = true;
 stoptimer(&wname,&window.app_handle());
     // for (i,_) in map.clone(){
     //   // gh.push(i);

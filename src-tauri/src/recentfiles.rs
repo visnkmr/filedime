@@ -157,7 +157,7 @@ thread::spawn(move || {
         // Read the hashset with a read lock
         if(ret.len()!=0){
 
-          slist(&windowname,&app_handle, &ret, string_clone.clone())
+          // slist(&windowname,&app_handle, &ret, string_clone.clone())
         }
       
      

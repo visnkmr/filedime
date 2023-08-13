@@ -4,7 +4,7 @@ use prefstore::getallcustomwithin;
 use std::collections::{HashSet, HashMap};
 use std::mem::{self};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicI8, Ordering};
+use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
 // use std::sync::mpsc::{Sender, Receiver};
 use rustc_hash::FxHashMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -55,6 +55,7 @@ pub struct AppStateStore {
     tabs:RwLock<FxHashMap<String,tab>>,
     pub expiration:Duration,
     pub whichthread:Arc<AtomicI8>,
+    pub searchcounter:Arc<AtomicI16>,
     bookmarks:RwLock<HashSet<marks>>,
     messagetothread:RwLock<String>,
     recents:Vec<String>,
@@ -109,6 +110,7 @@ impl AppStateStore {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
             whichthread:Arc::new(AtomicI8::new(0)),
+            searchcounter:Arc::new(AtomicI16::new(0)),
             nosize:RwLock::new(true),
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),

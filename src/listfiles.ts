@@ -36,6 +36,7 @@ type DriveItem = {
   file_system: string,
 }
 export function listfilteredlist(sq:string){
+  // settableandtbody();
   let tryele = document.getElementById("listoffiles");
   tryele?.replaceChildren();
   console.log("settingpath");
@@ -46,27 +47,32 @@ export function listfilteredlist(sq:string){
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
 // Get the element by id
-let element = document.getElementById("listoffiles");
 
 // Check if it exists
-for (var ef in globalThis.lastpopfilelist) {
-    if(globalThis.lastpopfilelist[ef].name.includes(sq)){
-      
-      if (element!==null) {
-        // if(JSON.parse(data.payload) instanceof File)
-  
-      // console.log(JSON.stringify(globalThis.lastpopfilelist))
-  
-        eachfile(globalThis.lastpopfilelist[ef]);
-        // else{
-          // eachdrive(JSON.parse(data.payload) as DriveItem);
-        // }
-      } else {
-        // console.log(JSON.stringify(globalThis.lastpopfilelist))
-        settableandtbody();
-      }
-    }
+let filteredFilesList = globalThis.lastpopfilelist.filter(function (el) {
+  return el.name.includes(sq) || el.path.includes(sq);
+}
+);
+filteredFilesList.forEach(
+  function(eachdime,index){
+    if(index>10)
+    return
+    eachfile(eachdime);
   }
+)
+// for (var ef in filteredFilesList) {
+//     // if(globalThis.lastpopfilelist[ef].name.includes(sq)){
+      
+//         // if(JSON.parse(data.payload) instanceof File)
+  
+//       // console.log(JSON.stringify(globalThis.lastpopfilelist))
+
+//         eachfile(filteredFilesList[ef]);
+//         // else{
+//           // eachdrive(JSON.parse(data.payload) as DriveItem);
+//         // }
+//     // }
+//   }
     // globals.htmlbase.innerHTML = ""
     console.log("listfiles")
 }
@@ -98,19 +104,21 @@ export async function listenforfiles(){
 // Get the element by id
 let element = document.getElementById("listoffiles");
 
+globalThis.lastpopfilelist.push(JSON.parse(data.payload) as File)
+if(globalThis.lastpopfilelist.length>10)
+return
 // Check if it exists
 if (element!==null) {
   // if(JSON.parse(data.payload) instanceof File)
-  globalThis.lastpopfilelist.push(JSON.parse(data.payload) as File)
-  console.log(JSON.stringify(globalThis.lastpopfilelist))
+  // console.log(JSON.stringify(globalThis.lastpopfilelist))
 
     eachfile(JSON.parse(data.payload) as File);
     // else{
       // eachdrive(JSON.parse(data.payload) as DriveItem);
     // }
 } else {
-  globalThis.lastpopfilelist=[];
-  console.log(JSON.stringify(globalThis.lastpopfilelist))
+  // globalThis.lastpopfilelist=[];
+  // console.log(JSON.stringify(globalThis.lastpopfilelist))
   settableandtbody();
 }
     // globals.htmlbase.innerHTML = ""
@@ -252,7 +260,7 @@ function eachdrive(drive:DriveItem){
   // settableheaderandsort();
 }
 export function eachfile(file:File){
-  console.log(file)
+  // console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
   let tr = document.createElement("tr");

@@ -13,4 +13,4 @@ declare var latestimefilesloaded:number;
 declare var sendpath:string[];
 declare var timeouts:number[];
 declare var interval:NodeJS.Timer;
-declare var lastpopfilelist:import("/tmp/new/filedime/src/listfiles").File[];
+declare var lastpopfilelist:import("./listfiles").File[];
