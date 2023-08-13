@@ -21,7 +21,6 @@ Features implemented:
 
 Subtle features
 - [x] show name of right click file above context menu
-- [x] search toggle to enable and disable populating filelist of subtree of current folder for indexing. 
 
 Thanks Tauri, Typescript, Webpack->RSPack, 
 
