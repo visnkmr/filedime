@@ -41,6 +41,7 @@ struct rstr{
 pub async fn  search_try(windowname:String,path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let orig = *state.process_count.lock().unwrap();
   
   window.emit("reloadlist","resettable").unwrap();
 
@@ -57,7 +58,10 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
     if(string.len()<3){
       return Ok(());
     }
- 
+  state.filesetcollection.write().unwrap().clear();
+
+    sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
     let files = Arc::new(Mutex::new(Vec::<FileItem>::new())); 
     let files_clone = Arc::clone(&files); 
     let tfsize=Arc::new(Mutex::<u64>::new(0));
@@ -461,6 +465,8 @@ let u:HashSet<String>=map.clone()
     // slist(&wname,&window.app_handle(), &wtr, string.clone())
   }
   *doneornot_clone.lock().unwrap()=true;
+  sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
   // Set the flag to true with a write lock
 // let mut done = done.write().unwrap();
 // *done = true;

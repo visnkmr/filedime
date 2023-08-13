@@ -102,6 +102,8 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   let orig = *state.process_count.lock().unwrap();
 
   state.filesetcollection.write().unwrap().clear();
+  sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
 
   // else{
   //   match(testpath.read_dir()){
