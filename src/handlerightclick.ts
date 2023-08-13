@@ -12,6 +12,10 @@ export function handlerightclick(e:MouseEvent){
         cs.className="cf";
         cs.textContent=(clicksource).dataset.value!;
         globals.menu.appendChild(cs);
+      cs=document.createElement("p")
+        cs.className="cf";
+        cs.textContent=(clicksource).dataset.path!;
+        globals.menu.appendChild(cs);
       let o1=document.createElement("li")
         o1.id="o1"
         o1.textContent="Open in new tab"
