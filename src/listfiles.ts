@@ -110,7 +110,7 @@ return
 // Check if it exists
 if (element!==null) {
   // if(JSON.parse(data.payload) instanceof File)
-  console.log(JSON.stringify(globalThis.lastpopfilelist))
+  // console.log(JSON.stringify(globalThis.lastpopfilelist))
 
     eachfile(JSON.parse(data.payload) as File);
     // else{
@@ -260,7 +260,7 @@ function eachdrive(drive:DriveItem){
   // settableheaderandsort();
 }
 export function eachfile(file:File){
-  console.log(file)
+  // console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
   let tr = document.createElement("tr");
