@@ -344,8 +344,8 @@ let u:HashSet<String>=map.clone()
     // return true;
     // })
     .filter(|(i, _)| {
-      fuzzy_match(&i, &string).unwrap_or(0)>0
-      //  i.contains(&string)
+      // fuzzy_match(&i, &string).unwrap_or(0)>0
+       i.contains(&string)
     })
     .flat_map(|(_, y)| {
     //   window.emit("reloadlist",json!({
