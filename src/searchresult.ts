@@ -11,6 +11,8 @@ export function loadsearchresult(){
       let onresfile: File = JSON.parse(data.payload) as File;
 
       globalThis.lastpopfilelist.push(onresfile)
+      if(globalThis.lastpopfilelist.length>10)
+      return
       // if(files.length===0)
       //   return
     //  globals.ousd.style.display="none";
