@@ -36,6 +36,7 @@ type DriveItem = {
   file_system: string,
 }
 export function listfilteredlist(sq:string){
+  settableandtbody();
   let tryele = document.getElementById("listoffiles");
   tryele?.replaceChildren();
   console.log("settingpath");
@@ -46,13 +47,11 @@ export function listfilteredlist(sq:string){
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
 // Get the element by id
-let element = document.getElementById("listoffiles");
 
 // Check if it exists
 for (var ef in globalThis.lastpopfilelist) {
     if(globalThis.lastpopfilelist[ef].name.includes(sq)){
       
-      if (element!==null) {
         // if(JSON.parse(data.payload) instanceof File)
   
       // console.log(JSON.stringify(globalThis.lastpopfilelist))
@@ -61,10 +60,6 @@ for (var ef in globalThis.lastpopfilelist) {
         // else{
           // eachdrive(JSON.parse(data.payload) as DriveItem);
         // }
-      } else {
-        // console.log(JSON.stringify(globalThis.lastpopfilelist))
-        settableandtbody();
-      }
     }
   }
     // globals.htmlbase.innerHTML = ""

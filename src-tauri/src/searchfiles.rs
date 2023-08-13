@@ -41,6 +41,8 @@ struct rstr{
 pub async fn  search_try(windowname:String,path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  window.emit("reloadlist","resettable").unwrap();
+
   let counter = &state.searchcounter;
   let local_counter = Arc::new(AtomicI16::new(0));
   local_counter.store(0, Ordering::SeqCst);

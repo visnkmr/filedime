@@ -61,7 +61,7 @@ export function loadsearchresult(){
       globals.pathline.replaceChildren();
     
     let pathn = document.createElement("span");
-           pathn.textContent = data.payload+" "+globalThis.rescount+" results found";
+           pathn.textContent = data.payload+" "+globalThis.lastpopfilelist.length+" results found";
           //  pathn.dataset.loc = prefixes[i];
            globals.pathline?.appendChild(pathn);
     });
