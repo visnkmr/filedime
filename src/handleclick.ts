@@ -69,21 +69,21 @@ export function handleclicks(e:Event){
       }
     if(target===globals.newtab){
     addtab(uio.appWindow.label,"/home/roger/Downloads/");
-    (window as any).__TAURI__.invoke(
-      "load_tab",
-      {
-        windowname:uio.appWindow.label,
-        oid: globalThis.tid.toString()
-      }
-    );
+    // (window as any).__TAURI__.invoke(
+    //   "load_tab",
+    //   {
+    //     windowname:uio.appWindow.label,
+    //     oid: globalThis.tid.toString()
+    //   }
+    // );
     }
     if(target===globals.nosize){
       reloadsize();
     }
     
-    if(target===globals.tsearch){
-      populatesearchlist();
-    }
+    // if(target===globals.tsearch){
+    //   populatesearchlist();
+    // }
     
     if(target===globals.folcount){
       populateimmediatechildcount();
@@ -317,12 +317,12 @@ export function handleclicks(e:Event){
   if((target).className=="mark-button"){
     var gpath=(target).dataset.path!;
     addtab(uio.appWindow.label,gpath);
-    (window as any).__TAURI__.invoke(
-      "load_tab",
-      {
-        windowname:uio.appWindow.label,
-        oid: globalThis.tid.toString()
-      }
-    ).await;
+    // (window as any).__TAURI__.invoke(
+    //   "load_tab",
+    //   {
+    //     windowname:uio.appWindow.label,
+    //     oid: globalThis.tid.toString()
+    //   }
+    // ).await;
   }
 }

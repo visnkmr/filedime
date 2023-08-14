@@ -125,7 +125,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
                 }
               },
               Err(_)=>{
-
+                println!("unknown filetype");
               }
             }
               // if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one

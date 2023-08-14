@@ -1,5 +1,5 @@
 import { invoke, path } from '@tauri-apps/api';
-import * as globals from './file-explorer';
+import uio, * as globals from './file-explorer';
 
 export function listtabs(){
     (window as any).__TAURI__.event.listen("list-tabs", (data: { payload: string }) => {
@@ -116,5 +116,11 @@ export function addtab(wname:string,path:string){
       b.dataset.ff = "";
       // b.appendChild(tbt)
       globals.tablist.appendChild(b);
-      
+      (window as any).__TAURI__.invoke(
+        "load_tab",
+        {
+          windowname:uio.appWindow.label,
+          oid: globalThis.tid.toString()
+        }
+      );
 }

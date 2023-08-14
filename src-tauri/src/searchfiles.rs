@@ -38,9 +38,14 @@ struct rstr{
 //   Ok(())
 // }
 #[tauri::command]
-pub async fn  search_try(windowname:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
+pub async fn  search_try(windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
+  let mut exactmatch=false;
+  if string.contains("\"") {
+    exactmatch=true;
+    string = string[1..string.len() - 1].to_string();
+  }
   let orig = *state.process_count.lock().unwrap();
   
   window.emit("reloadlist","resettable").unwrap();
@@ -360,7 +365,9 @@ let u:HashSet<String>=map.clone()
     // return true;
     // })
     .filter(|(i, _)| {
-      // fuzzy_match(&i, &string).unwrap_or(0)>0
+      if(!exactmatch){
+        return fuzzy_match(&i, &string).unwrap_or(0)>0
+      }
        i.contains(&string)
     })
     .flat_map(|(_, y)| {
@@ -371,9 +378,9 @@ let u:HashSet<String>=map.clone()
       y.par_iter()
     })
     .cloned()
-    .filter(|i|{
-      !i.contains("node_modules")
-    })
+    // .filter(|i|{
+    //   !i.contains("node_modules")
+    // })
     // .inspect(|o| {
     //   // let path=Path::new(o);
     //   // let fname=path.file_name().unwrap().to_string_lossy().to_string();
