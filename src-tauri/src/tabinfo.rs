@@ -35,7 +35,7 @@ Ok(())
 }
 #[tauri::command]
 pub async fn closetab(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.removetab(id);
+  state.removetab(id,windowname.to_string());
   let app_handle = window.app_handle();
   // app_handle.emit_to(
   //   windowname,

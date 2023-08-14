@@ -69,10 +69,10 @@ const CACHE_EXPIRY:u64=60;
 
 
 #[tauri::command]
-async fn backbutton(oid:String,window: Window, state: State<'_, AppStateStore>) -> 
+async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
   {
-    match(state.getlasthistory(oid)){
+    match(state.getlasthistory(oid,windowname.to_string().clone())){
       Some(val)=>{
           return Ok(val)
       },
