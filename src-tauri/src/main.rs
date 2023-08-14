@@ -109,7 +109,7 @@ async fn check_if_installed(appname:&str) -> Result<bool, String> {
   Ok(output.status.success())
 }
 fn startup(window: &AppHandle) -> Result<(),()>{
-  
+  //define format for adding custom button as extensions to ui
   getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
   let mut buttonnames=Vec::new();
   // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
