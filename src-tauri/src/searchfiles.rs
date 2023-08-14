@@ -38,7 +38,7 @@ struct rstr{
 //   Ok(())
 // }
 #[tauri::command]
-pub async fn  search_try(windowname:String,path:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
+pub async fn  search_try(windowname:String,string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
 //  -> Vec<String> 
  {
   let orig = *state.process_count.lock().unwrap();
@@ -59,6 +59,10 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
       return Ok(());
     }
   state.filesetcollection.write().unwrap().clear();
+  let searchthrough=state.stl.lock().unwrap();
+  let map=searchthrough.clone();
+  let filescount=map.len();
+  drop(searchthrough);
 
     sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
@@ -76,6 +80,8 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
 
     let windowname2=windowname.clone();
     let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
+    let mut countoff=0;
+    let mut firsttime=true;
     // spawn a new thread to print the value of the files vector every 200 milliseconds
     let handle=thread::spawn(move|| {
       // let state1=state.clone();
@@ -86,43 +92,55 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
         //   break; // if yes, it means a new command has been invoked and the old one should be canceled
         // }
         nootimes+=1;
-        let msval=update.iter().next().unwrap_or(&120);
-    
+        
+        let mut msval=&(30 as u64);
+        if(firsttime||countoff>1)
+        {
+          if(countoff>1){
+            msval=update.iter().next().unwrap_or(&120);
+          }
+          
           if last_print.elapsed() >= Duration::from_millis(*msval) { 
-            // check if 200 milliseconds have passed since the last print
-              let files = files_clone.lock().unwrap();
-              let don = doneornot.lock().unwrap();
-              // println!("{}------{}----{}",nootimes,files.len(),fcount);
-                //           // push the file item to the vector
-                // totsize+=mem::size_of_val(&file);
-                // match(files.last()){
-                //   Some(file)=>{
-                //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
-    
-                //   },
-                //   None=>{
-    
-                //   }
-                // }
-                slist(&windowname,&app_handle,&files.clone(),string2.clone());
+            let files = files_clone.lock().unwrap();
+            countoff=files.len();
+            if(countoff>1){
+              firsttime=false;
+            }
+        let don = doneornot.lock().unwrap();
+              // check if 200 milliseconds have passed since the last print
                 
-                // folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
-                
-                if *don 
-                // || nootimes>10
-                // || fcount==files.len() 
-                {
-                println!("total {} files found",files.len());
-                // window2.emit("infiniteloader",
-                //   json!({
-                //       "message": "lfiles",
-                //       "status": "stop",
-                //       })
-                //   );
-                // handle.abort();
-                // stoptimer(&windowname, &window.app_handle());
-                break;
-              }
+                // println!("{}------{}----{}",nootimes,files.len(),fcount);
+                  //           // push the file item to the vector
+                  // totsize+=mem::size_of_val(&file);
+                  // match(files.last()){
+                  //   Some(file)=>{
+                  //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
+      
+                  //   },
+                  //   None=>{
+      
+                  //   }
+                  // }
+                  slist(&windowname,&app_handle,&files.clone(),string2.clone());
+                  
+                  // folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+                  
+                  if *don 
+                  // || nootimes>10
+                  // || fcount==files.len() 
+                  {
+                  println!("total {} files found from {}",files.len(),filescount);
+                  // window2.emit("infiniteloader",
+                  //   json!({
+                  //       "message": "lfiles",
+                  //       "status": "stop",
+                  //       })
+                  //   );
+                  // handle.abort();
+                  // stoptimer(&windowname, &window.app_handle());
+                  break;
+                }
+        }
        // lock the mutex and get a reference to the vector
               // println!("Files: {:?}", files); // print the vector value
               last_print = Instant::now(); // update the last print time to the current time
@@ -140,9 +158,7 @@ pub async fn  search_try(windowname:String,path:String,string: String,window: Wi
 
   
 
-  let searchthrough=state.stl.lock().unwrap();
-  let map=searchthrough.clone();
-  drop(searchthrough);
+
 //   let op=state.st.lock().unwrap().search_trie(&string);
 //   println!("{}",op.len());
 //   if(op.len()<10)

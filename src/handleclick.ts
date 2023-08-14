@@ -133,13 +133,15 @@ export function handleclicks(e:Event){
       // console.log("Loadtab");
       // Stop the event from bubbling up to the button element
       e.stopPropagation();
+      
       (window as any).__TAURI__.invoke(
         "load_tab",
         {
-        windowname:uio.appWindow.label,
+          windowname:uio.appWindow.label,
           oid: globalThis.tid.toString()
         }
       );
+      console.log("remthis----->"+uio.appWindow.label+" "+globalThis.tid.toString());
     }
     else if (pen.className === "tab-close") {
       // Do something when X is clicked
@@ -166,7 +168,7 @@ export function handleclicks(e:Event){
     // Do something based on the id
     switch (id) {
       case "o7":
-        // console.log("live--------->"+globalThis.frompath)
+       
       // invoke the list_files command from the backend with the path as argument
         (window as any).__TAURI__.invoke(
           "newwindow",
@@ -184,6 +186,10 @@ export function handleclicks(e:Event){
         setsendpath(globalThis.frompath)
         break;
       case "o1":
+        var label=uio.getCurrent().label;
+        addtab(label,globalThis.frompath);
+        // console.log("live--------->"+globalThis.frompath);
+        // console.log(((e.target as HTMLElement).parentNode! as HTMLElement).parentNode);
       // console.log("o1")
       // console.log(e)
       // Code for option 1

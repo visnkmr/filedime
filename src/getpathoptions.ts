@@ -36,17 +36,12 @@ export async function wholesearch(text:string){
      (window as any).__TAURI__.invoke(
     "search_try", {
       windowname:uio.appWindow.label,
-      path: globals.pathInput.value,
+      // path: globals.pathInput.value,
       string: text
   })
 }
 export async function searchforit(text:string){
-  //   (window as any).__TAURI__.invoke(
-  //   "search_try", {
-  //     windowname:uio.appWindow.label,
-  //     path: globals.pathInput.value,
-  //     string: text
-  // })
+  // wholesearch(text);
   listfilteredlist(text);
   console.log(globalThis.lastpopfilelist);
   // .error((option:any)=>{

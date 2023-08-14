@@ -87,9 +87,9 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       .follow_links(false)
       // .threads(n)
       .parents(true)
-      .git_exclude(true)
-      .ignore(true) // Disable the default ignore rules
-      .git_ignore(true) // Respect the .gitignore file
+      // .git_exclude(true)
+      // .ignore(true) // Disable the default ignore rules
+      // .git_ignore(true) // Respect the .gitignore file
       .build_parallel()
       .run(|| {
             println!("Populating");
