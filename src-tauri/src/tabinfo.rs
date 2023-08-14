@@ -23,8 +23,13 @@ pub struct tab{
 
 #[tauri::command]
 pub async fn load_tab(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  let (path,_,_)=state.gettab(&oid);
+
+  let (path,_,_)=state.gettab(&oid,windowname.to_string().clone());
+  // for i in state.gettabsfromwinlabel(&windowname.to_string()){
+  //   if()
+  // }
   println!("loadtab {} in window {}", oid.clone(),windowname.clone());
+
   list_files(windowname.to_string(),oid, path, "newtab".to_string(), window, state).await?;
 Ok(())
 }

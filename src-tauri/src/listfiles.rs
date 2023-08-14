@@ -139,7 +139,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
   println!("start timer");
   loadhistory(&windowname,&app_handle,
     serde_json::to_string(
-      &state.gettab(&oid).2
+      &state.gettab(&oid,windowname.clone()).2
     ).unwrap())?;
     println!("load history");
     // let mut fcount;

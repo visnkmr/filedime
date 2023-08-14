@@ -169,7 +169,7 @@ impl AppStateStore {
         }
 
         let mut tabs=self.tabs.write().unwrap();
-        tabs.insert(id,tab {
+        tabs.insert(windowname.clone()+"."+&id,tab {
                 path: path, 
                 focusfolder: ff,
                 history: tabhist,
@@ -243,8 +243,8 @@ impl AppStateStore {
         lastval
 
     }
-    pub fn gettab(&self,id:&String)->(String,String,Vec<String>){
-        let tab= self.tabs.read().unwrap().get(id).unwrap().clone();
+    pub fn gettab(&self,id:&String,windowname:String)->(String,String,Vec<String>){
+        let tab= self.tabs.read().unwrap().get(&(windowname+"."+id)).unwrap().clone();
         return (
             tab.path,
             tab.focusfolder,
@@ -259,6 +259,18 @@ impl AppStateStore {
             }
         }
         None
+    }
+    pub fn gettabsfromwinlabel(&self,winlabel:&String)->Vec<String>
+    {
+        let elements=self.tabs.read().unwrap().clone();
+        let mut tabsofwindow=vec![];
+        for (id,others) in elements{
+            if(others.windowname==winlabel.clone()){
+                tabsofwindow.push(id);
+            // return Some((others.path,id))
+            }
+        }
+        tabsofwindow
     }
     pub fn getactivepath(&self,id:&str)->(String,String,Vec<String>){
         let tab= self.tabs.read().unwrap().get(id).unwrap().clone();

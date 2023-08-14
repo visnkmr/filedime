@@ -214,10 +214,10 @@ async fn folcount(windowname:&str,id:String,path:String,window: Window,state: St
   Ok(())
 }
 
-#[tauri::command]
-fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
-  state.gettab(&id).0
-}
+// #[tauri::command]
+// fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
+//   state.gettab(&id).0
+// }
 #[tauri::command]
 async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
   // state.togglefolcount();
@@ -453,7 +453,7 @@ fn main() {
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
-        getpathfromid,
+        // getpathfromid,
         tabname,
         list_files,
         loadmarkdown,
