@@ -255,7 +255,7 @@ impl AppStateStore {
         let elements=self.tabs.read().unwrap().clone();
         for (id,others) in elements{
             if(others.windowname==winlabel.clone()){
-            return Some((others.path,id))
+                return Some((others.path,id))
             }
         }
         None

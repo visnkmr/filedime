@@ -123,4 +123,6 @@ export function addtab(wname:string,path:string){
           oid: globalThis.tid.toString()
         }
       );
+console.log("added to "+uio.appWindow.label)
+
 }

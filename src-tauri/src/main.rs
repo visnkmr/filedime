@@ -377,11 +377,11 @@ fn main() {
                 std::process::exit(0);
               }
               else{
+                // newwindow(id, path, ff, window, state);
                 // println!("{:?}",gk);
                 let absolute_date=getuniquewindowlabel();
                 opennewwindow(&app_handle,"uio",&absolute_date);
 
-                
                 // tauri::Builder::new()
                 // // .manage(gk)
                 // .invoke_handler(

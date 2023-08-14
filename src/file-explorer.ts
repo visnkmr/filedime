@@ -25,7 +25,6 @@ export default uio;
 // declare var globalThis.frompath:string;
 // globalThis.frompath=""
 globalThis.frompath = "";
-globalThis.tid = 0;
 globalThis.startstopfilewatchertoggle = false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
@@ -99,6 +98,8 @@ window.addEventListener("DOMContentLoaded", () => {
   var dev=false;
   console.log("1....."+label);
   if(label==="main"){
+globalThis.tid = 0;
+
     console.log("main")
     
   // globalThis.defpath =dev? "/home/roger/.local/share/Zeal/Zeal/docsets/JavaScript.docset/Contents/Resources/Documents":"/";
@@ -115,15 +116,25 @@ window.addEventListener("DOMContentLoaded", () => {
     // loader.hidden=false;
   }
   else{
-    console.log(label+"------"+globalThis.tid);
-      (window as any).__TAURI__.invoke(
-      "whattoload",
-      {
-        windowname:label,
-      })  
-      .then((path:string)=>{
-        addtab(label,path)
-      });
+// globalThis.tid = 99;
+addtab(uio.appWindow.label,globalThis.defpath);
+
+    // (window as any).__TAURI__.invoke(
+    //   "newwindow",
+    //   {
+    //     id: (globalThis.tid as number + 1).toString(),
+    //     path: globalThis.frompath,
+    //     ff:""
+    //   });
+    // console.log(label+"------"+globalThis.tid);
+    //   (window as any).__TAURI__.invoke(
+    //   "whattoload",
+    //   {
+    //     windowname:label,
+    //   })  
+    //   .then((path:string)=>{
+    //     addtab(label,path)
+    //   });
       
       //addtab here TODO
       // (window as any).__TAURI__.invoke(
