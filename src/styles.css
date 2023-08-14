@@ -256,6 +256,21 @@ progress{
 .cf{
   color: gray;
 }
+.hovertip{
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 95%;
+  width: fit-content;
+  transform: translateY(-50%);
+  /* width: 200px; */
+  /* height: 200px; */
+  background-color: lightgrey;
+  /* color: black; */
+}
+#hovertiptext{
+  color:black;
+}
 .menu {
   display: none;
   position: absolute;

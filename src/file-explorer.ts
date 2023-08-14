@@ -5,7 +5,7 @@ import  showdialog, { listendialog } from './debug';
 import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
-import { handlerightclick } from './handlerightclick';
+import { handlerightclick, hovered } from './handlerightclick';
 import { listenfordrives, listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { menuapilistener } from './menu_apis';
@@ -61,6 +61,7 @@ export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
+export const ht = document.getElementById("hovertip") as HTMLDivElement;
 // export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
 // Declare the type of the timer element
 
@@ -174,6 +175,11 @@ globalThis.tid = 0;
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)
     handlerightclick(e);
+  });
+  
+  document.addEventListener("mouseover", function (e) {
+    // console.log(e)
+    hovered(e);
   });
 
   // Add a listener for the click event on the document

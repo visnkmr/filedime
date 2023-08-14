@@ -67,3 +67,33 @@ export function handlerightclick(e:MouseEvent){
         globals.menu.style.top = e.pageY + "px";
       }
 }
+
+export function hovered(e:MouseEvent){
+    if((e.target as HTMLElement).className=="td1"){
+    let clicksource=(e.target as HTMLElement).parentNode as HTMLTableRowElement;
+
+        // Prevent the default menu from showing up
+        e.preventDefault();
+        globalThis.frompath=clicksource.dataset.path as string;
+        globals.ht.replaceChildren();
+        let cs=document.createElement("p")
+      //   cs.className="cf";
+      //   cs.textContent=(clicksource).dataset.value!;
+      //   globals.ht.appendChild(cs);
+      // cs=document.createElement("p")
+        cs.className="hovertiptext";
+        cs.textContent=(clicksource).dataset.path!;
+        globals.ht.appendChild(cs);
+        // Show the custom menu
+        globals.ht.style.display = "block";
+  
+    
+        // Position the menu according to the mouse coordinates
+        // globals.ht.style.left = e.clientX + "px";
+        // globals.ht.style.top = e.clientY + "px";
+      }
+      else{
+        globals.ht.style.display = "none";
+      }
+      
+}
