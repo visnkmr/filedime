@@ -552,6 +552,17 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
           }
         }
   }
+  // let searchthrough=state.stl.lock().unwrap();
+  // let map=searchthrough.clone();
+  // let filescount=map.len();
+  // drop(searchthrough);
+
+  // for i in map{
+  //   for j in i.1{
+
+  //     options.push(j)
+  //   }
+  // }
   
   // println!("{:?}",k.find_all(&path));
   // println!("{:?}",options);
