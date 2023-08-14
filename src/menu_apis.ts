@@ -39,8 +39,8 @@ export function menuapilistener(){
         break;
         case 'recent': recentfiles();
         break;
-        case 'tsearch': populatesearchlist();
-        break;
+        // case 'tsearch': populatesearchlist();
+        // break;
         case "resettable":settableandtbody();
           break;
         default: {

@@ -277,7 +277,7 @@ fn main() {
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
   let reload = CustomMenuItem::new("reload", "Reload".to_string());
   let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
-  let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
+  // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
   let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
   // let back = CustomMenuItem::new("back-button", "Back".to_string());
   // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
@@ -288,7 +288,7 @@ fn main() {
       // .add_item(open_terminal)
       .add_item(hide_size)
       .add_item(reload)
-      .add_item(toggle_search)
+      // .add_item(toggle_search)
       .add_item(hide_child_count)
       
   ))
@@ -438,9 +438,9 @@ fn main() {
         "recent"=>{
           event.window().emit("reloadlist","recent").unwrap();
         }
-        "tsearch"=>{
-          event.window().emit("reloadlist","tsearch").unwrap();
-        }
+        // "tsearch"=>{
+        //   event.window().emit("reloadlist","tsearch").unwrap();
+        // }
         "Learn More" => {
             let url = "https://github.com/visnkmr/iomer";
             shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
