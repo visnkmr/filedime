@@ -71,7 +71,7 @@ export const datalist = document.getElementById("path-list") as HTMLDataListElem
 // var bclose = document.querySelector(".tab-close") as HTMLSpanElement;
 // var thistory: string[] = [];
 // var tforward: string[] = [];
-var label=uio.getCurrent().label;
+// var label=uio.getCurrent().label;
 // if (label=="main"){
 //   // globalThis.defpath = "C:/Users/wkramer/Downloads/github"
 //   // lastfolder = globalThis.defpath;
@@ -96,8 +96,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // window.find();
   var dev=false;
-  console.log("1....."+label);
-  if(label==="main"){
+  console.log("1....."+uio.getCurrent().label);
+  if(uio.getCurrent().label==="main"){
 globalThis.tid = 0;
 
     console.log("main")
@@ -116,8 +116,10 @@ globalThis.tid = 0;
     // loader.hidden=false;
   }
   else{
-// globalThis.tid = 99;
-addtab(uio.appWindow.label,globalThis.defpath);
+  // globalThis.defpath="drives://"
+
+globalThis.tid = 0;
+// addtab(uio.appWindow.label,globalThis.defpath);
 
     // (window as any).__TAURI__.invoke(
     //   "newwindow",
@@ -126,15 +128,16 @@ addtab(uio.appWindow.label,globalThis.defpath);
     //     path: globalThis.frompath,
     //     ff:""
     //   });
-    // console.log(label+"------"+globalThis.tid);
-    //   (window as any).__TAURI__.invoke(
-    //   "whattoload",
-    //   {
-    //     windowname:label,
-    //   })  
-    //   .then((path:string)=>{
-    //     addtab(label,path)
-    //   });
+    let label=uio.getCurrent().label;
+    console.log(label+"------"+globalThis.tid);
+      (window as any).__TAURI__.invoke(
+      "whattoload",
+      {
+        windowname:label,
+      })  
+      .then((path:string)=>{
+        addtab(label,path)
+      });
       
       //addtab here TODO
       // (window as any).__TAURI__.invoke(

@@ -97,7 +97,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
     opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&getuniquewindowlabel());
     return Ok(())
   }
-  window.emit("reloadlist","resettable").unwrap();
+  window.emit_to(&wname,"reloadlist","resettable").unwrap();
   
   let orig = *state.process_count.lock().unwrap();
 
@@ -326,7 +326,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
         return false;
       }
       let mut global_thread_controller= true;
-      println!("{:?}",get_enum_value(&state.whichthread) );
+      // println!("{:?}",get_enum_value(&state.whichthread) );
 
         if let wThread::Listing = get_enum_value(&state.whichthread) 
         { global_thread_controller= true; } 

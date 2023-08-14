@@ -481,7 +481,7 @@ let u:HashSet<String>=map.clone()
         
         // Drop the lock after inserting
         // drop(ret);
-      println!("{}",ei);
+      // println!("{}",ei);
       Some(())
     });
     // let wtr=ret_clone2.read().unwrap().clone();

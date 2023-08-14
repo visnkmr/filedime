@@ -161,7 +161,7 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
 #[tauri::command]
 fn get_timestamp() -> String {
     let timestamp = format!("{}", chrono::Utc::now().timestamp_millis());
-    println!("{}",timestamp); 
+    // println!("{}",timestamp); 
     timestamp
 }
 #[tauri::command]

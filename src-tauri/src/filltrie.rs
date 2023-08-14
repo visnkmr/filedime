@@ -92,7 +92,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
       // .git_ignore(true) // Respect the .gitignore file
       .build_parallel()
       .run(|| {
-            println!("Populating");
+            // println!("Populating");
 
           // let total_bytes = total_bytes.clone();
           // let database = database.clone();

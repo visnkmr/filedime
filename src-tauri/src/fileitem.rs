@@ -133,7 +133,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
                 let (width, height) = img;
                 filedime=
                 format!("{} x {}", width, height).to_string();
-                println!("{filedime}")
+                // println!("{filedime}")
               }
           }
           filetype=g.to_string_lossy().to_string();
