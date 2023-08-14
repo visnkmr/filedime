@@ -5,7 +5,7 @@ import  showdialog, { listendialog } from './debug';
 import { watchfile } from './filechangewatcher';
 import { getpathlist, searchforit } from './getpathoptions';
 import { handleclicks } from './handleclick';
-import { handlerightclick } from './handlerightclick';
+import { handlerightclick, hovered } from './handlerightclick';
 import { listenfordrives, listenforfiles, listenforfolcount, settableandtbody } from './listfiles';
 import { loadmarkdown } from './markdown';
 import { menuapilistener } from './menu_apis';
@@ -29,6 +29,23 @@ globalThis.startstopfilewatchertoggle = false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 
+let current="20px";
+window.addEventListener('wheel', function(event) {
+  if (event.ctrlKey) {
+    if (event.deltaY < 0) {
+      current =(parseInt(current)+2)+'px';
+    } else if (event.deltaY > 0) {
+      current =(parseInt(current)-2)+'px';
+    }
+    var elements = document.querySelectorAll('*');
+    elements.forEach(function(element) {
+    (element as HTMLElement).style.fontSize=current;
+
+    });
+    console.log(current);
+  }
+});
+
 globalThis.activetab="";
 
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;
@@ -44,6 +61,7 @@ export const ousd = document.getElementById("ousd") as HTMLDivElement;
 export const filewatch = document.getElementById("startserve") as HTMLDivElement;
 export const parentsize = document.getElementById("parent-size") as HTMLParagraphElement;
 export const menu = document.getElementById("menu") as HTMLUListElement;
+export const ht = document.getElementById("hovertip") as HTMLDivElement;
 // export const loader = document.getElementById('loader-toggle') as HTMLDivElement;
 // Declare the type of the timer element
 
@@ -157,6 +175,11 @@ globalThis.tid = 0;
   document.addEventListener("contextmenu", function (e) {
     // console.log(e)
     handlerightclick(e);
+  });
+  
+  document.addEventListener("mouseover", function (e) {
+    // console.log(e)
+    hovered(e);
   });
 
   // Add a listener for the click event on the document

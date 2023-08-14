@@ -25,6 +25,15 @@ export async function getpathlist(path:string){
           // Append the option element to the datalist element
           globals.datalist.appendChild(optionElement);
         }
+        for (const option of globalThis.lastpopfilelist) {
+          // Create a new option element with the option value
+          const optionElement = document.createElement("option");
+          // // console.log("here#1")
+          optionElement.value = option.path;
+
+          // Append the option element to the datalist element
+          globals.datalist.appendChild(optionElement);
+        }
       }
     })
     .catch((error:string) => {
