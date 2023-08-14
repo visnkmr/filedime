@@ -50,7 +50,7 @@ export function listfilteredlist(sq:string){
 
 // Check if it exists
 let filteredFilesList = globalThis.lastpopfilelist.filter(function (el) {
-  return el.name.includes(sq) || el.path.includes(sq);
+  return el.name.toLocaleLowerCase().includes(sq.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(sq.toLocaleLowerCase());
 }
 );
 filteredFilesList.forEach(

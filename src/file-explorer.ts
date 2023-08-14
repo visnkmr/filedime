@@ -29,6 +29,23 @@ globalThis.startstopfilewatchertoggle = false;
 export const { invoke } = (window as any).__TAURI__.tauri;
 export const { listen } = (window as any).__TAURI__.event;
 
+let current="20px";
+window.addEventListener('wheel', function(event) {
+  if (event.ctrlKey) {
+    if (event.deltaY < 0) {
+      current =(parseInt(current)+2)+'px';
+    } else if (event.deltaY > 0) {
+      current =(parseInt(current)-2)+'px';
+    }
+    var elements = document.querySelectorAll('*');
+    elements.forEach(function(element) {
+    (element as HTMLElement).style.fontSize=current;
+
+    });
+    console.log(current);
+  }
+});
+
 globalThis.activetab="";
 
 export const pathInput = document.getElementById("path-input") as HTMLInputElement;

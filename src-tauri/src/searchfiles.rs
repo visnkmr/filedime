@@ -42,7 +42,7 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
 //  -> Vec<String> 
  {
   let mut exactmatch=false;
-  if string.contains("\"") {
+  if string.starts_with("\"") && string.ends_with("\"") {
     exactmatch=true;
     string = string[1..string.len() - 1].to_string();
   }
