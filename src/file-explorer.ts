@@ -68,7 +68,7 @@ export const ht = document.getElementById("hovertip") as HTMLDivElement;
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 globalThis.sendpath=[]
 // let sendpath="";
-globalThis.isthumbnail=true;
+globalThis.isthumbnail=false;
 
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
@@ -79,10 +79,14 @@ export const copy = document.getElementById("copy") as HTMLButtonElement;
   export const sync = document.getElementById("sync") as HTMLButtonElement;
 
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
+
+export const sl = document.getElementById("switch-layout") as HTMLButtonElement;
+
 export const namesort = document.getElementById("name-sort") as HTMLButtonElement;
 export const sizesort = document.getElementById("size-sort") as HTMLButtonElement;
 export const datesort = document.getElementById("date-sort") as HTMLButtonElement;
 export const ftypesort = document.getElementById("ftype-sort") as HTMLButtonElement;
+
 export const nosize = document.getElementById("no-size") as HTMLButtonElement;
 export const folcount = document.getElementById("fol-count") as HTMLButtonElement;
 export const tsearch = document.getElementById("t-search") as HTMLButtonElement;

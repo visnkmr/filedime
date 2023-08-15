@@ -298,6 +298,10 @@ export function handleclicks(e:Event){
       // globals.datesort.textContent="Date"
       globals.ftypesort.textContent="Filetype"
       break; 
+    case globals.sl:
+      globalThis.isthumbnail=!globalThis.isthumbnail;
+      reloadlist();
+      break;
     case globals.ftypesort:
       sortby("ftype");
       if(order=="asc"){
