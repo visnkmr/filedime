@@ -323,10 +323,13 @@ export function showthumbnails(file:File):HTMLElement{
       //   );
 }
 export function eachfile(file:File){
-  globalThis.isthumbnail=true;
-  let listofefs=document.getElementById("flist") as HTMLDivElement;
-  listofefs.appendChild(showthumbnails(file));
-  return
+  if(globalThis.isthumbnail)
+  {
+    globalThis.isthumbnail=true;
+    let listofefs=document.getElementById("flist") as HTMLDivElement;
+    listofefs.appendChild(showthumbnails(file));
+    return
+  }
   // console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
@@ -577,11 +580,16 @@ function compare(a: number|string, b: number|string,order:string) {
 //     });
 // }
 export function sortby(basedon:string){
-console.log(globalThis.lastpopfilelist)
+  // console.log("---->"+globalThis.lastpopfilelist)
 
   globalThis.order = globalThis.order === "asc" ? "desc" : "asc";
-  // settableandtbody();
   clearchildrenofall()
+  if(!isthumbnail){
+    let tempstore=globalThis.lastpopfilelist;
+    settableandtbody();
+    globalThis.lastpopfilelist=tempstore;
+
+  }
 
   console.log("settingpath");
   // globals.fileList.replaceChildren()
@@ -590,10 +598,10 @@ console.log(globalThis.lastpopfilelist)
   globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
-// Get the element by id
+  // Get the element by id
 
-// Check if it exists
-let filteredFilesList = globalThis.lastpopfilelist.sort(function (a, b) {
+  // Check if it exists
+  let filteredFilesList = globalThis.lastpopfilelist.sort(function (a, b) {
   // if (index !== 2){
     let compres=0;
     switch(basedon){
@@ -616,7 +624,7 @@ let filteredFilesList = globalThis.lastpopfilelist.sort(function (a, b) {
     // return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string));
 
 });
-console.log(filteredFilesList)
+// console.log(filteredFilesList)
 filteredFilesList.forEach(
   function(eachdime,index){
     if(index>10)
