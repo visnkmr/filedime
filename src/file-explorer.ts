@@ -78,6 +78,10 @@ export const copy = document.getElementById("copy") as HTMLButtonElement;
   export const sync = document.getElementById("sync") as HTMLButtonElement;
 
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
+export const namesort = document.getElementById("name-sort") as HTMLButtonElement;
+export const sizesort = document.getElementById("size-sort") as HTMLButtonElement;
+export const datesort = document.getElementById("date-sort") as HTMLButtonElement;
+export const ftypesort = document.getElementById("ftype-sort") as HTMLButtonElement;
 export const nosize = document.getElementById("no-size") as HTMLButtonElement;
 export const folcount = document.getElementById("fol-count") as HTMLButtonElement;
 export const tsearch = document.getElementById("t-search") as HTMLButtonElement;

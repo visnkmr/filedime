@@ -135,6 +135,7 @@ if (element!==null) {
   });
   
 }
+
 export function listenfordrives(){
   // console.log("listdrives")
   let nooftimes=0;
@@ -447,17 +448,17 @@ export function setdrivetableandtbody(){
     tbody.id="listoffiles"
     globals.fileList.appendChild(tbody);
 }
-
-export function settableheaderandsort(){
-  let order = "asc";
-    // create a function to compare two values based on the order
-    function compare(a: number|string, b: number|string) {
+function compare(a: number|string, b: number|string,order:string) {
       if (order === "asc") {
         return a < b ? -1 : a > b ? 1 : 0;
       } else {
         return a > b ? -1 : a < b ? 1 : 0;
       }
     }
+export function settableheaderandsort(){
+  let order = "asc";
+    // create a function to compare two values based on the order
+    
     let tbody=document.getElementById("listoffiles") as HTMLTableElement;
     // create a function to sort the table rows based on the column index
     function sortTable(index: number) {
@@ -466,10 +467,10 @@ export function settableheaderandsort(){
       // sort the rows based on the cell value at the given index
       rows.sort(function (a, b) {
         if (index !== 2){
-          return compare(String(a.cells[index].dataset.value), String(b.cells[index].dataset.value));
+          return compare(String(a.cells[index].dataset.value), String(b.cells[index].dataset.value),order);
         }
         else
-          return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string));
+          return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string),order);
   
       });
       // append the sorted rows to the table body
@@ -504,7 +505,70 @@ export function settableheaderandsort(){
       sortTable(1);
     });
 }
+export function sortby(basedon:string){
+console.log(globalThis.lastpopfilelist)
 
+  globalThis.order = globalThis.order === "asc" ? "desc" : "asc";
+  // settableandtbody();
+  let tryele = document.getElementById("listoffiles");
+  tryele?.replaceChildren();
+  console.log("settingpath");
+  // globals.fileList.replaceChildren()
+
+  
+  globalThis.lastimefilesloaded=globalThis.latestimefilesloaded;
+  globals.ousd.style.display="none";
+  globals.filewatch.style.display="none";
+// Get the element by id
+
+// Check if it exists
+let filteredFilesList = globalThis.lastpopfilelist.sort(function (a, b) {
+  // if (index !== 2){
+    let compres=0;
+    switch(basedon){
+      case "name":
+        compres=compare(String(a.name), String(b.name),order);
+        break;
+      case "date":
+        compres=compare(a.timestamp, b.timestamp,order);
+        break;
+      case "ftype":
+        compres=compare(String(a.ftype), String(b.ftype),order);
+        break;
+      case "size":
+        compres=compare(a.rawfs,b.rawfs,order);
+        break;
+    }
+    return compres;
+  // }
+  // else
+    // return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string));
+
+});
+console.log(filteredFilesList)
+filteredFilesList.forEach(
+  function(eachdime,index){
+    if(index>10)
+    return
+    eachfile(eachdime);
+  }
+)
+// for (var ef in filteredFilesList) {
+//     // if(globalThis.lastpopfilelist[ef].name.includes(sq)){
+      
+//         // if(JSON.parse(data.payload) instanceof File)
+  
+//       // console.log(JSON.stringify(globalThis.lastpopfilelist))
+
+//         eachfile(filteredFilesList[ef]);
+//         // else{
+//           // eachdrive(JSON.parse(data.payload) as DriveItem);
+//         // }
+//     // }
+//   }
+    // globals.htmlbase.innerHTML = ""
+    console.log("listfiles")
+}
 function setautocompletepath() {
   let splitat=  /[\\/]/;
   var arr = globals.pathInput.value.split(splitat); // arr is ["a", "b", "c", "d"]
