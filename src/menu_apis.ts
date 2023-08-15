@@ -41,7 +41,10 @@ export function menuapilistener(){
         break;
         // case 'tsearch': populatesearchlist();
         // break;
-        case "resettable":settableandtbody();
+        case "resettable":
+         
+
+          settableandtbody();
           break;
         default: {
           // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;

@@ -241,7 +241,7 @@ export function handleclicks(e:Event){
     globals.menu.style.display = "none";
   }
   if (
-    (target).tagName === "TD"
+    (target).tagName === "TD" || (e.target as HTMLElement).className=="td1"
   ) {
     let clicksource=target.parentNode as HTMLTableRowElement;
     // console.log("tryopen--------->"+JSON.stringify(target.parentNode.dataset))
@@ -258,6 +258,21 @@ export function handleclicks(e:Event){
       break;
     case globals.reload:
       reloadlist();
+      break;
+    case globals.sth:
+      isdark=!isdark
+      var elements = document.querySelectorAll('*');
+      elements.forEach(function(element) {
+        if(isdark){
+
+          (element as HTMLElement).style.color="white";
+          (element as HTMLElement).style.backgroundColor="black";
+        }
+        else{
+          (element as HTMLElement).style.color="black";
+          (element as HTMLElement).style.backgroundColor="white";
+        }
+      });
       break;
     case globals.namesort:
       sortby("name");
@@ -298,6 +313,10 @@ export function handleclicks(e:Event){
       // globals.datesort.textContent="Date"
       globals.ftypesort.textContent="Filetype"
       break; 
+    case globals.sl:
+      globalThis.isthumbnail=!globalThis.isthumbnail;
+      reloadlist();
+      break;
     case globals.ftypesort:
       sortby("ftype");
       if(order=="asc"){

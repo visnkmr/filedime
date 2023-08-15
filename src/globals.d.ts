@@ -15,3 +15,5 @@ declare var timeouts:number[];
 declare var interval:NodeJS.Timer;
 declare var order:string;
 declare var lastpopfilelist:import("./listfiles").File[];
+declare var isthumbnail:boolean;
+declare var isdark:boolean;
