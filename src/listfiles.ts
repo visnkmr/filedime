@@ -35,10 +35,16 @@ type DriveItem = {
   disk_type: string,
   file_system: string,
 }
-export function listfilteredlist(sq:string){
-  // settableandtbody();
+export function clearchildrenofall(){
   let tryele = document.getElementById("listoffiles");
   tryele?.replaceChildren();
+  let flist=document.getElementById("flist")
+  flist!.replaceChildren();
+  globals.fileList.replaceChildren();
+}
+export function listfilteredlist(sq:string){
+  // settableandtbody();
+  clearchildrenofall()
   console.log("settingpath");
   // globals.fileList.replaceChildren()
 
@@ -102,13 +108,13 @@ export async function listenforfiles(){
   globals.ousd.style.display="none";
   globals.filewatch.style.display="none";
 // Get the element by id
-let element = document.getElementById("listoffiles");
+// let element = document.getElementById("listoffiles");
 
 globalThis.lastpopfilelist.push(JSON.parse(data.payload) as File)
 if(globalThis.lastpopfilelist.length>10)
 return
 // Check if it exists
-if (element!==null) {
+// if (element!==null) {
   // if(JSON.parse(data.payload) instanceof File)
   // console.log(JSON.stringify(globalThis.lastpopfilelist))
 
@@ -116,11 +122,12 @@ if (element!==null) {
     // else{
       // eachdrive(JSON.parse(data.payload) as DriveItem);
     // }
-} else {
-  // globalThis.lastpopfilelist=[];
-  // console.log(JSON.stringify(globalThis.lastpopfilelist))
-  settableandtbody();
-}
+// } 
+// else {
+//   // globalThis.lastpopfilelist=[];
+//   // console.log(JSON.stringify(globalThis.lastpopfilelist))
+//   settableandtbody();
+// }
     // globals.htmlbase.innerHTML = ""
     console.log("listfiles")
     // pathline.innerHTML != "";
@@ -273,7 +280,53 @@ function eachdrive(drive:DriveItem){
   tbody.appendChild(tr);
   // settableheaderandsort();
 }
+export function showthumbnails(file:File):HTMLElement{
+  let tr = document.createElement("span");
+  tr.style.padding="10px 10px 10px 10px"
+  tr.style.margin="10px 10px 10px 10px"
+  tr.style.backgroundColor="gray"
+  // create two table cell elements for the filename and filesize columns
+  tr.dataset.value = file.name;
+  tr.dataset.name = file.name;
+  tr.dataset.path = file.path;
+  tr.dataset.ftype = file.ftype;
+  tr.dataset.lmdate = file.lmdate.toString();
+  tr.dataset.size = file.size.toString()+" ("+file.foldercon+")";
+  
+  let td1 = document.createElement("span");
+
+  td1.textContent = file.name;
+  td1.className = "td1";
+
+  td1.dataset.isDir = file.is_dir.toString();
+  if (file.is_dir) {
+    td1.id = "folder"
+    if (file.foldercon > 0) {
+      td1.textContent = file.name + " (" + file.foldercon + ")";
+    }
+    else {
+      td1.textContent = file.name;
+
+    }
+  }
+  td1.dataset.size = file.size.toString();
+  tr.appendChild(td1);
+  return tr
+      // (window as any).__TAURI__.invoke(
+      //   "foldersize",
+      //   {
+
+      //     path: file.path,
+      //   }
+      //   ).then(
+      //     (size:string)=>{calcsbutton.textContent=size}
+      //   );
+}
 export function eachfile(file:File){
+  globalThis.isthumbnail=true;
+  let listofefs=document.getElementById("flist") as HTMLDivElement;
+  listofefs.appendChild(showthumbnails(file));
+  return
   // console.log(file)
   let tbody=document.getElementById("listoffiles") as HTMLTableElement;
   // create a table row element for each file
@@ -442,10 +495,13 @@ export function adddrivestablehead(){
 
 //init detail list
 export function settableandtbody(){
+  clearchildrenofall()
   globalThis.lastpopfilelist=[];
 
-  globals.fileList.replaceChildren();
-    addtablehead();
+  
+    if(!globalThis.isthumbnail){
+      addtablehead();
+    }
   
   
     let tbody = document.createElement("tbody");
@@ -525,8 +581,8 @@ console.log(globalThis.lastpopfilelist)
 
   globalThis.order = globalThis.order === "asc" ? "desc" : "asc";
   // settableandtbody();
-  let tryele = document.getElementById("listoffiles");
-  tryele?.replaceChildren();
+  clearchildrenofall()
+
   console.log("settingpath");
   // globals.fileList.replaceChildren()
 

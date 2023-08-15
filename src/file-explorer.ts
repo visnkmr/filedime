@@ -68,6 +68,7 @@ export const ht = document.getElementById("hovertip") as HTMLDivElement;
 export const reload = document.getElementById("reload") as HTMLButtonElement;
 globalThis.sendpath=[]
 // let sendpath="";
+globalThis.isthumbnail=true;
 
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;

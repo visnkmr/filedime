@@ -3,6 +3,13 @@
   /* color: white; */
   /* background-color: black; */
 }
+.flist{
+  display: grid;
+  /* grid-template-columns: repeat(3, 1fr); */
+  gap: 10px;
+  /* grid-auto-rows: 100px; */
+  grid-auto-flow: column;
+}
 .markslist {
   display: flex;
   flex-direction: column;

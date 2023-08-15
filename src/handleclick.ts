@@ -241,7 +241,7 @@ export function handleclicks(e:Event){
     globals.menu.style.display = "none";
   }
   if (
-    (target).tagName === "TD"
+    (target).tagName === "TD" || (e.target as HTMLElement).className=="td1"
   ) {
     let clicksource=target.parentNode as HTMLTableRowElement;
     // console.log("tryopen--------->"+JSON.stringify(target.parentNode.dataset))
