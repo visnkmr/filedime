@@ -46,7 +46,7 @@ export function clearchildrenofall(){
 export function listfilteredlist(sq:string){
   // settableandtbody();
   clearchildrenofall();
-  if(!isthumbnail){
+  if(!globalThis.isthumbnail){
     let tempstore=globalThis.lastpopfilelist;
     settableandtbody();
     globalThis.lastpopfilelist=tempstore;
@@ -591,7 +591,15 @@ export function sortby(basedon:string){
 
   globalThis.order = globalThis.order === "asc" ? "desc" : "asc";
   clearchildrenofall()
-  
+  let element = document.getElementById("listoffiles");
+  if(!globalThis.isthumbnail){
+    if(element==null){
+        let tempstore=globalThis.lastpopfilelist;
+        settableandtbody();
+        globalThis.lastpopfilelist=tempstore;
+    
+    }
+  }
 
   console.log("settingpath");
   // globals.fileList.replaceChildren()
