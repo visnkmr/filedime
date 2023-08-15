@@ -320,7 +320,7 @@ stoptimer(&wname,&window.app_handle());
   // options
 }
 
-
+//recent files are listed if they are of the following types.
 fn is_image_file(file_name: &str) -> bool {
   let extension = Path::new(file_name)
       .extension()

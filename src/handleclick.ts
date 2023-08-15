@@ -2,7 +2,7 @@ import setsendpath from './copynpaste';
 import { copyToClipboard } from './ctc';
 import uio, * as globals from './file-explorer';
 import { wholesearch } from './getpathoptions';
-import { settableandtbody } from './listfiles';
+import { settableandtbody, sortby } from './listfiles';
 import { loader } from './loader';
 import { populateimmediatechildcount, populatesearchlist, reloadlist, reloadsize } from './menu_apis';
 import { openfile } from './openfile';
@@ -259,6 +259,58 @@ export function handleclicks(e:Event){
     case globals.reload:
       reloadlist();
       break;
+    case globals.namesort:
+      sortby("name");
+      if(order=="asc"){
+        globals.namesort.textContent="Name (Z-A)"
+      }
+      else{
+        globals.namesort.textContent="Name (A-Z)"
+      }
+      // globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
+      break; 
+    case globals.sizesort:
+      sortby("size");
+      if(order=="asc"){
+        globals.sizesort.textContent="Size (1-0)"
+      }
+      else{
+        globals.sizesort.textContent="Size (0-1)"
+      }
+      globals.namesort.textContent="Name"
+      // globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
+      break;
+    case globals.datesort:
+      sortby("date");
+      if(order=="asc"){
+        globals.datesort.textContent="Date (Old-New)"
+      }
+      else{
+        globals.datesort.textContent="Date (New-Old)"
+      }
+      globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      // globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
+      break; 
+    case globals.ftypesort:
+      sortby("ftype");
+      if(order=="asc"){
+        globals.ftypesort.textContent="Filetype (Z-A)"
+      }
+      else{
+        globals.ftypesort.textContent="Filetype (A-Z)"
+      }
+      globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      // globals.ftypesort.textContent="Filetype"
+      break; 
     case globals.backButton:
       (window as any).__TAURI__.invoke(
         "backbutton", 

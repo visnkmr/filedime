@@ -76,7 +76,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
       filetype+="symlink";
     }
     if !path.is_dir(){
-      
+      //modify here to add more extensions to list linecount
       match(path.extension()){
         Some(g)=>{
           if matches!(g.to_string_lossy().as_ref(),
