@@ -1,4 +1,4 @@
-Iomer, an open source almost feature complete pro file explorer.
+Filedime, an open source almost feature complete file explorer written in Rust (for all filesystem interaction,backend), Tauri(for frontend, front-backend intercom).
 
 Features implemented:
 
@@ -8,7 +8,7 @@ Features implemented:
 - [x] search with speed and responsiveness parity with fzf
 - [x] folder size compute with speed and responsiveness parity with baobab(Disk Usage Analyzer).
 - [x] preview html, markdown files.
-- [x] LOC for rs, js, toml, etc more can be implemented as required.
+- [x] LOC for ts, rs, js, java, md ,css, html, toml, etc more can be implemented as required.
 - [x] bookmark files or folders.
 - [x] details screen for list sort by date, size.
 - [x] path autocomplete as you type.
@@ -21,6 +21,7 @@ Features implemented:
 
 Subtle features
 - [x] show name of right click file above context menu
+- [x] show file location on hover at bottom left of window when scrolling over results of search
 
 Thanks Tauri, Typescript, Webpack->RSPack, 
 
