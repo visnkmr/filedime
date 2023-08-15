@@ -259,6 +259,21 @@ export function handleclicks(e:Event){
     case globals.reload:
       reloadlist();
       break;
+    case globals.sth:
+      isdark=!isdark
+      var elements = document.querySelectorAll('*');
+      elements.forEach(function(element) {
+        if(isdark){
+
+          (element as HTMLElement).style.color="white";
+          (element as HTMLElement).style.backgroundColor="black";
+        }
+        else{
+          (element as HTMLElement).style.color="black";
+          (element as HTMLElement).style.backgroundColor="white";
+        }
+      });
+      break;
     case globals.namesort:
       sortby("name");
       if(order=="asc"){

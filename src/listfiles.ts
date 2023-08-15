@@ -41,10 +41,17 @@ export function clearchildrenofall(){
   let flist=document.getElementById("flist")
   flist!.replaceChildren();
   globals.fileList.replaceChildren();
-}
+  
+} 
 export function listfilteredlist(sq:string){
   // settableandtbody();
-  clearchildrenofall()
+  clearchildrenofall();
+  if(!isthumbnail){
+    let tempstore=globalThis.lastpopfilelist;
+    settableandtbody();
+    globalThis.lastpopfilelist=tempstore;
+
+  }
   console.log("settingpath");
   // globals.fileList.replaceChildren()
 
@@ -584,12 +591,7 @@ export function sortby(basedon:string){
 
   globalThis.order = globalThis.order === "asc" ? "desc" : "asc";
   clearchildrenofall()
-  if(!isthumbnail){
-    let tempstore=globalThis.lastpopfilelist;
-    settableandtbody();
-    globalThis.lastpopfilelist=tempstore;
-
-  }
+  
 
   console.log("settingpath");
   // globals.fileList.replaceChildren()

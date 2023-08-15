@@ -69,6 +69,7 @@ export const reload = document.getElementById("reload") as HTMLButtonElement;
 globalThis.sendpath=[]
 // let sendpath="";
 globalThis.isthumbnail=false;
+globalThis.isdark=false;
 
 export const recent = document.getElementById("recent") as HTMLButtonElement;
 export const newtab = document.getElementById("newtab") as HTMLButtonElement;
@@ -81,6 +82,7 @@ export const copy = document.getElementById("copy") as HTMLButtonElement;
 export const backButton = document.getElementById("back-button") as HTMLButtonElement;
 
 export const sl = document.getElementById("switch-layout") as HTMLButtonElement;
+export const sth = document.getElementById("switch-theme") as HTMLButtonElement;
 
 export const namesort = document.getElementById("name-sort") as HTMLButtonElement;
 export const sizesort = document.getElementById("size-sort") as HTMLButtonElement;
