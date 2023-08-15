@@ -267,33 +267,49 @@ export function handleclicks(e:Event){
       else{
         globals.namesort.textContent="Name (A-Z)"
       }
+      // globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
       break; 
     case globals.sizesort:
       sortby("size");
       if(order=="asc"){
-        globals.namesort.textContent="Size (1-0)"
+        globals.sizesort.textContent="Size (1-0)"
       }
       else{
-        globals.namesort.textContent="Size (0-1)"
+        globals.sizesort.textContent="Size (0-1)"
       }
+      globals.namesort.textContent="Name"
+      // globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
       break;
     case globals.datesort:
       sortby("date");
       if(order=="asc"){
-        globals.namesort.textContent="Date (Old-New)"
+        globals.datesort.textContent="Date (Old-New)"
       }
       else{
-        globals.namesort.textContent="Date (New-Old)"
+        globals.datesort.textContent="Date (New-Old)"
       }
+      globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      // globals.datesort.textContent="Date"
+      globals.ftypesort.textContent="Filetype"
       break; 
     case globals.ftypesort:
       sortby("ftype");
       if(order=="asc"){
-        globals.namesort.textContent="Type (Z-A)"
+        globals.ftypesort.textContent="Filetype (Z-A)"
       }
       else{
-        globals.namesort.textContent="Type (A-Z)"
+        globals.ftypesort.textContent="Filetype (A-Z)"
       }
+      globals.namesort.textContent="Name"
+      globals.sizesort.textContent="Size"
+      globals.datesort.textContent="Date"
+      // globals.ftypesort.textContent="Filetype"
       break; 
     case globals.backButton:
       (window as any).__TAURI__.invoke(

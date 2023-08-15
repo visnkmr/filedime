@@ -165,6 +165,19 @@ let element = document.getElementById("listoffiles");
 if (element!==null) {
   // if(JSON.parse(data.payload) instanceof File)
   for (let ed of JSON.parse(data.payload) as DriveItem[]) {
+//     let a:import("./listfiles").File={
+//       name:ed.name,
+//       path: ed.mount_point,
+//       is_dir: true,
+//       size: parseInt(ed.total),
+//       rawfs: parseInt(ed.total),
+//       lmdate: 0,
+//       timestamp: 0,
+//       foldercon: 0,
+//       ftype: ed.file_system,
+//     };
+// globalThis.lastpopfilelist.push(a)
+
     eachdrive(ed);
   }
   
@@ -356,7 +369,7 @@ export function eachfile(file:File){
 
   tr.appendChild(td3);
   tbody.appendChild(tr);
-  settableheaderandsort();
+  // settableheaderandsort();
 }
 
 //add table head
@@ -441,6 +454,8 @@ export function settableandtbody(){
 }
 export function setdrivetableandtbody(){
   globals.fileList.replaceChildren();
+  globalThis.lastpopfilelist=[];
+
     adddrivestablehead();
   
   
@@ -455,56 +470,56 @@ function compare(a: number|string, b: number|string,order:string) {
         return a > b ? -1 : a < b ? 1 : 0;
       }
     }
-export function settableheaderandsort(){
-  let order = "asc";
-    // create a function to compare two values based on the order
+// export function settableheaderandsort(){
+//   let order = "asc";
+//     // create a function to compare two values based on the order
     
-    let tbody=document.getElementById("listoffiles") as HTMLTableElement;
-    // create a function to sort the table rows based on the column index
-    function sortTable(index: number) {
-      // get the table rows as an array
-      let rows = Array.from(tbody.rows);
-      // sort the rows based on the cell value at the given index
-      rows.sort(function (a, b) {
-        if (index !== 2){
-          return compare(String(a.cells[index].dataset.value), String(b.cells[index].dataset.value),order);
-        }
-        else
-          return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string),order);
+//     let tbody=document.getElementById("listoffiles") as HTMLTableElement;
+//     // create a function to sort the table rows based on the column index
+//     function sortTable(index: number) {
+//       // get the table rows as an array
+//       let rows = Array.from(tbody.rows);
+//       // sort the rows based on the cell value at the given index
+//       rows.sort(function (a, b) {
+//         if (index !== 2){
+//           return compare(String(a.cells[index].dataset.value), String(b.cells[index].dataset.value),order);
+//         }
+//         else
+//           return compare(parseInt(a.cells[index].dataset.value as string), parseInt(b.cells[index].dataset.value as string),order);
   
-      });
-      // append the sorted rows to the table body
-      for (let row of rows) {
-        tbody.appendChild(row);
-      }
-      // toggle the order for the next click
-      order = order === "asc" ? "desc" : "asc";
-    }
-    let filename = document.getElementById("filename") as HTMLTableCellElement;
-    let filesize = document.getElementById("filesize") as HTMLTableCellElement;
-    let lastmod = document.getElementById("lastmod") as HTMLTableCellElement;
-    let ftype = document.getElementById("ftype") as HTMLTableCellElement;
-    // add a click event listener to the filename th element
-    filename.addEventListener("click", function () {
-      // call the sortTable function with index 0
-      sortTable(0);
-    });
-    // add a click event listener to the filesize th element
-    filesize.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(2);
-    });
-    // add a click event listener to the lastmod th element
-    lastmod.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(3);
-    });
+//       });
+//       // append the sorted rows to the table body
+//       for (let row of rows) {
+//         tbody.appendChild(row);
+//       }
+//       // toggle the order for the next click
+//       order = order === "asc" ? "desc" : "asc";
+//     }
+//     let filename = document.getElementById("filename") as HTMLTableCellElement;
+//     let filesize = document.getElementById("filesize") as HTMLTableCellElement;
+//     let lastmod = document.getElementById("lastmod") as HTMLTableCellElement;
+//     let ftype = document.getElementById("ftype") as HTMLTableCellElement;
+//     // add a click event listener to the filename th element
+//     filename.addEventListener("click", function () {
+//       // call the sortTable function with index 0
+//       sortTable(0);
+//     });
+//     // add a click event listener to the filesize th element
+//     filesize.addEventListener("click", function () {
+//       // call the sortTable function with index 1
+//       sortTable(2);
+//     });
+//     // add a click event listener to the lastmod th element
+//     lastmod.addEventListener("click", function () {
+//       // call the sortTable function with index 1
+//       sortTable(3);
+//     });
   
-    ftype.addEventListener("click", function () {
-      // call the sortTable function with index 1
-      sortTable(1);
-    });
-}
+//     ftype.addEventListener("click", function () {
+//       // call the sortTable function with index 1
+//       sortTable(1);
+//     });
+// }
 export function sortby(basedon:string){
 console.log(globalThis.lastpopfilelist)
 
