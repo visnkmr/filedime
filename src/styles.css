@@ -3,6 +3,7 @@
   /* color: white; */
   /* background-color: black; */
 }
+
 .flist{
   display: grid;
   /* grid-template-columns: repeat(3, 1fr); */
@@ -156,6 +157,7 @@ thead{
   margin: 0; /* remove the default margin */
   padding: 0; /* remove the default padding */
   width: 80%;
+  /* height: 120%; */
   /* overflow-x: scroll; */
   /* overflow: hidden; */
 }
@@ -266,7 +268,7 @@ progress{
 .hovertip{
   display: none;
   position: fixed;
-  left: 0;
+  right: 0;
   top: 95%;
   width: fit-content;
   transform: translateY(-50%);

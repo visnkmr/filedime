@@ -234,7 +234,8 @@ function eachdrive(drive:DriveItem){
   td1.className = "td1";
 
   // td1.dataset.isDir = drive.is_removable.toString();
-  if (!drive.is_removable) {
+  if (!drive.is_removable) 
+  {
     td1.id = "folder"
     
   }
