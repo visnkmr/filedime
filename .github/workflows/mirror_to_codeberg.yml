@@ -1,0 +1,15 @@
+name: Mirror to codeberg
+on:
+  push:
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - name: Mirror to Codeberg
+        run: |
+          git fetch --unshallow
+          git remote set-url --add --push origin https://visnk:${{secrets.CBERG_TOKEN}}@codeberg.org/visnk/filedime.git
+          git push --all
