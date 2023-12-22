@@ -96,14 +96,16 @@ export default function Greet() {
       </aside>
       <main className="flex flex-col p-6">
         <h1 className="font-semibold text-lg md:text-2xl">My Files</h1>
-        <div className="grid grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-4 gap-4 mt-6">
         {greeting.map((message, index) => (
             <Card onClick={
                 ()=>
-                {invoke('list_files', { 
+                { 
+                  console.log(message);
+                  invoke('list_files', { 
                     windowname:"main",
                     oid: "0",
-                    path: message.mount_point,
+                    path: "message.name",
                     ff: "" 
                 })}
             }>
