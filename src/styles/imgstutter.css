@@ -1,0 +1,16 @@
+.topimg:hover {
+  padding: 10px;
+  transition: all 0.25s ease-in;
+  background-color:black;
+}
+.topimg {
+  transition: all 0.25s ease-in-out;
+  background-color: none;
+  
+}
+picture:hover {
+  transition: all 0.25s ease-in;
+}
+picture {
+  transition: all 0.25s ease-in-out;
+}
