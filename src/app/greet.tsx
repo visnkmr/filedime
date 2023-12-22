@@ -5,33 +5,38 @@ import { invoke } from '@tauri-apps/api/tauri'
 import React from 'react';
 import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/6W6XSJzKlzb
- */
+
 import Link from "next/link"
 import { CardContent, Card } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
 
 export default function Greet() {
-    const initlogmsg:object[]=[]
-  const [greeting, setGreeting] = useState(initlogmsg);
-  let messagearay
+    const filesobjinit:object[]=[]
+  const [driveslist, setdriveslist] = useState(filesobjinit);
+  const [fileslist, setfileslist] = useState(filesobjinit);
   const [count, addone] = useState(0);
 
   useEffect(() => {
     listen('list-drives', (event) => {
         console.log(event);
-        setGreeting(JSON.parse(event.payload));
+        setdriveslist(JSON.parse(event.payload));
+    })
+    .then(result => {
+            // console.log(uio.getCurrent().label)
+            console.log(result)
+        })
+    .catch(console.error);
+    listen('list-files', (event) => {
+        console.log(event);
+        setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
     })
     .then(result => {
             // console.log(uio.getCurrent().label)
             console.log(result)
             
         })
-        .catch(console.error)
-    ;
+    .catch(console.error);
     // lfiles();
     invoke('list_files', { 
         windowname:"main",
@@ -97,7 +102,7 @@ export default function Greet() {
       <main className="flex flex-col p-6">
         <h1 className="font-semibold text-lg md:text-2xl">My Files</h1>
         <div className="grid grid-cols-4 gap-4 mt-6">
-        {greeting.map((message, index) => (
+        {driveslist.map((message, index) => (
             <Card onClick={
                 ()=>
                 { 
@@ -105,7 +110,7 @@ export default function Greet() {
                   invoke('list_files', { 
                     windowname:"main",
                     oid: "0",
-                    path: "message.name",
+                    path: message.mount_point,
                     ff: "" 
                 })}
             }>
@@ -114,32 +119,27 @@ export default function Greet() {
               <span className="font-medium text-lg">{message.mount_point}</span>
             </CardContent>
           </Card>
-            // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
+        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
-          <Card>
+        {fileslist.map((message, index) => (
+            <Card onClick={
+                ()=>
+                { 
+                  console.log(message);
+                  invoke('list_files', { 
+                    windowname:"main",
+                    oid: "0",
+                    path: message.path,
+                    ff: "" 
+                })}
+            }>
             <CardContent className="flex items-center space-x-4">
               <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">Documents</span>
+              <span className="font-medium text-lg">{message.name}</span>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="flex items-center space-x-4">
-              <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">Downloads</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center space-x-4">
-              <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">Music</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center space-x-4">
-              <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">Pictures</span>
-            </CardContent>
-          </Card>
+        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
+        ))}
         </div>
         <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
@@ -294,11 +294,11 @@ export function Other() {
     <p>
     {count}
     <ul>
-    {greeting.map((message, index) => (
+    {driveslist.map((message, index) => (
         <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
     ))}
     </ul>
-    {/* {greeting} */}
+    {/* {driveslist} */}
     </p>
   </div>
   );
