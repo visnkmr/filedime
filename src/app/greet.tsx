@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
+import {ForwardIcon, ArrowLeft} from "lucide-react"
 import React from 'react';
 import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "../components/ui/context-menu"
 
 import Link from "next/link"
 import { CardContent, Card } from "../components/ui/card"
@@ -14,6 +21,8 @@ import { Button } from "../components/ui/button"
 export default function Greet() {
     const filesobjinit:object[]=[]
   const [driveslist, setdriveslist] = useState(filesobjinit);
+  const [filecount, setfc] = useState(0);
+  const [path, setpath] = useState("Drives");
   const [sampletext,sst]=useState("")
   const [fileslist, setfileslist] = useState(filesobjinit);
   useEffect(() => {
@@ -22,6 +31,7 @@ export default function Greet() {
   useEffect(() => {
     // const unlisten=
     listen('list-drives', (event) => {
+      sst("")
         console.log("loading drives---->"+event.payload);
         setdriveslist(JSON.parse(event.payload));
     })
@@ -32,8 +42,15 @@ export default function Greet() {
     .catch(console.error);
     // const unlisten1=
     listen('list-files', (event) => {
+      setfc((old) => {
+        const newFileCount = old + 1;
+        // if (newFileCount < 11)
+         {
+          setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
+        }
+        return newFileCount;
+       });
         console.log("loading files---->"+event.payload);
-        setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
     })
     .then(result => {
             // console.log(uio.getCurrent().label)
@@ -120,17 +137,51 @@ export default function Greet() {
         </div>
       </aside>
       <main className="flex flex-col p-6">
-        <h1 className="font-semibold text-lg md:text-2xl">My Files ({fileslist.length})</h1>
+      <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="ghost">
+              <ForwardIcon className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex flex-grow items-center gap-4">
+            <div className="flex-grow">
+              <input
+                className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Path"
+                type="search"
+              />
+            </div>
+            <div className="flex-grow max-w-[20%]">
+              <input
+                className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Search"
+                type="search"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost">Tab 1</Button>
+              <Button variant="ghost">Tab 2</Button>
+              <Button variant="ghost">Tab 3</Button>
+            </div>
+          </div>
+        </div>
+        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?path:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{sampletext}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
         {driveslist.map((message, index) => (
+          <ContextMenu>
+          <ContextMenuTrigger>
+          
             <Card key={index} onClick={
                 ()=>
                 { 
                   setfileslist([])
                   setdriveslist([])
-
+                  setpath(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:"main",
@@ -144,16 +195,29 @@ export default function Greet() {
               <span className="font-medium text-lg">{message.mount_point}</span>
             </CardContent>
           </Card>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <p className='pl-4'>{message.mount_point}</p>
+            <ContextMenuItem>Open in new tab</ContextMenuItem>
+            <ContextMenuItem>Open in new window</ContextMenuItem>
+            <ContextMenuItem>Add bookmark</ContextMenuItem>
+            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
-        {fileslist.map((message, index) => (
+        {fileslist.slice(0,10).map((message, index) => (
+          <ContextMenu>
+          <ContextMenuTrigger>
             <Card key={index} onClick={
                 ()=>
                 { 
                   console.log("clicked");
                   setfileslist([])
                   setdriveslist([])
-                  
+                  setfc(0)
+                  setpath(message.name)
+                  sst(message.path)
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:"main",
@@ -169,10 +233,27 @@ export default function Greet() {
               <span className="font-medium text-lg">{message.name}</span>
             </CardContent>
           </Card>
+          </ContextMenuTrigger>
+          <ContextMenuContent className='bg-white'>
+            <p className='text-sm'>{message.path}</p>
+            <ContextMenuItem onSelect={(e)=>{
+              invoke("newwindow",
+              {
+                id: (1).toString(),
+                path: message.path,
+                ff:""
+              });
+
+            }}>Open in new tab</ContextMenuItem>
+            <ContextMenuItem>Open in new window</ContextMenuItem>
+            <ContextMenuItem>Add bookmark</ContextMenuItem>
+            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
-        <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
+        {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
           <TableHeader>
             <TableRow>
@@ -214,7 +295,7 @@ export default function Greet() {
               </TableCell>
             </TableRow>
           </TableBody>
-        </Table>
+        </Table> */}
       </main>
     </div>
   )
