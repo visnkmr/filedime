@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon} from "lucide-react"
 import React from 'react';
 import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -22,9 +22,9 @@ export default function Greet() {
     const filesobjinit:object[]=[]
   const [driveslist, setdriveslist] = useState(filesobjinit);
   const [filecount, setfc] = useState(0);
-  const [path, setpath] = useState("Drives");
-  const [sampletext,sst]=useState("")
-  const [pathinput,spi]=useState("")
+  const [path, setpath] = useState("drives://");
+  const [sampletext,sst]=useState("drives://")
+  // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState([])
   const [fileslist, setfileslist] = useState(filesobjinit);
   useEffect(() => {
@@ -33,7 +33,8 @@ export default function Greet() {
   useEffect(() => {
     // const unlisten=
     listen('list-drives', (event) => {
-      sst("")
+      // sst("")
+      // spi("Drives://")
         console.log("loading drives---->"+event.payload);
         setdriveslist(JSON.parse(event.payload));
     })
@@ -108,8 +109,11 @@ export default function Greet() {
                 { 
                     setfileslist([])
                     setdriveslist([])
-
+                    sst("drives://")
+                    setpath("drives://")
+                    
                     // console.log(message);
+                    
                     invoke('list_files', { 
                       windowname:"main",
                       oid: "0",
@@ -126,10 +130,7 @@ export default function Greet() {
               <Link
                 className="flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 text-gray-900  transition-all hover:text-gray-900 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50"
                 href="#"
-              >
-                <FolderIcon className="h-4 w-4" />
-                My Files
-              </Link>
+              ><FolderIcon className="h-4 w-4" />{sampletext}</Link>
               <Link
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 href="#"
@@ -163,10 +164,10 @@ export default function Greet() {
                 placeholder="Path"
                 type="search"
                 list="path-list"
-                value={pathinput}
+                value={path}
                 onChange={(event) =>
                   {
-                    spi(event.target.value);
+                    setpath(event.target.value);
                     invoke(
                       "get_path_options", 
                       {
@@ -206,7 +207,24 @@ export default function Greet() {
                   }
                 }
               />
+              
             </div>
+            <ArrowRightIcon onClick={()=>{
+               setfileslist([])
+               setdriveslist([])
+               setfc(0)
+              //  setpath(message.name)
+              //  sst(message.path)
+              invoke(
+                "list_files",
+                {
+                windowname:uio.appWindow.label,
+                oid: "0",
+                path: path,
+                ff: ""
+                }
+                )
+            }}/>
             <div className="flex-grow max-w-[20%]">
               <input
                 className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -221,8 +239,8 @@ export default function Greet() {
             </div>
           </div>
         </div>
-        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?path:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
-        <p>{sampletext}</p>
+        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
+        <p>{path}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
         {driveslist.map((message, index) => (
@@ -234,7 +252,10 @@ export default function Greet() {
                 { 
                   setfileslist([])
                   setdriveslist([])
+                  setfc(0)
+                  // spi(message.mount_point)
                   setpath(message.mount_point)
+                  sst(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:"main",
@@ -269,8 +290,8 @@ export default function Greet() {
                   setfileslist([])
                   setdriveslist([])
                   setfc(0)
-                  setpath(message.name)
-                  sst(message.path)
+                  setpath(message.path)
+                  sst(message.name)
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:"main",
