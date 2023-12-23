@@ -24,10 +24,12 @@ export default function Greet() {
   const [filecount, setfc] = useState(0);
   const [path, setpath] = useState("Drives");
   const [sampletext,sst]=useState("")
+  const [pathinput,spi]=useState("")
+  const [pathsuggestlist,setpsl]=useState([])
   const [fileslist, setfileslist] = useState(filesobjinit);
   useEffect(() => {
     console.log(Math.random());
-}, []);
+  }, []);
   useEffect(() => {
     // const unlisten=
     listen('list-drives', (event) => {
@@ -87,6 +89,9 @@ export default function Greet() {
 //     })
 //       .catch(console.error)
 //   }, [count])
+
+
+
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -148,10 +153,58 @@ export default function Greet() {
           </div>
           <div className="flex flex-grow items-center gap-4">
             <div className="flex-grow">
+            <datalist id="path-list">
+            {pathsuggestlist.map((message, index) => (
+              <option key={index} value={message}/>
+            ))}
+            </datalist>
               <input
                 className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Path"
                 type="search"
+                list="path-list"
+                value={pathinput}
+                onChange={(event) =>
+                  {
+                    spi(event.target.value);
+                    invoke(
+                      "get_path_options", 
+                      {
+                        windowname:uio.appWindow.label,
+                        path: event.target.value,
+                      })
+                      .then((options:string[]) => {
+                        // console.log(options)
+                        // Clear the datalist options
+                        if (options !== null) {
+                          setpsl(options)
+                    
+                          // Loop through the options returned by Rust
+                          // for (const option of options) {
+                          //   const optionElement = document.createElement("option");
+                          //   // // console.log("here#1")
+                          //   optionElement.value = option;
+                    
+                          //   // Append the option element to the datalist element
+                          //   globals.datalist.appendChild(optionElement);
+                          // }
+                          // for (const option of globalThis.lastpopfilelist) {
+                          //   // Create a new option element with the option value
+                          //   const optionElement = document.createElement("option");
+                          //   // // console.log("here#1")
+                          //   optionElement.value = option.path;
+                    
+                          //   // Append the option element to the datalist element
+                          //   globals.datalist.appendChild(optionElement);
+                          // }
+                        }
+                      })
+                      .catch((error:string) => {
+                        // Handle any errors from Rust
+                        console.error(error);
+                      });
+                  }
+                }
               />
             </div>
             <div className="flex-grow max-w-[20%]">
