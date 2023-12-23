@@ -21,8 +21,10 @@ import { Button } from "../components/ui/button"
 export default function Greet() {
     const filesobjinit:object[]=[]
   const [driveslist, setdriveslist] = useState(filesobjinit);
+  const [filteredlist, setfl] = useState(filesobjinit);
   const [filecount, setfc] = useState(0);
   const [path, setpath] = useState("drives://");
+  const [searchstring,setss] = useState("");
   const [sampletext,sst]=useState("drives://")
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState([])
@@ -111,7 +113,7 @@ export default function Greet() {
                     setdriveslist([])
                     sst("drives://")
                     setpath("drives://")
-                    
+                    setss("")
                     // console.log(message);
                     
                     invoke('list_files', { 
@@ -230,6 +232,19 @@ export default function Greet() {
                 className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Search"
                 type="search"
+                value={searchstring}
+                onChange={(event) =>
+                  {
+                    let tosearch=event.target.value;
+                    setss(tosearch)
+                    let tofilter=driveslist.length>0?driveslist:fileslist;
+                    let filteredArray = tosearch.trim().length>0?tofilter.filter(function (el) {
+                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+                    }):tofilter;
+                    setfl(filteredArray)
+                    // || table.getColumn('reponame')?.setFilterValue(event.target.value)
+                  }
+                }
               />
             </div>
             <div className="flex items-center gap-2">
@@ -243,8 +258,10 @@ export default function Greet() {
         <p>{path}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
-        {driveslist.map((message, index) => (
-          <ContextMenu>
+        {driveslist.filter(function (el) {
+                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+                    }).map((message, index) => (
+          <ContextMenu key={index}>
           <ContextMenuTrigger>
           
             <Card key={index} onClick={
@@ -253,6 +270,7 @@ export default function Greet() {
                   setfileslist([])
                   setdriveslist([])
                   setfc(0)
+                  setss("")
                   // spi(message.mount_point)
                   setpath(message.mount_point)
                   sst(message.mount_point)
@@ -280,8 +298,11 @@ export default function Greet() {
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
-        {fileslist.slice(0,10).map((message, index) => (
-          <ContextMenu>
+        {fileslist.filter(function (el) {
+                     return searchstring.trim().length>0?
+                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
+                    }).slice(0,10).map((message, index) => (
+          <ContextMenu key={index}>
           <ContextMenuTrigger>
             <Card key={index} onClick={
                 ()=>
@@ -290,6 +311,8 @@ export default function Greet() {
                   setfileslist([])
                   setdriveslist([])
                   setfc(0)
+                  setss("")
+
                   setpath(message.path)
                   sst(message.name)
                   // useEffect(() => {
