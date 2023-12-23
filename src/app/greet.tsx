@@ -14,12 +14,15 @@ import { Button } from "../components/ui/button"
 export default function Greet() {
     const filesobjinit:object[]=[]
   const [driveslist, setdriveslist] = useState(filesobjinit);
+  const [sampletext,sst]=useState("")
   const [fileslist, setfileslist] = useState(filesobjinit);
-  const [count, addone] = useState(0);
-
   useEffect(() => {
+    console.log(Math.random());
+}, []);
+  useEffect(() => {
+    // const unlisten=
     listen('list-drives', (event) => {
-        console.log(event);
+        console.log("loading drives---->"+event.payload);
         setdriveslist(JSON.parse(event.payload));
     })
     .then(result => {
@@ -27,8 +30,9 @@ export default function Greet() {
             console.log(result)
         })
     .catch(console.error);
+    // const unlisten1=
     listen('list-files', (event) => {
-        console.log(event);
+        console.log("loading files---->"+event.payload);
         setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
     })
     .then(result => {
@@ -50,6 +54,10 @@ export default function Greet() {
         
     // })
     // .catch(console.error)
+    // return () => {
+    //   unlisten.then(f => f());
+    //   unlisten1.then(f => f());
+    // }
   },[])
 //   useEffect(() => {
 //     invoke<string>('greet', { 
@@ -101,12 +109,14 @@ export default function Greet() {
       </aside>
       <main className="flex flex-col p-6">
         <h1 className="font-semibold text-lg md:text-2xl">My Files</h1>
-        <div className="grid grid-cols-4 gap-4 mt-6">
+        <p>{sampletext}</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <Other/>
         {driveslist.map((message, index) => (
-            <Card onClick={
+            <Card key={index} onClick={
                 ()=>
                 { 
-                  console.log(message);
+                  // console.log(message);
                   invoke('list_files', { 
                     windowname:"main",
                     oid: "0",
@@ -122,16 +132,19 @@ export default function Greet() {
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         {fileslist.map((message, index) => (
-            <Card onClick={
+            <Card key={index} onClick={
                 ()=>
                 { 
-                  console.log(message);
-                  invoke('list_files', { 
-                    windowname:"main",
-                    oid: "0",
-                    path: message.path,
-                    ff: "" 
-                })}
+                  console.log("clicked");
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:"main",
+                      oid: "0",
+                      path: message.path,
+                      ff: "" 
+                  });
+                  // },[])
+              }
             }>
             <CardContent className="flex items-center space-x-4">
               <FolderIcon className="h-6 w-6" />
@@ -275,6 +288,7 @@ function TrashIcon(props) {
 
 export function Other() {
     
+  const [count, addone] = useState(0);
 
   // Necessary because we will have to use Greet as a component later.
   return (
@@ -293,11 +307,6 @@ export function Other() {
     }>Add One</button>
     <p>
     {count}
-    <ul>
-    {driveslist.map((message, index) => (
-        <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
-    ))}
-    </ul>
     {/* {driveslist} */}
     </p>
   </div>
