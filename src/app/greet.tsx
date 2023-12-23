@@ -237,12 +237,6 @@ export default function Greet() {
                   {
                     let tosearch=event.target.value;
                     setss(tosearch)
-                    let tofilter=driveslist.length>0?driveslist:fileslist;
-                    let filteredArray = tosearch.trim().length>0?tofilter.filter(function (el) {
-                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
-                    }):tofilter;
-                    setfl(filteredArray)
-                    // || table.getColumn('reponame')?.setFilterValue(event.target.value)
                   }
                 }
               />
