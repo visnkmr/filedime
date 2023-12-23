@@ -82,7 +82,19 @@ export default function Greet() {
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
-              <Link
+              <Link onClick={()=>
+                { 
+                    setfileslist([])
+                    setdriveslist([])
+
+                    // console.log(message);
+                    invoke('list_files', { 
+                      windowname:"main",
+                      oid: "0",
+                      path: "drives://",
+                      ff: "" 
+                  })}
+                }
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 href="#"
               >
@@ -108,14 +120,17 @@ export default function Greet() {
         </div>
       </aside>
       <main className="flex flex-col p-6">
-        <h1 className="font-semibold text-lg md:text-2xl">My Files</h1>
+        <h1 className="font-semibold text-lg md:text-2xl">My Files ({fileslist.length})</h1>
         <p>{sampletext}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-          <Other/>
+          {/* <Other/> */}
         {driveslist.map((message, index) => (
             <Card key={index} onClick={
                 ()=>
                 { 
+                  setfileslist([])
+                  setdriveslist([])
+
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:"main",
@@ -136,6 +151,9 @@ export default function Greet() {
                 ()=>
                 { 
                   console.log("clicked");
+                  setfileslist([])
+                  setdriveslist([])
+                  
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:"main",
