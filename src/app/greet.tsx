@@ -17,17 +17,19 @@ import Link from "next/link"
 import { CardContent, Card } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
+import { FileItem,DriveItem } from "../shared/types"
 
 export default function Greet() {
-    const filesobjinit:object[]=[]
-  const [driveslist, setdriveslist] = useState(filesobjinit);
-  const [filteredlist, setfl] = useState(filesobjinit);
+    const filesobjinit:FileItem[]=[]
+    const objinit:string[]=[]
+    const driveobjinit:DriveItem[]=[]
+  const [driveslist, setdriveslist] = useState(driveobjinit);
   const [filecount, setfc] = useState(0);
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [sampletext,sst]=useState("drives://")
   // const [pathinput,spi]=useState("")
-  const [pathsuggestlist,setpsl]=useState([])
+  const [pathsuggestlist,setpsl]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
   useEffect(() => {
     console.log(Math.random());
