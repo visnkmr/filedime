@@ -411,7 +411,7 @@ export default function Greet() {
             </CardContent>
           </Card>
           </ContextMenuTrigger>
-          <ContextMenuContent className='bg-white'>
+          <ContextMenuContent className=''>
             <p className='text-sm'>{message.path}</p>
             <ContextMenuItem onSelect={(e)=>{
               invoke("newwindow",
