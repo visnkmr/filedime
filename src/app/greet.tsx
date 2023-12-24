@@ -25,6 +25,8 @@ export default function Greet() {
     const filesobjinit:FileItem[]=[]
     const objinit:string[]=[]
     const driveobjinit:DriveItem[]=[]
+    const pathsplitobjinit:pathsplit[]=[]
+  const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [filecount, setfc] = useState(0);
   const [path, setpath] = useState("drives://");
@@ -34,6 +36,7 @@ export default function Greet() {
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
+  
   useEffect(() => {
     console.log(Math.random());
   }, []);
@@ -170,7 +173,7 @@ export default function Greet() {
         </div>
       </aside>
       <main className="flex flex-col p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Button size="sm" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
@@ -214,7 +217,7 @@ export default function Greet() {
                           //   optionElement.value = option;
                     
                           //   // Append the option element to the datalist element
-                          //   globals.datalist.appendChild(optionElement);
+                          //   datalist.appendChild(optionElement);
                           // }
                           // for (const option of globalThis.lastpopfilelist) {
                           //   // Create a new option element with the option value
@@ -223,7 +226,7 @@ export default function Greet() {
                           //   optionElement.value = option.path;
                     
                           //   // Append the option element to the datalist element
-                          //   globals.datalist.appendChild(optionElement);
+                          //   datalist.appendChild(optionElement);
                           // }
                         }
                       })
@@ -271,7 +274,7 @@ export default function Greet() {
                 invoke(
                   "search_try", {
                     windowname:uio.appWindow.label,
-                    // path: globals.pathInput.value,
+                    // path: pathInput.value,
                     string: searchstring
                 })
               }
@@ -282,6 +285,32 @@ export default function Greet() {
               <Button variant="ghost">Tab 3</Button>
             </div>
           </div>
+        </div>
+        <div className='flex items-center space-x-6 mb-6'>
+          {pathsplitlist
+          // .filter(function (el) {
+          //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+          // })
+          .map((eachif,index)  => (
+            <Link key={index} href="#" onClick={
+              ()=>
+              { 
+                setfileslist([])
+                setdriveslist([])
+                setfc(0)
+                setss("")
+                // spi(message.mount_point)
+                setpath(eachif.pathtofol)
+                sst(eachif.pathtofol)
+                // console.log(message);
+                invoke('list_files', { 
+                  windowname:"main",
+                  oid: "0",
+                  path: eachif.pathtofol,
+                  ff: "" 
+              })}
+          }>{eachif.interfolpath}</Link>
+          ))}
         </div>
         <div className='flex items-center justify-between mb-6'>
           {
@@ -354,6 +383,7 @@ export default function Greet() {
                   setss("")
 
                   setpath(message.path)
+                  setpsplitl(setautocompletepath(message.path))
                   sst(message.name)
                   // useEffect(() => {
                     invoke('list_files', { 
@@ -547,4 +577,37 @@ export function Other() {
     </p>
   </div>
   );
+}
+interface pathsplit{
+  interfolpath:string,
+  pathtofol:string
+}
+function setautocompletepath(pathInput:string):pathsplit[] {
+  let splitat=  /[\\/]/;
+  var arr = pathInput.split(splitat); // arr is ["a", "b", "c", "d"]
+  var prefixes: string[] = [];
+  var prefix = "";
+  for (var i = 0; i < arr.length; i++) {
+    prefix += arr[i]; // append the current element to the prefix
+    prefixes.push(prefix); // add the prefix to the prefixes array
+    prefix += "/"; // add a slash for the next iteration
+  }
+  var fols=[]
+  console.log(pathInput.split(splitat))
+  fols = pathInput.split(splitat);
+  console.log(fols.length);
+  let listinpath:pathsplit[]=[];
+  for (var i = 0; i < fols.length; i++){ 
+  // fols.forEach(
+    // function (fol, index) {
+      listinpath.push(
+        {
+          interfolpath:fols[i],
+          pathtofol:prefixes[i]
+        }
+      ) 
+      
+      // // console.log(index)
+    }
+    return listinpath;
 }
