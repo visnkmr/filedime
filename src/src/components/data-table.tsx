@@ -205,8 +205,8 @@ export function DataTable<TData, TValue>({
             })}
         </DropdownMenuContent>
       </DropdownMenu> */}
-      <div className='rounded-md border shadow-md'>
-        <Table className='text-center'>
+      <div className=''>
+        <Table className='rounded-md border shadow-md text-center'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

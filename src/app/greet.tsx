@@ -6,7 +6,6 @@ import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon} from "lucide-react"
 import React from 'react';
 import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
-import Dtable from "../src/components/dtable"
 import {columns} from "../src/components/columns"
 import {
   ContextMenu,
@@ -20,6 +19,7 @@ import { CardContent, Card } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
 import { FileItem,DriveItem } from "../shared/types"
+import { DataTable } from '../src/components/data-table';
 
 export default function Greet() {
     const filesobjinit:FileItem[]=[]
@@ -31,6 +31,7 @@ export default function Greet() {
   const [filecount, setfc] = useState(0);
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
+  const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -41,6 +42,12 @@ export default function Greet() {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("folder-size", (data: { payload: string }) => {
+      console.log("foldersize")
+    
+      setps(data.payload.toString())
+      // console.log(data.payload.toString())
+    });
     listen("fsc", (data: { payload: string }) => {
       console.log("-------------__>"+((data.payload)))
       console.log("fscl----->"+JSON.parse(data.payload));
@@ -280,13 +287,13 @@ export default function Greet() {
               }
             }/>
             <div className="flex items-center gap-2">
-              <Button variant="ghost">Tab 1</Button>
+              <span>{parentsize}</span>
               <Button variant="ghost">Tab 2</Button>
               <Button variant="ghost">Tab 3</Button>
             </div>
           </div>
         </div>
-        <div className='flex items-center space-x-6 mb-6'>
+        <div className='flex items-center space-x-6 mb-6 '>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -324,7 +331,10 @@ export default function Greet() {
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
-        <Dtable columns={columns} data={fileslist}/>
+        <span className={fileslist.length>0 ? 'block' : 'hidden'}>
+
+          <DataTable columns={columns} data={fileslist}/>
+        </span>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
         {driveslist.filter(function (el) {
