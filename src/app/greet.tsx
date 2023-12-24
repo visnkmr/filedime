@@ -100,7 +100,7 @@ export default function Greet() {
     .catch(console.error);
     // lfiles();
     invoke('list_files', { 
-        windowname:"main",
+        windowname:uio.appWindow.label,
         oid: "0",
         path: "drives://",
         ff: "" 
@@ -152,7 +152,7 @@ export default function Greet() {
                     // console.log(message);
                     
                     invoke('list_files', { 
-                      windowname:"main",
+                      windowname:uio.appWindow.label,
                       oid: "0",
                       path: "drives://",
                       ff: "" 
@@ -311,7 +311,7 @@ export default function Greet() {
                 sst(eachif.pathtofol)
                 // console.log(message);
                 invoke('list_files', { 
-                  windowname:"main",
+                  windowname:uio.appWindow.label,
                   oid: "0",
                   path: eachif.pathtofol,
                   ff: "" 
@@ -355,7 +355,7 @@ export default function Greet() {
                   sst(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
-                    windowname:"main",
+                    windowname:uio.appWindow.label,
                     oid: "0",
                     path: message.mount_point,
                     ff: "" 
@@ -397,7 +397,7 @@ export default function Greet() {
                   sst(message.name)
                   // useEffect(() => {
                     invoke('list_files', { 
-                      windowname:"main",
+                      windowname:uio.appWindow.label,
                       oid: "0",
                       path: message.path,
                       ff: "" 
@@ -572,7 +572,7 @@ export function Other() {
     <h1>Greet</h1>
       <button type="button" onClick={() => {
         // invoke<string>('list_files', { 
-        //     // windowname:"main",
+        //     // windowname:uio.appWindow.label,
         //     oid: "0",
         //     path: "drives://",
         //     ff: "" 
