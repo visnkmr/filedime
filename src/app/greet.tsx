@@ -35,6 +35,21 @@ export default function Greet() {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("load-sresults", (data: { payload: string }) => {
+      let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
+      sst("Search Results")
+      console.log("Found----->"+fl.length)
+      setfileslist(fl)
+      setfc(fl.length)
+      // // if(globalThis.lastpopfilelist.length>10)
+      // // return
+      // if (fileList.length>100){
+      //   fileList=fileList.slice(0,100)
+      // }
+      // fileList.forEach(function(ef){
+      //   eachfile(ef)
+      // });
+    });
     // const unlisten=
     listen('list-drives', (event) => {
       // sst("")
@@ -243,6 +258,16 @@ export default function Greet() {
                 }
               />
             </div>
+            <SearchIcon onClick={
+              ()=>{
+                invoke(
+                  "search_try", {
+                    windowname:uio.appWindow.label,
+                    // path: globals.pathInput.value,
+                    string: searchstring
+                })
+              }
+            }/>
             <div className="flex items-center gap-2">
               <Button variant="ghost">Tab 1</Button>
               <Button variant="ghost">Tab 2</Button>
@@ -251,7 +276,7 @@ export default function Greet() {
           </div>
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
-        <p>{path}</p>
+        <p>{searchstring.trim().length>0?"":path}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
         {driveslist.filter(function (el) {
