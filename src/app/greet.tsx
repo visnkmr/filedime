@@ -30,6 +30,7 @@ export default function Greet() {
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [sampletext,sst]=useState("drives://")
+  const [filesetcollectionlist,setfscl]=useState(objinit)
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
@@ -37,6 +38,11 @@ export default function Greet() {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("fsc", (data: { payload: string }) => {
+      console.log("-------------__>"+((data.payload)))
+      console.log("fscl----->"+JSON.parse(data.payload));
+      setfscl(JSON.parse(data.payload));
+    });
     listen("load-sresults", (data: { payload: string }) => {
       let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
       sst("Search Results")
@@ -276,6 +282,16 @@ export default function Greet() {
               <Button variant="ghost">Tab 3</Button>
             </div>
           </div>
+        </div>
+        <div className='flex items-center justify-between mb-6'>
+          {
+          Object.entries(filesetcollectionlist)
+          // .filter(function (el) {
+          //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+          // })
+          .map(([key, value],index)  => (
+            <p key={index}>{key}({value})</p>
+          ))}
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
