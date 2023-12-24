@@ -57,7 +57,7 @@ export const columns: ColumnDef<FileItem>[] = [
   // },
 
   {
-    accessorKey: 'filename',
+    accessorKey: 'name',
     header: ({ column }) => {
       return (
         <Button
@@ -150,7 +150,7 @@ export const columns: ColumnDef<FileItem>[] = [
   //   },
   // }
   ,{
-    accessorKey: 'filetype',
+    accessorKey: 'ftype',
     header: ({ column }) => {
       return (
         <Button
@@ -175,7 +175,7 @@ export const columns: ColumnDef<FileItem>[] = [
       )
     },
   },{
-    accessorKey: 'size',
+    accessorKey: 'rawfs',
     header: ({ column }) => {
       return (
         <Button
@@ -196,11 +196,11 @@ export const columns: ColumnDef<FileItem>[] = [
       const rname = getValue()
 
       return (
-          <p className='w-10 sm:w-64 wolc'>{rawfs}</p>
+          <p className='w-10 sm:w-64 wolc'>{size}</p>
       )
     },
   },{
-    accessorKey: 'time',
+    accessorKey: 'timestamp',
     header: ({ column }) => {
       return (
         <Button
@@ -222,7 +222,7 @@ export const columns: ColumnDef<FileItem>[] = [
       const utcTime = utcDateTime.toFormat('dd MMM yy'); // Format UTC time in ddmmyyhhss format
 
       return (
-          <p>{timestamp}</p>
+          <p>{utcTime}</p>
       )
     },
   },

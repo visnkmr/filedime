@@ -134,11 +134,10 @@ export function DataTable<TData, TValue>({
       <div className='flex items-center py-5'>
         <Input
           placeholder='Search in filename...'
-          value={(table.getColumn('filename')?.getFilterValue() as string) ?? ''}
+          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             {
-              table.getColumn('filename')?.setFilterValue(event.target.value)
-              // || table.getColumn('reponame')?.setFilterValue(event.target.value)
+              table.getColumn('name')?.setFilterValue(event.target.value)
             }
           }
           className='max-w-sm'
