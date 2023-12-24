@@ -6,6 +6,8 @@ import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon} from "lucide-react"
 import React from 'react';
 import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
+import Dtable from "../src/components/dtable"
+import {columns} from "../src/components/columns"
 import {
   ContextMenu,
   ContextMenuContent,
@@ -277,6 +279,7 @@ export default function Greet() {
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
+        <Dtable columns={columns} data={fileslist}/>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {/* <Other/> */}
         {driveslist.filter(function (el) {
