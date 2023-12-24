@@ -15,7 +15,7 @@ import {
 } from "../components/ui/context-menu"
 
 import Link from "next/link"
-import { CardContent, Card } from "../components/ui/card"
+import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
 import { FileItem,DriveItem } from "../shared/types"
@@ -34,6 +34,7 @@ export default function Greet() {
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
   const [filesetcollectionlist,setfscl]=useState(objinit)
+  const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
@@ -42,6 +43,10 @@ export default function Greet() {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("button-names", (data: { payload: string }) => {
+      setcbl(JSON.parse(data.payload) as string[]);
+      console.log("winnames: "+data.payload.toString())
+    });
     listen("folder-size", (data: { payload: string }) => {
       console.log("foldersize")
     
@@ -180,6 +185,26 @@ export default function Greet() {
         </div>
       </aside>
       <main className="flex flex-col p-6">
+        <div className='flex flex-row mb-4'>
+        {custombuttonlist.map((bn, index) => (
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm' key={index} onClick={
+                ()=>{
+                  invoke(
+                    "otb",
+                    {
+                      bname: bn,
+                      path: path,
+                    }
+                    );
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+              <FolderIcon className="h-4 w-4" />
+              <span className="font-medium text-sm">{bn}</span>
+            </CardDescription>
+          </Card>
+            ))}
+        </div>
       <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Button size="sm" variant="ghost">
