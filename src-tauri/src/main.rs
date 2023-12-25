@@ -228,9 +228,9 @@ async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStor
   Ok(whichpath.0)
 }
 #[tauri::command]
-async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
    let absolute_date=getuniquewindowlabel();
-  state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
+  // state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
   let filename=PathBuf::from(path.clone());
   let mut wname="";
   if let Some(fname)=filename.file_name(){
@@ -247,13 +247,18 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
 
 #[tauri::command]
 fn tabname(path:String)->String{
+  let p=path.clone();
+  let result=
   if let Some(h)=PathBuf::from(&path).file_stem(){
     let tabname=h.to_string_lossy().to_string();
     if(tabname==""){path}else{tabname}
 }
 else{
     path
-}
+};
+println!(" found tabname of ------> {} as {}",p,result);
+
+result
 }
 #[tauri::command]
 async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{

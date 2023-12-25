@@ -20,15 +20,40 @@ import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from ".
 import { Button } from "../components/ui/button"
 import { FileItem,DriveItem } from "../shared/types"
 import { DataTable } from '../src/components/data-table';
-
+type tabinfo = {
+  id: number,
+  path: string,
+  ff: string,
+  tabname: string,
+  history:string[]
+};
+interface wininfo{
+  winname:string,
+  tablist:tabinfo[],
+  tabidsalloted:number
+}
 export default function Greet() {
-    const filesobjinit:FileItem[]=[]
-    const objinit:string[]=[]
-    const driveobjinit:DriveItem[]=[]
-    const pathsplitobjinit:pathsplit[]=[]
+  async function setupAppWindow() {
+    const appWindow = (await import('@tauri-apps/api/window')).appWindow
+    console.log("windowname top---------->"+appWindow.label)
+
+    setAppWindow(appWindow)
+  }
+
+  useEffect(() => {
+    setupAppWindow()
+    // console.log("windowname---------->"+winInfo.winname)
+    // openTab("drives://")
+  }, []) 
+  const filesobjinit:FileItem[]=[]
+  const objinit:string[]=[]
+  const driveobjinit:DriveItem[]=[]
+  const pathsplitobjinit:pathsplit[]=[]
   const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
   const [driveslist, setdriveslist] = useState(driveobjinit);
+  const [activetabid,setactivetabid]=useState(0)
   const [filecount, setfc] = useState(0);
+  const [tablist,settbl]=useState<tabinfo[]>()
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [parentsize,setps] = useState("");
@@ -37,22 +62,131 @@ export default function Greet() {
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState(objinit)
-  const [fileslist, setfileslist] = useState(filesobjinit);
   const [appWindow, setAppWindow] = useState()
+  // let wininfo: wininfo = {
+  //   winname: appWindow?.label,
+  //   tablist: [],
+  //   tabidsalloted: 0
+  //  };
+  //  const [winInfo,setwi]= useState(wininfo)
+  // const [history,sethistory]=useState(objinit)
+  const [fileslist, setfileslist] = useState(filesobjinit);
+  
+  // const [backpressed,setbackpressed]=useState(false)
+  
 
+  // function openTab(tabPath: string): void {
+  //   let temptab=winInfo.tabidsalloted++;
+  //   let newTab: tabinfo = {
+  //     tabid: temptab,
+  //     tabpath: tabPath,
+  //     history: []
+  //   };
+  //   winInfo.tablist.push(newTab);
+  //   invoke('list_files', { 
+  //     windowname:winInfo.winname,
+  //     oid: temptab.toString(),
+  //     path: tabPath,
+  //     ff: "" 
+  // })
+  //  }
+  //  function navigateToNewPath(tabid: number, newPath: string,oldpath:string): void {
+  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+  //   if (tabIndex !== -1 && !backpressed) {
+  //     winInfo.tablist[tabIndex].tabpath = newPath;
+  //     winInfo.tablist[tabIndex].history.push(oldpath);
+  //   }
+  //   setbackpressed(false)
+  //  }
+  //  function closeTab(tabid: number): void {
+  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+  //   if (tabIndex !== -1) {
+  //    winInfo.tablist.splice(tabIndex, 1);
+  //   }
+  //  }
+  //  function activateTab(tabid: number): void {
+  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+  //   if (tabIndex !== -1) {
+  //     sethistory(winInfo.tablist[tabIndex].history)
+  //     setactivetabid(tabid)
+  //     invoke('list_files', { 
+  //       windowname:winInfo.winname,
+  //       oid: tabid.toString(),
+  //       path: winInfo.tablist[tabIndex].tabpath,
+  //       ff: "" 
+  //   })
+  //    // Activate the tab...
+  //   }
+  //  }
+
+  //  function goBack(): void {
+  //   let activeTab = winInfo.tablist.find(tab => tab.tabid === activetabid );
+  //   if (activeTab && activeTab.history.length > 1) {
+  //     setbackpressed(true)
+  //     navigateToNewPath(activetabid, activeTab.history[activeTab.history.length - 1],path);
+  //     activeTab.history.pop();
+  //   }
+  //  }
   // Import appWindow and save it inside the state for later usage
-  async function setupAppWindow() {
-    const appWindow = (await import('@tauri-apps/api/window')).appWindow
-    setAppWindow(appWindow)
-  }
-
-  useEffect(() => {
-    setupAppWindow()
-  }, []) 
+  
   useEffect(() => {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("list-tabs", (data: { payload: string }) => {
+      console.log("listtabs ")
+    
+      
+      let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
+      settbl(tabs)
+      // // console.log("files")
+      // clear the file list
+      // globals.tablist.innerHTML = "";
+      // // console.log(data.payload)
+      // loop through the files array
+      // for (let tb of tabs) {
+      //   // create a table row element for each file
+      //   // let border=document.createElement("span");
+      //   // border.className="border-bx"
+      //   // globals.tablist.appendChild(border);
+      //   // let tbt=document.createElement("span");
+      //   // tbt.className="tbt"
+  
+      //   let b = document.createElement("div");
+      //   b.className = "tab-button";
+      //   if(tb.path===globalThis.activetab){
+      //     b.classList.add("active");
+      //     b.classList.remove("inactive");
+      //   }
+      //   else{
+      //     b.classList.add("inactive");
+      //     b.classList.remove("active");
+      //   }
+      //  (window as any).__TAURI__.invoke(
+      //     "getuniquewindowlabel",
+      //     {
+            
+      //     }
+      //     ).then((returned:string)=>{
+      //       b.dataset.ul=returned;
+      //     })
+  
+      //   let sn = document.createElement("span");
+      //   sn.className = "tab-name"
+        
+      //   let sc = document.createElement("span");
+      //   sc.className = "tab-close"
+      //   sn.textContent = tb.tabname;
+      //   sc.textContent = "x";
+      //   b.appendChild(sn);
+      //   b.appendChild(sc);
+      //   b.id = tb.id.toString();
+      //   b.dataset.path = tb.path;
+      //   b.dataset.ff = tb.ff;
+      //   // b.appendChild(tbt)
+      //   globals.tablist.appendChild(b);
+      // }
+    });
     listen("button-names", (data: { payload: string }) => {
       setcbl(JSON.parse(data.payload) as string[]);
       console.log("winnames: "+data.payload.toString())
@@ -114,12 +248,14 @@ export default function Greet() {
         })
     .catch(console.error);
     // lfiles();
-    invoke('list_files', { 
-        windowname:appWindow?.label,
-        oid: "0",
-        path: "drives://",
-        ff: "" 
-    })
+    
+    // openTab("drives://")
+    // invoke('list_files', { 
+    //     windowname:winInfo.winname,
+    //     oid: activetabid,
+    //     path: "drives://",
+    //     ff: "" 
+    // })
     // .then(result => {
     //     // console.log(uio.getCurrent().label)
     //     console.log(result)
@@ -131,6 +267,12 @@ export default function Greet() {
     //   unlisten1.then(f => f());
     // }
   },[])
+  useEffect(()=>{
+    if(!appWindow)
+      return
+    setpath("drives://")
+    newtab();
+  },[appWindow])
 //   useEffect(() => {
 //     invoke<string>('greet', { 
 //         name: "test"
@@ -142,7 +284,60 @@ export default function Greet() {
 //     })
 //       .catch(console.error)
 //   }, [count])
+  function newtab(){
+    let newtabid=new Date().getTime();
+                      invoke(
+                        "tabname",
+                        {
+                          path:path,
+                        }
+                      ).then((returned:string)=>{
+                        console.log("what was returned....."+returned)
+                        invoke(
+                          "newtab",
+                          {
+                            windowname:appWindow?.label,
+                            oid: newtabid.toString(),
+                            path: path,
+                            ff: ""
+                          }
+                        );
+                        
+                        settbl((old)=>{
+                          return (old && old?.length>0)?
+                          [...old,{
+                            id:newtabid,
+                            path:path,
+                            ff:"",
+                            tabname:returned,
+                            history:[]
+                          } as tabinfo]:
+                          [{
+                            id:newtabid,
+                            path:path,
+                            ff:"",
+                            tabname:returned,
+                            history:[]
+                          } as tabinfo]
+                        
+                        })
+                        setfileslist([])
+                        setdriveslist([])
+                        setfc(0)
+                        setss("")
 
+                        // setpath(message.path)
+                        // setpsplitl(setautocompletepath(message.path))
+                        // sst(message.name)
+                        invoke(
+                          "load_tab",
+                          {
+                            windowname:appWindow?.label,
+                            oid: newtabid.toString()
+                          }
+                        );
+                      });
+  }
 
 
   return (
@@ -168,7 +363,7 @@ export default function Greet() {
                     
                     invoke('list_files', { 
                       windowname:appWindow?.label,
-                      oid: "0",
+                      oid: activetabid.toString(),
                       path: "drives://",
                       ff: "" 
                   })}
@@ -190,6 +385,56 @@ export default function Greet() {
                 <TrashIcon className="h-4 w-4" />
                 Trash
               </Link>
+              <Link
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                href="#"
+                onClick={()=>
+                  { 
+                      // setfileslist([])
+                      // setdriveslist([])
+                      // sst("drives://")
+                      // setpath("drives://")
+                      // setss("")
+                      // console.log(message);
+                      
+                      // openTab("drives://");
+                      
+                      newtab();
+                  }
+                  }
+              >
+                <TrashIcon className="h-4 w-4" />
+                New Tab
+              </Link>
+              <span className='h-16'/>
+              {tablist?(<>
+              <h1 className=''>Tabs</h1>
+              {
+                
+               tablist.map((tab, index) => (
+                <Link key={index}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                  href="#"
+                  onClick={()=>
+                    { 
+                        // setfileslist([])
+                        // setdriveslist([])
+                        // sst("drives://")
+                        // setpath("drives://")
+                        // setss("")
+                        // console.log(message);
+                        
+                        // activateTab(tab.tabid)
+                    }
+                    }
+                >
+                  <FolderIcon className="h-4 w-4" />
+                  {tab.tabname}
+                </Link>
+                ))
+
+              }
+              </>):(null)}
             </nav>
           </div>
         </div>
@@ -291,7 +536,7 @@ export default function Greet() {
                 "list_files",
                 {
                 windowname:appWindow?.label,
-                oid: "0",
+                oid: activetabid.toString(),
                 path: path,
                 ff: ""
                 }
@@ -347,7 +592,7 @@ export default function Greet() {
                 // console.log(message);
                 invoke('list_files', { 
                   windowname:appWindow?.label,
-                  oid: "0",
+                  oid: activetabid.toString(),
                   path: eachif.pathtofol,
                   ff: "" 
               })}
@@ -391,7 +636,7 @@ export default function Greet() {
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:appWindow?.label,
-                    oid: "0",
+                    oid: activetabid.toString(),
                     path: message.mount_point,
                     ff: "" 
                 })}
@@ -433,7 +678,7 @@ export default function Greet() {
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:appWindow?.label,
-                      oid: "0",
+                      oid: activetabid.toString(),
                       path: message.path,
                       ff: "" 
                   });
@@ -451,22 +696,23 @@ export default function Greet() {
             <ContextMenuItem onSelect={(e)=>{
               invoke("newwindow",
               {
-                id: (1).toString(),
+                // id: (winInfo.tabidsalloted++).toString(),
                 path: message.path,
                 ff:""
               });
 
             }}>Open in new window</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
-              invoke(
-                "newtab",
-                {
-                  windowname:appWindow?.label,
-                  oid: globalThis.tid.toString(),
-                  path: path,
-                  ff: ""
-                }
-              );
+              openTab(message.path)
+              // invoke(
+              //   "newtab",
+              //   {
+              //     windowname:appWindow?.label,
+              //     oid: (tabid+1).toString(),
+              //     path: message.path,
+              //     ff: ""
+              //   }
+              // );
             }}>Open in new tab</ContextMenuItem>
             <ContextMenuItem>Add bookmark</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
