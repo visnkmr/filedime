@@ -104,15 +104,19 @@ export default function Greet() {
   //    winInfo.tablist.splice(tabIndex, 1);
   //   }
   //  }
+  function reset(){
+      setfileslist([])
+      setdriveslist([])
+      setfc(0)
+      setss("")
+  }
    function activateTab(tab: tabinfo){
     // console.log("activate tab "+tabid)
     // let activeTab = tablist.find(tab => tab.id === tabid );
     // if (activeTab) {
       // setpath(tab.path)s
-      setfileslist([])
-      setdriveslist([])
-      setfc(0)
-      setss("")
+      setactivetabid(tab.id)
+      reset()
       invoke('list_files', { 
         windowname:appWindow?.label,
         oid: tab.id.toString(),
@@ -339,11 +343,8 @@ export default function Greet() {
                           } as tabinfo]
                         
                         })
-                        setfileslist([])
-                        setdriveslist([])
-                        setfc(0)
-                        setss("")
-
+                        reset()
+                        setactivetabid(newtabid)
                         // setpath(message.path)
                         // setpsplitl(setautocompletepath(message.path))
                         // sst(message.name)
@@ -372,11 +373,9 @@ export default function Greet() {
             <nav className="grid items-start px-4 text-sm font-medium">
               <Link onClick={()=>
                 { 
-                    setfileslist([])
-                    setdriveslist([])
+                    reset()
                     sst("drives://")
                     setpath("drives://")
-                    setss("")
                     // console.log(message);
                     
                     invoke('list_files', { 
@@ -392,10 +391,10 @@ export default function Greet() {
                 <HomeIcon className="h-4 w-4" />
                 Home
               </Link>
-              <Link
-                className="flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 text-gray-900  transition-all hover:text-gray-900 dark:bg-gray-800 dark:text-gray-50 dark:hover:text-gray-50"
+              {/* <Link
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900  transition-all hover:text-gray-900  dark:text-gray-50 dark:hover:text-gray-50"
                 href="#"
-              ><FolderIcon className="h-4 w-4" />{sampletext}</Link>
+              ><FolderIcon className="h-4 w-4" />{sampletext}</Link> */}
               <Link
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 href="#"
@@ -431,7 +430,7 @@ export default function Greet() {
                 
                tablist.map((tab, index) => (
                 <Link key={index}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
                   href="#"
                   onClick={()=>
                     { 
@@ -447,7 +446,7 @@ export default function Greet() {
                     }
                 >
                   <FolderIcon className="h-4 w-4" />
-                  {tab.tabname}
+                  {activetabid === tab.id ? sampletext:tab.tabname}
                 </Link>
                 ))
 
@@ -545,9 +544,7 @@ export default function Greet() {
               
             </div>
             <ArrowRightIcon onClick={()=>{
-               setfileslist([])
-               setdriveslist([])
-               setfc(0)
+               reset()
               //  setpath(message.name)
               //  sst(message.path)
               invoke(
@@ -600,10 +597,7 @@ export default function Greet() {
             <Link key={index} href="#" onClick={
               ()=>
               { 
-                setfileslist([])
-                setdriveslist([])
-                setfc(0)
-                setss("")
+                reset()
                 // spi(message.mount_point)
                 setpath(eachif.pathtofol)
                 sst(eachif.pathtofol)
@@ -644,10 +638,7 @@ export default function Greet() {
             <Card key={index} onClick={
                 ()=>
                 { 
-                  setfileslist([])
-                  setdriveslist([])
-                  setfc(0)
-                  setss("")
+                  reset()
                   // spi(message.mount_point)
                   setpath(message.mount_point)
                   sst(message.mount_point)
@@ -685,10 +676,7 @@ export default function Greet() {
                 ()=>
                 { 
                   console.log("clicked");
-                  setfileslist([])
-                  setdriveslist([])
-                  setfc(0)
-                  setss("")
+                  reset()
 
                   setpath(message.path)
                   setpsplitl(setautocompletepath(message.path))
@@ -721,16 +709,16 @@ export default function Greet() {
 
             }}>Open in new window</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
-              openTab(message.path)
-              // invoke(
-              //   "newtab",
-              //   {
-              //     windowname:appWindow?.label,
-              //     oid: (tabid+1).toString(),
-              //     path: message.path,
-              //     ff: ""
-              //   }
-              // );
+              // openTab(message.path)
+              invoke(
+                "newtab",
+                {
+                  windowname:appWindow?.label,
+                  oid: activetabid.toString(),
+                  path: message.path,
+                  ff: ""
+                }
+              );
             }}>Open in new tab</ContextMenuItem>
             <ContextMenuItem>Add bookmark</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
