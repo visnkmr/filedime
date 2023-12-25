@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon} from "lucide-react"
 import React from 'react';
-import { window as uio } from '@tauri-apps/api';
+// import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 import {columns} from "../src/components/columns"
 import {
@@ -38,7 +38,17 @@ export default function Greet() {
   // const [pathinput,spi]=useState("")
   const [pathsuggestlist,setpsl]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
-  
+  const [appWindow, setAppWindow] = useState()
+
+  // Import appWindow and save it inside the state for later usage
+  async function setupAppWindow() {
+    const appWindow = (await import('@tauri-apps/api/window')).appWindow
+    setAppWindow(appWindow)
+  }
+
+  useEffect(() => {
+    setupAppWindow()
+  }, []) 
   useEffect(() => {
     console.log(Math.random());
   }, []);
@@ -105,7 +115,7 @@ export default function Greet() {
     .catch(console.error);
     // lfiles();
     invoke('list_files', { 
-        windowname:uio.appWindow.label,
+        windowname:appWindow?.label,
         oid: "0",
         path: "drives://",
         ff: "" 
@@ -157,7 +167,7 @@ export default function Greet() {
                     // console.log(message);
                     
                     invoke('list_files', { 
-                      windowname:uio.appWindow.label,
+                      windowname:appWindow?.label,
                       oid: "0",
                       path: "drives://",
                       ff: "" 
@@ -233,7 +243,7 @@ export default function Greet() {
                     invoke(
                       "get_path_options", 
                       {
-                        windowname:uio.appWindow.label,
+                        windowname:appWindow?.label,
                         path: event.target.value,
                       })
                       .then((options:string[]) => {
@@ -280,7 +290,7 @@ export default function Greet() {
               invoke(
                 "list_files",
                 {
-                windowname:uio.appWindow.label,
+                windowname:appWindow?.label,
                 oid: "0",
                 path: path,
                 ff: ""
@@ -305,7 +315,7 @@ export default function Greet() {
               ()=>{
                 invoke(
                   "search_try", {
-                    windowname:uio.appWindow.label,
+                    windowname:appWindow?.label,
                     // path: pathInput.value,
                     string: searchstring
                 })
@@ -336,7 +346,7 @@ export default function Greet() {
                 sst(eachif.pathtofol)
                 // console.log(message);
                 invoke('list_files', { 
-                  windowname:uio.appWindow.label,
+                  windowname:appWindow?.label,
                   oid: "0",
                   path: eachif.pathtofol,
                   ff: "" 
@@ -380,7 +390,7 @@ export default function Greet() {
                   sst(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
-                    windowname:uio.appWindow.label,
+                    windowname:appWindow?.label,
                     oid: "0",
                     path: message.mount_point,
                     ff: "" 
@@ -422,7 +432,7 @@ export default function Greet() {
                   sst(message.name)
                   // useEffect(() => {
                     invoke('list_files', { 
-                      windowname:uio.appWindow.label,
+                      windowname:appWindow?.label,
                       oid: "0",
                       path: message.path,
                       ff: "" 
@@ -446,10 +456,27 @@ export default function Greet() {
                 ff:""
               });
 
+            }}>Open in new window</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              invoke(
+                "newtab",
+                {
+                  windowname:appWindow?.label,
+                  oid: globalThis.tid.toString(),
+                  path: path,
+                  ff: ""
+                }
+              );
             }}>Open in new tab</ContextMenuItem>
-            <ContextMenuItem>Open in new window</ContextMenuItem>
             <ContextMenuItem>Add bookmark</ContextMenuItem>
-            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              try {
+                navigator.clipboard.writeText(message.path);
+                console.log('Content copied to clipboard');
+              } catch (err) {
+                console.error('Failed to copy: ', err);
+              }
+            }}>Copy path to clipboard</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
@@ -597,7 +624,7 @@ export function Other() {
     <h1>Greet</h1>
       <button type="button" onClick={() => {
         // invoke<string>('list_files', { 
-        //     // windowname:uio.appWindow.label,
+        //     // windowname:appWindow?.label,
         //     oid: "0",
         //     path: "drives://",
         //     ff: "" 
