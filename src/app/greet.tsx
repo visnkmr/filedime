@@ -104,7 +104,23 @@ export default function Greet() {
   //    winInfo.tablist.splice(tabIndex, 1);
   //   }
   //  }
-  //  function activateTab(tabid: number): void {
+   function activateTab(tab: tabinfo){
+    // console.log("activate tab "+tabid)
+    // let activeTab = tablist.find(tab => tab.id === tabid );
+    // if (activeTab) {
+      // setpath(tab.path)s
+      setfileslist([])
+      setdriveslist([])
+      setfc(0)
+      setss("")
+      invoke('list_files', { 
+        windowname:appWindow?.label,
+        oid: tab.id.toString(),
+        path: tab.path,
+        ff: "" 
+    })
+    // }
+  //  }
   //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
   //   if (tabIndex !== -1) {
   //     sethistory(winInfo.tablist[tabIndex].history)
@@ -117,7 +133,7 @@ export default function Greet() {
   //   })
   //    // Activate the tab...
   //   }
-  //  }
+   }
 
   //  function goBack(): void {
   //   let activeTab = winInfo.tablist.find(tab => tab.tabid === activetabid );
@@ -221,6 +237,8 @@ export default function Greet() {
     listen('list-drives', (event) => {
       // sst("")
       // spi("Drives://")
+      setcbl([])
+      setfscl([])
         console.log("loading drives---->"+event.payload);
         setdriveslist(JSON.parse(event.payload));
     })
@@ -424,7 +442,7 @@ export default function Greet() {
                         // setss("")
                         // console.log(message);
                         
-                        // activateTab(tab.tabid)
+                        activateTab(tab)
                     }
                     }
                 >
@@ -568,8 +586,8 @@ export default function Greet() {
             }/>
             <div className="flex items-center gap-2">
               <span>{parentsize}</span>
-              <Button variant="ghost">Tab 2</Button>
-              <Button variant="ghost">Tab 3</Button>
+              {/* <Button variant="ghost">Tab 2</Button>
+              <Button variant="ghost">Tab 3</Button> */}
             </div>
           </div>
         </div>
