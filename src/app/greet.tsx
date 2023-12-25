@@ -117,12 +117,19 @@ export default function Greet() {
       // setpath(tab.path)s
       setactivetabid(tab.id)
       reset()
-      invoke('list_files', { 
-        windowname:appWindow?.label,
-        oid: tab.id.toString(),
-        path: tab.path,
-        ff: "" 
-    })
+      invoke(
+        "load_tab",
+        {
+          windowname:appWindow?.label,
+          oid: tab.id.toString()
+        }
+      );
+    //   invoke('list_files', { 
+    //     windowname:appWindow?.label,
+    //     oid: tab.id.toString(),
+    //     path: tab.path,
+    //     ff: "" 
+    // })
     // }
   //  }
   //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
