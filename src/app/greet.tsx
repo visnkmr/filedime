@@ -104,7 +104,12 @@ export default function Greet() {
   //    winInfo.tablist.splice(tabIndex, 1);
   //   }
   //  }
-  function reset(){
+  function reset(p?:string){
+    if(p){
+      setpath(p);
+      setpsplitl(splitpath(p))
+      sst(p)
+    }
       setfileslist([])
       setdriveslist([])
       setfc(0)
@@ -116,7 +121,7 @@ export default function Greet() {
     // if (activeTab) {
       // setpath(tab.path)s
       setactivetabid(tab.id)
-      reset()
+      reset(tab.path)
       invoke(
         "load_tab",
         {
@@ -264,6 +269,27 @@ export default function Greet() {
         const newFileCount = old + 1;
         // if (newFileCount < 11)
          {
+          // setpsplitl(splitpath(path))
+          invoke(
+            "tabname",
+            {
+              path:path,
+            }
+          ).then((returned:string)=>{
+            console.log("what was returned....."+returned)
+            if(tablist && tablist.length>0){
+
+              let tempstoreoldtablist=tablist;
+              let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+              if(objIndex !== -1){
+  
+                tempstoreoldtablist![objIndex!].path = path;
+                tempstoreoldtablist![objIndex!].tabname = returned;
+                settbl(tempstoreoldtablist!);
+              }
+            }
+          })
+
           setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
         }
         return newFileCount;
@@ -353,7 +379,7 @@ export default function Greet() {
                         reset()
                         setactivetabid(newtabid)
                         // setpath(message.path)
-                        // setpsplitl(setautocompletepath(message.path))
+                        // setpsplitl(splitpath(message.path))
                         // sst(message.name)
                         invoke(
                           "load_tab",
@@ -380,9 +406,9 @@ export default function Greet() {
             <nav className="grid items-start px-4 text-sm font-medium">
               <Link onClick={()=>
                 { 
-                    reset()
+                    reset("drives://")
                     sst("drives://")
-                    setpath("drives://")
+                    // setpath()
                     // console.log(message);
                     
                     invoke('list_files', { 
@@ -453,7 +479,9 @@ export default function Greet() {
                     }
                 >
                   <FolderIcon className="h-4 w-4" />
-                  {activetabid === tab.id ? sampletext:tab.tabname}
+                  {/* {activetabid === tab.id ? sampletext: */}
+                  {tab.tabname}
+                  {/* } */}
                 </Link>
                 ))
 
@@ -551,7 +579,7 @@ export default function Greet() {
               
             </div>
             <ArrowRightIcon onClick={()=>{
-               reset()
+               reset(path)
               //  setpath(message.name)
               //  sst(message.path)
               invoke(
@@ -604,9 +632,9 @@ export default function Greet() {
             <Link key={index} href="#" onClick={
               ()=>
               { 
-                reset()
+                reset(eachif.pathtofol)
                 // spi(message.mount_point)
-                setpath(eachif.pathtofol)
+                // setpath()
                 sst(eachif.pathtofol)
                 // console.log(message);
                 invoke('list_files', { 
@@ -645,9 +673,9 @@ export default function Greet() {
             <Card key={index} onClick={
                 ()=>
                 { 
-                  reset()
+                  reset(message.mount_point)
                   // spi(message.mount_point)
-                  setpath(message.mount_point)
+                  // setpath()
                   sst(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
@@ -683,10 +711,10 @@ export default function Greet() {
                 ()=>
                 { 
                   console.log("clicked");
-                  reset()
+                  reset(message.path)
 
-                  setpath(message.path)
-                  setpsplitl(setautocompletepath(message.path))
+                  // setpath()
+                  // setpsplitl(splitpath(message.path))
                   sst(message.name)
                   // useEffect(() => {
                     invoke('list_files', { 
@@ -903,7 +931,7 @@ interface pathsplit{
   interfolpath:string,
   pathtofol:string
 }
-function setautocompletepath(pathInput:string):pathsplit[] {
+function splitpath(pathInput:string):pathsplit[] {
   let splitat=  /[\\/]/;
   var arr = pathInput.split(splitat); // arr is ["a", "b", "c", "d"]
   var prefixes: string[] = [];
