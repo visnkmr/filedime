@@ -116,6 +116,7 @@ export default function Greet() {
       setss("")
   }
    function activateTab(tab: tabinfo){
+    console.log("activating"+JSON.stringify(tab))
     // console.log("activate tab "+tabid)
     // let activeTab = tablist.find(tab => tab.id === tabid );
     // if (activeTab) {
@@ -230,8 +231,8 @@ export default function Greet() {
       // console.log(data.payload.toString())
     });
     listen("fsc", (data: { payload: string }) => {
-      console.log("-------------__>"+((data.payload)))
-      console.log("fscl----->"+JSON.parse(data.payload));
+      // console.log("-------------__>"+((data.payload)))
+      // console.log("fscl----->"+JSON.parse(data.payload));
       setfscl(JSON.parse(data.payload));
     });
     listen("load-sresults", (data: { payload: string }) => {
@@ -342,13 +343,20 @@ function updatetabs(tabpath){
 }
 function closetab(){
   if(tablist && tablist.length>1){
-
+      
     let tempstoreoldtablist=tablist;
     let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
     if(objIndex !== -1){
-      tempstoreoldtablist.splice(objIndex,1)
+      const removed=tempstoreoldtablist.splice(objIndex,1)
+      console.log("closed tab now tablist is "+JSON.stringify(tempstoreoldtablist)+"\t removed"+JSON.stringify(removed))
+      // closeall();
+      // tempstoreoldtablist.map((tab,index)=>{
+      
+    // })
       settbl(tempstoreoldtablist!);
+      
     }
+    
   }
 }
   function newtab(){
@@ -388,6 +396,8 @@ function closetab(){
                           } as tabinfo]
                         
                         })
+      // console.log("opened tab now tablist is "+JSON.stringify(tablist))
+
                         reset()
                         setactivetabid(newtabid)
                         // setpath(message.path)
@@ -495,7 +505,11 @@ function closetab(){
                   {/* {activetabid === tab.id ? sampletext: */}
                   {tab.tabname}
                   {/* } */}
-                  <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={()=>{closetab()}}/>
+                  <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
+                    e.stopPropagation();
+                    closetab();
+                    activateTab(tablist[tablist.length-1])
+                  }}/>
                 </Link>
                 ))
 
