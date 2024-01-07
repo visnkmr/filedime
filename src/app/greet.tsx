@@ -270,25 +270,6 @@ export default function Greet() {
         // if (newFileCount < 11)
          {
           // setpsplitl(splitpath(path))
-          invoke(
-            "tabname",
-            {
-              path:path,
-            }
-          ).then((returned:string)=>{
-            console.log("what was returned....."+returned)
-            if(tablist && tablist.length>0){
-
-              let tempstoreoldtablist=tablist;
-              let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
-              if(objIndex !== -1){
-  
-                tempstoreoldtablist![objIndex!].path = path;
-                tempstoreoldtablist![objIndex!].tabname = returned;
-                settbl(tempstoreoldtablist!);
-              }
-            }
-          })
 
           setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
         }
@@ -339,6 +320,26 @@ export default function Greet() {
 //     })
 //       .catch(console.error)
 //   }, [count])
+function updatetabs(tabpath){
+  invoke(
+    "tabname",
+    {
+      path:tabpath,
+    }
+  ).then((returned:string)=>{
+     if(tablist && tablist.length>0){
+
+    let tempstoreoldtablist=tablist;
+    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+    if(objIndex !== -1){
+
+      tempstoreoldtablist![objIndex!].path = tabpath;
+      tempstoreoldtablist![objIndex!].tabname = returned;
+      settbl(tempstoreoldtablist!);
+    }
+  }
+  })
+}
   function newtab(){
     let newtabid=new Date().getTime();
                       invoke(
@@ -580,6 +581,7 @@ export default function Greet() {
             </div>
             <ArrowRightIcon onClick={()=>{
                reset(path)
+               updatetabs(path)
               //  setpath(message.name)
               //  sst(message.path)
               invoke(
@@ -633,6 +635,7 @@ export default function Greet() {
               ()=>
               { 
                 reset(eachif.pathtofol)
+                updatetabs(eachif.pathtofol)
                 // spi(message.mount_point)
                 // setpath()
                 sst(eachif.pathtofol)
@@ -674,6 +677,7 @@ export default function Greet() {
                 ()=>
                 { 
                   reset(message.mount_point)
+                  updatetabs(message.mount_point)
                   // spi(message.mount_point)
                   // setpath()
                   sst(message.mount_point)
@@ -712,7 +716,8 @@ export default function Greet() {
                 { 
                   console.log("clicked");
                   reset(message.path)
-
+                  updatetabs(message.path)
+                 
                   // setpath()
                   // setpsplitl(splitpath(message.path))
                   sst(message.name)
