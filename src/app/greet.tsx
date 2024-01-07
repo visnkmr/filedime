@@ -491,7 +491,7 @@ function closetab(){
               </Link>
               
               {bookmarks && bookmarks.length>0 ?(<>
-                <span className='h-16'/>
+              <span className='h-16'/>
               <h1 className=''>Bookmarks</h1>
               {
                 
@@ -503,6 +503,15 @@ function closetab(){
                   href="#"
                   onClick={()=>
                     { 
+                      invoke(
+                        "newtab",
+                        {
+                          windowname:appWindow?.label,
+                          oid: activetabid.toString(),
+                          path: mark.path,
+                          ff: ""
+                        }
+                      );
                         // setfileslist([])
                         // setdriveslist([])
                         // sst("drives://")
