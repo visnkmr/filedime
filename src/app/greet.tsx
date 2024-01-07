@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon} from "lucide-react"
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -340,6 +340,17 @@ function updatetabs(tabpath){
   }
   })
 }
+function closetab(){
+  if(tablist && tablist.length>1){
+
+    let tempstoreoldtablist=tablist;
+    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+    if(objIndex !== -1){
+      tempstoreoldtablist.splice(objIndex,1)
+      settbl(tempstoreoldtablist!);
+    }
+  }
+}
   function newtab(){
     let newtabid=new Date().getTime();
                       invoke(
@@ -409,6 +420,7 @@ function updatetabs(tabpath){
                 { 
                     reset("drives://")
                     sst("drives://")
+                    updatetabs("drives://")
                     // setpath()
                     // console.log(message);
                     
@@ -454,7 +466,7 @@ function updatetabs(tabpath){
                   }
                   }
               >
-                <TrashIcon className="h-4 w-4" />
+                <PlusIcon className="h-4 w-4" />
                 New Tab
               </Link>
               <span className='h-16'/>
@@ -483,6 +495,7 @@ function updatetabs(tabpath){
                   {/* {activetabid === tab.id ? sampletext: */}
                   {tab.tabname}
                   {/* } */}
+                  <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={()=>{closetab()}}/>
                 </Link>
                 ))
 
