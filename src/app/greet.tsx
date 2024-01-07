@@ -27,6 +27,10 @@ type tabinfo = {
   tabname: string,
   history:string[]
 };
+type mark = {
+  path:string,
+  name:string
+};
 interface wininfo{
   winname:string,
   tablist:tabinfo[],
@@ -55,6 +59,7 @@ export default function Greet() {
   const [isgrid,setig]=useState(true)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
+  const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [parentsize,setps] = useState("");
@@ -285,6 +290,10 @@ export default function Greet() {
             
         })
     .catch(console.error);
+    listen("load-marks", (data: { payload:string }) => {
+      console.log("listmarks ")
+      setbms(JSON.parse(data.payload) as mark[])
+    });
     // lfiles();
     
     // openTab("drives://")
@@ -480,6 +489,35 @@ function closetab(){
                 <PlusIcon className="h-4 w-4" />
                 New Tab
               </Link>
+              <span className='h-16'/>
+              {bookmarks?(<>
+              <h1 className=''>Bookmarks</h1>
+              {
+                
+               bookmarks.map((mark, index) => (
+                <Link key={index}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
+                  href="#"
+                  onClick={()=>
+                    { 
+                        // setfileslist([])
+                        // setdriveslist([])
+                        // sst("drives://")
+                        // setpath("drives://")
+                        // setss("")
+                        // console.log(message);
+                        
+                        // activateTab(tab)
+                    }
+                    }
+                >
+                  <FolderIcon className="h-4 w-4" />
+                  {mark.name}
+                </Link>
+                ))
+
+              }
+              </>):(null)}
               <span className='h-16'/>
               {tablist?(<>
               <h1 className=''>Tabs</h1>
@@ -798,7 +836,15 @@ function closetab(){
                 }
               );
             }}>Open in new tab</ContextMenuItem>
-            <ContextMenuItem>Add bookmark</ContextMenuItem>
+            <ContextMenuItem onSelect={()=>{
+              invoke(
+                "addmark",
+                {
+              windowname:appWindow?.label,
+                  path: message.path
+                }
+              );
+            }}>Add bookmark</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
               try {
                 navigator.clipboard.writeText(message.path);
