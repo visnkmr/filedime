@@ -489,12 +489,15 @@ function closetab(){
                 <PlusIcon className="h-4 w-4" />
                 New Tab
               </Link>
-              <span className='h-16'/>
-              {bookmarks?(<>
+              
+              {bookmarks && bookmarks.length>0 ?(<>
+                <span className='h-16'/>
               <h1 className=''>Bookmarks</h1>
               {
                 
                bookmarks.map((mark, index) => (
+                <ContextMenu>
+                  <ContextMenuTrigger>
                 <Link key={index}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
                   href="#"
@@ -514,6 +517,20 @@ function closetab(){
                   <FolderIcon className="h-4 w-4" />
                   {mark.name}
                 </Link>
+                    
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem onSelect={()=>{
+                      invoke(
+                        "removemark",
+                        {
+                      windowname:appWindow?.label,
+                          path: mark.path
+                        }
+                      );
+                    }}>Remove bookmark</ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
                 ))
 
               }
