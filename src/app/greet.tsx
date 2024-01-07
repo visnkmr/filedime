@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList} from "lucide-react"
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -52,6 +52,7 @@ export default function Greet() {
   const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
+  const [isgrid,setig]=useState(true)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [path, setpath] = useState("drives://");
@@ -521,8 +522,18 @@ function closetab(){
       </aside>
       <main className="flex flex-col p-6">
         <div className='flex flex-row mb-4'>
+            <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  setig((old)=>{return !old})
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            {isgrid?<LayoutGrid className="h-4 w-4"/>:<LayoutList className="h-4 w-4"/>}
+              
+            </CardDescription>
+          </Card>
         {custombuttonlist.map((bn, index) => (
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm' key={index} onClick={
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4' key={index} onClick={
                 ()=>{
                   invoke(
                     "otb",
@@ -688,7 +699,7 @@ function closetab(){
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
-        <span className={fileslist.length>0 ? 'block' : 'hidden'}>
+        <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
@@ -732,7 +743,7 @@ function closetab(){
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
-        {fileslist.filter(function (el) {
+        {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
                     }).slice(0,10).map((message, index) => (
