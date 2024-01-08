@@ -62,6 +62,8 @@ export default function Greet() {
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
+  const [fileopsrc,setfos] = useState("");
+  const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
   const [filesetcollectionlist,setfscl]=useState(objinit)
@@ -172,6 +174,10 @@ export default function Greet() {
     console.log(Math.random());
   }, []);
   useEffect(() => {
+    listen("fopprogress", (data: { payload: string }) => {
+      let progressinfo = JSON.parse(data.payload);
+      console.log(JSON.stringify(progressinfo))
+    });
     listen("list-tabs", (data: { payload: string }) => {
       console.log("listtabs ")
     
@@ -432,8 +438,31 @@ function closetab(){
             <Link className="flex items-center gap-2 font-semibold" href="#">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
+              
             </Link>
+            
           </div>
+         
+
+          {fileopsrc?( 
+          <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
+                 <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                  ()=>{
+                    invoke('fileop_with_progress', { 
+                      windowname:appWindow?.label,
+                      src:fileopsrc,
+                      dst:fileopdest
+                  })
+                  }
+              }>
+              <CardDescription className="flex items-center space-x-2 p-2">
+              Paste
+                
+              </CardDescription>
+            </Card>
+            </div>
+              )
+              :(null)}
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
               <Link onClick={()=>
@@ -879,6 +908,9 @@ function closetab(){
                 console.error('Failed to copy: ', err);
               }
             }}>Copy path to clipboard</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              setfos(message.path)
+            }}>Copy</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>

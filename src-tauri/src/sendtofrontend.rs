@@ -100,6 +100,15 @@ pub fn loadhistory(windowname:&str,ah:&AppHandle,string:String)->Result<(),Strin
       .map_err(|e| e.to_string())?; 
     Ok(())
 }
+pub fn sendprogress(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "fopprogress",
+        string,
+      )
+      .map_err(|e| e.to_string())?; 
+    Ok(())
+}
 
 pub fn loadmarks(windowname:&str,ah:&AppHandle,string:String){
   ah.emit_to(

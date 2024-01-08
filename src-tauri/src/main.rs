@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet, fmt::format};
 mod dirsize;
 mod fileitem;
 mod filltrie;
@@ -12,7 +12,7 @@ use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
 use rayon::prelude::*;
-use sendtofrontend::{sendbuttonnames, lfat};
+use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
 use serde_json::json;
 use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent};
 use walkdir::WalkDir;
@@ -67,6 +67,59 @@ pub struct FileItem {
 }
 const CACHE_EXPIRY:u64=60;
 
+use std::fs::File;
+use std::io::{self,  Write, Seek, SeekFrom};
+#[tauri::command]
+async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window){
+  match(fileop(windowname, src, dst, removefile,&window.app_handle())){
+    Ok(_) => {
+      
+    },
+    Err(_) => {
+      
+    },
+}
+}
+fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> io::Result<()> {
+   // Open the source file
+   let mut src_file = File::open(src.clone())?;
+
+   // Get the size of the source file
+   let src_size = src_file.metadata()?.len();
+
+
+   // Open the destination file
+   let mut dst_file = File::create(dst)?;
+
+   // Buffer to hold the read data
+   let mut buffer = Vec::new();
+
+   // Read from the source file and write to the destination file
+   loop {
+       match src_file.read_to_end(&mut buffer) {
+           Ok(n) => {
+               if n == 0 {
+                  break;
+               }
+               dst_file.write_all(&buffer)?;
+               sendprogress(&windowname, ah, (json!({
+                "progress": n,
+                "size":src_size,
+             })).to_string());
+              //  pb.inc(n as u64);
+               buffer.clear();
+           },
+           Err(err) => return Err(err),
+       }
+   }
+
+  //  pb.finish_with_message("done");
+  // Remove the source file
+  if(removefile){
+    fs::remove_file(src)?;
+  }
+   Ok(())
+}
 
 #[tauri::command]
 async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
@@ -459,6 +512,7 @@ fn main() {
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
+        fileop_with_progress,
         addmark,
         backbutton,
         closetab,
