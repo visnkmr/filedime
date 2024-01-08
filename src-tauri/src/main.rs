@@ -104,23 +104,22 @@ fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHa
   //  let mut dst_file = File::create(dst)?;
 
    // Buffer to hold the read data
-   let mut buffer = Vec::new();
+   let mut buffer = [0; 1024];
+   let mut written = 0;
    println!("copying started");
 
    // Read from the source file and write to the destination file
    loop {
-       match src_file.read_to_end(&mut buffer) {
+       match src_file.read(&mut buffer) {
+           Ok(0) => break,
            Ok(n) => {
-               if n == 0 {
-                  break;
-               }
-               dst_file.write_all(&buffer)?;
+               dst_file.write_all(&buffer[..n])?;
+               written+=n;
                sendprogress(&windowname, ah, (json!({
-                "progress": n,
+                "progress": written,
                 "size":src_size,
              })).to_string());
               //  pb.inc(n as u64);
-               buffer.clear();
            },
            Err(err) => return Err(err),
        }
