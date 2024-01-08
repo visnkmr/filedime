@@ -111,7 +111,7 @@ export default function Greet() {
   //   if (tabIndex !== -1) {
   //    winInfo.tablist.splice(tabIndex, 1);
   //   }
-  //  }
+  //  } 
   function reset(p?:string){
     if(p){
       setpath(p);
@@ -451,7 +451,19 @@ function closetab(){
                     invoke('fileop_with_progress', { 
                       windowname:appWindow?.label,
                       src:fileopsrc,
-                      dst:fileopdest
+                      dst:path,
+                      removefile:false
+                  }).then(()=>{
+                    console.log("done");
+                    reset(path)
+                    sst(path)
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: "" 
+                  })
+                    
                   })
                   }
               }>
@@ -478,7 +490,8 @@ function closetab(){
                       oid: activetabid.toString(),
                       path: "drives://",
                       ff: "" 
-                  })}
+                  })
+                }
                 }
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 href="#"

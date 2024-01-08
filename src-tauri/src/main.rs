@@ -71,11 +71,16 @@ use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
 #[tauri::command]
 async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window){
+  println!("copying function recieved rust from {}",windowname);
+  
+
   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
     Ok(_) => {
+    println!("copying succeeded");
       
     },
-    Err(_) => {
+    Err(e) => {
+   println!("copying failed {}",e);
       
     },
 }
@@ -86,13 +91,21 @@ fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHa
 
    // Get the size of the source file
    let src_size = src_file.metadata()?.len();
+   let src_path = Path::new(&src);
+   let src_filename = src_path.file_name().unwrap().to_str().unwrap();
 
+   // Append the filename to the destination path
+   let mut dst_path = Path::new(&dst).join(src_filename);
 
    // Open the destination file
-   let mut dst_file = File::create(dst)?;
+   let mut dst_file = File::create(dst_path.clone())?;
+   println!("copy from  {} to {:?}",src,dst_path);
+   // Open the destination file
+  //  let mut dst_file = File::create(dst)?;
 
    // Buffer to hold the read data
    let mut buffer = Vec::new();
+   println!("copying started");
 
    // Read from the source file and write to the destination file
    loop {
@@ -112,6 +125,7 @@ fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHa
            Err(err) => return Err(err),
        }
    }
+   println!("copying done");
 
   //  pb.finish_with_message("done");
   // Remove the source file
