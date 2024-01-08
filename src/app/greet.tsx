@@ -455,6 +455,8 @@ function closetab(){
                       removefile:false
                   }).then(()=>{
                     console.log("done");
+                    setfos("")
+                    setfod("")
                     reset(path)
                     sst(path)
                     invoke('list_files', { 
