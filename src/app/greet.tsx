@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList} from "lucide-react"
+import { Badge } from "../components/ui/badge"
+
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -802,7 +804,7 @@ function closetab(){
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <p key={index}>{key}({value})</p>
+            <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
