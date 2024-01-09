@@ -185,6 +185,26 @@ export default function Greet() {
       let progressinfo = JSON.parse(data.payload);
       console.log(JSON.stringify(progressinfo))
     });
+    listen("reloadlist", (data: { payload: string }) => {
+      switch(data.payload){
+        case 'reload':reloadlist();
+        break;
+        case 'nosize': reloadsize();
+        break;
+        case 'folcount': populateimmediatechildcount();
+        break;
+        case 'recent': recentfiles();
+        break;
+        default: {
+          // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
+          // console.log(statusofpar.message)
+          console.log(JSON.stringify(data.payload))
+          // console.log(JSON.stringify(data.payload)+"-------->"+statusofpar.message)
+        }
+        // default:reloadlist();
+      }
+      //  reloadlist();
+      });
     listen("list-tabs", (data: { payload: string }) => {
       console.log("listtabs ")
     
@@ -214,7 +234,7 @@ export default function Greet() {
       //     b.classList.add("inactive");
       //     b.classList.remove("active");
       //   }
-      //  (window as any).__TAURI__.invoke(
+      //  invoke(
       //     "getuniquewindowlabel",
       //     {
             
@@ -344,6 +364,36 @@ export default function Greet() {
 //     })
 //       .catch(console.error)
 //   }, [count])
+
+ function reloadlist(){
+      // invoke the list_files command from the backend with the path as argument
+      invoke(
+        "list_files",
+        {
+        windowname:appWindow?.label,
+          oid: activetabid.toString(),
+          path: path,
+          ff: ""
+        });
+}
+function populateimmediatechildcount(){
+  invoke(
+    "folcount",
+    {
+    windowname:appWindow?.label,
+      id: activetabid.toString(),
+      path: path
+    });
+}
+function recentfiles(){
+    console.log("recent");
+    invoke(
+    "recent_files", {
+      windowname:appWindow?.label,
+      string: "",
+  })
+}
+ 
 function updatetabs(tabpath){
   invoke(
     "tabname",
@@ -435,7 +485,20 @@ function closetab(){
                         );
                       });
   }
-
+  function reloadsize(){
+    console.log("loading size js---->1");
+    if(appWindow){
+      const thensobj={windowname: appWindow?.label,
+      id: activetabid.toString(),
+      path: path,
+    };
+    console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
+    invoke(
+      "nosize",
+      thensobj);
+    console.log("loading size js----->2")
+    }
+  }
 
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">

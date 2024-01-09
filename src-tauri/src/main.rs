@@ -231,9 +231,13 @@ fn get_timestamp() -> String {
     timestamp
 }
 #[tauri::command]
-async fn nosize(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn nosize(windowname:String,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  println!("loading size rust---->1");
+
   state.togglenosize();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  println!("loading size rust---->2");
+
   Ok(())
 }
 //manually test using ramdisk
