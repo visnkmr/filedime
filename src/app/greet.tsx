@@ -15,6 +15,11 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "../components/ui/context-menu"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../components/ui/hover-card"
 
 import Link from "next/link"
 import { CardContent, Card, CardDescription } from "../components/ui/card"
@@ -859,7 +864,9 @@ function closetab(){
                     }).slice(0,10).map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
-            <Card key={index} onClick={
+            <HoverCard>
+              <HoverCardTrigger>
+              <Card key={index} onClick={
                 ()=>
                 { 
                   console.log("clicked");
@@ -877,13 +884,20 @@ function closetab(){
                       ff: "" 
                   });
                   // },[])
-              }
-            }>
-            <CardContent className="flex items-center space-x-4">
-              <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">{message.name}</span>
-            </CardContent>
-          </Card>
+                  }
+                }>
+                <CardContent className="flex items-center space-x-4">
+                  <FolderIcon className="h-6 w-6" />
+                  <span className="font-medium text-lg overflow-clip">{message.name}</span>
+                </CardContent>
+              </Card>
+              </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               {message.path}
+              </HoverCardContent>
+            </HoverCard>
+
+            
           </ContextMenuTrigger>
           <ContextMenuContent className=''>
             <p className='text-sm'>{message.path}</p>
