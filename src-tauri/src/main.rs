@@ -350,37 +350,37 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 fn main() {
   // init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
-  let reload = CustomMenuItem::new("reload", "Reload".to_string());
-  let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
-  // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
-  let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
-  // let back = CustomMenuItem::new("back-button", "Back".to_string());
-  // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
-  let recent = CustomMenuItem::new("recent", "Recent".to_string());
+  // let reload = CustomMenuItem::new("reload", "Reload".to_string());
+  // let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
+  // // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
+  // let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
+  // // let back = CustomMenuItem::new("back-button", "Back".to_string());
+  // // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
+  // let recent = CustomMenuItem::new("recent", "Recent".to_string());
   
-  let menu = Menu::new()
-  .add_submenu(Submenu::new("File", Menu::new()
-      // .add_item(open_terminal)
-      .add_item(hide_size)
-      .add_item(reload)
-      // .add_item(toggle_search)
-      .add_item(hide_child_count)
+  // let menu = Menu::new()
+  // .add_submenu(Submenu::new("File", Menu::new()
+  //     // .add_item(open_terminal)
+  //     .add_item(hide_size)
+  //     .add_item(reload)
+  //     // .add_item(toggle_search)
+  //     .add_item(hide_child_count)
       
-  ))
+  // ))
   
-  .add_submenu(Submenu::new("Window", Menu::new()
-  .add_item(CustomMenuItem::new("close", "Close"))
+  // .add_submenu(Submenu::new("Window", Menu::new()
+  // .add_item(CustomMenuItem::new("close", "Close"))
  
       
-  ))
+  // ))
 
-  .add_item(CustomMenuItem::new("Learn More", "Learn More"))
-  .add_item(CustomMenuItem::new("quit", "Quit"))
+  // .add_item(CustomMenuItem::new("Learn More", "Learn More"))
+  // .add_item(CustomMenuItem::new("quit", "Quit"))
    
-    // .add_item(back)
-    // .add_item(forward)
-    .add_item(recent)
-    ;
+  //   // .add_item(back)
+  //   // .add_item(forward)
+  //   .add_item(recent)
+  //   ;
   let mut g=AppStateStore::new(CACHE_EXPIRY);
 
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
@@ -490,39 +490,39 @@ fn main() {
     
       Ok(())
     })
-    .menu(menu)
-    .on_menu_event(|event| {
-      match event.menu_item_id() {
-        "quit" => {
-          std::process::exit(0);
-        }
-        "close" => {
-          event.window().close().unwrap();
-        }
-        "reload"=>{
-          event.window().emit("reloadlist","reload").unwrap();
-          // otb(event.window().label(),g);
-        }
-        "nosize"=>{
-          event.window().emit("reloadlist","nosize").unwrap();
-          // otb(event.window().label(),g);
-        }
-        "folcount"=>{
-          event.window().emit("reloadlist","folcount").unwrap();
-        }
-        "recent"=>{
-          event.window().emit("reloadlist","recent").unwrap();
-        }
-        // "tsearch"=>{
-        //   event.window().emit("reloadlist","tsearch").unwrap();
-        // }
-        "Learn More" => {
-            let url = "https://github.com/visnkmr/iomer";
-            shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
-          }
-        _ => {}
-      }
-    })
+    // .menu(menu)
+    // .on_menu_event(|event| {
+    //   match event.menu_item_id() {
+    //     "quit" => {
+    //       std::process::exit(0);
+    //     }
+    //     "close" => {
+    //       event.window().close().unwrap();
+    //     }
+    //     "reload"=>{
+    //       event.window().emit("reloadlist","reload").unwrap();
+    //       // otb(event.window().label(),g);
+    //     }
+    //     "nosize"=>{
+    //       event.window().emit("reloadlist","nosize").unwrap();
+    //       // otb(event.window().label(),g);
+    //     }
+    //     "folcount"=>{
+    //       event.window().emit("reloadlist","folcount").unwrap();
+    //     }
+    //     "recent"=>{
+    //       event.window().emit("reloadlist","recent").unwrap();
+    //     }
+    //     // "tsearch"=>{
+    //     //   event.window().emit("reloadlist","tsearch").unwrap();
+    //     // }
+    //     "Learn More" => {
+    //         let url = "https://github.com/visnkmr/iomer";
+    //         shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
+    //       }
+    //     _ => {}
+    //   }
+    // })
     .on_window_event(on_window_event)
 
     .manage(g)
