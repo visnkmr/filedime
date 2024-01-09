@@ -839,7 +839,7 @@ function closetab(){
             }>
             <CardContent className="flex items-center space-x-4">
               <FolderIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">{message.mount_point}</span>
+              <span className="font-medium text-lg">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
             </CardContent>
           </Card>
           </ContextMenuTrigger>
