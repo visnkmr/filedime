@@ -1029,7 +1029,7 @@ function closetab(){
                 }>
                 <CardContent className="flex items-center space-x-4">
                   <FolderIcon className="h-6 w-6" />
-                  <span className="font-medium text-lg overflow-clip">{message.name}</span>
+                  <span className="font-medium text-lg overflow-clip">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                 </CardContent>
               </Card>
               </HoverCardTrigger>
