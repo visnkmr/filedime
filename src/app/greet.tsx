@@ -1,8 +1,9 @@
 'use client'
 
+import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 
 import React from 'react';
@@ -500,6 +501,8 @@ function closetab(){
     }
   }
 
+  
+
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -700,6 +703,8 @@ function closetab(){
       </aside>
       <main className="flex flex-col p-6">
         <div className='flex flex-row mb-4'>
+        <HoverCard>
+              <HoverCardTrigger>
             <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                 ()=>{
                   setig((old)=>{return !old})
@@ -710,6 +715,79 @@ function closetab(){
               
             </CardDescription>
           </Card>
+          </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               List / Grid
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  reloadlist()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <RefreshCcwIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               Reload
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  reloadsize()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <RulerIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               Show size of folder
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  populateimmediatechildcount()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <FolderTreeIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               Count immediate children of folders
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  recentfiles()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <FolderClockIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent className='bg-black overflow-clip'>
+               Recent Files
+              </HoverCardContent>
+            </HoverCard>
         {custombuttonlist.map((bn, index) => (
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4' key={index} onClick={
                 ()=>{
@@ -906,7 +984,7 @@ function closetab(){
                 })}
             }>
             <CardContent className="flex items-center space-x-4">
-              <FolderIcon className="h-6 w-6" />
+              <HardDriveIcon className="h-6 w-6" />
               <span className="font-medium text-lg">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
             </CardContent>
           </Card>
@@ -955,8 +1033,9 @@ function closetab(){
                 </CardContent>
               </Card>
               </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent className='bg-black overflow-clip flex flex-col'>
                {message.path}
+              <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
               </HoverCardContent>
             </HoverCard>
 
