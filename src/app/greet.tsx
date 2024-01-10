@@ -449,11 +449,11 @@ function updatetabs(tabpath){
     console.error(e)
   })
 }
-function closetab(){
+function closetab(closeid){
   if(tablist && tablist.length>1){
       
     let tempstoreoldtablist=tablist;
-    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === closeid));
     if(objIndex !== -1){
       const removed=tempstoreoldtablist.splice(objIndex,1)
       console.log("closed tab now tablist is "+JSON.stringify(tempstoreoldtablist)+"\t removed"+JSON.stringify(removed))
@@ -726,7 +726,7 @@ function closetab(){
                   {/* } */}
                   <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
                     e.stopPropagation();
-                    closetab();
+                    closetab(tab.id);
                     activateTab(tablist[tablist.length-1])
                   }}/>
                 </Link>
