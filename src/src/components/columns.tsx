@@ -11,6 +11,8 @@ import '../../styles/committablestyle.css'
 import { FileItem } from '../../shared/types';
 import Link from 'next/link';
 import { invoke } from '@tauri-apps/api/tauri';
+import Greet from '../../app/greet';
+import { appWindow } from '@tauri-apps/api/window';
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -79,7 +81,7 @@ export const columns: ColumnDef<FileItem>[] = [
 
       return (
         
-          <Link className='w-32' href="#" onClick={
+          <button className='w-32' onDoubleClick={
             ()=>
             { 
               // setfileslist([])
@@ -90,13 +92,19 @@ export const columns: ColumnDef<FileItem>[] = [
               // setpath(message.mount_point)
               // sst(message.mount_point)
               // console.log(message);
-              invoke('list_files', { 
-                windowname:"main",
-                oid: "0",
-                path: path,
-                ff: "" 
-            })}
-          }>{`${name}`}</Link>
+              
+              invoke('mirror', { 
+                functionname:"loadinglist",
+                arguments: [path]
+            })
+            // invoke('list_files', { 
+            //     windowname:appWindow?.label,
+            //     oid: "0",
+            //     path: path,
+            //     ff: "" 
+            // })
+          }
+          }>{`${name}`}</button>
         // <div className="text-right">
         //   {original_price_incl_tax !== price && (
         //     <Tooltip

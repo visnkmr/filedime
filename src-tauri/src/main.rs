@@ -70,6 +70,13 @@ const CACHE_EXPIRY:u64=60;
 use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
 #[tauri::command]
+fn mirror(functionname:String,arguments: Vec<String>,window: Window){
+  window.get_focused_window().unwrap().emit("mirror", serde_json::to_string(&json!({
+    "functionname":functionname,
+    "arguments":arguments
+  })).unwrap());
+}
+  #[tauri::command]
 async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window){
   println!("copying function recieved rust from {}",windowname);
   
@@ -529,6 +536,7 @@ fn main() {
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
+        mirror,
         fileop_with_progress,
         addmark,
         backbutton,

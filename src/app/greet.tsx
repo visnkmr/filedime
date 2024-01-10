@@ -3,8 +3,9 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import {appWindow as appWindow2} from "@tauri-apps/api/window"
 
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
@@ -81,6 +82,7 @@ export default function Greet() {
   const [appWindow, setAppWindow] = useState()
   // let wininfo: wininfo = {
   //   winname: appWindow?.label,
+  //   winname: appWindow?.label,
   //   tablist: [],
   //   tabidsalloted: 0
   //  };
@@ -130,6 +132,7 @@ export default function Greet() {
       setdriveslist([])
       setfc(0)
       setss("")
+      console.log("reset done")
   }
    function activateTab(tab: tabinfo){
     console.log("activating"+JSON.stringify(tab))
@@ -181,7 +184,32 @@ export default function Greet() {
   useEffect(() => {
     console.log(Math.random());
   }, []);
+  type wtd={
+    functionname:string,
+    arguments:string[]
+  }
   useEffect(() => {
+    listen("mirror", (data: { payload: string }) => {
+      let whattodo:wtd=JSON.parse(data.payload)
+      switch(whattodo.functionname){
+        case "loadinglist":{
+          console.log("reload called from "+appWindow2?.label)
+          reset(whattodo.arguments[0])
+          updatetabs(whattodo.arguments[0])
+          // setpath()
+          // setpsplitl(splitpath(message.path))
+          sst(whattodo.arguments[0])
+          console.log(whattodo.arguments[0])
+          invoke('list_files', { 
+            windowname:appWindow2?.label,
+            oid: activetabid.toString(),
+            path: whattodo.arguments[0],
+            ff: "" 
+        })
+        }
+      }
+      
+    })
     listen("fopprogress", (data: { payload: string }) => {
       let progressinfo = JSON.parse(data.payload);
       console.log(JSON.stringify(progressinfo))
@@ -396,12 +424,14 @@ function recentfiles(){
 }
  
 function updatetabs(tabpath){
+  console.log("update tabs called")
   invoke(
     "tabname",
     {
       path:tabpath,
     }
   ).then((returned:string)=>{
+    console.log("preupdate tablist--->"+JSON.stringify(tablist))
      if(tablist && tablist.length>0){
 
     let tempstoreoldtablist=tablist;
@@ -412,7 +442,11 @@ function updatetabs(tabpath){
       tempstoreoldtablist![objIndex!].tabname = returned;
       settbl(tempstoreoldtablist!);
     }
+    console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
   }
+  })
+  .catch((e)=>{
+    console.error(e)
   })
 }
 function closetab(){
@@ -513,6 +547,9 @@ function closetab(){
               <span className="">Filedime</span>
               
             </Link>
+            <LogInIcon className="w-4 h-4" onClick={()=>{
+              console.log(JSON.stringify(tablist))
+            }}/>
             
           </div>
          
@@ -981,7 +1018,8 @@ function closetab(){
                     oid: activetabid.toString(),
                     path: message.mount_point,
                     ff: "" 
-                })}
+                })
+              }
             }>
             <CardContent className="flex items-center space-x-4">
               <HardDriveIcon className="h-6 w-6" />
@@ -1007,10 +1045,10 @@ function closetab(){
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <Card key={index} onClick={
+              <Card key={index} onDoubleClick={
                 ()=>
                 { 
-                  console.log("clicked");
+                  console.log("gridlayout clicked");
                   reset(message.path)
                   updatetabs(message.path)
                  
