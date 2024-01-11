@@ -459,7 +459,7 @@ const columns: ColumnDef<FileItem>[] = [
 
       return (
         
-          <button className='w-32' onDoubleClick={
+          <button className='w-32  overflow-auto whitespace-nowrap' onDoubleClick={
             ()=>
             { 
               reset(path)
@@ -1237,7 +1237,7 @@ function closetab(closeid){
           }>{eachif.interfolpath}</Link>
           ))}
         </div>
-        <div className='flex items-center justify-between mb-6'>
+        <div className='flex items-center mb-6 '>
           {
           Object.entries(filesetcollectionlist)
           // .filter(function (el) {
@@ -1280,7 +1280,7 @@ function closetab(closeid){
             }>
             <CardContent className="flex items-center space-x-4">
               <HardDriveIcon className="h-6 w-6" />
-              <span className="font-medium text-lg">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
+              <span className="font-medium text-lg overflow-auto whitespace-nowrap">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
             </CardContent>
           </Card>
           </ContextMenuTrigger>
@@ -1324,7 +1324,7 @@ function closetab(closeid){
                 }>
                 <CardContent className="flex items-center space-x-4">
                   <FolderIcon className="h-6 w-6" />
-                  <span className="font-medium text-lg overflow-clip">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                  <span className="font-medium text-lg  overflow-auto whitespace-nowrap">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                 </CardContent>
               </Card>
               </HoverCardTrigger>
