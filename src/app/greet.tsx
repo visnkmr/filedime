@@ -652,6 +652,9 @@ const columns: ColumnDef<FileItem>[] = [
   // ...
 ];
  function reloadlist(){
+      reset(path)
+          // setpath()
+          // setpsplitl(splitpath(message.path))
       // invoke the list_files command from the backend with the path as argument
       invoke(
         "list_files",
@@ -663,6 +666,7 @@ const columns: ColumnDef<FileItem>[] = [
         });
 }
 function populateimmediatechildcount(){
+  reset(path)
   invoke(
     "folcount",
     {
@@ -778,6 +782,7 @@ function closetab(closeid){
                       });
   }
   function reloadsize(){
+    reset(path)
     console.log("loading size js---->1");
     if(appWindow){
       const thensobj={windowname: appWindow?.label,
@@ -1010,7 +1015,7 @@ function closetab(closeid){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent >
                List / Grid
               </HoverCardContent>
             </HoverCard>
@@ -1027,7 +1032,7 @@ function closetab(closeid){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent >
                Reload
               </HoverCardContent>
             </HoverCard>
@@ -1044,7 +1049,7 @@ function closetab(closeid){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent >
                Show size of folder
               </HoverCardContent>
             </HoverCard>
@@ -1061,7 +1066,7 @@ function closetab(closeid){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent >
                Count immediate children of folders
               </HoverCardContent>
             </HoverCard>
@@ -1078,7 +1083,7 @@ function closetab(closeid){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip'>
+              <HoverCardContent >
                Recent Files
               </HoverCardContent>
             </HoverCard>
@@ -1328,7 +1333,7 @@ function closetab(closeid){
                 </CardContent>
               </Card>
               </HoverCardTrigger>
-              <HoverCardContent className='bg-black overflow-clip flex flex-col'>
+              <HoverCardContent className='flex flex-col'>
                {message.path}
               <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
               </HoverCardContent>
