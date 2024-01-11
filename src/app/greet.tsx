@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
-import {appWindow as appWindow2} from "@tauri-apps/api/window"
+// import {appWindow as appWindow2} from "@tauri-apps/api/window"
 
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
@@ -168,19 +168,19 @@ export default function Greet() {
       // setpath(tab.path)s
       setactivetabid(tab.id)
       reset(tab.path)
-      invoke(
-        "load_tab",
-        {
-          windowname:appWindow?.label,
-          oid: tab.id.toString()
-        }
-      );
-    //   invoke('list_files', { 
-    //     windowname:appWindow?.label,
-    //     oid: tab.id.toString(),
-    //     path: tab.path,
-    //     ff: "" 
-    // })
+      // invoke(
+      //   "load_tab",
+      //   {
+      //     windowname:appWindow?.label,
+      //     oid: tab.id.toString()
+      //   }
+      // );
+      invoke('list_files', { 
+        windowname:appWindow?.label,
+        oid: tab.id.toString(),
+        path: tab.path,
+        ff: "" 
+    })
     // }
   //  }
   //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
@@ -249,60 +249,60 @@ export default function Greet() {
       }
       //  reloadlist();
       });
-    listen("list-tabs", (data: { payload: string }) => {
-      console.log("listtabs ")
+    // listen("list-tabs", (data: { payload: string }) => {
+    //   console.log("listtabs ")
     
       
-      let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
-      settbl(tabs)
-      // // console.log("files")
-      // clear the file list
-      // globals.tablist.innerHTML = "";
-      // // console.log(data.payload)
-      // loop through the files array
-      // for (let tb of tabs) {
-      //   // create a table row element for each file
-      //   // let border=document.createElement("span");
-      //   // border.className="border-bx"
-      //   // globals.tablist.appendChild(border);
-      //   // let tbt=document.createElement("span");
-      //   // tbt.className="tbt"
+    //   let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
+    //   settbl(tabs)
+    //   // // console.log("files")
+    //   // clear the file list
+    //   // globals.tablist.innerHTML = "";
+    //   // // console.log(data.payload)
+    //   // loop through the files array
+    //   // for (let tb of tabs) {
+    //   //   // create a table row element for each file
+    //   //   // let border=document.createElement("span");
+    //   //   // border.className="border-bx"
+    //   //   // globals.tablist.appendChild(border);
+    //   //   // let tbt=document.createElement("span");
+    //   //   // tbt.className="tbt"
   
-      //   let b = document.createElement("div");
-      //   b.className = "tab-button";
-      //   if(tb.path===globalThis.activetab){
-      //     b.classList.add("active");
-      //     b.classList.remove("inactive");
-      //   }
-      //   else{
-      //     b.classList.add("inactive");
-      //     b.classList.remove("active");
-      //   }
-      //  invoke(
-      //     "getuniquewindowlabel",
-      //     {
+    //   //   let b = document.createElement("div");
+    //   //   b.className = "tab-button";
+    //   //   if(tb.path===globalThis.activetab){
+    //   //     b.classList.add("active");
+    //   //     b.classList.remove("inactive");
+    //   //   }
+    //   //   else{
+    //   //     b.classList.add("inactive");
+    //   //     b.classList.remove("active");
+    //   //   }
+    //   //  invoke(
+    //   //     "getuniquewindowlabel",
+    //   //     {
             
-      //     }
-      //     ).then((returned:string)=>{
-      //       b.dataset.ul=returned;
-      //     })
+    //   //     }
+    //   //     ).then((returned:string)=>{
+    //   //       b.dataset.ul=returned;
+    //   //     })
   
-      //   let sn = document.createElement("span");
-      //   sn.className = "tab-name"
+    //   //   let sn = document.createElement("span");
+    //   //   sn.className = "tab-name"
         
-      //   let sc = document.createElement("span");
-      //   sc.className = "tab-close"
-      //   sn.textContent = tb.tabname;
-      //   sc.textContent = "x";
-      //   b.appendChild(sn);
-      //   b.appendChild(sc);
-      //   b.id = tb.id.toString();
-      //   b.dataset.path = tb.path;
-      //   b.dataset.ff = tb.ff;
-      //   // b.appendChild(tbt)
-      //   globals.tablist.appendChild(b);
-      // }
-    });
+    //   //   let sc = document.createElement("span");
+    //   //   sc.className = "tab-close"
+    //   //   sn.textContent = tb.tabname;
+    //   //   sc.textContent = "x";
+    //   //   b.appendChild(sn);
+    //   //   b.appendChild(sc);
+    //   //   b.id = tb.id.toString();
+    //   //   b.dataset.path = tb.path;
+    //   //   b.dataset.ff = tb.ff;
+    //   //   // b.appendChild(tbt)
+    //   //   globals.tablist.appendChild(b);
+    //   // }
+    // });
     listen("button-names", (data: { payload: string }) => {
       setcbl(JSON.parse(data.payload) as string[]);
       console.log("winnames: "+data.payload.toString())
@@ -459,7 +459,7 @@ const columns: ColumnDef<FileItem>[] = [
 
       return (
         
-          <button className='w-32  overflow-auto whitespace-nowrap' onDoubleClick={
+          <button className='w-32' onDoubleClick={
             ()=>
             { 
               reset(path)
@@ -469,7 +469,7 @@ const columns: ColumnDef<FileItem>[] = [
           sst(path)
           console.log(path)
           invoke('list_files', { 
-            windowname:appWindow2?.label,
+            windowname:appWindow?.label,
             oid: activetabid.toString(),
             path: path,
             ff: "" 
@@ -772,13 +772,19 @@ function closetab(closeid){
                         // setpath(message.path)
                         // setpsplitl(splitpath(message.path))
                         // sst(message.name)
-                        invoke(
-                          "load_tab",
-                          {
-                            windowname:appWindow?.label,
-                            oid: newtabid.toString()
-                          }
-                        );
+                        // invoke(
+                        //   "load_tab",
+                        //   {
+                        //     windowname:appWindow?.label,
+                        //     oid: newtabid.toString()
+                        //   }
+                        // );
+                        invoke('list_files', { 
+                          windowname:appWindow?.label,
+                          oid: newtabid.toString(),
+                          path: path,
+                          ff: "" 
+                      })
                       });
   }
   function reloadsize(){
@@ -1285,7 +1291,7 @@ function closetab(closeid){
             }>
             <CardContent className="flex items-center space-x-4">
               <HardDriveIcon className="h-6 w-6" />
-              <span className="font-medium text-lg overflow-auto whitespace-nowrap">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
+              <span className="font-medium text-lg ">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
             </CardContent>
           </Card>
           </ContextMenuTrigger>
@@ -1329,7 +1335,7 @@ function closetab(closeid){
                 }>
                 <CardContent className="flex items-center space-x-4">
                   <FolderIcon className="h-6 w-6" />
-                  <span className="font-medium text-lg  overflow-auto whitespace-nowrap">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                  <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                 </CardContent>
               </Card>
               </HoverCardTrigger>
