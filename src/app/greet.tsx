@@ -23,7 +23,7 @@ import {
   HoverCardTrigger,
 } from "../components/ui/hover-card"
 
-import Link from "next/link"
+// import Link from "next/link"
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
@@ -810,11 +810,11 @@ function closetab(closeid){
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
-            <Link className="flex items-center gap-2 font-semibold" href="#">
+            <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
               
-            </Link>
+            </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
             }}/>
@@ -857,7 +857,7 @@ function closetab(closeid){
               :(null)}
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
-              <Link onClick={()=>
+              <button onClick={()=>
                 { 
                     reset("drives://")
                     sst("drives://")
@@ -874,22 +874,22 @@ function closetab(closeid){
                 }
                 }
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href="#"
+                
               >
                 <HomeIcon className="h-4 w-4" />
                 Home
-              </Link>
+              </button>
               {/* <Link
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900  transition-all hover:text-gray-900  dark:text-gray-50 dark:hover:text-gray-50"
                 href="#"
               ><FolderIcon className="h-4 w-4" />{sampletext}</Link> */}
-              <Link
+              <button
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href="#"
+                
               >
                 <TrashIcon className="h-4 w-4" />
                 Trash
-              </Link>
+              </button>
               <button
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
                 onClick={()=>
@@ -919,9 +919,8 @@ function closetab(closeid){
                bookmarks.map((mark, index) => (
                 <ContextMenu>
                   <ContextMenuTrigger>
-                <Link key={index}
+                <button key={index}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
-                  href="#"
                   onClick={()=>
                     { 
                       invoke(
@@ -946,7 +945,7 @@ function closetab(closeid){
                 >
                   <FolderIcon className="h-4 w-4" />
                   {mark.name}
-                </Link>
+                </button>
                     
                   </ContextMenuTrigger>
                   <ContextMenuContent>
@@ -971,9 +970,8 @@ function closetab(closeid){
               {
                 
                tablist.map((tab, index) => (
-                <Link key={index}
+                <button key={index}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
-                  href="#"
                   onClick={()=>
                     { 
                         // setfileslist([])
@@ -996,7 +994,7 @@ function closetab(closeid){
                     closetab(tab.id);
                     activateTab(tablist[tablist.length-1])
                   }}/>
-                </Link>
+                </button>
                 ))
 
               }
@@ -1229,7 +1227,7 @@ function closetab(closeid){
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map((eachif,index)  => (
-            <Link key={index} href="#" onClick={
+            <button key={index} onClick={
               ()=>
               { 
                 reset(eachif.pathtofol)
@@ -1244,7 +1242,7 @@ function closetab(closeid){
                   path: eachif.pathtofol,
                   ff: "" 
               })}
-          }>{eachif.interfolpath}</Link>
+          }>{eachif.interfolpath}</button>
           ))}
         </div>
         <div className='flex items-center mb-6 '>
