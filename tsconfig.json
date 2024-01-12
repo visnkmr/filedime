@@ -54,7 +54,7 @@
     // Raise an error on this expressions with an inferred type of any
     "noImplicitThis": true,
     // Parse in strict mode and emit "use strict" for each source file
-    "alwaysStrict": false,
+    "alwaysStrict": true,
     // Enable stricter checking of the bind, call, and apply methods on functions
     "strictBindCallApply": true,
     // Enable stricter checking of null and undefined values

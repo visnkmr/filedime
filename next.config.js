@@ -84,39 +84,39 @@ const nextConfig =
             terserOptions: {
               ecma: 10,
               warnings: false,
-              output: {
-                comments: false,
-                indent_level: 2,
-                ecma:10,
-                indent_start: 0,
-                quote_keys: false,
-                wrap_iife: true,
-              },
-              compress: {
-                drop_console: true,
-                drop_debugger: true,
-                hoist_funs: true,
-                hoist_props: true,
-                hoist_vars: true,
-                inline: true,
-                loops: true,
-                negate_iife: true,
-                passes: 3,
-                reduce_funcs: true,
-                reduce_vars: true,
-                switches: true,
-                toplevel: true,
-                typeofs: true,
-                unsafe: true,
-                unsafe_arrows: true,
-                unsafe_comps: true,
-                unsafe_Function: true,
-                unsafe_math: true,
-                unsafe_methods: true,
-                unsafe_proto: true,
-                unsafe_regexp: true,
-                unsafe_undefined: true,
-              },
+              // output: {
+              //   comments: false,
+              //   indent_level: 2,
+              //   ecma:10,
+              //   indent_start: 0,
+              //   quote_keys: false,
+              //   wrap_iife: true,
+              // },
+              // compress: {
+              //   drop_console: true,
+              //   drop_debugger: true,
+              //   hoist_funs: true,
+              //   hoist_props: true,
+              //   hoist_vars: true,
+              //   inline: true,
+              //   loops: true,
+              //   negate_iife: true,
+              //   passes: 3,
+              //   reduce_funcs: true,
+              //   reduce_vars: true,
+              //   switches: true,
+              //   toplevel: true,
+              //   typeofs: true,
+              //   unsafe: true,
+              //   unsafe_arrows: true,
+              //   unsafe_comps: true,
+              //   unsafe_Function: true,
+              //   unsafe_math: true,
+              //   unsafe_methods: true,
+              //   unsafe_proto: true,
+              //   unsafe_regexp: true,
+              //   unsafe_undefined: true,
+              // },
               ie8: false
             }
           }),
@@ -146,7 +146,7 @@ const nextConfig =
     // };
 
     // Merge chunks instead of creating new ones
-    config.optimization.minimize = true;
+    config.optimization.minimize = false;
 //     if (typeof nextRuntime === "undefined") {
 //       config.resolve.fallback = {
 //                 ...config.resolve.fallback,

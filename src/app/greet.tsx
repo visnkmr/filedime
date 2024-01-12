@@ -1,7 +1,8 @@
 'use client'
+// 'use strict'
 
 import FRc from "../components/findsizecomp"
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
@@ -93,7 +94,8 @@ export default function Greet() {
   const [activetabid,setactivetabid]=useState(0)
   const [isgrid,setig]=useState(true)
   const [filecount, setfc] = useState(0);
-  const [tablist,settbl]=useState<tabinfo[]>()
+  const tablist=useRef<tabinfo[]>([])
+  console.log("tablist right now is "+JSON.stringify(tablist.current))
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
@@ -692,16 +694,16 @@ function updatetabs(tabpath){
       path:tabpath,
     }
   ).then((returned:string)=>{
-    console.log("preupdate tablist--->"+JSON.stringify(tablist))
-     if(tablist && tablist.length>0){
+    console.log("preupdate tablist--->"+JSON.stringify(tablist.current))
+     if(tablist.current && tablist.current.length>0){
 
-    let tempstoreoldtablist=tablist;
+    let tempstoreoldtablist=tablist.current;
     let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
     if(objIndex !== -1){
 
       tempstoreoldtablist![objIndex!].path = tabpath;
       tempstoreoldtablist![objIndex!].tabname = returned;
-      settbl(tempstoreoldtablist!);
+      tablist.current=(tempstoreoldtablist!);
     }
     console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
   }
@@ -711,9 +713,9 @@ function updatetabs(tabpath){
   })
 }
 function closetab(closeid){
-  if(tablist && tablist.length>1){
+  if(tablist.current && tablist.current.length>1){
       
-    let tempstoreoldtablist=tablist;
+    let tempstoreoldtablist=tablist.current;
     let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === closeid));
     if(objIndex !== -1){
       const removed=tempstoreoldtablist.splice(objIndex,1)
@@ -722,7 +724,7 @@ function closetab(closeid){
       // tempstoreoldtablist.map((tab,index)=>{
       
     // })
-      settbl(tempstoreoldtablist!);
+      tablist.current=(tempstoreoldtablist!);
       
     }
     
@@ -730,26 +732,28 @@ function closetab(closeid){
 }
   function newtab(){
     let newtabid=new Date().getTime();
-                      invoke(
-                        "tabname",
-                        {
-                          path:path,
-                        }
-                      ).then((returned:string)=>{
+    const returned=path;
+                      // invoke(
+                      //   "tabname",
+                      //   {
+                      //     path:path,
+                      //   }
+                      // ).then((returned:string)=>{
                         console.log("what was returned....."+returned)
-                        invoke(
-                          "newtab",
-                          {
-                            windowname:appWindow?.label,
-                            oid: newtabid.toString(),
-                            path: path,
-                            ff: ""
-                          }
-                        );
+                        // invoke(
+                        //   "newtab",
+                        //   {
+                        //     windowname:appWindow?.label,
+                        //     oid: newtabid.toString(),
+                        //     path: path,
+                        //     ff: ""
+                        //   }
+                        // );
                         
-                        settbl((old)=>{
-                          return (old && old?.length>0)?
-                          [...old,{
+                        // settbl((old)=>{
+                          console.log("before new tab tabs is---->"+JSON.stringify(tablist.current))
+                          tablist.current= (tablist.current && tablist.current?.length>0)?
+                          [...tablist.current,{
                             id:newtabid,
                             path:path,
                             ff:"",
@@ -763,8 +767,8 @@ function closetab(closeid){
                             tabname:returned,
                             history:[]
                           } as tabinfo]
-                        
-                        })
+                          console.log("after new tab tabs is---->"+JSON.stringify(tablist.current))
+                        // })
       // console.log("opened tab now tablist is "+JSON.stringify(tablist))
 
                         reset()
@@ -785,7 +789,7 @@ function closetab(closeid){
                           path: path,
                           ff: "" 
                       })
-                      });
+                      // });
   }
   function reloadsize(){
     reset(path)
@@ -816,7 +820,7 @@ function closetab(closeid){
               
             </Link>
             <LogInIcon className="w-4 h-4" onClick={()=>{
-              console.log(JSON.stringify(tablist))
+              console.log(JSON.stringify(tablist.current))
             }}/>
             
           </div>
@@ -967,11 +971,11 @@ function closetab(closeid){
               }
               </>):(null)}
               <span className='h-16'/>
-              {tablist?(<>
+              {tablist.current?(<>
               <h1 className=''>Tabs</h1>
               {
                 
-               tablist.map((tab, index) => (
+               tablist.current.map((tab, index) => (
                 <Link key={index}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
                   href="#"
@@ -992,10 +996,10 @@ function closetab(closeid){
                   {/* {activetabid === tab.id ? sampletext: */}
                   {tab.tabname}
                   {/* } */}
-                  <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
+                  <XIcon className={`h-4 w-4  ${tablist.current!.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
                     e.stopPropagation();
                     closetab(tab.id);
-                    activateTab(tablist[tablist.length-1])
+                    activateTab(tablist.current![tablist.current!.length-1])
                   }}/>
                 </Link>
                 ))
