@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet};
+use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet, fmt::format};
 mod dirsize;
 mod fileitem;
 mod filltrie;
@@ -12,7 +12,7 @@ use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use prefstore::*;
 use rayon::prelude::*;
-use sendtofrontend::{sendbuttonnames, lfat};
+use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
 use serde_json::json;
 use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent};
 use walkdir::WalkDir;
@@ -67,6 +67,79 @@ pub struct FileItem {
 }
 const CACHE_EXPIRY:u64=60;
 
+use std::fs::File;
+use std::io::{self,  Write, Seek, SeekFrom};
+#[tauri::command]
+fn mirror(functionname:String,arguments: Vec<String>,window: Window){
+  window.get_focused_window().unwrap().emit("mirror", serde_json::to_string(&json!({
+    "functionname":functionname,
+    "arguments":arguments
+  })).unwrap());
+}
+  #[tauri::command]
+async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window){
+  println!("copying function recieved rust from {}",windowname);
+  
+
+  match(fileop(windowname, src, dst, removefile,&window.app_handle())){
+    Ok(_) => {
+    println!("copying succeeded");
+      
+    },
+    Err(e) => {
+   println!("copying failed {}",e);
+      
+    },
+}
+}
+fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> io::Result<()> {
+   // Open the source file
+   let mut src_file = File::open(src.clone())?;
+
+   // Get the size of the source file
+   let src_size = src_file.metadata()?.len();
+   let src_path = Path::new(&src);
+   let src_filename = src_path.file_name().unwrap().to_str().unwrap();
+
+   // Append the filename to the destination path
+   let mut dst_path = Path::new(&dst).join(src_filename);
+
+   // Open the destination file
+   let mut dst_file = File::create(dst_path.clone())?;
+   println!("copy from  {} to {:?}",src,dst_path);
+   // Open the destination file
+  //  let mut dst_file = File::create(dst)?;
+
+   // Buffer to hold the read data
+   let mut buffer = [0; 1024];
+   let mut written = 0;
+   println!("copying started");
+
+   // Read from the source file and write to the destination file
+   loop {
+       match src_file.read(&mut buffer) {
+           Ok(0) => break,
+           Ok(n) => {
+               dst_file.write_all(&buffer[..n])?;
+               written+=n;
+               sendprogress(&windowname, ah, (json!({
+                "progress": written,
+                "size":src_size,
+             })).to_string());
+              //  pb.inc(n as u64);
+           },
+           Err(err) => return Err(err),
+       }
+   }
+   println!("copying done");
+
+  //  pb.finish_with_message("done");
+  // Remove the source file
+  if(removefile){
+    fs::remove_file(src)?;
+  }
+   Ok(())
+}
 
 #[tauri::command]
 async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
@@ -165,9 +238,13 @@ fn get_timestamp() -> String {
     timestamp
 }
 #[tauri::command]
-async fn nosize(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn nosize(windowname:String,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  println!("loading size rust---->1");
+
   state.togglenosize();
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  println!("loading size rust---->2");
+
   Ok(())
 }
 //manually test using ramdisk
@@ -228,9 +305,9 @@ async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStor
   Ok(whichpath.0)
 }
 #[tauri::command]
-async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
    let absolute_date=getuniquewindowlabel();
-  state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
+  // state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
   let filename=PathBuf::from(path.clone());
   let mut wname="";
   if let Some(fname)=filename.file_name(){
@@ -247,13 +324,18 @@ async fn newwindow(id:String,path:String,ff:String,window: Window,state: State<'
 
 #[tauri::command]
 fn tabname(path:String)->String{
+  let p=path.clone();
+  let result=
   if let Some(h)=PathBuf::from(&path).file_stem(){
     let tabname=h.to_string_lossy().to_string();
     if(tabname==""){path}else{tabname}
 }
 else{
     path
-}
+};
+println!(" found tabname of ------> {} as {}",p,result);
+
+result
 }
 #[tauri::command]
 async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
@@ -275,37 +357,37 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 fn main() {
   // init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
-  let reload = CustomMenuItem::new("reload", "Reload".to_string());
-  let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
-  // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
-  let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
-  // let back = CustomMenuItem::new("back-button", "Back".to_string());
-  // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
-  let recent = CustomMenuItem::new("recent", "Recent".to_string());
+  // let reload = CustomMenuItem::new("reload", "Reload".to_string());
+  // let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
+  // // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
+  // let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
+  // // let back = CustomMenuItem::new("back-button", "Back".to_string());
+  // // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
+  // let recent = CustomMenuItem::new("recent", "Recent".to_string());
   
-  let menu = Menu::new()
-  .add_submenu(Submenu::new("File", Menu::new()
-      // .add_item(open_terminal)
-      .add_item(hide_size)
-      .add_item(reload)
-      // .add_item(toggle_search)
-      .add_item(hide_child_count)
+  // let menu = Menu::new()
+  // .add_submenu(Submenu::new("File", Menu::new()
+  //     // .add_item(open_terminal)
+  //     .add_item(hide_size)
+  //     .add_item(reload)
+  //     // .add_item(toggle_search)
+  //     .add_item(hide_child_count)
       
-  ))
+  // ))
   
-  .add_submenu(Submenu::new("Window", Menu::new()
-  .add_item(CustomMenuItem::new("close", "Close"))
+  // .add_submenu(Submenu::new("Window", Menu::new()
+  // .add_item(CustomMenuItem::new("close", "Close"))
  
       
-  ))
+  // ))
 
-  .add_item(CustomMenuItem::new("Learn More", "Learn More"))
-  .add_item(CustomMenuItem::new("quit", "Quit"))
+  // .add_item(CustomMenuItem::new("Learn More", "Learn More"))
+  // .add_item(CustomMenuItem::new("quit", "Quit"))
    
-    // .add_item(back)
-    // .add_item(forward)
-    .add_item(recent)
-    ;
+  //   // .add_item(back)
+  //   // .add_item(forward)
+  //   .add_item(recent)
+  //   ;
   let mut g=AppStateStore::new(CACHE_EXPIRY);
 
   // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
@@ -415,71 +497,73 @@ fn main() {
     
       Ok(())
     })
-    .menu(menu)
-    .on_menu_event(|event| {
-      match event.menu_item_id() {
-        "quit" => {
-          std::process::exit(0);
-        }
-        "close" => {
-          event.window().close().unwrap();
-        }
-        "reload"=>{
-          event.window().emit("reloadlist","reload").unwrap();
-          // otb(event.window().label(),g);
-        }
-        "nosize"=>{
-          event.window().emit("reloadlist","nosize").unwrap();
-          // otb(event.window().label(),g);
-        }
-        "folcount"=>{
-          event.window().emit("reloadlist","folcount").unwrap();
-        }
-        "recent"=>{
-          event.window().emit("reloadlist","recent").unwrap();
-        }
-        // "tsearch"=>{
-        //   event.window().emit("reloadlist","tsearch").unwrap();
-        // }
-        "Learn More" => {
-            let url = "https://github.com/visnkmr/iomer";
-            shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
-          }
-        _ => {}
-      }
-    })
+    // .menu(menu)
+    // .on_menu_event(|event| {
+    //   match event.menu_item_id() {
+    //     "quit" => {
+    //       std::process::exit(0);
+    //     }
+    //     "close" => {
+    //       event.window().close().unwrap();
+    //     }
+    //     "reload"=>{
+    //       event.window().emit("reloadlist","reload").unwrap();
+    //       // otb(event.window().label(),g);
+    //     }
+    //     "nosize"=>{
+    //       event.window().emit("reloadlist","nosize").unwrap();
+    //       // otb(event.window().label(),g);
+    //     }
+    //     "folcount"=>{
+    //       event.window().emit("reloadlist","folcount").unwrap();
+    //     }
+    //     "recent"=>{
+    //       event.window().emit("reloadlist","recent").unwrap();
+    //     }
+    //     // "tsearch"=>{
+    //     //   event.window().emit("reloadlist","tsearch").unwrap();
+    //     // }
+    //     "Learn More" => {
+    //         let url = "https://github.com/visnkmr/iomer";
+    //         shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
+    //       }
+    //     _ => {}
+    //   }
+    // })
     .on_window_event(on_window_event)
 
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
-        tabname,
-        list_files,
-        loadmarkdown,
-        get_path_options,
-        getuniquewindowlabel,
-        openpath,
-        nosize,
+        mirror,
+        fileop_with_progress,
+        addmark,
+        backbutton,
+        closetab,
+        copynpaste,
         folcount,
+        foldersize,
+        get_path_options,
+        get_timestamp,
+        getuniquewindowlabel,
+        list_files,
+        load_tab,
+        loadfromhtml,
+        loadmarkdown,
         loadsearchlist,
         newtab,
-        load_tab,
-        backbutton,
-        addmark,
-        closetab,
-        removemark,
-        startserver,
-        loadfromhtml,
-        whattoload,
-        stopserver,
-        search_try,
-        recent_files,
         newwindow,
+        nosize,
+        openpath,
         otb,
-        foldersize,
-        copynpaste,
-        get_timestamp
+        recent_files,
+        removemark,
+        search_try,
+        startserver,
+        stopserver,
+        tabname,
+        whattoload,
         // get_window_label
         ]
       )

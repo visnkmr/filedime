@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
+src_old/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,7 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+.next/
 ; src-tauri/icons/
 src/assets/
 src-tauri/links.md
@@ -35,3 +35,4 @@ src/file-explorer-1.js.map
 src/file-explorer.js.map
 src/dialog.js.map
 src/dialog.js
+out/

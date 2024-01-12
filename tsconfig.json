@@ -1,11 +1,22 @@
 {
-  "include": ["src/*.d.ts", "src/*.ts"],
+  "include": [
+    "src/*.d.ts",
+    "shared/*.d.ts",
+    "src/shared/*.tsx",
+    "src/components/*.tsx",
+    "src/*.ts",
+    "src/*.tsx",
+    "js/*.ts",
+    "app/*.tsx",
+    ".next/types/**/*.ts" ],
   "compilerOptions": {
     // "typeRoots": [
-    //   "./node_modules/@types",
-    //   "./typings"
+    //   // "./node_modules/@types",
+    //   "./shared/types"
+    //   // "./typings"
     // ],
     "target": "ESNext",
+    "useDefineForClassFields": true,
     "removeComments": true,
     "esModuleInterop": true,
     // Allow JavaScript files to be compiled
@@ -43,7 +54,7 @@
     // Raise an error on this expressions with an inferred type of any
     "noImplicitThis": true,
     // Parse in strict mode and emit "use strict" for each source file
-    "alwaysStrict": true,
+    "alwaysStrict": false,
     // Enable stricter checking of the bind, call, and apply methods on functions
     "strictBindCallApply": true,
     // Enable stricter checking of null and undefined values
@@ -56,6 +67,29 @@
     "noImplicitReturns": true,
     // Report errors for fallthrough cases in switch statement
     "noFallthroughCasesInSwitch": true
-  // "esModuleInterop": true
-  }
+    // "esModuleInterop": true
+    ,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,0 +1,16 @@
+.bulb circle {
+    animation: flash 3s infinite;
+  }
+  
+  @keyframes flash {
+    0% {
+      fill-opacity: 0;
+    }
+    50% {
+      fill-opacity: 1;
+    }
+    100% {
+      fill-opacity: 0;
+    }
+  }
+  

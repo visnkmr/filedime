@@ -292,8 +292,7 @@ let handle=thread::spawn(move|| {
       }
       thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
   }
-})
-;
+});
 
 set_enum_value(&state.whichthread, wThread::Listing);
 let stop_flag_local = Arc::new(AtomicBool::new(true));

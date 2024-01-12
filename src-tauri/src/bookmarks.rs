@@ -21,7 +21,7 @@ pub async fn removemark(windowname:&str,path:String,window: Window,state: State<
 pub async fn addmark(windowname:&str,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.addmark(path);
   let app_handle = window.app_handle();
-  println!("{:?}",state);
+  // println!("{:?}",state);
   loadmarks(windowname, &app_handle, serde_json::to_string(&state.getmarks()).unwrap());
   
   Ok(())
