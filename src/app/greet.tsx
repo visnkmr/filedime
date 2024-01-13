@@ -1305,7 +1305,9 @@ function closetab(closeid){
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
-                    }).slice(0,10).map((message, index) => (
+                    })
+                    // .slice(0,10)
+                    .map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
             <HoverCard>
