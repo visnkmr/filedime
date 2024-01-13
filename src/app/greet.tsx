@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 
 import React from 'react';
@@ -214,7 +215,25 @@ export default function Greet() {
     functionname:string,
     arguments:string[]
   }
+  function openmarkdown(htmlfrommd: string) {
+    const options = {
+      replace: ({ attribs, name, children }) => {
+        if (!attribs || name !== 'a') {
+          return;
+        }
+    
+        return <a {...attribs} target="_blank">{children}</a>;
+      },
+     };
+    
+     return <div>{parse(htmlfrommd, options)}</div>;
+  }
   useEffect(() => {
+    listen("load-markdown", (data: { payload: string }) => {
+        console.log("loadmarkdown")
+        
+        openmarkdown(data.payload)
+      });
     // listen("mirror", (data: { payload: string }) => {
     //   let whattodo:wtd=JSON.parse(data.payload)
     //   switch(whattodo.functionname){
@@ -257,7 +276,7 @@ export default function Greet() {
     //   settbl(tabs)
     //   // // console.log("files")
     //   // clear the file list
-    //   // globals.tablist.innerHTML = "";
+    //   // tablist.innerHTML = "";
     //   // // console.log(data.payload)
     //   // loop through the files array
     //   // for (let tb of tabs) {
@@ -675,6 +694,7 @@ function populateimmediatechildcount(){
       path: path
     });
 }
+
 function recentfiles(){
     console.log("recent");
     invoke(
