@@ -1455,6 +1455,9 @@ function closetab(closeid){
               </HoverCardTrigger>
               <HoverCardContent className='flex flex-col'>
                {message.path}
+               <br/>
+               {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
+               
               <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
               </HoverCardContent>
             </HoverCard>
