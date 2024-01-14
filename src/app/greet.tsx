@@ -3,7 +3,7 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
@@ -370,6 +370,7 @@ export default function Greet() {
       let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
       sst("Search Results")
       console.log("Found----->"+fl.length)
+      // fl=fl.splice(0,500);
       setfileslist(fl)
       setfc(fl.length)
       // // if(globalThis.lastpopfilelist.length>10)
@@ -504,14 +505,102 @@ const columns: ColumnDef<FileItem>[] = [
     cell: ({
       getValue,
       row: {
-        original: { path,name },
+        original: { path,name,foldercon,size,rawfs,is_dir },
       },
     }) => {
       const rname = getValue()
 
       return (
-        
-          <button className='w-32' onDoubleClick={
+        <div>
+          <ContextMenu>
+          <ContextMenuTrigger>
+            <HoverCard>
+              <HoverCardTrigger>
+              <button className="flex items-center" onDoubleClick={
+                ()=>
+                { 
+                  console.log("gridlayout clicked");
+                  reset(path)
+                  updatetabs(path)
+                 
+                  // setpath()
+                  // setpsplitl(splitpath(path))
+                  sst(name)
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: "" 
+                  });
+                  // },[])
+                  }
+                }>
+                {/* <CardContent > */}
+                  {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
+                  {/* <span className="font-medium text-lg"> */}
+                    {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
+                    {/* </span> */}
+                {/* </CardContent> */}
+              </button>
+              </HoverCardTrigger>
+              <HoverCardContent className='flex flex-col'>
+               {path}
+               <br/>
+               {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
+               
+              <FRc location={path} size={size} rawsize={rawfs}/>
+              </HoverCardContent>
+            </HoverCard>
+
+            
+          </ContextMenuTrigger>
+          <ContextMenuContent className=''>
+            <p className='text-sm'>{path}</p>
+            <ContextMenuItem onSelect={(e)=>{
+              invoke("newwindow",
+              {
+                // id: (winInfo.tabidsalloted++).toString(),
+                path: path,
+                ff:""
+              });
+
+            }}>Open in new window</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              // openTab(path)
+              invoke(
+                "newtab",
+                {
+                  windowname:appWindow?.label,
+                  oid: activetabid.toString(),
+                  path: path,
+                  ff: ""
+                }
+              );
+            }}>Open in new tab</ContextMenuItem>
+            <ContextMenuItem onSelect={()=>{
+              invoke(
+                "addmark",
+                {
+              windowname:appWindow?.label,
+                  path: path
+                }
+              );
+            }}>Add bookmark</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              try {
+                navigator.clipboard.writeText(path);
+                console.log('Content copied to clipboard');
+              } catch (err) {
+                console.error('Failed to copy: ', err);
+              }
+            }}>Copy path to clipboard</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              setfos(path)
+            }}>Copy</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+          {/* <button className='w-32' onDoubleClick={
             ()=>
             { 
               reset(path)
@@ -527,7 +616,8 @@ const columns: ColumnDef<FileItem>[] = [
             ff: "" 
         })
           }
-          }>{`${name}`}</button>
+          }>{`${name}`}</button> */}
+        </div>
         // <div className="text-right">
         //   {original_price_incl_tax !== price && (
         //     <Tooltip
@@ -1421,7 +1511,7 @@ function closetab(closeid){
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
                     })
-                    // .slice(0,10)
+                    .slice(0,fileslist.length>500?500:fileslist.length)
                     .map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
