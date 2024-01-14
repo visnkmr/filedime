@@ -3,7 +3,7 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
@@ -93,6 +93,8 @@ export default function Greet() {
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
   const [isgrid,setig]=useState(true)
+  const [startstopfilewatch,setstartstopfilewatch]=useState(false)
+  const [setwatchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
@@ -217,6 +219,7 @@ export default function Greet() {
     arguments:string[]
   }
   function openmarkdown(htmlfrommd: string) {
+    setwbv(true)
     console.log("before editing md is ---->"+htmlfrommd)
     const news=htmlfrommd.replace(/<a\s/g, "<a target='_blank' ");
     console.log("after editing md is ---->"+news)
@@ -231,6 +234,34 @@ export default function Greet() {
         
         openmarkdown(data.payload)
       });
+      listen("send-log", (data: { payload: string }) => {
+        // console.log("grandloc")
+        let status=data.payload;
+        switch(status){
+            case "stopped":
+                console.log("file watching stopped")
+                break;
+            case "changed":
+                (window as any).__TAURI__.invoke(
+                    "list_files",
+                    {
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: ""
+                    });
+                break;
+        }
+        // lastfolder = data.payload.toString();
+        // console.log(data.payload.toString())
+      });
+    //   listen("load-html", (data: { payload: string }) => {
+    //     setmdc(data.payload)
+
+    //     // lastfolder = data.payload.toString();
+    //     // console.log(data.payload.toString())
+    //   }
+    // );
     // listen("mirror", (data: { payload: string }) => {
     //   let whattodo:wtd=JSON.parse(data.payload)
     //   switch(whattodo.functionname){
@@ -365,6 +396,7 @@ export default function Greet() {
     .catch(console.error);
     // const unlisten1=
     listen('list-files', (event) => {
+      setwbv(false)
       setfc((old) => {
         const newFileCount = old + 1;
         // if (newFileCount < 11)
@@ -410,8 +442,11 @@ export default function Greet() {
   useEffect(()=>{
     if(!appWindow)
       return
-    setpath("drives://")
-    newtab();
+      if(!startstopfilewatch){
+
+        setpath("drives://")
+        newtab();
+      }
   },[appWindow])
 //   useEffect(() => {
 //     invoke<string>('greet', { 
@@ -1077,6 +1112,65 @@ function closetab(closeid){
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                 ()=>{
+                  setstartstopfilewatch((old)=>{let newv= !old;
+                    if(newv){
+
+                      // console.log("startserve");
+                      invoke(
+                        "startserver",
+                        {
+                          windowname:appWindow?.label,
+                          pathstr:path
+                        }
+                        );
+                    }
+                    // }
+                    // else if (target==globals.stopserve){
+                    // console.log("stopserve");
+                    else{
+                    invoke(
+                      "stopserver",
+                      {
+                        windowname:appWindow?.label,
+                        path:""
+                      }
+                    );
+                  }
+                  return newv});
+          
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <EyeIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent >
+               Hot reload (Monitor changes and reload as necessary)
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  reloadsize()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <RulerIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent >
+               Show size of folder
+              </HoverCardContent>
+            </HoverCard>
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
                   populateimmediatechildcount()
                 }
             }>
@@ -1278,7 +1372,7 @@ function closetab(closeid){
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
