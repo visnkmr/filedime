@@ -230,9 +230,10 @@ export default function Greet() {
   // }
   useEffect(() => {
     listen("load-markdown", (data: { payload: string }) => {
+      let markdowninfo=JSON.parse(data.payload);
         console.log("loadmarkdown")
-        
-        openmarkdown(data.payload)
+        sst(markdowninfo.filename)
+        openmarkdown(markdowninfo.htmlfmd)
       });
       listen("send-log", (data: { payload: string }) => {
         // console.log("grandloc")
@@ -1369,7 +1370,7 @@ function closetab(closeid){
             <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
-        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
+        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
         <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
