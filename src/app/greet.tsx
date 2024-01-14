@@ -94,7 +94,7 @@ export default function Greet() {
   const [activetabid,setactivetabid]=useState(0)
   const [isgrid,setig]=useState(true)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
-  const [setwatchbuttonvisibility,setwbv]=useState(false)
+  const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
@@ -1108,6 +1108,8 @@ function closetab(closeid){
                Show size of folder
               </HoverCardContent>
             </HoverCard>
+            <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
+
             <HoverCard>
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
@@ -1150,7 +1152,8 @@ function closetab(closeid){
                Hot reload (Monitor changes and reload as necessary)
               </HoverCardContent>
             </HoverCard>
-            <HoverCard>
+            </div>
+            {/* <HoverCard>
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                 ()=>{
@@ -1166,7 +1169,7 @@ function closetab(closeid){
               <HoverCardContent >
                Show size of folder
               </HoverCardContent>
-            </HoverCard>
+            </HoverCard> */}
             <HoverCard>
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
