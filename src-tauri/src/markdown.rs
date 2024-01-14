@@ -1,6 +1,7 @@
 use std::{path::PathBuf, io::Read};
 
 use comrak::{markdown_to_html, ComrakOptions};
+use serde_json::json;
 use tauri::{Window, State, Manager};
 
 use crate::{appstate::AppStateStore, sizeunit::{self, find_size}, sendtofrontend::{folsize, sendparentloc}};
@@ -10,6 +11,10 @@ pub fn loadmarkdown(windowname:&str,name: String, window: Window,g:State<AppStat
   let mut content=String::new();
   let app_handle = window.app_handle();
   let path=PathBuf::from(name.clone());
+  let mut filename="";
+  if let Some(filenameosstr)=path.file_name(){
+    filename=filenameosstr.to_str().unwrap();
+  }
   let parent=path.clone();
 
   let mut file = std::fs::File::open(name).unwrap();
@@ -36,7 +41,10 @@ pub fn loadmarkdown(windowname:&str,name: String, window: Window,g:State<AppStat
   app_handle.emit_to(
       windowname,
       "load-markdown",
-      &htmformd,
+      serde_json::to_string(&json!({
+        "htmlfmd":htmformd,
+        "filename":filename
+      })).unwrap(),
     )
     .map_err(|e| e.to_string()).unwrap_or(println!("failed to send parent loc"));
 

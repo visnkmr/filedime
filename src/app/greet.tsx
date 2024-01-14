@@ -3,8 +3,9 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 
 import React from 'react';
@@ -92,12 +93,15 @@ export default function Greet() {
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
   const [isgrid,setig]=useState(true)
+  const [startstopfilewatch,setstartstopfilewatch]=useState(false)
+  const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
+  const [mdc,setmdc] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
@@ -214,7 +218,51 @@ export default function Greet() {
     functionname:string,
     arguments:string[]
   }
+  function openmarkdown(htmlfrommd: string) {
+    setwbv(true)
+    console.log("before editing md is ---->"+htmlfrommd)
+    const news=htmlfrommd.replace(/<a\s/g, "<a target='_blank' ");
+    console.log("after editing md is ---->"+news)
+    setmdc(news);
+  }
+  // if(mdc){
+  //   reset()
+  // }
   useEffect(() => {
+    listen("load-markdown", (data: { payload: string }) => {
+      let markdowninfo=JSON.parse(data.payload);
+        console.log("loadmarkdown")
+        sst(markdowninfo.filename)
+        openmarkdown(markdowninfo.htmlfmd)
+      });
+      listen("send-log", (data: { payload: string }) => {
+        // console.log("grandloc")
+        let status=data.payload;
+        switch(status){
+            case "stopped":
+                console.log("file watching stopped")
+                break;
+            case "changed":
+                (window as any).__TAURI__.invoke(
+                    "list_files",
+                    {
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: ""
+                    });
+                break;
+        }
+        // lastfolder = data.payload.toString();
+        // console.log(data.payload.toString())
+      });
+    //   listen("load-html", (data: { payload: string }) => {
+    //     setmdc(data.payload)
+
+    //     // lastfolder = data.payload.toString();
+    //     // console.log(data.payload.toString())
+    //   }
+    // );
     // listen("mirror", (data: { payload: string }) => {
     //   let whattodo:wtd=JSON.parse(data.payload)
     //   switch(whattodo.functionname){
@@ -257,7 +305,7 @@ export default function Greet() {
     //   settbl(tabs)
     //   // // console.log("files")
     //   // clear the file list
-    //   // globals.tablist.innerHTML = "";
+    //   // tablist.innerHTML = "";
     //   // // console.log(data.payload)
     //   // loop through the files array
     //   // for (let tb of tabs) {
@@ -349,6 +397,7 @@ export default function Greet() {
     .catch(console.error);
     // const unlisten1=
     listen('list-files', (event) => {
+      setwbv(false)
       setfc((old) => {
         const newFileCount = old + 1;
         // if (newFileCount < 11)
@@ -394,8 +443,11 @@ export default function Greet() {
   useEffect(()=>{
     if(!appWindow)
       return
-    setpath("drives://")
-    newtab();
+      if(!startstopfilewatch){
+
+        setpath("drives://")
+        newtab();
+      }
   },[appWindow])
 //   useEffect(() => {
 //     invoke<string>('greet', { 
@@ -675,6 +727,7 @@ function populateimmediatechildcount(){
       path: path
     });
 }
+
 function recentfiles(){
     console.log("recent");
     invoke(
@@ -1056,6 +1109,68 @@ function closetab(closeid){
                Show size of folder
               </HoverCardContent>
             </HoverCard>
+            <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
+
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  setstartstopfilewatch((old)=>{let newv= !old;
+                    if(newv){
+
+                      // console.log("startserve");
+                      invoke(
+                        "startserver",
+                        {
+                          windowname:appWindow?.label,
+                          pathstr:path
+                        }
+                        );
+                    }
+                    // }
+                    // else if (target==globals.stopserve){
+                    // console.log("stopserve");
+                    else{
+                    invoke(
+                      "stopserver",
+                      {
+                        windowname:appWindow?.label,
+                        path:""
+                      }
+                    );
+                  }
+                  return newv});
+          
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <EyeIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent >
+               Hot reload (Monitor changes and reload as necessary)
+              </HoverCardContent>
+            </HoverCard>
+            </div>
+            {/* <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                ()=>{
+                  reloadsize()
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <RulerIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent >
+               Show size of folder
+              </HoverCardContent>
+            </HoverCard> */}
             <HoverCard>
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
@@ -1255,13 +1370,13 @@ function closetab(closeid){
             <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
-        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
+        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <p>{searchstring.trim().length>0?"":path}</p>
         <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -1305,7 +1420,9 @@ function closetab(closeid){
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
-                    }).slice(0,10).map((message, index) => (
+                    })
+                    // .slice(0,10)
+                    .map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
             <HoverCard>
@@ -1391,7 +1508,13 @@ function closetab(closeid){
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
+         
+        {/* <span>
+
+          {mdc}
+        </span> */}
         </div>
+        <div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>
         {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
           <TableHeader>
