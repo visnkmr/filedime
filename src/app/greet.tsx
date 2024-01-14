@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 
 import React from 'react';
@@ -98,6 +99,7 @@ export default function Greet() {
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
+  const [mdc,setmdc] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
@@ -214,7 +216,21 @@ export default function Greet() {
     functionname:string,
     arguments:string[]
   }
+  function openmarkdown(htmlfrommd: string) {
+    console.log("before editing md is ---->"+htmlfrommd)
+    const news=htmlfrommd.replace(/<a\s/g, "<a target='_blank' ");
+    console.log("after editing md is ---->"+news)
+    setmdc(news);
+  }
+  // if(mdc){
+  //   reset()
+  // }
   useEffect(() => {
+    listen("load-markdown", (data: { payload: string }) => {
+        console.log("loadmarkdown")
+        
+        openmarkdown(data.payload)
+      });
     // listen("mirror", (data: { payload: string }) => {
     //   let whattodo:wtd=JSON.parse(data.payload)
     //   switch(whattodo.functionname){
@@ -257,7 +273,7 @@ export default function Greet() {
     //   settbl(tabs)
     //   // // console.log("files")
     //   // clear the file list
-    //   // globals.tablist.innerHTML = "";
+    //   // tablist.innerHTML = "";
     //   // // console.log(data.payload)
     //   // loop through the files array
     //   // for (let tb of tabs) {
@@ -675,6 +691,7 @@ function populateimmediatechildcount(){
       path: path
     });
 }
+
 function recentfiles(){
     console.log("recent");
     invoke(
@@ -1393,7 +1410,13 @@ function closetab(closeid){
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
+         
+        {/* <span>
+
+          {mdc}
+        </span> */}
         </div>
+        <div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>
         {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
           <TableHeader>
