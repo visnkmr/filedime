@@ -3,7 +3,7 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
@@ -39,7 +39,8 @@ type tabinfo = {
 };
 type mark = {
   path:string,
-  name:string
+  name:string,
+  // is_dir:string
 };
 interface wininfo{
   winname:string,
@@ -92,6 +93,7 @@ export default function Greet() {
   const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
+  const [listlimit,setll]=useState(true)
   const [isgrid,setig]=useState(true)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
@@ -962,6 +964,7 @@ function closetab(closeid){
               console.log(JSON.stringify(tablist))
             }}/>
             
+            
           </div>
          
 
@@ -1086,8 +1089,10 @@ function closetab(closeid){
                     }
                     }
                 >
-                  <FolderIcon className="h-4 w-4" />
+                   {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+                   <BookIcon className="h-6 w-6 mr-3" />
                   {mark.name}
+                  
                 </button>
                     
                   </ContextMenuTrigger>
@@ -1308,7 +1313,7 @@ function closetab(closeid){
                 }
             }>
             <CardDescription className="flex items-center space-x-2 p-2">
-              <FolderIcon className="h-4 w-4" />
+              <CodeIcon className="h-4 w-4" />
               <span className="font-medium text-sm">{bn}</span>
             </CardDescription>
           </Card>
@@ -1460,7 +1465,13 @@ function closetab(closeid){
             <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
+        <span className="flex flex-row space-x-4 w-full">
+
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
+        <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
+              setll((old)=>{return !old});
+            }}>Show all</Button>
+        </span>
         <p>{searchstring.trim().length>0?"":path}</p>
         <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
@@ -1511,7 +1522,7 @@ function closetab(closeid){
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
                     })
-                    .slice(0,fileslist.length>500?500:fileslist.length)
+                    .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
@@ -1538,7 +1549,7 @@ function closetab(closeid){
                   }
                 }>
                 <CardContent className="flex items-center space-x-4">
-                  <FolderIcon className="h-6 w-6" />
+                {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                   <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                 </CardContent>
               </Card>
