@@ -99,6 +99,7 @@ export default function Greet() {
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
+  const [mdc,setmdc] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
@@ -216,18 +217,14 @@ export default function Greet() {
     arguments:string[]
   }
   function openmarkdown(htmlfrommd: string) {
-    const options = {
-      replace: ({ attribs, name, children }) => {
-        if (!attribs || name !== 'a') {
-          return;
-        }
-    
-        return <a {...attribs} target="_blank">{children}</a>;
-      },
-     };
-    
-     return <div>{parse(htmlfrommd, options)}</div>;
+    console.log("before editing md is ---->"+htmlfrommd)
+    const news=htmlfrommd.replace(/<a\s/g, "<a target='_blank' ");
+    console.log("after editing md is ---->"+news)
+    setmdc(news);
   }
+  // if(mdc){
+  //   reset()
+  // }
   useEffect(() => {
     listen("load-markdown", (data: { payload: string }) => {
         console.log("loadmarkdown")
@@ -1413,7 +1410,13 @@ function closetab(closeid){
         </ContextMenu>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
+         
+        {/* <span>
+
+          {mdc}
+        </span> */}
         </div>
+        <div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>
         {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
           <TableHeader>
