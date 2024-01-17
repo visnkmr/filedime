@@ -151,7 +151,7 @@ thread::spawn(move || {
         msval=*update.iter().next().unwrap_or(&120);
         
       }
-      println!("---->{}",ret.len());
+      // println!("---->{}",ret.len());
       if last_print.elapsed() >= Duration::from_millis(msval) { 
 
         // Read the hashset with a read lock
@@ -164,7 +164,7 @@ thread::spawn(move || {
 
               
         // println!("{:?}", *ret);
-        println!("{:?}", ret.len());
+        // println!("{:?}", ret.len());
         // Check the flag with a read lock
         let done = done_clone.read().unwrap();
         // If the flag is true, break out of the loop
@@ -200,16 +200,16 @@ thread::spawn(move || {
 // Populate the hashset using par_iter and inspect
 let u:HashSet<String>=map.clone()
     .par_iter()
-    // .filter(|(i, _)| {
-    //   // fuzzy_match(&i, &string).unwrap_or(0)>0
+    .filter(|(i, _)| {
+      // fuzzy_match(&i, &string).unwrap_or(0)>0
       
-    //    (
-    //     is_needed_file(i)||
-    //    is_image_file(i) 
-    //   )
-    //   // true
+       (
+        is_needed_file(i)||
+       is_image_file(i) 
+      )
+      // true
 
-    // })
+    })
     .flat_map(|(_, y)| {
       window.emit("reloadlist",json!({
         "message": "pariter4",
@@ -218,9 +218,9 @@ let u:HashSet<String>=map.clone()
       y.par_iter()
     })
     .cloned()
-    // .filter(|i|{
-    //   !i.contains("node_modules")
-    // })
+    .filter(|i|{
+      !i.contains("node_modules")
+    })
     // .inspect(|o| {
     //   // let path=Path::new(o);
     //   // let fname=path.file_name().unwrap().to_string_lossy().to_string();
@@ -267,7 +267,7 @@ let u:HashSet<String>=map.clone()
         
         // Drop the lock after inserting
         drop(ret);
-      println!("{}",ei);
+      // println!("{}",ei);
       Some(())
     });
     let wtr=ret_clone2.read().unwrap().clone();
@@ -332,13 +332,12 @@ fn is_image_file(file_name: &str) -> bool {
   }
 }
 fn is_needed_file(file_name: &str) -> bool {
-  return true
-  // let extension = Path::new(file_name)
-  //     .extension()
-  //     .and_then(|ext| ext.to_str())
-  //     .unwrap_or("");
-  // match extension.to_lowercase().as_str() {
-  //     "rs" | "js" | "json" | "toml" => true,
-  //     _ => false,
-  // }
+  let extension = Path::new(file_name)
+      .extension()
+      .and_then(|ext| ext.to_str())
+      .unwrap_or("");
+  match extension.to_lowercase().as_str() {
+      "rs" | "js" | "json" | "toml" => true,
+      _ => false,
+  }
 }
