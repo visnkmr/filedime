@@ -97,7 +97,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
             if let Ok(file) = File::open(path){ // open the file
             let reader = BufReader::new(file); // create a buffered reader
             folderloc=reader.lines().count(); // count the number of lines in the file
-            // println!("Number of lines: {}", count); 
+            // println!("Number of lines: {}", folderloc); 
             }// print the count
           }
           else if matches!(g.to_string_lossy().as_ref(),
@@ -201,7 +201,12 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
       rawfs:size,    
       lmdate:lmdate.clone(),
       timestamp:timestamp,
-      foldercon:foldercon,
+      foldercon:if(path.is_dir()){
+        foldercon
+      }
+      else{
+        folderloc as i32
+      },
       ftype: if(folderloc>0){
         filetype + " (" + &folderloc.to_string() + ")" 
       }

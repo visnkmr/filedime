@@ -355,6 +355,7 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 }
 
 fn main() {
+  
   // init();
   // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
   // let reload = CustomMenuItem::new("reload", "Reload".to_string());

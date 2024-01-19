@@ -279,6 +279,7 @@ pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStat
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();
         let endtime = duration.as_secs();
+        // println!("stl is {:?  }",state);
         println!("endtime----{}",endtime);
         
         // .collect(); // collect into a vec

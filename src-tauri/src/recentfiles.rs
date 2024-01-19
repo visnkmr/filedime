@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock}, thread, io::{BufReader, BufRead}, collections::HashSet, cmp::Ordering};
 
 use rayon::prelude::*;
 use serde::Serialize;
@@ -151,7 +151,7 @@ thread::spawn(move || {
         msval=*update.iter().next().unwrap_or(&120);
         
       }
-      println!("---->{}",ret.len());
+      // println!("---->{}",ret.len());
       if last_print.elapsed() >= Duration::from_millis(msval) { 
 
         // Read the hashset with a read lock
@@ -164,7 +164,7 @@ thread::spawn(move || {
 
               
         // println!("{:?}", *ret);
-        println!("{:?}", ret.len());
+        // println!("{:?}", ret.len());
         // Check the flag with a read lock
         let done = done_clone.read().unwrap();
         // If the flag is true, break out of the loop
@@ -267,7 +267,7 @@ let u:HashSet<String>=map.clone()
         
         // Drop the lock after inserting
         drop(ret);
-      println!("{}",ei);
+      // println!("{}",ei);
       Some(())
     });
     let wtr=ret_clone2.read().unwrap().clone();
@@ -341,3 +341,33 @@ fn is_needed_file(file_name: &str) -> bool {
       _ => false,
   }
 }
+// extern crate gtk;
+// extern crate gio;
+
+// use gtk::{prelude::*, RecentManager};
+// use gio::prelude::*;
+
+// #[test]
+// #[tauri::command]
+// async fn getrecentfiles(windowname:String,window: Window, state: State<'_, AppStateStore>)->Result<(),()> {
+//   let mut hfi:HashSet<FileItem>=HashSet::new();
+//    match(gtk::init()){
+//     Ok(_) => {
+//       let manager = RecentManager::default().expect("Failed to get RecentManager.");
+//       let mut items = manager.items();
+//         items.sort_by_cached_key(|item| item.modified() as i64);
+//         items.reverse();
+//         println!("{}",items.len());
+//       for item in items {
+//         hfi.insert(populatefileitem(item.display_name().unwrap().to_string(), Path::new(&item.uri_display().unwrap().to_string()), &window, &state));
+//           // println!("{} {:?} {}",item.modified(),item.display_name().unwrap(),item.uri_display().unwrap())
+//       }
+//       rflist(&windowname,&window.app_handle(), &hfi)
+//     },
+//     Err(_) => {
+      
+//     },
+// }
+
+//    Ok(())
+// }

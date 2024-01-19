@@ -1,4 +1,6 @@
 use std::process::Command;
+use chrono::format::format;
+use regex::Regex;
 use sysinfo::{DiskExt, System, SystemExt, RefreshKind};
 
 use crate::sizeunit;
@@ -64,3 +66,83 @@ pub fn get_drives() -> Result<Drives, String> {
 
     Ok(Drives { array_of_drives })
 }
+#[derive(Debug)]
+struct ditem{
+    name:Option<String>,
+    fstype:Option<String>,
+    label:Option<String>,
+    uuid:Option<String>,
+    mountpoint:Option<String>,
+
+}
+fn parse_drive_info(line: &str){
+    let fields: Vec<&str> = line.split_whitespace().collect();
+    println!("{:?}",ditem{
+        name: fields.get(0).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
+        fstype: fields.get(1).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
+        label: fields.get(2).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
+        uuid: fields.get(3).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
+        mountpoint: fields.get(4).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
+    });
+ }
+
+#[test]
+fn listallntfs() {
+    let output = Command::new("lsblk")
+        .arg("-f")
+        .output()
+        .expect("Failed to execute command");
+ 
+    let output = String::from_utf8(output.stdout).unwrap();
+    let lines: Vec<&str> = output.split('\n').collect();
+    // let mut dlist:Vec<DriveInformation>=Vec::new();
+    
+    for line in lines {
+        parse_drive_info(&line)
+    //     if line.contains("ntfs") {
+    //         let words: Vec<&str> = line.split_whitespace().collect();
+    //         let re = Regex::new(r"\w+").unwrap();
+    //         let result = re.find(words[0]).unwrap().as_str();
+    //         // if(words.len()>3){
+    //             // println!("/dev/{}-------{}", result, words[2]);
+    //             dlist.push(DriveInformation{
+    //                 name:words[2].to_string(),
+    //                 mount_point: format!("/dev/{}", result),
+    //                 total:String::new(),
+    //                 free: String::new(),
+    //                 is_removable: false,
+    //                 disk_type: String::new(),
+    //                 file_system: "NTFS".to_string(),
+    //             });
+    //         // }
+    //         // else{
+
+    //         // }
+    //         // println!("{}", line);
+    //     }
+    }
+    // println!("{:?}",dlist)
+ }
+ fn mountdrive(uuid:String,mount_point:String) {
+    // Create the directory
+    let mkdir_cmd = Command::new("mkdir")
+        .arg(format!("/run/media/{}",uuid))
+        .status()
+        .expect("Failed to execute command");
+ 
+    // Check if the directory creation was successful
+    assert!(mkdir_cmd.success());
+ 
+    // Mount the NTFS partition
+    let mount_cmd = Command::new("mount")
+        .arg("-t")
+        .arg("ntfs-3g")
+        .arg(format!("{}",mount_point))
+        .arg(format!("/run/media/{}",uuid))
+        .status()
+        .expect("Failed to execute command");
+ 
+    // Check if the mount operation was successful
+    assert!(mount_cmd.success());
+ }
+ 

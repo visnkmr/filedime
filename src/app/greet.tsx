@@ -2,12 +2,12 @@
 
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon} from "lucide-react"
+import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
-import parse from 'html-react-parser';
+// import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
-
+// import { platform } from '@tauri-apps/api/os'
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -39,7 +39,8 @@ type tabinfo = {
 };
 type mark = {
   path:string,
-  name:string
+  name:string,
+  // is_dir:string
 };
 interface wininfo{
   winname:string,
@@ -72,6 +73,13 @@ import '../styles/committablestyle.css'
 
 
 export default function Greet() {
+  // if (platformName === 'linux') 
+console.log(convertFileSrc("/home/roger/Downloads/gpsss.png"))
+  // {
+    // assetUrl = await convertFileSrc2(playingTrack.value.file_path)
+  // } else {
+    // assetUrl = convertFileSrc(playingTrack.value.file_path)
+  // }
   
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
@@ -92,6 +100,7 @@ export default function Greet() {
   const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
+  const [listlimit,setll]=useState(true)
   const [isgrid,setig]=useState(true)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
@@ -370,6 +379,7 @@ export default function Greet() {
       let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
       sst("Search Results")
       console.log("Found----->"+fl.length)
+      // fl=fl.splice(0,500);
       setfileslist(fl)
       setfc(fl.length)
       // // if(globalThis.lastpopfilelist.length>10)
@@ -504,14 +514,102 @@ const columns: ColumnDef<FileItem>[] = [
     cell: ({
       getValue,
       row: {
-        original: { path,name },
+        original: { path,name,foldercon,size,rawfs,is_dir },
       },
     }) => {
       const rname = getValue()
 
       return (
-        
-          <button className='w-32' onDoubleClick={
+        <div>
+          <ContextMenu>
+          <ContextMenuTrigger>
+            <HoverCard>
+              <HoverCardTrigger>
+              <button className="flex items-center" onDoubleClick={
+                ()=>
+                { 
+                  // console.log("gridlayout clicked");
+                  reset(path)
+                  updatetabs(path)
+                 
+                  // setpath()
+                  // setpsplitl(splitpath(path))
+                  sst(name)
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: "" 
+                  });
+                  // },[])
+                  }
+                }>
+                {/* <CardContent > */}
+                  {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
+                  {/* <span className="font-medium text-lg"> */}
+                    {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
+                    {/* </span> */}
+                {/* </CardContent> */}
+              </button>
+              </HoverCardTrigger>
+              <HoverCardContent className='flex flex-col'>
+               {path}
+               <br/>
+               {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
+               
+              <FRc location={path} size={size} rawsize={rawfs}/>
+              </HoverCardContent>
+            </HoverCard>
+
+            
+          </ContextMenuTrigger>
+          <ContextMenuContent className=''>
+            <p className='text-sm'>{path}</p>
+            <ContextMenuItem onSelect={(e)=>{
+              invoke("newwindow",
+              {
+                // id: (winInfo.tabidsalloted++).toString(),
+                path: path,
+                ff:""
+              });
+
+            }}>Open in new window</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              // openTab(path)
+              invoke(
+                "newtab",
+                {
+                  windowname:appWindow?.label,
+                  oid: activetabid.toString(),
+                  path: path,
+                  ff: ""
+                }
+              );
+            }}>Open in new tab</ContextMenuItem>
+            <ContextMenuItem onSelect={()=>{
+              invoke(
+                "addmark",
+                {
+              windowname:appWindow?.label,
+                  path: path
+                }
+              );
+            }}>Add bookmark</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              try {
+                navigator.clipboard.writeText(path);
+                console.log('Content copied to clipboard');
+              } catch (err) {
+                console.error('Failed to copy: ', err);
+              }
+            }}>Copy path to clipboard</ContextMenuItem>
+            <ContextMenuItem onSelect={(e)=>{
+              setfos(path)
+            }}>Copy</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+          {/* <button className='w-32' onDoubleClick={
             ()=>
             { 
               reset(path)
@@ -527,7 +625,8 @@ const columns: ColumnDef<FileItem>[] = [
             ff: "" 
         })
           }
-          }>{`${name}`}</button>
+          }>{`${name}`}</button> */}
+        </div>
         // <div className="text-right">
         //   {original_price_incl_tax !== price && (
         //     <Tooltip
@@ -866,11 +965,11 @@ function closetab(closeid){
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
-              
             </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
             }}/>
+            
             
           </div>
          
@@ -996,8 +1095,10 @@ function closetab(closeid){
                     }
                     }
                 >
-                  <FolderIcon className="h-4 w-4" />
+                   {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+                   <BookIcon className="h-6 w-6 mr-3" />
                   {mark.name}
+                  
                 </button>
                     
                   </ContextMenuTrigger>
@@ -1218,7 +1319,7 @@ function closetab(closeid){
                 }
             }>
             <CardDescription className="flex items-center space-x-2 p-2">
-              <FolderIcon className="h-4 w-4" />
+              <CodeIcon className="h-4 w-4" />
               <span className="font-medium text-sm">{bn}</span>
             </CardDescription>
           </Card>
@@ -1370,17 +1471,24 @@ function closetab(closeid){
             <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
+        <span className="flex flex-row space-x-4 w-full">
+
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
+        <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
+              setll((old)=>{return !old});
+            }}>Show all</Button>
+        </span>
         <p>{searchstring.trim().length>0?"":path}</p>
         <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6`}>
+        <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 ":"space-y-4"} mt-6`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
                     }).map((message, index) => (
+                      <div className={`${!isgrid?"":"flex  "}`}>
           <ContextMenu key={index}>
           <ContextMenuTrigger>
           
@@ -1415,13 +1523,16 @@ function closetab(closeid){
             <ContextMenuItem>Copy to clipboard</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+                         </div>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
+        </div>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 space-x-4 mt-6`}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
                     })
-                    // .slice(0,10)
+                    .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
           <ContextMenu key={index}>
           <ContextMenuTrigger>
@@ -1448,13 +1559,17 @@ function closetab(closeid){
                   }
                 }>
                 <CardContent className="flex items-center space-x-4">
-                  <FolderIcon className="h-6 w-6" />
+                {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                   <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                 </CardContent>
               </Card>
               </HoverCardTrigger>
               <HoverCardContent className='flex flex-col'>
+                {message.name.includes(".jpg")||message.name.includes(".png")?(<img src={`${convertFileSrc(message.path)}`}/>):""}
                {message.path}
+               <br/>
+               {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
+               
               <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
               </HoverCardContent>
             </HoverCard>
