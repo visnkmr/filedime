@@ -965,7 +965,6 @@ function closetab(closeid){
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
-              <img src={`${convertFileSrc("/home/roger/Downloads/gpsss.png")}`}/>
             </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
@@ -1527,6 +1526,8 @@ function closetab(closeid){
                          </div>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
+        </div>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 space-x-4 mt-6`}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
@@ -1564,6 +1565,7 @@ function closetab(closeid){
               </Card>
               </HoverCardTrigger>
               <HoverCardContent className='flex flex-col'>
+                {message.name.includes(".jpg")||message.name.includes(".png")?(<img src={`${convertFileSrc(message.path)}`}/>):""}
                {message.path}
                <br/>
                {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
