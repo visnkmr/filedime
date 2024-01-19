@@ -74,7 +74,7 @@ import '../styles/committablestyle.css'
 
 export default function Greet() {
   // if (platformName === 'linux') 
-console.log("http://127.0.0.1:16780/" + "/home/roger/Downloads/gpsss.png".split('/').slice(-4).join("/"))
+console.log(convertFileSrc("/home/roger/Downloads/gpsss.png"))
   // {
     // assetUrl = await convertFileSrc2(playingTrack.value.file_path)
   // } else {
@@ -965,7 +965,7 @@ function closetab(closeid){
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
-              <img src={`${"http://127.0.0.1:16780/" + "/home/roger/Downloads/gpsss.png".split('/').slice(-4).join("/")}`}/>
+              <img src={`${convertFileSrc("/home/roger/Downloads/gpsss.png")}`}/>
             </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
