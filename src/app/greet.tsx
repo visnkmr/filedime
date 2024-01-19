@@ -521,7 +521,7 @@ const columns: ColumnDef<FileItem>[] = [
               <button className="flex items-center" onDoubleClick={
                 ()=>
                 { 
-                  console.log("gridlayout clicked");
+                  // console.log("gridlayout clicked");
                   reset(path)
                   updatetabs(path)
                  
@@ -1477,11 +1477,12 @@ function closetab(closeid){
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6`}>
+        <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 ":"space-y-4"} mt-6`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
                     }).map((message, index) => (
+                      <div className={`${!isgrid?"":"flex  "}`}>
           <ContextMenu key={index}>
           <ContextMenuTrigger>
           
@@ -1516,6 +1517,7 @@ function closetab(closeid){
             <ContextMenuItem>Copy to clipboard</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+                         </div>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         {isgrid && fileslist.filter(function (el) {
