@@ -16,6 +16,14 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "path": {
+        "all": true
+      },
+      "protocol": {
+        "all": true,
+        "asset": true,
+        "assetScope": ["**"]
       }
     },
     "systemTray":{
@@ -35,7 +43,7 @@
       "targets": "all"
     },
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; media-src *; connect-src 'self' asset: *; style-src 'unsafe-inline' 'self'"
     },
     "updater": {
       "active": false

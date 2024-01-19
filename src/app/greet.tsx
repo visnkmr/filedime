@@ -2,12 +2,12 @@
 
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
-import parse from 'html-react-parser';
+// import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
-
+// import { platform } from '@tauri-apps/api/os'
 import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
@@ -73,6 +73,13 @@ import '../styles/committablestyle.css'
 
 
 export default function Greet() {
+  // if (platformName === 'linux') 
+console.log("http://127.0.0.1:16780/" + "/home/roger/Downloads/gpsss.png".split('/').slice(-4).join("/"))
+  // {
+    // assetUrl = await convertFileSrc2(playingTrack.value.file_path)
+  // } else {
+    // assetUrl = convertFileSrc(playingTrack.value.file_path)
+  // }
   
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
@@ -958,7 +965,7 @@ function closetab(closeid){
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
-              
+              <img src={`${"http://127.0.0.1:16780/" + "/home/roger/Downloads/gpsss.png".split('/').slice(-4).join("/")}`}/>
             </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
