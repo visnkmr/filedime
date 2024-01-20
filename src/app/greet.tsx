@@ -3,8 +3,10 @@
 import FRc from "../components/findsizecomp"
 import { useEffect, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import ReadFileComp from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -481,6 +483,7 @@ export default function Greet() {
 //     })
 //       .catch(console.error)
 //   }, [count])
+
 const columns: ColumnDef<FileItem>[] = [
    
   // {
@@ -1574,7 +1577,9 @@ function closetab(closeid){
                   <CardContent className="flex items-center space-x-4">
                   {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                     <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
-                    {!message.is_dir?(
+                    {!message.is_dir
+                    // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
+                    ?(
                 <Sheet modal={false}>
                 <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
           <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
@@ -1583,7 +1588,12 @@ function closetab(closeid){
               </SheetHeader>
               {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
           {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
+          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></video>):""}
+          {HTML_TYPE.some(type => message.name.includes(type))?(<iframe src={message.path} title={message.path}></iframe>):""}
+          {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}>
+				</audio>):""}
+        <ReadFileComp path={message.path}/>
+        
               <SheetDescription></SheetDescription>
             
           </SheetContent>
