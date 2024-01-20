@@ -12,6 +12,19 @@ import React from 'react';
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 // import {columns} from "../src/components/columns"
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "../components/ui/popover"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../components/ui/sheet"
 import {
   ContextMenu,
   ContextMenuContent,
@@ -71,15 +84,13 @@ import '../styles/committablestyle.css'
 // 	});
 // });
 
-
+  const IMAGE_TYPES = ['jpg', 'png', 'gif', 'bmp', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi', 'webp', 'tiff', 'tif', 'ico', 'svg', 'webp'];
+  const VIDEO_TYPES = ['mp4', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'ocg', 'm4p', 'm4v', 'avi', 'wmv', 'mov', 'qt', 'flv', 'swf'];
+  const PLAIN_TEXT = ['txt'];
+  const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
+  const MARKDOWN_TYPES = ['md', 'markdown', 'mdown', 'mkd', 'mkdown', 'mdwn', 'mdtxt', 'mdtext', 'text'];
+  const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
 export default function Greet() {
-  // if (platformName === 'linux') 
-console.log(convertFileSrc("/home/roger/Downloads/gpsss.png"))
-  // {
-    // assetUrl = await convertFileSrc2(playingTrack.value.file_path)
-  // } else {
-    // assetUrl = convertFileSrc(playingTrack.value.file_path)
-  // }
   
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
@@ -1157,7 +1168,7 @@ function closetab(closeid){
           </div>
         </div>
       </aside>
-      <main className="flex flex-col p-6">
+      <main className="flex flex-col p-6 overflow-hidden">
         <div className='flex flex-row mb-4'>
         <HoverCard>
               <HoverCardTrigger>
@@ -1461,7 +1472,7 @@ function closetab(closeid){
           }>{eachif.interfolpath}</button>
           ))}
         </div>
-        <div className='flex items-center mb-6 '>
+        <div className='flex items-center'>
           {
           Object.entries(filesetcollectionlist)
           // .filter(function (el) {
@@ -1471,7 +1482,7 @@ function closetab(closeid){
             <Badge variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
-        <span className="flex flex-row space-x-4 w-full">
+        <span className="flex flex-row space-x-4">
 
         <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
         <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
@@ -1527,7 +1538,7 @@ function closetab(closeid){
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 space-x-4 mt-6`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 space-x-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
@@ -1538,34 +1549,50 @@ function closetab(closeid){
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <Card key={index} onDoubleClick={
-                ()=>
-                { 
-                  console.log("gridlayout clicked");
-                  reset(message.path)
-                  updatetabs(message.path)
-                 
-                  // setpath()
-                  // setpsplitl(splitpath(message.path))
-                  sst(message.name)
-                  // useEffect(() => {
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: message.path,
-                      ff: "" 
-                  });
-                  // },[])
-                  }
-                }>
-                <CardContent className="flex items-center space-x-4">
-                {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
-                  <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
-                </CardContent>
-              </Card>
+              <Sheet modal={false} >
+                <SheetTrigger>
+                <Card key={index} onDoubleClick={
+                  ()=>
+                  { 
+                    console.log("gridlayout clicked");
+                    reset(message.path)
+                    updatetabs(message.path)
+                  
+                    // setpath()
+                    // setpsplitl(splitpath(message.path))
+                    sst(message.name)
+                    // useEffect(() => {
+                      invoke('list_files', { 
+                        windowname:appWindow?.label,
+                        oid: activetabid.toString(),
+                        path: message.path,
+                        ff: "" 
+                    });
+                    // },[])
+                    }
+                  }>
+                  <CardContent className="flex items-center space-x-4">
+                  {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
+                    <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                  </CardContent>
+                </Card>
+                </SheetTrigger>
+                <SheetContent side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                  <SheetHeader>
+                    <SheetTitle>Are you absolutely sure?</SheetTitle>
+                    <SheetDescription>
+                      This action cannot be undone. This will permanently delete your account
+                      and remove your data from our servers.
+                    </SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
               </HoverCardTrigger>
               <HoverCardContent className='flex flex-col'>
-                {message.name.includes(".jpg")||message.name.includes(".png")?(<img src={`${convertFileSrc(message.path)}`}/>):""}
+                {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
+                {message.name.includes(".pdf")?(<embed src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
+                {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
+                
                {message.path}
                <br/>
                {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}

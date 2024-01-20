@@ -1,7 +1,7 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::Read, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::HashSet, fmt::format};
+use std::{io::{Read, Cursor}, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::{HashSet, HashMap}, fmt::format};
 mod dirsize;
 mod fileitem;
 mod filltrie;
@@ -14,7 +14,7 @@ use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
 use serde_json::json;
-use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent};
+use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -353,7 +353,18 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
+use url::Url;
 
+fn parse_uri(uri: &str) -> HashMap<String, String> {
+  let parsed_url = Url::parse(uri).unwrap();
+  let mut params = HashMap::new();
+
+  for (key, value) in parsed_url.query_pairs() {
+      params.insert(key.into_owned(), value.into_owned());
+  }
+
+  params
+}
 fn main() {
   
   // init();
@@ -532,7 +543,38 @@ fn main() {
     //   }
     // })
     .on_window_event(on_window_event)
-
+  //   .register_uri_scheme_protocol("image", move |app, request| {
+  //     let res_not_img = ResponseBuilder::new()
+  //       .status(404)
+  //       .body(Vec::new());
+  
+  //     if request.method() != "GET" { return res_not_img; }
+  
+  //     let uri = request.uri();
+  
+  //     // Parse the URI to get the image file path, width, height, and quality
+  //     // This depends on the exact format of your URIs
+  //     let params = parse_uri(uri);
+  //     let ag1="/home/roger/Downloads/scrsht.png".to_string();
+  //     let img_path = params.get("path").unwrap_or(&ag1);
+  //     let width = params.get("width").unwrap_or(&"100".to_string()).parse::<u32>().unwrap_or(100);
+  //     let height = params.get("height").unwrap_or(&"100".to_string()).parse::<u32>().unwrap_or(100);
+  //     let quality = params.get("quality").unwrap_or(&"40".to_string()).parse::<u8>().unwrap_or(40);
+  
+  //     // Open the image file
+  //     let img = image::open(img_path).unwrap();
+  
+  //     // Resize and adjust the quality
+  //     let img = img.resize(width, height, image::imageops::FilterType::Nearest);
+  //     let mut buffer = Cursor::new(Vec::new());
+  //     img.write_to(&mut buffer, image::ImageOutputFormat::Jpeg(quality)).unwrap();
+  
+  //     // Create the HTTP response
+  //     ResponseBuilder::new()
+  //      .mimetype("image/png")
+  //      .body(buffer.into_inner())
+  //     //  .unwrap();
+  //  })
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
