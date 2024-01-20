@@ -139,7 +139,7 @@ export default function Greet() {
   //  const [winInfo,setwi]= useState(wininfo)
   // const [history,sethistory]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
-  
+  const [isSheetOpen, setiso] = useState(false);
   // const [backpressed,setbackpressed]=useState(false)
   
 
@@ -1580,9 +1580,7 @@ function closetab(closeid){
                 
               </HoverCardTrigger>
               <HoverCardContent className={"bg-white dark:bg-gray-800 flex flex-col"} >
-                {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
-                {message.name.includes(".pdf")?(<embed src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-                {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
+                
                 
                {message.path}
                <br/>
@@ -1642,12 +1640,13 @@ function closetab(closeid){
         </SheetTrigger>
                 <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                   <SheetHeader>
-                    <SheetTitle>Are you absolutely sure?</SheetTitle>
-                    <SheetDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove your data from our servers.
-                    </SheetDescription>
-                  </SheetHeader>
+                    <SheetTitle>{message.name}</SheetTitle>
+                    </SheetHeader>
+                    {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
+                {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
+                {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
+                    <SheetDescription></SheetDescription>
+                  
                 </SheetContent>
               </Sheet>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
