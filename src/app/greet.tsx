@@ -465,7 +465,7 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-
+        reset("drives://")
         setpath("drives://")
         newtab();
       }
@@ -1538,20 +1538,19 @@ function closetab(closeid){
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 space-x-4 mt-6 overflow-scroll`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
                     })
                     .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
-                      <Sheet modal={false} >
-                      <SheetTrigger>
+                     
           <ContextMenu key={index}>
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              
+             
                 <Card key={index} onDoubleClick={
                   ()=>
                   { 
@@ -1575,12 +1574,26 @@ function closetab(closeid){
                   <CardContent className="flex items-center space-x-4">
                   {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                     <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                    {!message.is_dir?(
+                <Sheet modal={false}>
+                <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
+          <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+            <SheetHeader>
+              <SheetTitle>{message.name}</SheetTitle>
+              </SheetHeader>
+              {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
+          {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
+          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
+              <SheetDescription></SheetDescription>
+            
+          </SheetContent>
+        </Sheet>):""}
                   </CardContent>
                 </Card>
                 
               </HoverCardTrigger>
               <HoverCardContent className={"bg-white dark:bg-gray-800 flex flex-col"} >
-                
+             
                 
                {message.path}
                <br/>
@@ -1637,18 +1650,7 @@ function closetab(closeid){
             }}>Copy</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
-        </SheetTrigger>
-                <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                  <SheetHeader>
-                    <SheetTitle>{message.name}</SheetTitle>
-                    </SheetHeader>
-                    {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
-                {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-                {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
-                    <SheetDescription></SheetDescription>
-                  
-                </SheetContent>
-              </Sheet>
+        
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
          
