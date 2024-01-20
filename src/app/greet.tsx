@@ -1579,7 +1579,7 @@ function closetab(closeid){
                 </Card>
                 
               </HoverCardTrigger>
-              <HoverCardContent className='flex flex-col'>
+              <HoverCardContent className={"bg-white dark:bg-gray-800 flex flex-col"} >
                 {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
                 {message.name.includes(".pdf")?(<embed src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
                 {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload"><source src={`${convertFileSrc(message.path)}`}/></video>):""}
@@ -1640,7 +1640,7 @@ function closetab(closeid){
           </ContextMenuContent>
         </ContextMenu>
         </SheetTrigger>
-                <SheetContent side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                   <SheetHeader>
                     <SheetTitle>Are you absolutely sure?</SheetTitle>
                     <SheetDescription>
