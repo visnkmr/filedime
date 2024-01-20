@@ -1545,12 +1545,13 @@ function closetab(closeid){
                     })
                     .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
+                      <Sheet modal={false} >
+                      <SheetTrigger>
           <ContextMenu key={index}>
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <Sheet modal={false} >
-                <SheetTrigger>
+              
                 <Card key={index} onDoubleClick={
                   ()=>
                   { 
@@ -1576,17 +1577,7 @@ function closetab(closeid){
                     <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                   </CardContent>
                 </Card>
-                </SheetTrigger>
-                <SheetContent side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                  <SheetHeader>
-                    <SheetTitle>Are you absolutely sure?</SheetTitle>
-                    <SheetDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove your data from our servers.
-                    </SheetDescription>
-                  </SheetHeader>
-                </SheetContent>
-              </Sheet>
+                
               </HoverCardTrigger>
               <HoverCardContent className='flex flex-col'>
                 {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
@@ -1648,6 +1639,17 @@ function closetab(closeid){
             }}>Copy</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        </SheetTrigger>
+                <SheetContent side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                  <SheetHeader>
+                    <SheetTitle>Are you absolutely sure?</SheetTitle>
+                    <SheetDescription>
+                      This action cannot be undone. This will permanently delete your account
+                      and remove your data from our servers.
+                    </SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
          
