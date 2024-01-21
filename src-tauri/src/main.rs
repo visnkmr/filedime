@@ -353,18 +353,18 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
-use url::Url;
+// use url::Url;
 
-fn parse_uri(uri: &str) -> HashMap<String, String> {
-  let parsed_url = Url::parse(uri).unwrap();
-  let mut params = HashMap::new();
+// fn parse_uri(uri: &str) -> HashMap<String, String> {
+//   let parsed_url = Url::parse(uri).unwrap();
+//   let mut params = HashMap::new();
 
-  for (key, value) in parsed_url.query_pairs() {
-      params.insert(key.into_owned(), value.into_owned());
-  }
+//   for (key, value) in parsed_url.query_pairs() {
+//       params.insert(key.into_owned(), value.into_owned());
+//   }
 
-  params
-}
+//   params
+// }
 fn main() {
   
   // init();

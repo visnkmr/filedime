@@ -24,6 +24,11 @@
         "all": true,
         "asset": true,
         "assetScope": ["**"]
+      },
+      "fs": {
+        "scope": ["**"],
+        "all": false, 
+        "readFile": true
       }
     },
     "systemTray":{
