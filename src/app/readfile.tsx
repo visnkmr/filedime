@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
 import {
@@ -106,7 +106,38 @@ export default function ReadFileComp({path,name}){
         // useEffect(() => {
         //   hljs.initHighlighting();
         //  }, []);
-         
+        const imgRef = useRef(null);
+ const containerRef = useRef(null);
+ const [scale, setScale] = useState(1);
+ const [position, setPosition] = useState({ x: 0, y: 0 });
+ const [isDragging, setIsDragging] = useState(false);
+ const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+
+ const handleScroll = (event) => {
+    event.preventDefault();
+    const delta = event.deltaY || event.detail || event.wheelDelta;
+    setScale((prevScale) => prevScale + delta * -0.001);
+    // Clamp the scale value to prevent scaling too far in or out
+    setScale((prevScale) => Math.min(Math.max(1, prevScale), 5));
+ };
+
+ const handleMouseDown = (event) => {
+    setIsDragging(true);
+    setLastMousePos({ x: event.clientX, y: event.clientY });
+ };
+
+ const handleMouseMove = (event) => {
+    if (!isDragging) return;
+    const dx = event.clientX - lastMousePos.x;
+    const dy = event.clientY - lastMousePos.y;
+    setPosition((prevPosition) => ({ x: prevPosition.x + dx, y: prevPosition.y + dy }));
+    setLastMousePos({ x: event.clientX, y: event.clientY });
+ };
+
+ const handleMouseUp = () => {
+    setIsDragging(false);
+ };
+      
        
     return (
         <>
@@ -157,7 +188,24 @@ export default function ReadFileComp({path,name}){
         </div>
             <div className="h-full overflow-scroll">
 
-        {IMAGE_TYPES.some(type => name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(path)}`}/>):""}
+        {IMAGE_TYPES.some(type => name.includes(type))?(
+           <div 
+           ref={containerRef} 
+           onWheel={handleScroll} 
+           onMouseDown={handleMouseDown} 
+           onMouseMove={handleMouseMove} 
+           onMouseUp={handleMouseUp} 
+           onMouseLeave={handleMouseUp} 
+           className="relative overflow-hidden"
+         >
+        <img 
+        ref={imgRef}
+        alt="Zoomable"
+        style={{ transform: `scale(${scale})  translate(${-position.x}px, ${-position.y}px)`, transition: 'transform 0.2s' }}
+        className="w-full" 
+        src={`${convertFileSrc(path)}`}/></div>
+        
+        ):""}
           {name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
           {VIDEO_TYPES.some(type => name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></video>):""}
           {HTML_TYPE.some(type => name.includes(type))?(<iframe src={path} title={path}></iframe>):""}
