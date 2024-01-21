@@ -38,6 +38,12 @@ export default function ReadFileComp({path,name}){
     setmdc(news);
   }
   useEffect(()=>{
+    const fetchData = async () => {
+      const response = await fs.readTextFile(path);
+      console.log(response)
+      
+      setData(response);
+    }
     // listen("load-markdown", (data: { payload: string }) => {
     //     openmarkdown(data.payload)
     //   });
@@ -49,14 +55,22 @@ export default function ReadFileComp({path,name}){
                 console.log("file watching stopped")
                 break;
             case "changed":
-              invoke('loadmarkdown', { 
-                path: path
-            })
-              .then(result => {
-                // console.log("whats in file:"+result)
-                openmarkdown(result)
-            })
-              .catch(console.error)
+              if(!MARKDOWN_TYPES.some(type => path.includes(type))){
+
+                fetchData()
+              }
+              else
+              {
+
+                invoke('loadmarkdown', { 
+                  path: path
+              })
+                .then(result => {
+                  // console.log("whats in file:"+result)
+                  openmarkdown(result)
+              })
+                .catch(console.error)
+              }
                 break;
         }
         // lastfolder = data.payload.toString();
@@ -68,6 +82,8 @@ export default function ReadFileComp({path,name}){
           
            const fetchData = async () => {
              const response = await fs.readTextFile(path);
+             console.log(response)
+             
              setData(response);
            }
            if(!MARKDOWN_TYPES.some(type => path.includes(type))){
@@ -88,7 +104,9 @@ export default function ReadFileComp({path,name}){
        
     return (
         <>
-        <HoverCard>
+        <div className="flex place-content-center whitespace-nowrap overflow-scroll">
+
+        <HoverCard >
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                 ()=>{
@@ -121,7 +139,7 @@ export default function ReadFileComp({path,name}){
                 }
             }>
             <CardDescription className="flex items-center space-x-2 p-2">
-            <EyeIcon className="h-4 w-4"/>
+            Monitor for changes
               
             </CardDescription>
           </Card>
@@ -130,13 +148,21 @@ export default function ReadFileComp({path,name}){
                Hot reload (Monitor changes and reload as necessary)
               </HoverCardContent>
             </HoverCard>
+        </div>
+            <div className="h-full overflow-scroll">
+
         {IMAGE_TYPES.some(type => name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(path)}`}/>):""}
           {name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
           {VIDEO_TYPES.some(type => name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></video>):""}
           {HTML_TYPE.some(type => name.includes(type))?(<iframe src={path} title={path}></iframe>):""}
           {AUDIO_TYPES.some(type => name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></audio>):""}
           {MARKDOWN_TYPES.some(type => name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}
-          {PLAIN_TEXT.some(type => name.includes(type))?({data}):""}
+            {/* {PLAIN_TEXT.some(type => name.includes(type))?( */}
+             <p>
+              {(data)}
+              </p>
+            {/* ):""} */}
+            </div>
         
         
         </>
