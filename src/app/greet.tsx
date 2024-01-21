@@ -1485,7 +1485,7 @@ function closetab(closeid){
 
           <DataTable columns={columns} data={fileslist}/>
         </span>
-        <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 ":"space-y-4"} mt-6`}>
+        <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-scroll":"space-y-4 overflow-scroll"} mt-6`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
