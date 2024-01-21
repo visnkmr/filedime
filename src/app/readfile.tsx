@@ -6,6 +6,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../components/ui/hover-card"
+// import hljs from 'highlight.js';
+
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 const MARKDOWN_TYPES = ['md', 'markdown', 'mdown', 'mkd', 'mkdown', 'mdwn', 'mdtxt', 'mdtext', 'text'];
 const IMAGE_TYPES = ['jpg', 'png', 'gif', 'bmp', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi', 'webp', 'tiff', 'tif', 'ico', 'svg', 'webp'];
@@ -22,7 +24,7 @@ export default function ReadFileComp({path,name}){
 
     setAppWindow(appWindow)
   }
-  const [data, setData] = useState("null");
+  const [data, setData] = useState("");
   const [mdc,setmdc] = useState("");
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [appWindow, setAppWindow] = useState()
@@ -101,6 +103,10 @@ export default function ReadFileComp({path,name}){
                     .catch(console.error)
            }
         }, [path]);
+        // useEffect(() => {
+        //   hljs.initHighlighting();
+        //  }, []);
+         
        
     return (
         <>
@@ -158,9 +164,9 @@ export default function ReadFileComp({path,name}){
           {AUDIO_TYPES.some(type => name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></audio>):""}
           {MARKDOWN_TYPES.some(type => name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}
             {/* {PLAIN_TEXT.some(type => name.includes(type))?( */}
-             <p>
-              {(data)}
-              </p>
+            <pre data-type="code">
+            <code dangerouslySetInnerHTML={{__html: (data)}}/>
+             </pre>
             {/* ):""} */}
             </div>
         

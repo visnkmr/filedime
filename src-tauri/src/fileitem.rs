@@ -88,7 +88,8 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
            "kt" |
            "java" |
            "md" |
-            "css"
+            "css"|
+            "yaml"
           )
           {
             //add a right click context menu option to do this on the tab name uptop

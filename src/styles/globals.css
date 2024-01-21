@@ -30,7 +30,8 @@
       )
       rgb(var(--background-start-rgb));
   } */
-  .screen1,
+  
+  /*.screen1,
   .screen2,
   .screen3
    {
@@ -39,12 +40,12 @@
     height: 650px;
     overflow: hidden;
     position: relative;
-    /* border: 2px solid #b3b3b3; */
+    /~ border: 2px solid #b3b3b3; ~/
     border-radius: 1px;
     margin: 0 auto;
     transition: z-index 0.25s ease-in-out;
   }
-  /* .screen-1{
+  /~ .screen-1{
     bottom: -100%;
   }
   
@@ -54,24 +55,24 @@
   
   .screen-3{
     bottom: -440%;
-  } */
+  } ~/
   .screen1:hover {
-    z-index: 1; /* Increase the z-index value */
+    z-index: 1; /~ Increase the z-index value ~/
     transition: z-index 0.25s ease-in;
   } 
   .screen2:hover {
-    z-index: 1; /* Increase the z-index value */
+    z-index: 1; /~ Increase the z-index value ~/
   } 
   .screen3:hover {
-    z-index: 1; /* Increase the z-index value */
+    z-index: 1; /~ Increase the z-index value ~/
   }
   .screen1 img {
     bottom: -100%; 
-    /* bottom: -195%; amz */
-    /* bottom: -440%; gh */
+    /~ bottom: -195%; amz ~/
+    /~ bottom: -440%; gh ~/
 
-    /* bottom: -950px; */
-    /* bottom: -1815px; */
+    /~ bottom: -950px; ~/
+    /~ bottom: -1815px; ~/
     width: 100%;
     height: auto;
     position: absolute;
@@ -86,11 +87,11 @@
   }
   .screen2 img {
     bottom: -195%; 
-    /* bottom: -195%; amz */
-    /* bottom: -440%; gh */
+    /~ bottom: -195%; amz ~/
+    /~ bottom: -440%; gh ~/
 
-    /* bottom: -950px; */
-    /* bottom: -1815px; */
+    /~ bottom: -950px; ~/
+    /~ bottom: -1815px; ~/
     width: 100%;
     height: auto;
     position: absolute;
@@ -105,11 +106,11 @@
   }
   .screen3 img {
     bottom: -448%; 
-    /* bottom: -195%; amz */
-    /* bottom: -440%; gh */
+    /~ bottom: -195%; amz ~/
+    /~ bottom: -440%; gh ~/
 
-    /* bottom: -950px; */
-    /* bottom: -1815px; */
+    /~ bottom: -950px; ~/
+    /~ bottom: -1815px; ~/
     width: 100%;
     height: auto;
     position: absolute;
@@ -157,4 +158,4 @@ h4{
     font-size: 18px;
     padding-left: 10%;
     padding-right: 10%;
-}
+}*/
