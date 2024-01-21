@@ -109,13 +109,14 @@ export default function Greet() {
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
   const [listlimit,setll]=useState(true)
-  const [isgrid,setig]=useState(true)
+  const [isgrid,setig]=useState(false)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("drives://");
+  const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
@@ -956,7 +957,7 @@ function closetab(closeid){
     console.log("loading size js----->2")
     }
   }
-
+const [isvalid,setvalid]=useState(true);
   
 
   return (
@@ -1348,10 +1349,17 @@ function closetab(closeid){
                 placeholder="Path"
                 type="search"
                 list="path-list"
-                value={path}
+                value={pathitype}
                 onChange={(event) =>
                   {
-                    setpath(event.target.value);
+                    setpit(event.target.value);
+                    invoke('doespathexist', { 
+                              path: event.target.value
+                          })
+                            .then(result => {
+                              setvalid(result)
+                          })
+                            .catch(console.error)
                     invoke(
                       "get_path_options", 
                       {
@@ -1393,9 +1401,9 @@ function closetab(closeid){
               />
               
             </div>
-            <ArrowRightIcon onClick={()=>{
-               reset(path)
-               updatetabs(path)
+            <ArrowRightIcon className={`${isvalid?"":"hidden"}`} onClick={()=>{
+               reset(pathitype)
+               updatetabs(pathitype)
               //  setpath(message.name)
               //  sst(message.path)
               invoke(
@@ -1403,7 +1411,7 @@ function closetab(closeid){
                 {
                 windowname:appWindow?.label,
                 oid: activetabid.toString(),
-                path: path,
+                path: pathitype,
                 ff: ""
                 }
                 )

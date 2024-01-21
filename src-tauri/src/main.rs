@@ -599,6 +599,7 @@ fn main() {
         newwindow,
         nosize,
         openpath,
+        doespathexist,
         otb,
         recent_files,
         removemark,
@@ -694,7 +695,14 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
   // println!("{:?}",k.find_all(&path));
   // println!("{:?}",options);
   Ok(options)
-}// In Rust, define a function that takes a path as an argument and returns a list of possible paths
+}#[tauri::command]
+async fn doespathexist(mut path: String) -> Result<bool,()> {
+  let pathasbuf=PathBuf::from(path.clone());
+  Ok(pathasbuf.exists()||path=="drives://")
+   
+  }
+          // Use substring instead of path
+     // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
   println!("{:?}",getwindowlist(app_handle));
 
