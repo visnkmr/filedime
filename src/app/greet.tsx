@@ -86,12 +86,7 @@ import '../styles/committablestyle.css'
 // 	});
 // });
 
-  const IMAGE_TYPES = ['jpg', 'png', 'gif', 'bmp', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi', 'webp', 'tiff', 'tif', 'ico', 'svg', 'webp'];
-  const VIDEO_TYPES = ['mp4', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'ocg', 'm4p', 'm4v', 'avi', 'wmv', 'mov', 'qt', 'flv', 'swf'];
-  const PLAIN_TEXT = ['txt'];
-  const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
-  const MARKDOWN_TYPES = ['md', 'markdown', 'mdown', 'mkd', 'mkdown', 'mdwn', 'mdtxt', 'mdtext', 'text'];
-  const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
+
 export default function Greet() {
   
   async function setupAppWindow() {
@@ -123,7 +118,6 @@ export default function Greet() {
   const [path, setpath] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
-  const [mdc,setmdc] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("drives://")
@@ -240,44 +234,38 @@ export default function Greet() {
     functionname:string,
     arguments:string[]
   }
-  function openmarkdown(htmlfrommd: string) {
-    setwbv(true)
-    console.log("before editing md is ---->"+htmlfrommd)
-    const news=htmlfrommd.replace(/<a\s/g, "<a target='_blank' ");
-    console.log("after editing md is ---->"+news)
-    setmdc(news);
-  }
+  
   // if(mdc){
   //   reset()
   // }
   useEffect(() => {
-    listen("load-markdown", (data: { payload: string }) => {
-      let markdowninfo=JSON.parse(data.payload);
-        console.log("loadmarkdown")
-        sst(markdowninfo.filename)
-        openmarkdown(markdowninfo.htmlfmd)
-      });
-      listen("send-log", (data: { payload: string }) => {
-        // console.log("grandloc")
-        let status=data.payload;
-        switch(status){
-            case "stopped":
-                console.log("file watching stopped")
-                break;
-            case "changed":
-                (window as any).__TAURI__.invoke(
-                    "list_files",
-                    {
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: path,
-                      ff: ""
-                    });
-                break;
-        }
-        // lastfolder = data.payload.toString();
-        // console.log(data.payload.toString())
-      });
+    // listen("load-markdown", (data: { payload: string }) => {
+    //   let markdowninfo=JSON.parse(data.payload);
+    //     console.log("loadmarkdown")
+    //     sst(markdowninfo.filename)
+    //     openmarkdown(markdowninfo.htmlfmd)
+    //   });
+      // listen("send-log", (data: { payload: string }) => {
+      //   // console.log("grandloc")
+      //   let status=data.payload;
+      //   switch(status){
+      //       case "stopped":
+      //           console.log("file watching stopped")
+      //           break;
+      //       case "changed":
+      //           invoke(
+      //               "list_files",
+      //               {
+      //                 windowname:appWindow?.label,
+      //                 oid: activetabid.toString(),
+      //                 path: path,
+      //                 ff: ""
+      //               });
+      //           break;
+      //   }
+      //   // lastfolder = data.payload.toString();
+      //   // console.log(data.payload.toString())
+      // });
     //   listen("load-html", (data: { payload: string }) => {
     //     setmdc(data.payload)
 
@@ -1226,7 +1214,7 @@ function closetab(closeid){
             </HoverCard>
             <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
 
-            <HoverCard>
+            {/* <HoverCard>
               <HoverCardTrigger>
           <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                 ()=>{
@@ -1267,7 +1255,7 @@ function closetab(closeid){
               <HoverCardContent >
                Hot reload (Monitor changes and reload as necessary)
               </HoverCardContent>
-            </HoverCard>
+            </HoverCard> */}
             </div>
             {/* <HoverCard>
               <HoverCardTrigger>
@@ -1586,13 +1574,8 @@ function closetab(closeid){
             <SheetHeader>
               <SheetTitle>{message.name}</SheetTitle>
               </SheetHeader>
-              {IMAGE_TYPES.some(type => message.name.includes(type))?(<img height={100} width={100} src={`${convertFileSrc(message.path)}`}/>):""}
-          {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></video>):""}
-          {HTML_TYPE.some(type => message.name.includes(type))?(<iframe src={message.path} title={message.path}></iframe>):""}
-          {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}>
-				</audio>):""}
-        <ReadFileComp path={message.path}/>
+              
+        <ReadFileComp path={message.path} name={message.name}/>
         
               <SheetDescription></SheetDescription>
             
@@ -1669,7 +1652,6 @@ function closetab(closeid){
           {mdc}
         </span> */}
         </div>
-        <div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>
         {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
         <Table className="mt-4">
           <TableHeader>

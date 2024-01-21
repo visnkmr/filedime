@@ -72,10 +72,10 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
     opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.",&getuniquewindowlabel());
     return Ok(())
   }
-  if(path.ends_with(".md")){
-    loadmarkdown(&windowname,path,window,state);
-    return Ok(());
-  }  
+  // if(path.ends_with(".md")){
+  //   loadmarkdown(&windowname,path,window,state);
+  //   return Ok(());
+  // }  
   
   if(path.ends_with(".html")
   ||path.ends_with(".htm")){

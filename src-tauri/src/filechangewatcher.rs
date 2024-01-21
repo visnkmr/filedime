@@ -84,7 +84,10 @@ pub fn startserver(windowname:String,pathstr:String,window: Window,state: State<
             {
                 println!("started");
                 // list_files(oid, pathstr, "dontcare".to_string(), window, state);
-                notifychange(&windowname, &app_handle);
+                // if(path.ends_with(".md")){
+
+                    notifychange(&windowname, &app_handle);
+                // }
             }
             std::thread::sleep(std::time::Duration::from_secs(1));
         }
