@@ -20,6 +20,11 @@ import { listen } from '@tauri-apps/api/event';
 //   PopoverTrigger,
 // } from "../components/ui/popover"
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "../components/ui/resizeable"
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -959,7 +964,22 @@ function closetab(closeid){
   }
 const [isvalid,setvalid]=useState(true);
   
+const [width, setWidth] = useState(200);
+ const [isDragging, setIsDragging] = useState(false);
 
+ const handleMouseDown = (event) => {
+    setIsDragging(true);
+    event.stopPropagation();
+ };
+
+ const handleMouseMove = (event) => {
+    if (!isDragging) return;
+    setWidth(window.innerWidth - event.clientX);
+ };
+
+ const handleMouseUp = () => {
+    setIsDragging(false);
+ };
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -1578,17 +1598,30 @@ const [isvalid,setvalid]=useState(true);
                     ?(
                 <Sheet modal={false}>
                 <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
-          <SheetContent className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-            <SheetHeader>
-              <SheetTitle>{message.name}</SheetTitle>
-              </SheetHeader>
+                  <SheetContent 
+                    // style={{ width: `${width}px` }}
+                    // onMouseDown={handleMouseDown}
+                    // onMouseMove={handleMouseMove}
+                    // onMouseUp={handleMouseUp}
+                    // onMouseLeave={handleMouseUp}
+                    className={"bg-transparent"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      <ResizablePanelGroup direction="horizontal">
+                      <ResizablePanel className="pointer-events-none"/>
+                      <ResizableHandle />
+                      <ResizablePanel className={"bg-white dark:bg-gray-800"}>
+                        <SheetHeader>
+                        <SheetTitle>{message.name}</SheetTitle>
+                      </SheetHeader>
               
-        <ReadFileComp path={message.path} name={message.name}/>
-        
-              <SheetDescription></SheetDescription>
-            
-          </SheetContent>
-        </Sheet>):""}
+                      <ReadFileComp path={message.path} name={message.name}/>
+                      </ResizablePanel>
+                    </ResizablePanelGroup>
+                      
+                
+                      {/* <SheetDescription></SheetDescription> */}
+                    
+                  </SheetContent>
+                </Sheet>):""}
                   </CardContent>
                 </Card>
                 
