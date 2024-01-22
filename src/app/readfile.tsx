@@ -210,7 +210,7 @@ export default function ReadFileComp({path,name}){
         <img 
         ref={imgRef}
         alt="Zoomable"
-        style={{ transform: `scale(${scale})  translate(${position.x}px, ${position.y}px)`, transition: 'transform ease 0.2s' }}
+        style={{ transform: `scale(${scale})  translate(${position.x}px, ${position.y}px)`, transition: 'transform 0.2s' }}
         className="w-full" 
         src={`${convertFileSrc(path)}`}/></div>
         
