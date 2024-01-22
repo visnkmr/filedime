@@ -127,10 +127,19 @@ export default function ReadFileComp({path,name}){
  };
 
  const handleMouseMove = (event) => {
-    if (!isDragging) return;
+  if (!isDragging) return;
     const dx = event.clientX - lastMousePos.x;
     const dy = event.clientY - lastMousePos.y;
-    setPosition((prevPosition) => ({ x: prevPosition.x + dx, y: prevPosition.y + dy }));
+
+    // Calculate the maximum allowed values for the x and y positions
+    const maxX = (containerRef.current.offsetWidth - imgRef.current.offsetWidth / scale) / 2;
+    const maxY = (containerRef.current.offsetHeight - imgRef.current.offsetHeight / scale) / 2;
+
+    // Clamp the new position within the limits
+    const newX = Math.min(Math.max(-maxX, position.x + dx), maxX);
+    const newY = Math.min(Math.max(-maxY, position.y + dy), maxY);
+
+    setPosition({ x: newX, y: newY });
     setLastMousePos({ x: event.clientX, y: event.clientY });
  };
 
@@ -201,7 +210,7 @@ export default function ReadFileComp({path,name}){
         <img 
         ref={imgRef}
         alt="Zoomable"
-        style={{ transform: `scale(${scale})  translate(${-position.x}px, ${-position.y}px)`, transition: 'transform 0.2s' }}
+        style={{ transform: `scale(${scale})  translate(${position.x}px, ${position.y}px)`, transition: 'transform ease 0.2s' }}
         className="w-full" 
         src={`${convertFileSrc(path)}`}/></div>
         
