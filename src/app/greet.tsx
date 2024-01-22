@@ -1604,8 +1604,8 @@ const [width, setWidth] = useState(200);
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-transparent"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                      <ResizablePanelGroup direction="horizontal">
+                    className={"bg-transparent pointer-events-none"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
                       <ResizablePanel className="pointer-events-none"/>
                       <ResizableHandle />
                       <ResizablePanel className={"bg-white dark:bg-gray-800"}>
