@@ -1604,18 +1604,18 @@ const [width, setWidth] = useState(200);
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-transparent pointer-events-none"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                      <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                      <ResizablePanel className="pointer-events-none"/>
+                    className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+                      <ResizablePanel/>
                       <ResizableHandle />
-                      <ResizablePanel className={"bg-white dark:bg-gray-800"}>
+                      <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
                         <SheetHeader>
                         <SheetTitle>{message.name}</SheetTitle>
                       </SheetHeader>
               
                       <ReadFileComp path={message.path} name={message.name}/>
-                      </ResizablePanel>
-                    </ResizablePanelGroup>
+                      {/* </ResizablePanel>
+                    </ResizablePanelGroup> */}
                       
                 
                       {/* <SheetDescription></SheetDescription> */}
