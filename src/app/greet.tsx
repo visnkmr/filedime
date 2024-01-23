@@ -1,7 +1,7 @@
 'use client'
 
 import FRc from "../components/findsizecomp"
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
@@ -143,23 +143,28 @@ export default function Greet() {
   const [fileslist, setfileslist] = useState(filesobjinit);
   const [isSheetOpen, setiso] = useState(false);
   // const [backpressed,setbackpressed]=useState(false)
-  const [percentage, setPercentage] = useState(0);
-let iDragging = false;
+  const [percentage, setPercentage] = useState(75);
+  const [isDragging, setIsDragging] = useState(false);
+//  setIsDragging(false);
+if(isDragging){
+  console.log("dragging")
+}
 
 const onMouseDown = (event) => {
- iDragging = true;
+ setIsDragging(true);
+ event.stopPropagation();
 };
 
 const onMouseMove = (event) => {
- if (!iDragging) return;
+ if (!isDragging) return;
  const xPos = event.pageX;
  const windowWidth = window.innerWidth;
- const percentage = (xPos / windowWidth) * 100;
- setPercentage(percentage);
+ const calcperc = (xPos / windowWidth) * 100;
+ setPercentage(Math.round(100-calcperc));
 };
 
 const onMouseUp = () => {
- iDragging = false;
+ setIsDragging(false);
  console.log(percentage)
 };
 
@@ -983,22 +988,35 @@ function closetab(closeid){
 const [isvalid,setvalid]=useState(true);
   
 const [width, setWidth] = useState(200);
- const [isDragging, setIsDragging] = useState(false);
 
- const handleMouseDown = (event) => {
-    setIsDragging(true);
-    event.stopPropagation();
- };
 
- const handleMouseMove = (event) => {
-    if (!isDragging) return;
-    setWidth(window.innerWidth - event.clientX);
- };
+//  const handleMouseDown = (event) => {
+//     setIsDragging(true);
+//     event.stopPropagation();
+//  };
+
+//  const handleMouseMove = (event) => {
+//     if (!isDragging) return;
+//     setWidth(window.innerWidth - event.clientX);
+//  };
 
  const handleMouseUp = () => {
     setIsDragging(false);
  };
+
+ const divRef = useRef();
+
+ function handleMouseMove(event) {
+  const x = event.pageX;
+  const y = event.pageY;
+  divRef.current.style.left = `${x}px`;
+  divRef.current.style.top = `${y}px`;
+ }
+ 
   return (
+    <>
+    <div id="overlay" className={"fixed top-0 right-0 bottom-0 left-0 z-[2]"}
+    onMouseDown={()=>}></div>
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
         <div className="flex h-full flex-col gap-2">
@@ -1617,17 +1635,26 @@ const [width, setWidth] = useState(200);
                 <Sheet modal={false}>
                 <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
                   <SheetContent 
+                   onMouseMove={handleMouseMove} 
                     // style={{ width: `${width}px` }}
                     // onMouseDown={handleMouseDown}
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-white dark:bg-gray-800 grid grid-flow-row"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                    className={`bg-white dark:bg-gray-800 grid grid-flow-row w-[${percentage}%]`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      <div 
+ ref={divRef} 
+
+ style={{ position: "fixed", left: "0px", top: "0px" }} 
+ className="cursor-pointer"
+>
+ I follow the cursor!
+</div>
                       <div className="flex flex-row w-full">
                       <div
-                      onMouseDown={onMouseDown} 
-                      onMouseMove={onMouseMove} 
-                      onMouseUp={onMouseUp} 
+                      // onMouseDown={onMouseDown} 
+                      // onMouseMove={onMouseMove} 
+                      // onMouseUp={onMouseUp} 
                       className="w-2 bg-gray-800 cursor-e-resize"></div>
                       <div className="w-full">
                       {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
@@ -1764,6 +1791,7 @@ const [width, setWidth] = useState(200);
         </Table> */}
       </main>
     </div>
+    </>
   )
 }
 
