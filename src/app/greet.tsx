@@ -114,19 +114,19 @@ export default function Greet() {
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
   const [listlimit,setll]=useState(true)
-  const [isgrid,setig]=useState(false)
+  const [isgrid,setig]=useState(true)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
-  const [path, setpath] = useState("drives://");
-  const [pathitype, setpit] = useState("drives://");
+  const [path, setpath] = useState("/home/roger/Downloads");
+  const [pathitype, setpit] = useState("/home/roger/Downloads");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("drives://")
+  const [sampletext,sst]=useState("/home/roger/Downloads")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -143,7 +143,25 @@ export default function Greet() {
   const [fileslist, setfileslist] = useState(filesobjinit);
   const [isSheetOpen, setiso] = useState(false);
   // const [backpressed,setbackpressed]=useState(false)
-  
+  const [percentage, setPercentage] = useState(0);
+let iDragging = false;
+
+const onMouseDown = (event) => {
+ iDragging = true;
+};
+
+const onMouseMove = (event) => {
+ if (!iDragging) return;
+ const xPos = event.pageX;
+ const windowWidth = window.innerWidth;
+ const percentage = (xPos / windowWidth) * 100;
+ setPercentage(percentage);
+};
+
+const onMouseUp = () => {
+ iDragging = false;
+ console.log(percentage)
+};
 
   // function openTab(tabPath: string): void {
   //   let temptab=winInfo.tabidsalloted++;
@@ -461,8 +479,8 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        reset("drives://")
-        setpath("drives://")
+        reset("/home/roger/Downloads")
+        setpath("/home/roger/Downloads")
         newtab();
       }
   },[appWindow])
@@ -1604,7 +1622,14 @@ const [width, setWidth] = useState(200);
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                    className={"bg-white dark:bg-gray-800 grid grid-flow-row"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      <div className="flex flex-row w-full">
+                      <div
+                      onMouseDown={onMouseDown} 
+                      onMouseMove={onMouseMove} 
+                      onMouseUp={onMouseUp} 
+                      className="w-2 bg-gray-800 cursor-e-resize"></div>
+                      <div className="w-full">
                       {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
                       <ResizablePanel/>
                       <ResizableHandle />
@@ -1616,7 +1641,8 @@ const [width, setWidth] = useState(200);
                       <ReadFileComp path={message.path} name={message.name}/>
                       {/* </ResizablePanel>
                     </ResizablePanelGroup> */}
-                      
+                     </div>
+                     </div> 
                 
                       {/* <SheetDescription></SheetDescription> */}
                     
