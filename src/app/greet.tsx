@@ -1005,19 +1005,52 @@ const [width, setWidth] = useState(200);
  };
 
  const divRef = useRef();
+ const divRef1 = useRef();
 
  function handleMouseMove(event) {
   const x = event.pageX;
   const y = event.pageY;
+  settts(`${x},${y}`)
   divRef.current.style.left = `${x}px`;
   divRef.current.style.top = `${y}px`;
  }
+ const [fcsable,setfcs]=useState(false);
+ const [texttoshow,settts]=useState("HOVERING");
+ const [isDown,setisDown] = useState(false);
+const [offset,setoffset] = useState([0, 0]);
+
  
   return (
     <>
-    <div id="overlay" className={"fixed top-0 right-0 bottom-0 left-0 z-[2]"}
-    onMouseDown={()=>}></div>
-    <div className="grid grid-cols-[300px_1fr] h-screen">
+    <div id="overlay" className={`fixed top-0 right-0 bottom-0 left-0 z-[2] ${fcsable?"":"pointer-events-none"}`}
+    ref={divRef}
+   
+  //   onMouseDown={(e)=>{
+  //     setfcs(false);
+  //   setisDown(true);
+  //   setoffset([
+  //     divRef1.offsetLeft - e.clientX,
+  //     divRef1.offsetTop - e.clientY
+  //  ])
+  //   }
+  //   }
+  //   onMouseUp={()=>{
+  //     setisDown(false)
+  //   }}
+  //   onMouseMove={(e)=>{
+  //     if (!isDown) return;
+  //     var x = e.clientX + offset[0];
+  //     var y = e.clientY + offset[1];
+  //     divRef1.style.left = x + 'px';
+  //    divRef1.style.top = y + 'px';
+  //   }}
+    >{texttoshow}</div>
+    <div className="grid grid-cols-[300px_1fr] h-screen"
+     onMouseMove={handleMouseMove} 
+     onMouseDown={(e)=>{settts(`clicked ${e.pageX},${e.pageY}`)}}
+    onMouseUp={(e)=>{
+      // setfcs(true);
+    settts(`click left ${e.pageX},${e.pageY}`)}}>
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
@@ -1635,7 +1668,7 @@ const [width, setWidth] = useState(200);
                 <Sheet modal={false}>
                 <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
                   <SheetContent 
-                   onMouseMove={handleMouseMove} 
+                  //  onMouseMove={handleMouseMove} 
                     // style={{ width: `${width}px` }}
                     // onMouseDown={handleMouseDown}
                     // onMouseMove={handleMouseMove}
@@ -1643,7 +1676,7 @@ const [width, setWidth] = useState(200);
                     // onMouseLeave={handleMouseUp}
                     className={`bg-white dark:bg-gray-800 grid grid-flow-row w-[${percentage}%]`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                       <div 
- ref={divRef} 
+//  ref={divRef} 
 
  style={{ position: "fixed", left: "0px", top: "0px" }} 
  className="cursor-pointer"
