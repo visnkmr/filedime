@@ -1,7 +1,7 @@
 'use client'
 
 import FRc from "../components/findsizecomp"
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
@@ -104,7 +104,7 @@ export default function Greet() {
   useEffect(() => {
     setupAppWindow()
     // console.log("windowname---------->"+winInfo.winname)
-    // openTab("drives://")
+    // openTab("/home/roger/Downloads")
   }, []) 
   const filesobjinit:FileItem[]=[]
   const objinit:string[]=[]
@@ -120,13 +120,13 @@ export default function Greet() {
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
-  const [path, setpath] = useState("drives://");
-  const [pathitype, setpit] = useState("drives://");
+  const [path, setpath] = useState("/home/roger/Downloads");
+  const [pathitype, setpit] = useState("/home/roger/Downloads");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("drives://")
+  const [sampletext,sst]=useState("/home/roger/Downloads")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -244,7 +244,39 @@ export default function Greet() {
   // if(mdc){
   //   reset()
   // }
+  const [tabHistories, setTabHistories] = useState({});
+    const addToTabHistory = (tabId, item) => {
+      setTabHistories((prevHistories) => ({
+        ...prevHistories,
+        [tabId]: [...(prevHistories[tabId] || []), item],
+      }));
+   }; const getTabHistory = (tabId) => {
+    let poppedItem;
+    setTabHistories((prevHistories) => {
+      const history = prevHistories[tabId] || [];
+      if (history.length === 0) {
+        return prevHistories;
+      }
+      // history.pop()
+      do{
+        poppedItem=history.pop();
+      }while((poppedItem===path))
+      return {
+        ...prevHistories,
+        [tabId]: history,
+      };
+    });
+
+    return poppedItem;
+ };
+
+ // Memoized function to get the length of a tab's history
+ const getTabHistoryLength = useMemo(() => (tabId) => {
+    return (tabHistories[tabId] || []).length;
+ }, [tabHistories]);
+
   useEffect(() => {
+
     // listen("load-markdown", (data: { payload: string }) => {
     //   let markdowninfo=JSON.parse(data.payload);
     //     console.log("loadmarkdown")
@@ -401,7 +433,7 @@ export default function Greet() {
     // const unlisten=
     listen('list-drives', (event) => {
       // sst("")
-      // spi("Drives://")
+      // spi("/home/roger/Downloads")
       setcbl([])
       setfscl([])
         console.log("loading drives---->"+event.payload);
@@ -412,6 +444,7 @@ export default function Greet() {
             console.log(result)
         })
     .catch(console.error);
+    
     // const unlisten1=
     listen('list-files', (event) => {
       setwbv(false)
@@ -439,11 +472,11 @@ export default function Greet() {
     });
     // lfiles();
     
-    // openTab("drives://")
+    // openTab("/home/roger/Downloads")
     // invoke('list_files', { 
     //     windowname:winInfo.winname,
     //     oid: activetabid,
-    //     path: "drives://",
+    //     path: "/home/roger/Downloads",
     //     ff: "" 
     // })
     // .then(result => {
@@ -461,8 +494,8 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        reset("drives://")
-        setpath("drives://")
+        reset("/home/roger/Downloads")
+        setpath("/home/roger/Downloads")
         newtab();
       }
   },[appWindow])
@@ -543,6 +576,7 @@ const columns: ColumnDef<FileItem>[] = [
                   // setpath()
                   // setpsplitl(splitpath(path))
                   sst(name)
+                  addToTabHistory(activetabid.toString(),path)
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:appWindow?.label,
@@ -939,6 +973,7 @@ function closetab(closeid){
                         //     oid: newtabid.toString()
                         //   }
                         // );
+                        addToTabHistory(newtabid.toString(),path)
                         invoke('list_files', { 
                           windowname:appWindow?.label,
                           oid: newtabid.toString(),
@@ -991,6 +1026,7 @@ const [width, setWidth] = useState(200);
             </button>
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
+              console.log(JSON.stringify(tabHistories))
             }}/>
             
             
@@ -1034,16 +1070,16 @@ const [width, setWidth] = useState(200);
             <nav className="grid items-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
-                    reset("drives://")
-                    sst("drives://")
-                    updatetabs("drives://")
+                    reset("/home/roger/Downloads")
+                    sst("/home/roger/Downloads")
+                    updatetabs("/home/roger/Downloads")
                     // setpath()
                     // console.log(message);
-                    
+                    addToTabHistory(activetabid.toString(),"/home/roger/Downloads")
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
-                      path: "drives://",
+                      path: "/home/roger/Downloads",
                       ff: "" 
                   })
                 }
@@ -1071,12 +1107,12 @@ const [width, setWidth] = useState(200);
                   { 
                       // setfileslist([])
                       // setdriveslist([])
-                      // sst("drives://")
-                      // setpath("drives://")
+                      // sst("/home/roger/Downloads")
+                      // setpath("/home/roger/Downloads")
                       // setss("")
                       // console.log(message);
                       
-                      // openTab("drives://");
+                      // openTab("/home/roger/Downloads");
                       
                       newtab();
                   }
@@ -1109,8 +1145,8 @@ const [width, setWidth] = useState(200);
                       );
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
+                        // sst("/home/roger/Downloads")
+                        // setpath("/home/roger/Downloads")
                         // setss("")
                         // console.log(message);
                         
@@ -1153,8 +1189,8 @@ const [width, setWidth] = useState(200);
                     { 
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
+                        // sst("/home/roger/Downloads")
+                        // setpath("/home/roger/Downloads")
                         // setss("")
                         // console.log(message);
                         
@@ -1351,7 +1387,25 @@ const [width, setWidth] = useState(200);
       <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Button size="sm" variant="ghost">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className={`h-4 w-4 ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} 
+              onClick={()=>{
+                let pathtogoto=getTabHistory(activetabid.toString())
+                if(pathtogoto && pathtogoto.trim().length>0){
+
+                  reset(pathtogoto)
+                  updatetabs(pathtogoto)
+                  // setpath()
+                  // setpsplitl(splitpath(pathtogoto))
+                  sst("")
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: pathtogoto,
+                      ff: "" 
+                  });
+                }
+              }} />
             </Button>
             <Button size="sm" variant="ghost">
               <ForwardIcon className="h-4 w-4" />
@@ -1426,6 +1480,7 @@ const [width, setWidth] = useState(200);
                updatetabs(pathitype)
               //  setpath(message.name)
               //  sst(message.path)
+              addToTabHistory(activetabid.toString(),pathitype)
               invoke(
                 "list_files",
                 {
@@ -1481,6 +1536,7 @@ const [width, setWidth] = useState(200);
                 // spi(message.mount_point)
                 // setpath()
                 sst(eachif.pathtofol)
+                addToTabHistory(activetabid.toString(),eachif.pathtofol)
                 // console.log(message);
                 invoke('list_files', { 
                   windowname:appWindow?.label,
@@ -1573,10 +1629,10 @@ const [width, setWidth] = useState(200);
                 <Card key={index} onDoubleClick={
                   ()=>
                   { 
-                    console.log("gridlayout clicked");
+                    // console.log("gridlayout clicked");
                     reset(message.path)
                     updatetabs(message.path)
-                  
+                    addToTabHistory(activetabid.toString(),message.path)
                     // setpath()
                     // setpsplitl(splitpath(message.path))
                     sst(message.name)
@@ -1837,7 +1893,7 @@ export function Other() {
         // invoke<string>('list_files', { 
         //     // windowname:appWindow?.label,
         //     oid: "0",
-        //     path: "drives://",
+        //     path: "/home/roger/Downloads",
         //     ff: "" 
         // })
         // let addo=count+1
