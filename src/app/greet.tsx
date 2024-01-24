@@ -126,7 +126,7 @@ export default function Greet() {
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("/home/roger/Downloads")
+  const [sampletext,sst]=useState("Downloads")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -178,7 +178,7 @@ export default function Greet() {
     if(p){
       setpath(p);
       setpsplitl(splitpath(p))
-      sst(p)
+      // sst(p)
     }
       setfileslist([])
       setdriveslist([])
@@ -245,12 +245,14 @@ export default function Greet() {
   //   reset()
   // }
   const [tabHistories, setTabHistories] = useState({});
+  const [tabForward, setTabf] = useState({});
     const addToTabHistory = (tabId, item) => {
       setTabHistories((prevHistories) => ({
         ...prevHistories,
         [tabId]: [...(prevHistories[tabId] || []), item],
       }));
-   }; const getTabHistory = (tabId) => {
+   }; 
+   const getTabHistory = (tabId) => {
     let poppedItem;
     setTabHistories((prevHistories) => {
       const history = prevHistories[tabId] || [];
@@ -266,14 +268,38 @@ export default function Greet() {
         [tabId]: history,
       };
     });
-
+    setTabf((fwds) => ({
+      ...fwds,
+      [tabId]: [...(fwds[tabId] || []), poppedItem],
+    }));
+    return poppedItem;
+ };
+ const getTabfwd = (tabId) => {
+    let poppedItem;
+    setTabf((fwds) => {
+      const fwdt = fwds[tabId] || [];
+      if (fwdt.length === 0) {
+        return fwds;
+      }
+      // history.pop()
+      do{
+        poppedItem=fwdt.pop();
+      }while((poppedItem===path))
+      return {
+        ...fwds,
+        [tabId]: fwdt,
+      };
+    });
     return poppedItem;
  };
 
  // Memoized function to get the length of a tab's history
  const getTabHistoryLength = useMemo(() => (tabId) => {
     return (tabHistories[tabId] || []).length;
- }, [tabHistories]);
+ }, [tabHistories]); 
+ const getTabfwdLength = useMemo(() => (tabId) => {
+    return (tabForward[tabId] || []).length;
+ }, [tabForward]);
 
   useEffect(() => {
 
@@ -575,7 +601,7 @@ const columns: ColumnDef<FileItem>[] = [
                  
                   // setpath()
                   // setpsplitl(splitpath(path))
-                  sst(name)
+                  // sst(name)
                   addToTabHistory(activetabid.toString(),path)
                   // useEffect(() => {
                     invoke('list_files', { 
@@ -886,6 +912,7 @@ function updatetabs(tabpath){
       path:tabpath,
     }
   ).then((returned:string)=>{
+    sst(returned)
     console.log("preupdate tablist--->"+JSON.stringify(tablist))
      if(tablist && tablist.length>0){
 
@@ -1027,6 +1054,7 @@ const [width, setWidth] = useState(200);
             <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
               console.log(JSON.stringify(tabHistories))
+              console.log(JSON.stringify(tabForward))
             }}/>
             
             
@@ -1071,7 +1099,7 @@ const [width, setWidth] = useState(200);
               <button onClick={()=>
                 { 
                     reset("/home/roger/Downloads")
-                    sst("/home/roger/Downloads")
+                    // sst("/home/roger/Downloads")
                     updatetabs("/home/roger/Downloads")
                     // setpath()
                     // console.log(message);
@@ -1386,8 +1414,8 @@ const [width, setWidth] = useState(200);
         </div>
       <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost">
-              <ArrowLeft className={`h-4 w-4 ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} 
+            {/* <Button size="sm" variant="ghost"> */}
+              <ArrowLeft className={` ${getTabHistoryLength(activetabid.toString())>0?"h-4 w-4":"hidden"}`} 
               onClick={()=>{
                 let pathtogoto=getTabHistory(activetabid.toString())
                 if(pathtogoto && pathtogoto.trim().length>0){
@@ -1396,7 +1424,7 @@ const [width, setWidth] = useState(200);
                   updatetabs(pathtogoto)
                   // setpath()
                   // setpsplitl(splitpath(pathtogoto))
-                  sst("")
+                  // sst("")
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:appWindow?.label,
@@ -1406,9 +1434,27 @@ const [width, setWidth] = useState(200);
                   });
                 }
               }} />
-            </Button>
+            {/* </Button> */}
             <Button size="sm" variant="ghost">
-              <ForwardIcon className="h-4 w-4" />
+              <ForwardIcon className={` ${getTabfwdLength(activetabid.toString())>0?"h-4 w-4":"hidden"}`} 
+              onClick={()=>{
+                let pathtogoto=getTabfwd(activetabid.toString())
+                if(pathtogoto && pathtogoto.trim().length>0){
+
+                  reset(pathtogoto)
+                  updatetabs(pathtogoto)
+                  // setpath()
+                  // setpsplitl(splitpath(pathtogoto))
+                  // sst("")
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: pathtogoto,
+                      ff: "" 
+                  });
+                }
+              }}/>
             </Button>
           </div>
           <div className="flex flex-grow items-center gap-4">
@@ -1535,7 +1581,7 @@ const [width, setWidth] = useState(200);
                 updatetabs(eachif.pathtofol)
                 // spi(message.mount_point)
                 // setpath()
-                sst(eachif.pathtofol)
+                // sst(eachif.pathtofol)
                 addToTabHistory(activetabid.toString(),eachif.pathtofol)
                 // console.log(message);
                 invoke('list_files', { 
@@ -1585,7 +1631,7 @@ const [width, setWidth] = useState(200);
                   updatetabs(message.mount_point)
                   // spi(message.mount_point)
                   // setpath()
-                  sst(message.mount_point)
+                  // sst(message.mount_point)
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:appWindow?.label,
@@ -1635,7 +1681,7 @@ const [width, setWidth] = useState(200);
                     addToTabHistory(activetabid.toString(),message.path)
                     // setpath()
                     // setpsplitl(splitpath(message.path))
-                    sst(message.name)
+                    // sst(message.name)
                     // useEffect(() => {
                       invoke('list_files', { 
                         windowname:appWindow?.label,
