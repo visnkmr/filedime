@@ -1,7 +1,7 @@
 'use client'
 
 import FRc from "../components/findsizecomp"
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
@@ -104,7 +104,7 @@ export default function Greet() {
   useEffect(() => {
     setupAppWindow()
     // console.log("windowname---------->"+winInfo.winname)
-    // openTab("drives://")
+    // openTab("/home/roger/Downloads")
   }, []) 
   const filesobjinit:FileItem[]=[]
   const objinit:string[]=[]
@@ -114,19 +114,19 @@ export default function Greet() {
   const [driveslist, setdriveslist] = useState(driveobjinit);
   const [activetabid,setactivetabid]=useState(0)
   const [listlimit,setll]=useState(true)
-  const [isgrid,setig]=useState(false)
+  const [isgrid,setig]=useState(true)
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
-  const [path, setpath] = useState("drives://");
-  const [pathitype, setpit] = useState("drives://");
+  const [path, setpath] = useState("/home/roger/Downloads");
+  const [pathitype, setpit] = useState("/home/roger/Downloads");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("drives://")
+  const [sampletext,sst]=useState("/home/roger/Downloads")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -401,7 +401,7 @@ export default function Greet() {
     // const unlisten=
     listen('list-drives', (event) => {
       // sst("")
-      // spi("Drives://")
+      // spi("/home/roger/Downloads")
       setcbl([])
       setfscl([])
         console.log("loading drives---->"+event.payload);
@@ -439,11 +439,11 @@ export default function Greet() {
     });
     // lfiles();
     
-    // openTab("drives://")
+    // openTab("/home/roger/Downloads")
     // invoke('list_files', { 
     //     windowname:winInfo.winname,
     //     oid: activetabid,
-    //     path: "drives://",
+    //     path: "/home/roger/Downloads",
     //     ff: "" 
     // })
     // .then(result => {
@@ -461,8 +461,8 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        reset("drives://")
-        setpath("drives://")
+        reset("/home/roger/Downloads")
+        setpath("/home/roger/Downloads")
         newtab();
       }
   },[appWindow])
@@ -972,16 +972,34 @@ const [width, setWidth] = useState(200);
     event.stopPropagation();
  };
 
- const handleMouseMove = (event) => {
-    if (!isDragging) return;
-    setWidth(window.innerWidth - event.clientX);
- };
+//  const handleMouseMove = (event) => {
+//     if (!isDragging) return;
+//     setWidth(window.innerWidth - event.clientX);
+//  };
 
  const handleMouseUp = () => {
     setIsDragging(false);
  };
+ const[isfocused,setif]=useState(false)
+ const myDivRef = useRef(null);
+
+ const handleMouseMove = (event) => {
+  // if(myDivRef.current!=null){
+  //   const rect = myDivRef.current!.getBoundingClientRect();
+  // const x = event.clientX;
+  // const y = event.clientY;
+
+  // if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+  //   console.log('Mouse is over the div');
+  // } else {
+  //   console.log('Mouse is not over the div');
+  // }
+  // }
+  
+};
   return (
-    <div className="grid grid-cols-[300px_1fr] h-screen">
+    <div className="grid grid-cols-[300px_1fr] h-screen"
+    onMouseMove={handleMouseMove}>
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
@@ -1034,16 +1052,16 @@ const [width, setWidth] = useState(200);
             <nav className="grid items-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
-                    reset("drives://")
-                    sst("drives://")
-                    updatetabs("drives://")
+                    reset("/home/roger/Downloads")
+                    sst("/home/roger/Downloads")
+                    updatetabs("/home/roger/Downloads")
                     // setpath()
                     // console.log(message);
                     
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
-                      path: "drives://",
+                      path: "/home/roger/Downloads",
                       ff: "" 
                   })
                 }
@@ -1071,12 +1089,12 @@ const [width, setWidth] = useState(200);
                   { 
                       // setfileslist([])
                       // setdriveslist([])
-                      // sst("drives://")
-                      // setpath("drives://")
+                      // sst("/home/roger/Downloads")
+                      // setpath("/home/roger/Downloads")
                       // setss("")
                       // console.log(message);
                       
-                      // openTab("drives://");
+                      // openTab("/home/roger/Downloads");
                       
                       newtab();
                   }
@@ -1109,8 +1127,8 @@ const [width, setWidth] = useState(200);
                       );
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
+                        // sst("/home/roger/Downloads")
+                        // setpath("/home/roger/Downloads")
                         // setss("")
                         // console.log(message);
                         
@@ -1153,8 +1171,8 @@ const [width, setWidth] = useState(200);
                     { 
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
+                        // sst("/home/roger/Downloads")
+                        // setpath("/home/roger/Downloads")
                         // setss("")
                         // console.log(message);
                         
@@ -1557,7 +1575,7 @@ const [width, setWidth] = useState(200);
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 overflow-scroll`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 overflow-scroll`} onMouseMove={()=>{setif(false)}}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
@@ -1604,11 +1622,16 @@ const [width, setWidth] = useState(200);
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-transparent pointer-events-none"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                      <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                      <ResizablePanel className="pointer-events-none"/>
+                    
+                    className={`bg-transparent ${isfocused?"":"pointer-events-none"}`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                      <ResizablePanelGroup direction="horizontal" className={`${isfocused?"":"pointer-events-none"}`}>
+                      <ResizablePanel className={`${isfocused?"":"pointer-events-none"}`}/>
                       <ResizableHandle />
-                      <ResizablePanel className={"bg-white dark:bg-gray-800"}>
+                      <ResizablePanel
+                      ref={myDivRef}
+                      onMouseMove={()=>{setif(true)}}
+                      onMouseDown={()=>{setif(true)}}
+                       className={"bg-white dark:bg-gray-800"}>
                         <SheetHeader>
                         <SheetTitle>{message.name}</SheetTitle>
                       </SheetHeader>
@@ -1837,7 +1860,7 @@ export function Other() {
         // invoke<string>('list_files', { 
         //     // windowname:appWindow?.label,
         //     oid: "0",
-        //     path: "drives://",
+        //     path: "/home/roger/Downloads",
         //     ff: "" 
         // })
         // let addo=count+1
