@@ -1593,15 +1593,18 @@ const [width, setWidth] = useState(200);
           }>{eachif.interfolpath}</button>
           ))}
         </div>
-        <div className='flex items-center'>
+        <div className="">
+
+        <div className='grid grid-flow-col overflow-x-auto'>
           {
           Object.entries(filesetcollectionlist)
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <Badge variant="outline" key={index}>{key}({value})</Badge>
+            <Badge className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key={index}>{key}({value})</Badge>
           ))}
+        </div>
         </div>
         <span className="flex flex-row space-x-4">
 
