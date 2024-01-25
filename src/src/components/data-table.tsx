@@ -156,7 +156,7 @@ export function DataTable<TData, TValue,String>({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
-            // variant='outline' 
+            variant='outline' 
             className='ml-auto'>
             Choose Columns
           </Button>

@@ -74,6 +74,8 @@ import {  ArrowUpDown } from 'lucide-react';
 import { DateTime } from 'luxon';
 // import LetterClamp from '../../src/components/letterclamp';
 import '../styles/committablestyle.css'
+import { table } from "console";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "../components/ui/dropdown-menu";
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -305,6 +307,7 @@ export default function Greet() {
  const getTabfwdLength = useMemo(() => (tabId) => {
     return (tabForward[tabId] || []).length;
  }, [tabForward]);
+ const [currentchoice,changechoiceto]=useState("")
 
   useEffect(() => {
 
@@ -1671,6 +1674,59 @@ const [width, setWidth] = useState(200);
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
+        <DropdownMenu>
+        <DropdownMenuTrigger className="p-4" asChild>
+          <Button 
+            variant='outline' 
+            className='ml-auto'>
+            Sort by {currentchoice}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
+          
+                <DropdownMenuItem
+                  className='capitalize text-black dark:text-white'
+                  // checked={issize}
+                  // onCheckedChange={(value:boolean) => {}}
+                  onClick={()=>{
+                    changechoiceto("Size")
+                  }}
+                >
+                  Size
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className='capitalize text-black dark:text-white'
+                  // checked={issize}
+                  // onCheckedChange={(value:boolean) => {}}
+                  onClick={()=>{
+                    changechoiceto("Name")
+                  }}
+                >
+                  Name
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className='capitalize text-black dark:text-white'
+                  // checked={issize}
+                  // onCheckedChange={(value:boolean) => {}}
+                  onClick={()=>{
+                    changechoiceto("Type")
+                  }}
+                >
+                  Type
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className='capitalize text-black dark:text-white'
+                  // checked={issize}
+                  // onCheckedChange={(value:boolean) => {}}
+                  onClick={()=>{
+                    changechoiceto("Date")
+                  }}
+                >
+                  Date
+                </DropdownMenuItem>
+              
+        </DropdownMenuContent>
+      </DropdownMenu>
         <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
                      return (searchstring.trim().length>0?
