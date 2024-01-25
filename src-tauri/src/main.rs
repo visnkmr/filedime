@@ -160,7 +160,19 @@ async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, 
 #[tauri::command]
 async fn openpath(path: String) -> Result<(), String> {
   println!("{}",path);
-  match(opener::open(path)){
+  if(is_appimage(path.clone())){
+    let output = Command::new(path)
+        .output()
+        .expect("Failed to execute command");
+
+    if !output.status.success() {
+        eprintln!("Command executed with error: {}", String::from_utf8_lossy(&output.stderr));
+    } else {
+        println!("Command executed successfully: {}", String::from_utf8_lossy(&output.stdout));
+    }
+  }
+  else
+  {match(opener::open(path)){
     Ok(g)=>{
       println!("opening")
       
@@ -168,8 +180,26 @@ async fn openpath(path: String) -> Result<(), String> {
       
       println!("error opening file")
     }
-  };
+  };}
   Ok(())
+}
+fn is_appimage(path: String) -> bool {
+  #[cfg(target_os = "linux")]
+  {
+    let path=Path::new(&path);
+    let metadata = fs::metadata(&path).unwrap();
+    let bval=if metadata.is_file() {
+        if let Some(ext) = path.extension() {
+            ext == "AppImage"
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+    return bval
+  }
+  false
 }
 #[cfg(target_os = "windows")]
 #[tauri::command]
