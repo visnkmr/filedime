@@ -60,7 +60,8 @@ export default function ReadFileComp({path,name}){
               if(!MARKDOWN_TYPES.some(type => path.includes(type))){
 
                 invoke('highlightfile', { 
-                  path: path
+                  path: path,
+                  theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
               })
                 .then(result => {
                   // console.log("whats in file:"+result)
@@ -86,7 +87,6 @@ export default function ReadFileComp({path,name}){
         // console.log(data.payload.toString())
       });
   },[])
-       
         useEffect(() => {
           
            const fetchData = async () => {
@@ -98,7 +98,8 @@ export default function ReadFileComp({path,name}){
            if(!MARKDOWN_TYPES.some(type => path.includes(type))){
 
             invoke('highlightfile', { 
-                  path: path
+                  path: path,
+                  theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
               })
                 .then(result => {
                   // console.log("whats in file:"+result)

@@ -156,12 +156,23 @@ async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, 
     }
     
   }
+
   #[tauri::command]
-async fn highlightfile(path:String)->Result<String,()>{
+async fn highlightfile(path:String,theme:String)->Result<String,()>{
   let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
-    let theme = &theme_set.themes["base16-ocean.light"];
-  let src =syntect::html::highlighted_html_for_file(&path, &syntax_set, &theme).unwrap();
+    // let dark="dark".to_string();
+    // let theme = "dark"; // or "light"
+
+    let th = 
+      if(theme=="dark".to_string()){
+        &theme_set.themes["base16-ocean.dark"]
+      }
+      else{
+        &theme_set.themes["base16-ocean.light"]
+      };
+      // &theme_set.themes["base16-ocean.light"];
+  let src =syntect::html::highlighted_html_for_file(&path, &syntax_set, th).unwrap();
   Ok(src)
 }
 #[tauri::command]
