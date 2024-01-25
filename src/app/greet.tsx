@@ -1659,7 +1659,7 @@ const [width, setWidth] = useState(200);
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 overflow-scroll`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
                      return searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true

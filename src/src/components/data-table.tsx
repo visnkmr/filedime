@@ -130,7 +130,7 @@ export function DataTable<TData, TValue>({
   // }, []) // <-- empty array means 'run once'
 
   return (
-    <div className=''>
+    <div className='overflow-scroll h-[60%]'>
       <div className='flex items-center py-5'>
         <Input
           placeholder='Search in filename...'
