@@ -1674,7 +1674,8 @@ const [width, setWidth] = useState(200);
         <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
                      return (searchstring.trim().length>0?
-                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true)
+                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
+                       (el.ftype===sftype || sftype ==="all"):(true))))
                     })
                     .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
