@@ -245,6 +245,7 @@ export default function Greet() {
   //   reset()
   // }
   const [tabHistories, setTabHistories] = useState({});
+  const [sftype,setsftype]=useState("")
   const [tabForward, setTabf] = useState({});
     const addToTabHistory = (tabId, item) => {
       setTabHistories((prevHistories) => ({
@@ -481,6 +482,7 @@ export default function Greet() {
           // setpsplitl(splitpath(path))
 
           setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
+          
         }
         return newFileCount;
        });
@@ -1596,13 +1598,14 @@ const [width, setWidth] = useState(200);
         <div className="">
 
         <div className='grid grid-flow-col overflow-x-auto'>
+        <Badge onClick={()=>setsftype("all")} className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key="all">all</Badge>
           {
           Object.entries(filesetcollectionlist)
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <Badge className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key={index}>{key}({value})</Badge>
+            <Badge onClick={()=>setsftype(key)} className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key={index}>{key}({value})</Badge>
           ))}
         </div>
         </div>
@@ -1616,7 +1619,7 @@ const [width, setWidth] = useState(200);
         <p>{searchstring.trim().length>0?"":path}</p>
         <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
 
-          <DataTable columns={columns} data={fileslist}/>
+          <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
         </span>
         <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-scroll":"space-y-4 overflow-scroll"} mt-6`}>
           {/* <Other/> */}
@@ -1675,7 +1678,7 @@ const [width, setWidth] = useState(200);
             <HoverCard>
               <HoverCardTrigger>
              
-                <Card key={index} onDoubleClick={
+                <Card className="m-3" key={index} onDoubleClick={
                   ()=>
                   { 
                     // console.log("gridlayout clicked");

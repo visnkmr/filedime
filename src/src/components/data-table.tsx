@@ -37,15 +37,19 @@ import { DateTime } from 'luxon';
 import { useSearchParams } from 'next/navigation'
 
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue,String> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  searchstring:String;
+  filetype:String;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData, TValue,String>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  searchstring,
+  filetype
+}: DataTableProps<TData, TValue,String>) {
   // const searchParams = useSearchParams()
  
   // const reponame = searchParams.get('reponame')!==null?searchParams.get('reponame'):""
@@ -102,6 +106,11 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    initialState: {
+      pagination: {
+          pageSize: 5,
+      },
+  },
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
@@ -129,20 +138,21 @@ export function DataTable<TData, TValue>({
   //   // code to run after render goes here
   // }, []) // <-- empty array means 'run once'
 
+  React.useEffect(()=>{
+    table.getColumn('name')?.setFilterValue(searchstring)
+  },[searchstring])
+  React.useEffect(()=>{
+    if(!!filetype){ 
+      filetype==="all"?table.getColumn('ftype')?.setFilterValue(""):
+      table.getColumn('ftype')?.setFilterValue(filetype)
+    }
+  },[filetype])
   return (
-    <div className='overflow-scroll h-[60%]'>
-      <div className='flex items-center py-5'>
-        <Input
-          placeholder='Search in filename...'
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            {
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
-          }
-          className='max-w-sm'
-        />
-      </div>
+    // <div className=''>
+
+    <div className=' overflow-scroll m-2'>
+      <div className='m-5'>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
@@ -169,6 +179,7 @@ export function DataTable<TData, TValue>({
             })}
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
       {/* <div className='flex items-center py-5'>
         <Input
           placeholder='Filter by reponame...'
@@ -277,5 +288,6 @@ export function DataTable<TData, TValue>({
         </Button>
       </div>
     </div>
+    // </div>
   );
 }
