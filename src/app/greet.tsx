@@ -6,7 +6,7 @@ import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
-import ReadFileComp from "./readfile"
+import ReadFileComp, { IMAGE_TYPES } from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -76,6 +76,7 @@ import { DateTime } from 'luxon';
 import '../styles/committablestyle.css'
 import { table } from "console";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "../components/ui/dropdown-menu";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -1740,8 +1741,20 @@ const [width, setWidth] = useState(200);
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-             
-                <Card className="m-3" key={index} onDoubleClick={
+                <div className="m-3">
+
+              {/* {IMAGE_TYPES.some(type => message.name.includes(type))?(
+                  <div 
+                  className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
+                >
+                <LazyLoadImage 
+                className="w-full object-fill overflow-hidden" 
+                src={`${convertFileSrc(message.path)}`}/></div>
+                
+                ):(<div 
+                  className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
+                ></div>)} */}
+                <Card  key={index} onDoubleClick={
                   ()=>
                   { 
                     // console.log("gridlayout clicked");
@@ -1795,6 +1808,7 @@ const [width, setWidth] = useState(200);
                 </Sheet>):""}
                   </CardContent>
                 </Card>
+                </div>
                 
               </HoverCardTrigger>
               <HoverCardContent className={`${setcolorpertheme} flex flex-col`} >
