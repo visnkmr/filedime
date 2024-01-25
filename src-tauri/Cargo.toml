@@ -24,6 +24,7 @@ panic = "abort"
 tauri-build = { version = "1.5.1", features = [] }
 
 [dependencies]
+syntect="5.1.0"
 # prefstore= {path="../../../rust/prefstore/prefstore"}
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 tauri = { version = "1.5.4", features = [ "path-all", "fs-read-file", "protocol-all", "shell-open", "system-tray"] }

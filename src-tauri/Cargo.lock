@@ -975,6 +975,7 @@ dependencies = [
  "rusync",
  "serde",
  "serde_json",
+ "syntect",
  "sysinfo",
  "tauri",
  "tauri-build",

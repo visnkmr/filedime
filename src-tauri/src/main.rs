@@ -14,6 +14,7 @@ use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
 use serde_json::json;
+use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
 use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
 use walkdir::WalkDir;
 use std::fs;
@@ -155,8 +156,14 @@ async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, 
     }
     
   }
-
-
+  #[tauri::command]
+async fn highlightfile(path:String)->Result<String,()>{
+  let syntax_set = SyntaxSet::load_defaults_newlines();
+    let theme_set = ThemeSet::load_defaults();
+    let theme = &theme_set.themes["base16-ocean.light"];
+  let src =syntect::html::highlighted_html_for_file(&path, &syntax_set, &theme).unwrap();
+  Ok(src)
+}
 #[tauri::command]
 async fn openpath(path: String) -> Result<(), String> {
   println!("{}",path);
@@ -629,6 +636,7 @@ fn main() {
         newwindow,
         nosize,
         openpath,
+        highlightfile,
         doespathexist,
         otb,
         recent_files,

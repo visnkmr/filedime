@@ -59,7 +59,14 @@ export default function ReadFileComp({path,name}){
             case "changed":
               if(!MARKDOWN_TYPES.some(type => path.includes(type))){
 
-                fetchData()
+                invoke('highlightfile', { 
+                  path: path
+              })
+                .then(result => {
+                  // console.log("whats in file:"+result)
+                  setData(result)
+              })
+                .catch(console.error)
               }
               else
               {
@@ -90,7 +97,14 @@ export default function ReadFileComp({path,name}){
            }
            if(!MARKDOWN_TYPES.some(type => path.includes(type))){
 
-             fetchData()
+            invoke('highlightfile', { 
+                  path: path
+              })
+                .then(result => {
+                  // console.log("whats in file:"+result)
+                  setData(result)
+              })
+                .catch(console.error)
            }
            else{
             invoke('loadmarkdown', { 
