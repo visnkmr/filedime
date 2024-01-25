@@ -252,6 +252,13 @@ export default function Greet() {
         ...prevHistories,
         [tabId]: [...(prevHistories[tabId] || []), item],
       }));
+   };
+    const addTofwdHistory = (tabId, item) => {
+      setTabf((fwds) => {({
+        ...fwds,
+          [tabId]: [...(fwds[tabId] || []), item],
+        })}
+      );
    }; 
    const getTabHistory = (tabId) => {
     let poppedItem;
@@ -269,10 +276,7 @@ export default function Greet() {
         [tabId]: history,
       };
     });
-    setTabf((fwds) => ({
-      ...fwds,
-      [tabId]: [...(fwds[tabId] || []), poppedItem],
-    }));
+    
     return poppedItem;
  };
  const getTabfwd = (tabId) => {
@@ -1003,6 +1007,7 @@ function closetab(closeid){
                         //   }
                         // );
                         addToTabHistory(newtabid.toString(),path)
+                        // addTofwdHistory(newtabid.toString(),path)
                         invoke('list_files', { 
                           windowname:appWindow?.label,
                           oid: newtabid.toString(),
@@ -1419,6 +1424,7 @@ const [width, setWidth] = useState(200);
             {/* <Button size="sm" variant="ghost"> */}
               <ArrowLeft className={` ${getTabHistoryLength(activetabid.toString())>0?"h-4 w-4":"hidden"}`} 
               onClick={()=>{
+                // addTofwdHistory(activetabid.toString(),path)
                 let pathtogoto=getTabHistory(activetabid.toString())
                 if(pathtogoto && pathtogoto.trim().length>0){
 
@@ -1667,8 +1673,8 @@ const [width, setWidth] = useState(200);
         </div>
         <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll`}>
         {isgrid && fileslist.filter(function (el) {
-                     return searchstring.trim().length>0?
-                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true
+                     return (searchstring.trim().length>0?
+                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):true)
                     })
                     .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
