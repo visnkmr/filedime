@@ -92,8 +92,8 @@ import '../styles/committablestyle.css'
 // });
 
 
+export let setcolorpertheme="bg-white dark:bg-gray-800"
 export default function Greet() {
-  
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
     console.log("windowname top---------->"+appWindow.label)
@@ -621,7 +621,7 @@ const columns: ColumnDef<FileItem>[] = [
                 {/* </CardContent> */}
               </button>
               </HoverCardTrigger>
-              <HoverCardContent className='flex flex-col'>
+              <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
                {path}
                <br/>
                {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
@@ -1212,7 +1212,7 @@ const [width, setWidth] = useState(200);
                 
                tablist.map((tab, index) => (
                 <button key={index}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
                     { 
                         // setfileslist([])
@@ -1259,7 +1259,7 @@ const [width, setWidth] = useState(200);
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent className={`${setcolorpertheme}`} >
                List / Grid
               </HoverCardContent>
             </HoverCard>
@@ -1276,7 +1276,7 @@ const [width, setWidth] = useState(200);
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent  className={`${setcolorpertheme}`}>
                Reload
               </HoverCardContent>
             </HoverCard>
@@ -1293,7 +1293,7 @@ const [width, setWidth] = useState(200);
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent  className={`${setcolorpertheme}`}>
                Show size of folder
               </HoverCardContent>
             </HoverCard>
@@ -1372,7 +1372,7 @@ const [width, setWidth] = useState(200);
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent   className={`${setcolorpertheme}`}>
                Count immediate children of folders
               </HoverCardContent>
             </HoverCard>
@@ -1389,7 +1389,7 @@ const [width, setWidth] = useState(200);
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent  className={`${setcolorpertheme}`}>
                Recent Files
               </HoverCardContent>
             </HoverCard>
@@ -1706,7 +1706,7 @@ const [width, setWidth] = useState(200);
                     // onMouseMove={handleMouseMove}
                     // onMouseUp={handleMouseUp}
                     // onMouseLeave={handleMouseUp}
-                    className={"bg-white dark:bg-gray-800"} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                    className={`${setcolorpertheme}`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                       {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
                       <ResizablePanel/>
                       <ResizableHandle />
@@ -1728,7 +1728,7 @@ const [width, setWidth] = useState(200);
                 </Card>
                 
               </HoverCardTrigger>
-              <HoverCardContent className={"bg-white dark:bg-gray-800 flex flex-col"} >
+              <HoverCardContent className={`${setcolorpertheme} flex flex-col`} >
              
                 
                {message.path}
