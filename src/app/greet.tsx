@@ -1425,9 +1425,7 @@ const [width, setWidth] = useState(200);
         </div>
       <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            {/* <Button size="sm" variant="ghost"> */}
-              <ArrowLeft className={` ${getTabHistoryLength(activetabid.toString())>0?"h-4 w-4":"hidden"}`} 
-              onClick={()=>{
+            <Button variant={"ghost"} className={` ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} onClick={()=>{
                 // addTofwdHistory(activetabid.toString(),path)
                 let pathtogoto=getTabHistory(activetabid.toString())
                 if(pathtogoto && pathtogoto.trim().length>0){
@@ -1445,11 +1443,12 @@ const [width, setWidth] = useState(200);
                       ff: "" 
                   });
                 }
-              }} />
+              }}><ArrowLeft className="h-4 w-4"
+              /></Button>
+            {/* <Button size="sm" variant="ghost"> */}
+              
             {/* </Button> */}
-            <Button size="sm" variant="ghost">
-              <ForwardIcon className={` ${getTabfwdLength(activetabid.toString())>0?"h-4 w-4":"hidden"}`} 
-              onClick={()=>{
+            <Button className={` ${getTabfwdLength(activetabid.toString())>0?"":"hidden"}`} variant="ghost"  onClick={()=>{
                 let pathtogoto=getTabfwd(activetabid.toString())
                 if(pathtogoto && pathtogoto.trim().length>0){
 
@@ -1466,7 +1465,9 @@ const [width, setWidth] = useState(200);
                       ff: "" 
                   });
                 }
-              }}/>
+              }}>
+              <ForwardIcon className="h-4 w-4" 
+             />
             </Button>
           </div>
           <div className="flex flex-grow items-center gap-4">
@@ -1533,7 +1534,7 @@ const [width, setWidth] = useState(200);
               />
               
             </div>
-            <ArrowRightIcon className={`${isvalid?"":"hidden"}`} onClick={()=>{
+            <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
                reset(pathitype)
                updatetabs(pathitype)
               //  setpath(message.name)
@@ -1548,7 +1549,9 @@ const [width, setWidth] = useState(200);
                 ff: ""
                 }
                 )
-            }}/>
+            }}>
+              <ArrowRightIcon className="h-4 w-4" />
+              </Button>
             <div className="flex-grow max-w-[20%]">
               <input
                 className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -1563,16 +1566,22 @@ const [width, setWidth] = useState(200);
                 }
               />
             </div>
-            <SearchIcon onClick={
+            <Button variant={"ghost"}  onClick={
               ()=>{
-                invoke(
-                  "search_try", {
-                    windowname:appWindow?.label,
-                    // path: pathInput.value,
-                    string: searchstring
-                })
+                if(searchstring.trim().length>0){
+
+                  invoke(
+                    "search_try", {
+                      windowname:appWindow?.label,
+                      // path: pathInput.value,
+                      string: searchstring
+                  })
+                }
               }
-            }/>
+            }>
+
+            <SearchIcon className="h-4 w-4"/>
+            </Button>
             <div className="flex items-center gap-2">
               <span>{parentsize}</span>
               {/* <Button variant="ghost">Tab 2</Button>
@@ -1608,14 +1617,14 @@ const [width, setWidth] = useState(200);
         <div className="">
 
         <div className='grid grid-flow-col overflow-x-auto'>
-        <Badge onClick={()=>setsftype("all")} className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key="all">all</Badge>
+        <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
           {
           Object.entries(filesetcollectionlist)
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <Badge onClick={()=>setsftype(key)} className="mr-4 mb-4 whitespace-nowrap min-w-min" variant="outline" key={index}>{key}({value})</Badge>
+            <Button onClick={()=>setsftype(key)} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key={index}><Badge variant={"outline"}>{key}({value})</Badge></Button>
           ))}
         </div>
         </div>
@@ -1679,7 +1688,7 @@ const [width, setWidth] = useState(200);
         <DropdownMenuTrigger className="p-4" asChild>
           <Button 
             variant='outline' 
-            className='ml-auto'>
+            className='ml-auto whitespace-nowrap overflow-hidden'>
             Sort by {currentchoice}
           </Button>
         </DropdownMenuTrigger>
