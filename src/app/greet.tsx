@@ -1721,6 +1721,7 @@ const [width, setWidth] = useState(200);
                   // onCheckedChange={(value:boolean) => {}}
                   onClick={()=>{
                     changechoiceto("Size")
+                    fileslist.sort((b, a) => a.rawfs - b.rawfs);
                   }}
                 >
                   Size
@@ -1767,138 +1768,138 @@ const [width, setWidth] = useState(200);
                     .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
                     .map((message, index) => (
                      
-          <ContextMenu key={index}>
-          <ContextMenuTrigger>
-            <HoverCard>
-              <HoverCardTrigger>
-                <div className="m-3">
+                      <ContextMenu key={index}>
+                      <ContextMenuTrigger>
+                        <HoverCard>
+                          <HoverCardTrigger>
+                            <div className="m-3">
 
-              {/* {IMAGE_TYPES.some(type => message.name.includes(type))?(
-                  <div 
-                  className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
-                >
-                <LazyLoadImage 
-                className="w-full object-fill overflow-hidden" 
-                src={`${convertFileSrc(message.path)}`}/></div>
-                
-                ):(<div 
-                  className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
-                ></div>)} */}
-                <Card  key={index} onDoubleClick={
-                  ()=>
-                  { 
-                    // console.log("gridlayout clicked");
-                    reset(message.path)
-                    updatetabs(message.path)
-                    addToTabHistory(activetabid.toString(),message.path)
-                    // setpath()
-                    // setpsplitl(splitpath(message.path))
-                    // sst(message.name)
-                    // useEffect(() => {
-                      invoke('list_files', { 
-                        windowname:appWindow?.label,
-                        oid: activetabid.toString(),
-                        path: message.path,
-                        ff: "" 
-                    });
-                    // },[])
-                    }
-                  }>
-                  <CardContent className="flex items-center space-x-4">
-                  {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
-                    <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
-                    {!message.is_dir
-                    // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
-                    ?(
-                <Sheet modal={false}>
-                <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
-                  <SheetContent 
-                    // style={{ width: `${width}px` }}
-                    // onMouseDown={handleMouseDown}
-                    // onMouseMove={handleMouseMove}
-                    // onMouseUp={handleMouseUp}
-                    // onMouseLeave={handleMouseUp}
-                    className={`${setcolorpertheme}`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                      {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                      <ResizablePanel/>
-                      <ResizableHandle />
-                      <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                        <SheetHeader>
-                        <SheetTitle>{message.name}</SheetTitle>
-                      </SheetHeader>
-              
-                      <ReadFileComp path={message.path} name={message.name}/>
-                      {/* </ResizablePanel>
-                    </ResizablePanelGroup> */}
-                      
-                
-                      {/* <SheetDescription></SheetDescription> */}
-                    
-                  </SheetContent>
-                </Sheet>):""}
-                  </CardContent>
-                </Card>
-                </div>
-                
-              </HoverCardTrigger>
-              <HoverCardContent className={`${setcolorpertheme} flex flex-col`} >
-             
-                
-               {message.path}
-               <br/>
-               {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
-               
-              <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
-              </HoverCardContent>
-            </HoverCard>
+                          {/* {IMAGE_TYPES.some(type => message.name.includes(type))?(
+                              <div 
+                              className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
+                            >
+                            <LazyLoadImage 
+                            className="w-full object-fill overflow-hidden" 
+                            src={`${convertFileSrc(message.path)}`}/></div>
+                            
+                            ):(<div 
+                              className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
+                            ></div>)} */}
+                            <Card  key={index} onDoubleClick={
+                              ()=>
+                              { 
+                                // console.log("gridlayout clicked");
+                                reset(message.path)
+                                updatetabs(message.path)
+                                addToTabHistory(activetabid.toString(),message.path)
+                                // setpath()
+                                // setpsplitl(splitpath(message.path))
+                                // sst(message.name)
+                                // useEffect(() => {
+                                  invoke('list_files', { 
+                                    windowname:appWindow?.label,
+                                    oid: activetabid.toString(),
+                                    path: message.path,
+                                    ff: "" 
+                                });
+                                // },[])
+                                }
+                              }>
+                              <CardContent className="flex items-center space-x-4">
+                              {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
+                                <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                                {!message.is_dir
+                                // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
+                                ?(
+                            <Sheet modal={false}>
+                            <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
+                              <SheetContent 
+                                // style={{ width: `${width}px` }}
+                                // onMouseDown={handleMouseDown}
+                                // onMouseMove={handleMouseMove}
+                                // onMouseUp={handleMouseUp}
+                                // onMouseLeave={handleMouseUp}
+                                className={`${setcolorpertheme}`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                                  {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+                                  <ResizablePanel/>
+                                  <ResizableHandle />
+                                  <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
+                                    <SheetHeader>
+                                    <SheetTitle>{message.name}</SheetTitle>
+                                  </SheetHeader>
+                          
+                                  <ReadFileComp path={message.path} name={message.name}/>
+                                  {/* </ResizablePanel>
+                                </ResizablePanelGroup> */}
+                                  
+                            
+                                  {/* <SheetDescription></SheetDescription> */}
+                                
+                              </SheetContent>
+                            </Sheet>):""}
+                              </CardContent>
+                            </Card>
+                            </div>
+                            
+                          </HoverCardTrigger>
+                          <HoverCardContent className={`${setcolorpertheme} flex flex-col`} >
+                        
+                            
+                          {message.path}
+                          <br/>
+                          {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
+                          
+                          <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
+                          </HoverCardContent>
+                        </HoverCard>
 
-            
-          </ContextMenuTrigger>
-          <ContextMenuContent className=''>
-            <p className='text-sm'>{message.path}</p>
-            <ContextMenuItem onSelect={(e)=>{
-              invoke("newwindow",
-              {
-                // id: (winInfo.tabidsalloted++).toString(),
-                path: message.path,
-                ff:""
-              });
+                        
+                      </ContextMenuTrigger>
+                      <ContextMenuContent className=''>
+                        <p className='text-sm'>{message.path}</p>
+                        <ContextMenuItem onSelect={(e)=>{
+                          invoke("newwindow",
+                          {
+                            // id: (winInfo.tabidsalloted++).toString(),
+                            path: message.path,
+                            ff:""
+                          });
 
-            }}>Open in new window</ContextMenuItem>
-            <ContextMenuItem onSelect={(e)=>{
-              // openTab(message.path)
-              invoke(
-                "newtab",
-                {
-                  windowname:appWindow?.label,
-                  oid: activetabid.toString(),
-                  path: message.path,
-                  ff: ""
-                }
-              );
-            }}>Open in new tab</ContextMenuItem>
-            <ContextMenuItem onSelect={()=>{
-              invoke(
-                "addmark",
-                {
-              windowname:appWindow?.label,
-                  path: message.path
-                }
-              );
-            }}>Add bookmark</ContextMenuItem>
-            <ContextMenuItem onSelect={(e)=>{
-              try {
-                navigator.clipboard.writeText(message.path);
-                console.log('Content copied to clipboard');
-              } catch (err) {
-                console.error('Failed to copy: ', err);
-              }
-            }}>Copy path to clipboard</ContextMenuItem>
-            <ContextMenuItem onSelect={(e)=>{
-              setfos(message.path)
-            }}>Copy</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
+                        }}>Open in new window</ContextMenuItem>
+                        <ContextMenuItem onSelect={(e)=>{
+                          // openTab(message.path)
+                          invoke(
+                            "newtab",
+                            {
+                              windowname:appWindow?.label,
+                              oid: activetabid.toString(),
+                              path: message.path,
+                              ff: ""
+                            }
+                          );
+                        }}>Open in new tab</ContextMenuItem>
+                        <ContextMenuItem onSelect={()=>{
+                          invoke(
+                            "addmark",
+                            {
+                          windowname:appWindow?.label,
+                              path: message.path
+                            }
+                          );
+                        }}>Add bookmark</ContextMenuItem>
+                        <ContextMenuItem onSelect={(e)=>{
+                          try {
+                            navigator.clipboard.writeText(message.path);
+                            console.log('Content copied to clipboard');
+                          } catch (err) {
+                            console.error('Failed to copy: ', err);
+                          }
+                        }}>Copy path to clipboard</ContextMenuItem>
+                        <ContextMenuItem onSelect={(e)=>{
+                          setfos(message.path)
+                        }}>Copy</ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
         
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
