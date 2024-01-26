@@ -1256,10 +1256,14 @@ const [width, setWidth] = useState(200);
         </div>
       </aside>
       <main className="flex flex-col p-6 overflow-hidden">
-        <div className='flex flex-row mb-4'>
+        <div className="mb-4">
+
+<div className='flex flex-row overflow-x-auto whitespace-nowrap p-1'>
+          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+
         <HoverCard>
               <HoverCardTrigger>
-            <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+            <Card className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
                 ()=>{
                   setig((old)=>{return !old})
                 }
@@ -1274,9 +1278,12 @@ const [width, setWidth] = useState(200);
                List / Grid
               </HoverCardContent>
             </HoverCard>
+          </Button>
+          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
                 ()=>{
                   reloadlist()
                 }
@@ -1291,9 +1298,12 @@ const [width, setWidth] = useState(200);
                Reload
               </HoverCardContent>
             </HoverCard>
+          </Button>
+          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   reloadsize()
                 }
@@ -1308,6 +1318,7 @@ const [width, setWidth] = useState(200);
                Show size of folder
               </HoverCardContent>
             </HoverCard>
+          </Button>
             <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
 
             {/* <HoverCard>
@@ -1370,9 +1381,11 @@ const [width, setWidth] = useState(200);
                Show size of folder
               </HoverCardContent>
             </HoverCard> */}
+            <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   populateimmediatechildcount()
                 }
@@ -1387,9 +1400,12 @@ const [width, setWidth] = useState(200);
                Count immediate children of folders
               </HoverCardContent>
             </HoverCard>
+            </Button>
+            <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   recentfiles()
                 }
@@ -1404,24 +1420,29 @@ const [width, setWidth] = useState(200);
                Recent Files
               </HoverCardContent>
             </HoverCard>
+            </Button>
         {custombuttonlist.map((bn, index) => (
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4' key={index} onClick={
-                ()=>{
-                  invoke(
-                    "otb",
-                    {
-                      bname: bn,
-                      path: path,
-                    }
-                    );
+          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap " key={index} onClick={
+            ()=>{
+              invoke(
+                "otb",
+                {
+                  bname: bn,
+                  path: path,
                 }
-            }>
-            <CardDescription className="flex items-center space-x-2 p-2">
+                );
+            }
+        }>
+
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm' >
+            <CardDescription className="flex items-center p-1">
               <CodeIcon className="h-4 w-4" />
               <span className="font-medium text-sm">{bn}</span>
             </CardDescription>
           </Card>
+          </Button>
             ))}
+        </div>
         </div>
       <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
