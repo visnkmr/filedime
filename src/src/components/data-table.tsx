@@ -108,7 +108,7 @@ export function DataTable<TData, TValue,String>({
     onColumnFiltersChange: setColumnFilters,
     initialState: {
       pagination: {
-          pageSize: 5,
+          pageSize: 15,
       },
   },
     getFilteredRowModel: getFilteredRowModel(),
@@ -150,8 +150,8 @@ export function DataTable<TData, TValue,String>({
   return (
     // <div className=''>
 
-    <div className=' overflow-scroll m-2'>
-      <div className='m-5'>
+    <div className='mt-2'>
+      <div className='mb-2'>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

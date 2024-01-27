@@ -1657,54 +1657,8 @@ const [width, setWidth] = useState(200);
             }}>Show all</Button>
         </span>
         <p>{searchstring.trim().length>0?"":path}</p>
-        <span className={(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}>
+        <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}>
 
-          <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
-        </span>
-        <div className={`${!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-scroll":"space-y-4 overflow-scroll"} mt-6`}>
-          {/* <Other/> */}
-        {driveslist.filter(function (el) {
-                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
-                    }).map((message, index) => (
-                      <div className={`${!isgrid?"":"flex  "}`}>
-          <ContextMenu key={index}>
-          <ContextMenuTrigger>
-          
-            <Card key={index} onClick={
-                ()=>
-                { 
-                  reset(message.mount_point)
-                  updatetabs(message.mount_point)
-                  // spi(message.mount_point)
-                  // setpath()
-                  // sst(message.mount_point)
-                  // console.log(message);
-                  invoke('list_files', { 
-                    windowname:appWindow?.label,
-                    oid: activetabid.toString(),
-                    path: message.mount_point,
-                    ff: "" 
-                })
-              }
-            }>
-            <CardContent className="flex items-center space-x-4">
-              <HardDriveIcon className="h-6 w-6" />
-              <span className="font-medium text-lg ">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
-            </CardContent>
-          </Card>
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <p className='pl-4'>{message.mount_point}</p>
-            <ContextMenuItem>Open in new tab</ContextMenuItem>
-            <ContextMenuItem>Open in new window</ContextMenuItem>
-            <ContextMenuItem>Add bookmark</ContextMenuItem>
-            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-                         </div>
-        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
-        ))}
-        </div>
         <DropdownMenu>
         <DropdownMenuTrigger className="p-4" asChild>
           <Button 
@@ -1759,7 +1713,57 @@ const [width, setWidth] = useState(200);
               
         </DropdownMenuContent>
       </DropdownMenu>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll`}>
+        </div>
+        <span className={`overflow-scroll ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
+        
+          <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
+        </span>
+        <div className={`${driveslist.length>0?(!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-scroll":"space-y-4 overflow-scroll"):"hidden"}`}>
+          {/* <Other/> */}
+        {driveslist.filter(function (el) {
+                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+                    }).map((message, index) => (
+                      <div className={`${!isgrid?"":"flex  "}`}>
+          <ContextMenu key={index}>
+          <ContextMenuTrigger>
+          
+            <Card key={index} onClick={
+                ()=>
+                { 
+                  reset(message.mount_point)
+                  updatetabs(message.mount_point)
+                  // spi(message.mount_point)
+                  // setpath()
+                  // sst(message.mount_point)
+                  // console.log(message);
+                  invoke('list_files', { 
+                    windowname:appWindow?.label,
+                    oid: activetabid.toString(),
+                    path: message.mount_point,
+                    ff: "" 
+                })
+              }
+            }>
+            <CardContent className="flex items-center space-x-4">
+              <HardDriveIcon className="h-6 w-6" />
+              <span className="font-medium text-lg ">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
+            </CardContent>
+          </Card>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <p className='pl-4'>{message.mount_point}</p>
+            <ContextMenuItem>Open in new tab</ContextMenuItem>
+            <ContextMenuItem>Open in new window</ContextMenuItem>
+            <ContextMenuItem>Add bookmark</ContextMenuItem>
+            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+                         </div>
+        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
+        ))}
+        </div>
+        
+        <div className={`${isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll":"hidden"}`}>
         {isgrid && fileslist.filter(function (el) {
                      return (searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
