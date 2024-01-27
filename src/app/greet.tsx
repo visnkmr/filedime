@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import ReadFileComp, { IMAGE_TYPES } from "./readfile"
 // import parse from 'html-react-parser';
@@ -880,6 +880,32 @@ const columns: ColumnDef<FileItem>[] = [
   // },
   // ...
 ];
+const useActiveElement = () => {
+  const [active, setActive] = useState(document.activeElement);
+   
+  const handleFocusIn = (e) => {
+     setActive(document.activeElement);
+  }
+   
+  useEffect(() => {
+     document.addEventListener('focusin', handleFocusIn)
+     return () => {
+       document.removeEventListener('focusin', handleFocusIn)
+  };
+  }, [])
+   
+  return active;
+ }
+ const focusedElement = useActiveElement();
+  
+ useEffect(() => {
+     if (focusedElement) {
+       focusedElement.value && console.log(focusedElement.value);
+     }
+    console.log(focusedElement);
+ }, [focusedElement])
+  
+ 
  function reloadlist(){
       reset(path)
           // setpath()
@@ -1255,7 +1281,7 @@ const [width, setWidth] = useState(200);
           </div>
         </div>
       </aside>
-      <main className="flex flex-col p-6 overflow-hidden">
+      <main className="flex flex-col pt-3 ps-3 overflow-hidden">
         <div className="mb-4">
 
 <div className='flex flex-row overflow-x-auto whitespace-nowrap p-1'>
@@ -1610,30 +1636,36 @@ const [width, setWidth] = useState(200);
             </div>
           </div>
         </div>
-        <div className='flex items-center space-x-6 mb-6 '>
+        <div className='flex items-center space-x-6 ms-2'>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
-          .map((eachif,index)  => (
-            <button key={index} onClick={
-              ()=>
-              { 
-                reset(eachif.pathtofol)
-                updatetabs(eachif.pathtofol)
-                // spi(message.mount_point)
-                // setpath()
-                // sst(eachif.pathtofol)
-                addToTabHistory(activetabid.toString(),eachif.pathtofol)
-                // console.log(message);
-                invoke('list_files', { 
-                  windowname:appWindow?.label,
-                  oid: activetabid.toString(),
-                  path: eachif.pathtofol,
-                  ff: "" 
-              })}
-          }>{eachif.interfolpath}</button>
-          ))}
+          .map((eachif,index)  => {
+            if(eachif.pathtofol.trim().length>0){
+
+              return <button key={index} onClick={
+                ()=>
+                { 
+                  reset(eachif.pathtofol)
+                  updatetabs(eachif.pathtofol)
+                  // spi(message.mount_point)
+                  // setpath()
+                  // sst(eachif.pathtofol)
+                  addToTabHistory(activetabid.toString(),eachif.pathtofol)
+                  // console.log(message);
+                  invoke('list_files', { 
+                    windowname:appWindow?.label,
+                    oid: activetabid.toString(),
+                    path: eachif.pathtofol,
+                    ff: "" 
+                })}
+            }>
+              {/* <TreesIcon className="h-4 w-4 "/> */}
+              {eachif.interfolpath}</button>
+            }
+            return;
+        })}
         </div>
         <div className="">
 

@@ -217,6 +217,31 @@ export function DataTable<TData, TValue,String>({
         </DropdownMenuContent>
       </DropdownMenu> */}
       <div className=''>
+        <div className='flex flex-row'>
+      <div className='flex space-x-2 py-4'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className='shadow-md'
+        >
+          Previous
+        </Button>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className='shadow-md'
+        >
+          Next
+        </Button>
+      </div>
+      <p className='ms-3 pt-4'>Total {table.getPageCount()} pages.</p>
+      
+        
+          </div>
         <Table className='rounded-md border shadow-md text-center'>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -266,28 +291,8 @@ export function DataTable<TData, TValue,String>({
           </TableBody>
         </Table>
       </div>
-        <p className='flex justify-start pt-4'>Total {table.getPageCount()} pages.</p>
-      <div className='flex justify-end space-x-2 py-4'>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className='shadow-md'
-        >
-          Previous
-        </Button>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className='shadow-md'
-        >
-          Next
-        </Button>
+        
       </div>
-    </div>
     // </div>
   );
 }
