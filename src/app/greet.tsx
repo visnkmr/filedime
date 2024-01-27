@@ -1848,7 +1848,7 @@ const [width, setWidth] = useState(200);
                       <ContextMenuTrigger>
                         <HoverCard>
                           <HoverCardTrigger>
-                            <div className="m-3">
+                            <div className="m-3 overflow-hidden">
 
                           {/* {IMAGE_TYPES.some(type => message.name.includes(type))?(
                               <div 
@@ -1861,7 +1861,11 @@ const [width, setWidth] = useState(200);
                             ):(<div 
                               className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
                             ></div>)} */}
-                            <Card  key={index} onDoubleClick={
+                            
+
+                            {/* <Card  key={index} > */}
+                              {/* <CardContent className=" overflow-hidden"> */}
+                              <Button className="h-full w-full p-6 flex justify-start overflow-hidden space-x-2 focus:bg-gray-500" variant={"outline"} onDoubleClick={
                               ()=>
                               { 
                                 // console.log("gridlayout clicked");
@@ -1881,14 +1885,23 @@ const [width, setWidth] = useState(200);
                                 // },[])
                                 }
                               }>
-                              <CardContent className="flex items-center space-x-4 overflow-hidden">
+                              <div className="overflow-visible">
+
                               {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
-                                <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                              </div>
+                              <div className="w-full flex justify-between overflow-hidden">
+                              <div className="overflow-hidden">
+
+                                <span className="font-medium text-lg overflow-hidden">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
+                              </div>
                                 {!message.is_dir
                                 // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
                                 ?(
                             <Sheet modal={false}>
-                            <SheetTrigger><EyeIcon className="h-4 w-4"/></SheetTrigger>
+                            <SheetTrigger className="p-2 focus:bg-gray-500">
+                              <EyeIcon className="h-4 w-4 "/>
+                              
+                              </SheetTrigger>
                               <SheetContent 
                                 // style={{ width: `${width}px` }}
                                 // onMouseDown={handleMouseDown}
@@ -1913,8 +1926,10 @@ const [width, setWidth] = useState(200);
                                 
                               </SheetContent>
                             </Sheet>):""}
-                              </CardContent>
-                            </Card>
+                              </div>
+                            </Button>
+                              {/* </CardContent> */}
+                            {/* </Card> */}
                             </div>
                             
                           </HoverCardTrigger>
