@@ -127,7 +127,8 @@ export default function Greet() {
   const [perpage,setperpage]=useState(15)
   useMemo(()=>{
     setnop(Math.ceil(filecount/perpage))
-  },[filecount,perpage])
+  },[filecount])
+  
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("/home/roger/Downloads");
@@ -151,6 +152,18 @@ export default function Greet() {
   //  const [winInfo,setwi]= useState(wininfo)
   // const [history,sethistory]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
+  useMemo(()=>{
+    !!filecount && perpage && setnop(Math.ceil(filecount/perpage))
+    !!fileslist && setfileslist((old)=>{
+      return [...old]
+    })
+  },[perpage])
+  useEffect(()=>{
+    setpageno((old)=>{
+      console.error(old+"---"+noofpages)
+     return old>noofpages?(noofpages-1):(old)
+    })
+  },[perpage])
   const [isSheetOpen, setiso] = useState(false);
   // const [backpressed,setbackpressed]=useState(false)
   
@@ -1808,14 +1821,18 @@ const [width, setWidth] = useState(200);
         <div className="flex flex-row">
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
-                {/* <Input value={perpage}
+                <div className="ms-2 flex flex-wrap">
+
+                <Input value={perpage}
+                className="whitespace-nowrap"
                 type="number"
                 onChange={(event) =>
                   {
                     let pp=Number(event.target.value);
                     setperpage(pp)
                   }
-                }/> */}
+                }/>
+                </div>
         </div>
         <div className={`${isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll":"hidden"}`}>
 
@@ -1824,7 +1841,7 @@ const [width, setWidth] = useState(200);
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
                        (el.ftype===sftype || sftype ==="all"):(true))))
                     })
-                    .slice(currentpage*15,(currentpage+1)*15)
+                    .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                      
                       <ContextMenu key={index}>
