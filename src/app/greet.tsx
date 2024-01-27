@@ -6,6 +6,7 @@ import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
+import {Checkbox} from "../components/ui/checkbox"
 import ReadFileComp, { IMAGE_TYPES } from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
@@ -573,27 +574,27 @@ const columns: ColumnDef<FileItem>[] = [
   //   accessorKey: 'reponame',
   //   header: 'Reponame',
   // },
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={table.getIsAllPageRowsSelected()}
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //       className="translate-y-[2px]"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //       className="translate-y-[2px]"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="translate-y-[2px]"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="translate-y-[2px]"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: true,
+  },
 
   {
     accessorKey: 'name',
@@ -612,6 +613,7 @@ const columns: ColumnDef<FileItem>[] = [
       );
     },
     cell: ({
+      row,
       getValue,
       row: {
         original: { path,name,foldercon,size,rawfs,is_dir },
@@ -620,12 +622,12 @@ const columns: ColumnDef<FileItem>[] = [
       const rname = getValue()
 
       return (
-        <div className="max-w-sm overflow-hidden">
+        <div className={`max-w-sm overflow-hidden`}>
           <ContextMenu>
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <button className="flex justify-start whitespace-nowrap" onDoubleClick={
+              <button className="w-full h-full flex justify-start whitespace-nowrap focus:bg-gray-500" onDoubleClick={
                 ()=>
                 { 
                   // console.log("gridlayout clicked");
