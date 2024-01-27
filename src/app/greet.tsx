@@ -1844,7 +1844,7 @@ const [width, setWidth] = useState(200);
                                 // },[])
                                 }
                               }>
-                              <CardContent className="flex items-center space-x-4">
+                              <CardContent className="flex items-center space-x-4 overflow-hidden">
                               {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                                 <span className="font-medium text-lg">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                                 {!message.is_dir
@@ -1881,9 +1881,9 @@ const [width, setWidth] = useState(200);
                             </div>
                             
                           </HoverCardTrigger>
-                          <HoverCardContent className={`${setcolorpertheme} flex flex-col`} >
-                        
-                            
+                          <HoverCardContent className={`${setcolorpertheme} flex flex-col text-center`} >
+                          {message.name}
+                          <br/>  
                           {message.path}
                           <br/>
                           {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
