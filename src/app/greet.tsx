@@ -121,6 +121,11 @@ export default function Greet() {
   const [startstopfilewatch,setstartstopfilewatch]=useState(false)
   const [watchbuttonvisibility,setwbv]=useState(false)
   const [filecount, setfc] = useState(0);
+  const [noofpages,setnop]=useState(1);
+  const [currentpage,setpageno]=useState(0)
+  useMemo(()=>{
+    setnop(Math.ceil(filecount/15))
+  },[filecount])
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("/home/roger/Downloads");
@@ -1798,13 +1803,20 @@ const [width, setWidth] = useState(200);
         ))}
         </div>
         
+        <div className="flex flex-row">
+        {Array.from({ length: noofpages }).map((_, index) => (
+                <Button variant={"outline"} className="mr-2 " key={index}  onClick={()=>setpageno(index)}>Page {index + 1}</Button>
+            ))}
+
+        </div>
         <div className={`${isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll":"hidden"}`}>
+
         {isgrid && fileslist.filter(function (el) {
                      return (searchstring.trim().length>0?
                        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
                        (el.ftype===sftype || sftype ==="all"):(true))))
                     })
-                    .slice(0,listlimit?(fileslist.length>500?500:fileslist.length):fileslist.length)
+                    .slice(currentpage*15,(currentpage+1)*15)
                     .map((message, index) => (
                      
                       <ContextMenu key={index}>
