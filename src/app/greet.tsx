@@ -581,7 +581,10 @@ const columns: ColumnDef<FileItem>[] = [
       return (
         <Button
           // variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => {
+            // console.error("pressed name")
+            column.toggleSorting(column.getIsSorted() === 'asc')
+          }}
         >
           FileName
           <ArrowUpDown className='ml-2 h-4 w-4' />
@@ -597,12 +600,12 @@ const columns: ColumnDef<FileItem>[] = [
       const rname = getValue()
 
       return (
-        <div>
+        <div className="max-w-sm overflow-hidden">
           <ContextMenu>
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <button className="flex items-center" onDoubleClick={
+              <button className="flex justify-start whitespace-nowrap" onDoubleClick={
                 ()=>
                 { 
                   // console.log("gridlayout clicked");
@@ -880,30 +883,30 @@ const columns: ColumnDef<FileItem>[] = [
   // },
   // ...
 ];
-const useActiveElement = () => {
-  const [active, setActive] = useState(document.activeElement);
+// const useActiveElement = () => {
+//   const [active, setActive] = useState(document.activeElement);
    
-  const handleFocusIn = (e) => {
-     setActive(document.activeElement);
-  }
+//   const handleFocusIn = (e) => {
+//      setActive(document.activeElement);
+//   }
    
-  useEffect(() => {
-     document.addEventListener('focusin', handleFocusIn)
-     return () => {
-       document.removeEventListener('focusin', handleFocusIn)
-  };
-  }, [])
+//   useEffect(() => {
+//      document.addEventListener('focusin', handleFocusIn)
+//      return () => {
+//        document.removeEventListener('focusin', handleFocusIn)
+//   };
+//   }, [])
    
-  return active;
- }
- const focusedElement = useActiveElement();
+//   return active;
+//  }
+//  const focusedElement = useActiveElement();
   
- useEffect(() => {
-     if (focusedElement) {
-       focusedElement.value && console.log(focusedElement.value);
-     }
-    console.log(focusedElement);
- }, [focusedElement])
+//  useEffect(() => {
+//      if (focusedElement) {
+//        focusedElement.value && console.log(focusedElement.value);
+//      }
+//     console.log(focusedElement);
+//  }, [focusedElement])
   
  
  function reloadlist(){

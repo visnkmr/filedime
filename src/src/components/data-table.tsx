@@ -290,6 +290,31 @@ export function DataTable<TData, TValue,String>({
             )}
           </TableBody>
         </Table>
+        <div className='flex flex-row'>
+      <div className='flex space-x-2 py-4'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className='shadow-md'
+        >
+          Previous
+        </Button>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className='shadow-md'
+        >
+          Next
+        </Button>
+      </div>
+      <p className='ms-3 pt-4'>Total {table.getPageCount()} pages.</p>
+      
+        
+          </div>
       </div>
         
       </div>
