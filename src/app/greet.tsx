@@ -77,6 +77,7 @@ import '../styles/committablestyle.css'
 import { table } from "console";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "../components/ui/dropdown-menu";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { Input } from "../components/ui/input";
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -123,9 +124,10 @@ export default function Greet() {
   const [filecount, setfc] = useState(0);
   const [noofpages,setnop]=useState(1);
   const [currentpage,setpageno]=useState(0)
+  const [perpage,setperpage]=useState(15)
   useMemo(()=>{
-    setnop(Math.ceil(filecount/15))
-  },[filecount])
+    setnop(Math.ceil(filecount/perpage))
+  },[filecount,perpage])
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
   const [path, setpath] = useState("/home/roger/Downloads");
@@ -1804,10 +1806,16 @@ const [width, setWidth] = useState(200);
         </div>
         
         <div className="flex flex-row">
-        {Array.from({ length: noofpages }).map((_, index) => (
-                <Button variant={"outline"} className="mr-2 " key={index}  onClick={()=>setpageno(index)}>Page {index + 1}</Button>
-            ))}
-
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
+                {/* <Input value={perpage}
+                type="number"
+                onChange={(event) =>
+                  {
+                    let pp=Number(event.target.value);
+                    setperpage(pp)
+                  }
+                }/> */}
         </div>
         <div className={`${isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll":"hidden"}`}>
 
