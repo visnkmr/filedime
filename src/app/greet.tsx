@@ -153,18 +153,23 @@ export default function Greet() {
   //  const [winInfo,setwi]= useState(wininfo)
   // const [history,sethistory]=useState(objinit)
   const [fileslist, setfileslist] = useState(filesobjinit);
+  const [sftype,setsftype]=useState("all")
+
   useMemo(()=>{
-    !!filecount && perpage && setnop(Math.ceil(filecount/perpage))
-    !!fileslist && setfileslist((old)=>{
-      return [...old]
-    })
-  },[perpage])
-  useEffect(()=>{
+    let filestocount=fileslist.filter(function (el) {
+      return (searchstring.trim().length>0?
+        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
+        (el.ftype===sftype || sftype ==="all"):(true))))
+     }).length;
+    !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
+    // !!fileslist && setfileslist((old)=>{
+    //   return [...old]
+    // })
     setpageno((old)=>{
       console.error(old+"---"+noofpages)
      return old>noofpages?(noofpages-1):(old)
     })
-  },[perpage])
+  },[perpage,sftype])
   const [isSheetOpen, setiso] = useState(false);
   // const [backpressed,setbackpressed]=useState(false)
   
@@ -204,6 +209,7 @@ export default function Greet() {
       setpsplitl(splitpath(p))
       // sst(p)
     }
+    setsftype("all")
       setfileslist([])
       setdriveslist([])
       setfc(0)
@@ -269,7 +275,6 @@ export default function Greet() {
   //   reset()
   // }
   const [tabHistories, setTabHistories] = useState({});
-  const [sftype,setsftype]=useState("")
   const [tabForward, setTabf] = useState({});
     const addToTabHistory = (tabId, item) => {
       setTabHistories((prevHistories) => ({
