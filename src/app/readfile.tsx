@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
+import FRc from "../components/findsizecomp"
+
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "../components/ui/hover-card"
 // import hljs from 'highlight.js';
+import { FileItem,DriveItem } from "../shared/types"
 
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 export const MARKDOWN_TYPES = ['md', 'markdown', 'mdown', 'mkd', 'mkdown', 'mdwn', 'mdtxt', 'mdtext', 'text'];
@@ -17,7 +20,10 @@ export const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
 export const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
-export default function ReadFileComp({path,name}){
+interface rfcprops {
+  message:FileItem
+}
+export default function ReadFileComp({message}:rfcprops){
     async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
     console.log("windowname top---------->"+appWindow.label)
@@ -87,29 +93,35 @@ export default function ReadFileComp({path,name}){
         // console.log(data.payload.toString())
       });
   },[])
+  const [failed,setfailed]=useState(false)
         useEffect(() => {
           
            const fetchData = async () => {
-             const response = await fs.readTextFile(path);
+             const response = await fs.readTextFile(message.path);
              console.log(response)
              
              setData(response);
            }
-           if(!MARKDOWN_TYPES.some(type => path.includes(type))){
+           if(!MARKDOWN_TYPES.some(type => message.path.includes(type))){
 
             invoke('highlightfile', { 
-                  path: path,
+                  path: message.path,
                   theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
               })
                 .then(result => {
+                  setfailed(false)
                   // console.log("whats in file:"+result)
                   setData(result)
               })
-                .catch(console.error)
+                .catch((e)=>{
+                  setfailed(true)
+                  console.error(e);
+
+                })
            }
            else{
             invoke('loadmarkdown', { 
-                      path: path
+                      path: message.path
                   })
                     .then(result => {
                       // console.log("whats in file:"+result)
@@ -117,7 +129,7 @@ export default function ReadFileComp({path,name}){
                   })
                     .catch(console.error)
            }
-        }, [path]);
+        }, [message.path]);
         // useEffect(() => {
         //   hljs.initHighlighting();
         //  }, []);
@@ -179,7 +191,7 @@ export default function ReadFileComp({path,name}){
                         "startserver",
                         {
                           windowname:appWindow?.label,
-                          pathstr:path
+                          pathstr:message.path
                         }
                         );
                     }
@@ -212,7 +224,7 @@ export default function ReadFileComp({path,name}){
         </div>
             <div className="h-full overflow-scroll">
 
-        {IMAGE_TYPES.some(type => name.includes(type))?(
+        {IMAGE_TYPES.some(type => message.name.includes(type))?(
            <div 
            ref={containerRef} 
            onWheel={handleScroll} 
@@ -227,18 +239,28 @@ export default function ReadFileComp({path,name}){
         alt="Zoomable"
         style={{ transform: `scale(${scale})  translate(${position.x}px, ${position.y}px)`, transition: 'transform 0.2s' }}
         className="w-full" 
-        src={`${convertFileSrc(path)}`}/></div>
+        src={`${convertFileSrc(message.path)}`}/></div>
         
         ):""}
-          {name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-          {VIDEO_TYPES.some(type => name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></video>):""}
-          {HTML_TYPE.some(type => name.includes(type))?(<iframe src={path} title={path}></iframe>):""}
-          {AUDIO_TYPES.some(type => name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(path)}`}></audio>):""}
-          {MARKDOWN_TYPES.some(type => name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}
+          {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
+          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></video>):""}
+          {HTML_TYPE.some(type => message.name.includes(type))?(<iframe src={message.path} title={message.path}></iframe>):""}
+          {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></audio>):""}
+          {MARKDOWN_TYPES.some(type => message.name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}
             {/* {PLAIN_TEXT.some(type => name.includes(type))?( */}
-            <pre data-type="code">
-            <code dangerouslySetInnerHTML={{__html: (data)}}/>
-             </pre>
+          {data.trim().length>0?(<pre data-type="code">
+          <code dangerouslySetInnerHTML={{__html: (data)}}/>
+            </pre>):(<>
+            {message.name}
+                        <br/>  
+                        {message.path}
+                        <br/>
+                        {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
+                        
+                        <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
+            </>)}
+
+            
             {/* ):""} */}
             </div>
         

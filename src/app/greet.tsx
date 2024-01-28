@@ -7,7 +7,7 @@ import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
-import ReadFileComp, { IMAGE_TYPES } from "./readfile"
+import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT } from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -1902,6 +1902,8 @@ const [width, setWidth] = useState(200);
                                 <span className="font-medium text-lg overflow-hidden">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
                               </div>
                                 {!message.is_dir
+                                // &&
+                                // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
                                 // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
                                 ?(
                             <Sheet modal={false}>
@@ -1924,7 +1926,7 @@ const [width, setWidth] = useState(200);
                                     <SheetTitle>{message.name}</SheetTitle>
                                   </SheetHeader>
                           
-                                  <ReadFileComp path={message.path} name={message.name}/>
+                                  <ReadFileComp message={message}/>
                                   {/* </ResizablePanel>
                                 </ResizablePanelGroup> */}
                                   
