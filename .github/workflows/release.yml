@@ -119,7 +119,7 @@ jobs:
           export PKG_CONFIG_SYSROOT_DIR=/
       - name: install frontend dependencies
         run: yarn install # change this to npm or pnpm depending on which one you use
-      - uses: tauri-apps/tauri-action@v0.4.5
+      - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
