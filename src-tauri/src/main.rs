@@ -667,7 +667,7 @@ fn main() {
   app.run(|app_handle, e| match e {
     
     tauri::RunEvent::ExitRequested { api, .. } => {
-      api.prevent_exit();
+      // api.prevent_exit();
       
     }
     tauri::RunEvent::WindowEvent { event, .. } => match event {
