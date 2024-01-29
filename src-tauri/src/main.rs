@@ -15,7 +15,8 @@ use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
 use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
-use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, SystemTray, SystemTrayMenu, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
+use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
+
 use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
@@ -498,52 +499,52 @@ fn main() {
     }else{
       println!("loading buttons failed")
     }
-    let tray_id = "my-tray";
-    SystemTray::new()
-      .with_id(tray_id)
-      .with_menu(
-        SystemTrayMenu::new()
-          .add_item(CustomMenuItem::new("quit", "Quit"))
-          .add_item(CustomMenuItem::new("open", "Open"))
-      )
-      .on_event({
+    // let tray_id = "my-tray";
+    // SystemTray::new()
+    //   .with_id(tray_id)
+    //   .with_menu(
+    //     SystemTrayMenu::new()
+    //       .add_item(CustomMenuItem::new("quit", "Quit"))
+    //       .add_item(CustomMenuItem::new("open", "Open"))
+    //   )
+    //   .on_event({
         
-        move |event| {
-        match event{
-            tauri::SystemTrayEvent::MenuItemClick { tray_id, id,.. } => {
-            let mut gk=AppStateStore::new(CACHE_EXPIRY);
+    //     move |event| {
+    //     match event{
+    //         tauri::SystemTrayEvent::MenuItemClick { tray_id, id,.. } => {
+    //         let mut gk=AppStateStore::new(CACHE_EXPIRY);
               
-              if(id=="quit"){
+    //           if(id=="quit"){
                 
 
-                std::process::exit(0);
-              }
-              else{
-                // newwindow(id, path, ff, window, state);
-                // println!("{:?}",gk);
-                let absolute_date=getuniquewindowlabel();
-                opennewwindow(&app_handle,"uio",&absolute_date);
+    //             std::process::exit(0);
+    //           }
+    //           else{
+    //             // newwindow(id, path, ff, window, state);
+    //             // println!("{:?}",gk);
+    //             let absolute_date=getuniquewindowlabel();
+    //             opennewwindow(&app_handle,"uio",&absolute_date);
 
-                // tauri::Builder::new()
-                // // .manage(gk)
-                // .invoke_handler(
-                //   tauri::generate_handler![
-                //     list_files,
-                //     ]
-                //   )
-                // .run(tauri::generate_context!())
-                // .expect("error while running tauri application");
-              }  
-            },
-            _ =>{
-              //on right click on tray icon on windows this is triggered.
-            },
-        }
-        // let tray_handle = app_handle.tray_handle_by_id(tray_id).unwrap();
+    //             // tauri::Builder::new()
+    //             // // .manage(gk)
+    //             // .invoke_handler(
+    //             //   tauri::generate_handler![
+    //             //     list_files,
+    //             //     ]
+    //             //   )
+    //             // .run(tauri::generate_context!())
+    //             // .expect("error while running tauri application");
+    //           }  
+    //         },
+    //         _ =>{
+    //           //on right click on tray icon on windows this is triggered.
+    //         },
+    //     }
+    //     // let tray_handle = app_handle.tray_handle_by_id(tray_id).unwrap();
         
-      }
-    })
-      .build(app)?;
+    //   }
+    // })
+      // .build(app)?;
     
       // get an instance of AppHandle
       // let app_handle = app.handle().get_window("main").unwrap();

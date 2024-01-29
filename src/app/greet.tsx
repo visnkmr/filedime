@@ -109,7 +109,7 @@ export default function Greet() {
   useEffect(() => {
     setupAppWindow()
     // console.log("windowname---------->"+winInfo.winname)
-    // openTab("/home/roger/Downloads")
+    // openTab("drives://")
   }, []) 
   const filesobjinit:FileItem[]=[]
   const objinit:string[]=[]
@@ -132,8 +132,8 @@ export default function Greet() {
   
   const [tablist,settbl]=useState<tabinfo[]>()
   const [bookmarks,setbms]=useState<mark[]>()
-  const [path, setpath] = useState("/home/roger/Downloads");
-  const [pathitype, setpit] = useState("/home/roger/Downloads");
+  const [path, setpath] = useState("drives://");
+  const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
@@ -494,7 +494,7 @@ export default function Greet() {
     // const unlisten=
     listen('list-drives', (event) => {
       // sst("")
-      // spi("/home/roger/Downloads")
+      // spi("drives://")
       setcbl([])
       setfscl([])
         console.log("loading drives---->"+event.payload);
@@ -534,11 +534,11 @@ export default function Greet() {
     });
     // lfiles();
     
-    // openTab("/home/roger/Downloads")
+    // openTab("drives://")
     // invoke('list_files', { 
     //     windowname:winInfo.winname,
     //     oid: activetabid,
-    //     path: "/home/roger/Downloads",
+    //     path: "drives://",
     //     ff: "" 
     // })
     // .then(result => {
@@ -556,8 +556,8 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        reset("/home/roger/Downloads")
-        setpath("/home/roger/Downloads")
+        reset("drives://")
+        setpath("drives://")
         newtab();
       }
   },[appWindow])
@@ -705,13 +705,18 @@ const columns: ColumnDef<FileItem>[] = [
               );
             }}>Add bookmark</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
-              try {
-                navigator.clipboard.writeText(path);
-                console.log('Content copied to clipboard');
-              } catch (err) {
-                console.error('Failed to copy: ', err);
+              useEffect(() => {
+              if (typeof window !== 'undefined'){
+
+                try {
+                  navigator.clipboard.writeText(path);
+                  console.log('Content copied to clipboard');
+                } catch (err) {
+                  console.error('Failed to copy: ', err);
+                }
               }
-            }}>Copy path to clipboard</ContextMenuItem>
+            },[])}}
+            >Copy path to clipboard</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
               setfos(path)
             }}>Copy</ContextMenuItem>
@@ -1165,16 +1170,16 @@ const [width, setWidth] = useState(200);
             <nav className="grid items-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
-                    reset("/home/roger/Downloads")
-                    // sst("/home/roger/Downloads")
-                    updatetabs("/home/roger/Downloads")
+                    reset("drives://")
+                    // sst("drives://")
+                    updatetabs("drives://")
                     // setpath()
                     // console.log(message);
-                    addToTabHistory(activetabid.toString(),"/home/roger/Downloads")
+                    addToTabHistory(activetabid.toString(),"drives://")
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
-                      path: "/home/roger/Downloads",
+                      path: "drives://",
                       ff: "" 
                   })
                 }
@@ -1202,12 +1207,12 @@ const [width, setWidth] = useState(200);
                   { 
                       // setfileslist([])
                       // setdriveslist([])
-                      // sst("/home/roger/Downloads")
-                      // setpath("/home/roger/Downloads")
+                      // sst("drives://")
+                      // setpath("drives://")
                       // setss("")
                       // console.log(message);
                       
-                      // openTab("/home/roger/Downloads");
+                      // openTab("drives://");
                       
                       newtab();
                   }
@@ -1240,8 +1245,8 @@ const [width, setWidth] = useState(200);
                       );
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("/home/roger/Downloads")
-                        // setpath("/home/roger/Downloads")
+                        // sst("drives://")
+                        // setpath("drives://")
                         // setss("")
                         // console.log(message);
                         
@@ -1284,8 +1289,8 @@ const [width, setWidth] = useState(200);
                     { 
                         // setfileslist([])
                         // setdriveslist([])
-                        // sst("/home/roger/Downloads")
-                        // setpath("/home/roger/Downloads")
+                        // sst("drives://")
+                        // setpath("drives://")
                         // setss("")
                         // console.log(message);
                         
@@ -1988,13 +1993,18 @@ const [width, setWidth] = useState(200);
                           );
                         }}>Add bookmark</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
-                          try {
-                            navigator.clipboard.writeText(message.path);
-                            console.log('Content copied to clipboard');
-                          } catch (err) {
-                            console.error('Failed to copy: ', err);
-                          }
-                        }}>Copy path to clipboard</ContextMenuItem>
+                          useEffect(() => {
+                            if (typeof window !== 'undefined'){
+              
+                              try {
+                                navigator.clipboard.writeText(path);
+                                console.log('Content copied to clipboard');
+                              } catch (err) {
+                                console.error('Failed to copy: ', err);
+                              }
+                            }
+                          },[])}}
+                        >Copy path to clipboard</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
                           setfos(message.path)
                         }}>Copy</ContextMenuItem>
@@ -2153,7 +2163,7 @@ export function Other() {
         // invoke<string>('list_files', { 
         //     // windowname:appWindow?.label,
         //     oid: "0",
-        //     path: "/home/roger/Downloads",
+        //     path: "drives://",
         //     ff: "" 
         // })
         // let addo=count+1

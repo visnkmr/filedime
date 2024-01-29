@@ -5,7 +5,7 @@ use std::os::unix::fs::OpenOptionsExt;
 
 #[cfg(windows)]
 use std::os::windows::fs::OpenOptionsExt;
-use image::{GenericImageView, io::Reader};
+// use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State, Manager};
@@ -114,28 +114,28 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     //   .custom_flags( libc::O_NONBLOCK 
     // )
       .open(path).unwrap());
-    #[cfg(unix)]
-    let f = 
+    // #[cfg(unix)]
+    // let f = 
     
-    BufReader::new(
-      OpenOptions::new()
-      .read(true)
-      .custom_flags({ libc::O_NONBLOCK } 
-    )
-      .open(path).unwrap());
+    // BufReader::new(
+    //   OpenOptions::new()
+    //   .read(true)
+    //   .custom_flags({ libc::O_NONBLOCK } 
+    // )
+    //   .open(path).unwrap());
  
-    let mut reader = image::io::Reader::new(f);
-            // println!("image found");
-            if let Ok(img) = 
-            // image::image_dimensions(path)
-           reader.into_dimensions()
-              {
+    // let mut reader = image::io::Reader::new(f);
+    //         // println!("image found");
+    //         if let Ok(img) = 
+    //         // image::image_dimensions(path)
+    //        reader.into_dimensions()
+    //           {
                 
-                let (width, height) = img;
-                filedime=
-                format!("{} x {}", width, height).to_string();
-                // println!("{filedime}")
-              }
+    //             let (width, height) = img;
+    //             filedime=
+    //             format!("{} x {}", width, height).to_string();
+    //             // println!("{filedime}")
+    //           }
           }
           filetype=g.to_string_lossy().to_string();
           // if(!state.filesetcollection.read().unwrap().contains(&filetype)){
