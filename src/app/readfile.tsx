@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { fs } from '@tauri-apps/api'
+// import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
 import FRc from "../components/findsizecomp"
 
@@ -46,12 +46,12 @@ export default function ReadFileComp({message}:rfcprops){
     setmdc(news);
   }
   useEffect(()=>{
-    const fetchData = async () => {
-      const response = await fs.readTextFile(path);
-      console.log(response)
+    // const fetchData = async () => {
+    //   const response = await fs.readTextFile(message.path);
+    //   console.log(response)
       
-      setData(response);
-    }
+    //   setData(response);
+    // }
     // listen("load-markdown", (data: { payload: string }) => {
     //     openmarkdown(data.payload)
     //   });
@@ -63,10 +63,10 @@ export default function ReadFileComp({message}:rfcprops){
                 console.log("file watching stopped")
                 break;
             case "changed":
-              if(!MARKDOWN_TYPES.some(type => path.includes(type))){
+              if(!MARKDOWN_TYPES.some(type => message.path.includes(type))){
 
                 invoke('highlightfile', { 
-                  path: path,
+                  path: message.path,
                   theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
               })
                 .then(result => {
@@ -79,7 +79,7 @@ export default function ReadFileComp({message}:rfcprops){
               {
 
                 invoke('loadmarkdown', { 
-                  path: path
+                  path: message.path
               })
                 .then(result => {
                   // console.log("whats in file:"+result)
@@ -96,12 +96,12 @@ export default function ReadFileComp({message}:rfcprops){
   const [failed,setfailed]=useState(false)
         useEffect(() => {
           
-           const fetchData = async () => {
-             const response = await fs.readTextFile(message.path);
-             console.log(response)
+          //  const fetchData = async () => {
+          //    const response = await fs.readTextFile(message.path);
+          //    console.log(response)
              
-             setData(response);
-           }
+          //    setData(response);
+          //  }
            if(!MARKDOWN_TYPES.some(type => message.path.includes(type))){
 
             invoke('highlightfile', { 
