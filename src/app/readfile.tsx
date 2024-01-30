@@ -20,7 +20,8 @@ export const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
 export const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
-import { converttstodt } from "./greet";
+import { converttstodt, setcolorpertheme } from "./greet";
+import { SheetHeader, SheetTitle } from "../components/ui/sheet";
 interface rfcprops {
   message:FileItem
 }
@@ -178,7 +179,13 @@ export default function ReadFileComp({message}:rfcprops){
        
     return (
         <>
-        <div className="flex place-content-center whitespace-nowrap overflow-scroll">
+        
+
+        <div className="flex flex-row whitespace-nowrap overflow-scroll">
+        <SheetHeader className="pr-2">
+                                    <SheetTitle>{message.name}</SheetTitle>
+                                  </SheetHeader>
+        <div className="flex h-full justify-center">
 
         <HoverCard >
               <HoverCardTrigger>
@@ -218,12 +225,13 @@ export default function ReadFileComp({message}:rfcprops){
             </CardDescription>
           </Card>
           </HoverCardTrigger>
-              <HoverCardContent >
+              <HoverCardContent  className={`${setcolorpertheme}`}>
                Hot reload (Monitor changes and reload as necessary)
               </HoverCardContent>
             </HoverCard>
         </div>
-            <div className="h-full overflow-scroll">
+        </div>
+            <div className="h-[90%] overflow-scroll">
 
         {IMAGE_TYPES.some(type => message.name.includes(type))?(
            <div 
@@ -265,6 +273,7 @@ export default function ReadFileComp({message}:rfcprops){
             
             {/* ):""} */}
             </div>
+        
         
         
         </>

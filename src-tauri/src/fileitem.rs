@@ -187,16 +187,19 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
         // ftype: samplestring, 
       // }
     FileItem { 
-      name:if(folderloc>0){
-        name.clone() + " (" + &folderloc.to_string() + ")" 
-      }
-      else if !filedime.is_empty() {
-        name.clone() + " (" + &filedime + ")" 
+      name:
+      // if(folderloc>0){
+      //   name.clone() + " (" + &folderloc.to_string() + ")" 
+      // }
+      // else if !filedime.is_empty() {
+      //   name.clone() + " (" + &filedime + ")" 
         
-      }
-      else{
+      // }
+      // else
+      // {
         name.clone()
-      },
+      // }
+      ,
       path:pathtf.clone(),
       is_dir,
       size:{

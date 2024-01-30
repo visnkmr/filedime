@@ -1771,82 +1771,7 @@ const [width, setWidth] = useState(200);
             }}>Show all</Button> */}
         {/* </span> */}
         {/* <p>{searchstring.trim().length>0?"":path}</p> */}
-        <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}>
-
-        <DropdownMenu>
-        <DropdownMenuTrigger className="p-4" asChild>
-          <Button 
-            variant='outline' 
-            className='ml-auto whitespace-nowrap overflow-hidden'>
-            Sort by {currentchoice}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
-          
-                <DropdownMenuItem
-                  className='capitalize text-black dark:text-white'
-                  // checked={issize}
-                  // onCheckedChange={(value:boolean) => {}}
-                  onClick={()=>{
-                    changechoiceto("Size")
-                    fileslist.sort((b, a) => a.rawfs - b.rawfs);
-                  }}
-                >
-                  Size
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className='capitalize text-black dark:text-white'
-                  // checked={issize}
-                  // onCheckedChange={(value:boolean) => {}}
-                  onClick={()=>{
-                    changechoiceto("Name")
-                    fileslist.sort((a, b) => {
-                      if (a.name < b.name) {
-                          return -1;
-                      }
-                      if (a.name > b.name) {
-                          return 1;
-                      }
-                      return 0;
-                  });
-                  }}
-                >
-                  Name
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className='capitalize text-black dark:text-white'
-                  // checked={issize}
-                  // onCheckedChange={(value:boolean) => {}}
-                  onClick={()=>{
-                    changechoiceto("Type")
-                    fileslist.sort((a, b) => {
-                      if (a.ftype < b.ftype) {
-                          return -1;
-                      }
-                      if (a.ftype > b.ftype) {
-                          return 1;
-                      }
-                      return 0;
-                  });
-                  }}
-                >
-                  Type
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className='capitalize text-black dark:text-white'
-                  // checked={issize}
-                  // onCheckedChange={(value:boolean) => {}}
-                  onClick={()=>{
-                    changechoiceto("Date")
-                    fileslist.sort((b, a) => a.timestamp - b.timestamp);
-                  }}
-                >
-                  Date
-                </DropdownMenuItem>
-              
-        </DropdownMenuContent>
-      </DropdownMenu>
-        </div>
+       
         <span className={`overflow-scroll ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
         
           <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
@@ -1897,13 +1822,90 @@ const [width, setWidth] = useState(200);
         </div>
         
         <div className={`${isgrid?"flex flex-row":"hidden"}`}>
+        {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
+
+<DropdownMenu>
+<DropdownMenuTrigger className="p-4" asChild>
+  <Button 
+    variant='outline' 
+    className='whitespace-nowrap overflow-hidden mr-2'>
+    Sort by {currentchoice}
+  </Button>
+</DropdownMenuTrigger>
+<DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
+  
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Size")
+            fileslist.sort((b, a) => a.rawfs - b.rawfs);
+          }}
+        >
+          Size
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Name")
+            fileslist.sort((a, b) => {
+              if (a.name < b.name) {
+                  return -1;
+              }
+              if (a.name > b.name) {
+                  return 1;
+              }
+              return 0;
+          });
+          }}
+        >
+          Name
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Type")
+            fileslist.sort((a, b) => {
+              if (a.ftype < b.ftype) {
+                  return -1;
+              }
+              if (a.ftype > b.ftype) {
+                  return 1;
+              }
+              return 0;
+          });
+          }}
+        >
+          Type
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Date")
+            fileslist.sort((b, a) => a.timestamp - b.timestamp);
+          }}
+        >
+          Date
+        </DropdownMenuItem>
+      
+</DropdownMenuContent>
+</DropdownMenu>
+{/* </div> */}
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
-                <div className="ms-2 flex flex-wrap">
+                <div className="ms-2 flex whitespace-nowrap overflow-hidden">
 
                 <Input value={perpage}
-                className="whitespace-nowrap"
+                className="w-16"
                 type="number"
+                placeholder="Per Page Count"
                 onChange={(event) =>
                   {
                     let pp=Number(event.target.value);
@@ -1988,14 +1990,12 @@ const [width, setWidth] = useState(200);
                                 // onMouseMove={handleMouseMove}
                                 // onMouseUp={handleMouseUp}
                                 // onMouseLeave={handleMouseUp}
-                                className={`${setcolorpertheme}`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                                className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
                                   {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
                                   <ResizablePanel/>
                                   <ResizableHandle />
                                   <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                                    <SheetHeader>
-                                    <SheetTitle>{message.name}</SheetTitle>
-                                  </SheetHeader>
+                                   
                           
                                   <ReadFileComp message={message}/>
                                   {/* </ResizablePanel>
