@@ -146,7 +146,7 @@ export default function Greet() {
   const [fileopsrc,setfos] = useState("");
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("Downloads")
+  const [sampletext,sst]=useState("")
   const [filesetcollectionlist,setfscl]=useState(objinit)
   const [custombuttonlist,setcbl]=useState(objinit)
   // const [pathinput,spi]=useState("")
@@ -1761,14 +1761,16 @@ const [width, setWidth] = useState(200);
           ))}
         </div>
         </div>
-        <span className="flex flex-row space-x-4">
+        {/* <span className="flex flex-row space-x-4"> */}
 
-        <h1 className="font-semibold text-lg md:text-2xl">{fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} ({fileslist.length>0?filecount:driveslist.length})</h1>
-        <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
+        {/* <h1 className="font-semibold text-lg md:text-2xl">
+          {fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} 
+          Contains: {fileslist.length>0?filecount:driveslist.length} Items</h1> */}
+        {/* <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
               setll((old)=>{return !old});
-            }}>Show all</Button>
-        </span>
-        <p>{searchstring.trim().length>0?"":path}</p>
+            }}>Show all</Button> */}
+        {/* </span> */}
+        {/* <p>{searchstring.trim().length>0?"":path}</p> */}
         <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}>
 
         <DropdownMenu>
@@ -1941,7 +1943,7 @@ const [width, setWidth] = useState(200);
 
                             {/* <Card  key={index} > */}
                               {/* <CardContent className=" overflow-hidden"> */}
-                              <Button className="h-full w-full p-6 flex justify-start overflow-hidden space-x-2 focus:bg-gray-500" variant={"outline"} onDoubleClick={
+                              <Button className="h-full w-full p-6 flex justify-start overflow-hidden space-x-2 focus:bg-gray-200 focus:dark:bg-gray-700" variant={"outline"} onDoubleClick={
                               ()=>
                               { 
                                 // console.log("gridlayout clicked");
@@ -1976,7 +1978,7 @@ const [width, setWidth] = useState(200);
                                 // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
                                 ?(
                             <Sheet modal={false}>
-                            <SheetTrigger className="p-2 focus:bg-gray-500">
+                            <SheetTrigger className="p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
                               <EyeIcon className="h-4 w-4 "/>
                               
                               </SheetTrigger>
