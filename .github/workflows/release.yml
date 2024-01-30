@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches:
-      - '*'
+      - 'main'
       # - 'v*'
 
 jobs:
@@ -50,36 +50,36 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          # - host: macos-latest
-          #   target: x86_64-apple-darwin
-          #   os: darwin
-          #   arch: amd64
-          # - host: macos-latest
-          #   target: aarch64-apple-darwin
-          #   os: darwin
-          #   arch: arm64
-          # - host: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   arch: amd64
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            os: darwin
+            arch: amd64
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            os: darwin
+            arch: arm64
           - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            arch: arm64
+            target: x86_64-pc-windows-msvc
+            arch: amd64
+          # - host: windows-latest
+          #   target: aarch64-pc-windows-msvc
+          #   arch: arm64
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            os: linux
+            arch: amd64
           # - host: ubuntu-latest
-          #   target: x86_64-unknown-linux-gnu
+          #   target: aarch64-unknown-linux-gnu
           #   os: linux
-          #   arch: amd64
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            os: linux
-            arch: arm64
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            os: linux
-            arch: x86_64
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            os: linux
-            arch: arm64
+          #   arch: arm64
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   os: linux
+          #   arch: x86_64
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   os: linux
+          #   arch: arm64
           
           # - host: ubuntu-latest
           #   target: aarch64-unknown-linux-gnu
@@ -91,10 +91,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      - name: setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -114,12 +110,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
-          echo "configure PKG_CONFIG_PATH and PKG_CONFIG_SYSROOT_DIR for x86 target of tauri"
-          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
-          export PKG_CONFIG_SYSROOT_DIR=/
       - name: install frontend dependencies
         run: yarn install # change this to npm or pnpm depending on which one you use
-      - uses: tauri-apps/tauri-action@dev
+      - uses: tauri-apps/tauri-action@v0.4.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -128,77 +121,30 @@ jobs:
           # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'App v__VERSION__'
           # releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
+          # releaseDraft: true
           # prerelease: false
-          # releaseId: ${{ needs.create-release.outputs.release_id }}
+          releaseId: ${{ needs.create-release.outputs.release_id }}
 
-  # publish-release:
-  #   permissions:
-  #     contents: write
-  #   runs-on: ubuntu-20.04
-  #   needs: [create-release, build-tauri]
-
-  #   steps:
-  #     - name: publish release
-  #       id: publish-release
-  #       uses: actions/github-script@v6
-  #       env:
-  #         release_id: ${{ needs.create-release.outputs.release_id }}
-  #       with:
-  #         script: |
-  #           github.rest.repos.updateRelease({
-  #             owner: context.repo.owner,
-  #             repo: context.repo.repo,
-  #             release_id: process.env.release_id,
-  #             draft: true,
-  #             prerelease: false
-  #           })
-  release-arm:
-    runs-on: ubuntu-latest
+  publish-release:
     permissions:
       contents: write
+    runs-on: ubuntu-20.04
+    needs: [create-release, build-tauri]
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: pguyot/arm-runner-action@v2.5.2
+      - name: publish release
+        id: publish-release
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-release.outputs.release_id }}
         with:
-          base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bullseye.7z
-          cpu: cortex-a53
-          bind_mount_repository: true
-          image_additional_mb: 10240
-          optimize_image: false
-          commands: |
-            # Rust complains (rightly) that $HOME doesn't match eid home
-            export HOME=/root
-            # Workaround to CI worker being stuck on Updating crates.io index
-            export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-            # Install setup prerequisites
-            apt update -y --allow-releaseinfo-change
-            apt upgrade -y
-            apt autoremove -y
-            apt install -y curl file
-            curl https://sh.rustup.rs -sSf | sh -s -- -y
-            . "$HOME/.cargo/env"
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
-            # Install framework specific packages
-            apt-get install -y nodejs
-            npm install --global yarn
-            yarn add next@latest react@latest react-dom@latest eslint-config-next@latest
-            # Install build tools and tauri-cli requirements
-            apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-            
-            cargo install tauri-cli
-            # Install frontend dependencies
-            yarn 
-            # Build the application
-            cargo tauri build --verbose
-      - name: Upload deb bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: Debian Bundle
-          path: /filedime/src-tauri/target/release/bundle/deb/*.deb
-      - name: Upload appimage bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: Appimage Bundle
-          path: /filedime/src-tauri/target/release/bundle/appimage/*.AppImage
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+              prerelease: false
+            })
+
 
