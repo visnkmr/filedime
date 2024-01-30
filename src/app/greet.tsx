@@ -1719,7 +1719,10 @@ const [width, setWidth] = useState(200);
             </Button>
             </div>
             {/* <div className="flex items-center gap-2"> */}
-              <span>{parentsize}</span>
+              <div className="flex items-center">
+
+              <span className=" whitespace-nowrap">{parentsize}</span>
+              </div>
               {/* <Button variant="ghost">Tab 2</Button>
               <Button variant="ghost">Tab 3</Button> */}
             {/* </div> */}
