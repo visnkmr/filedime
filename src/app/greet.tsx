@@ -1868,7 +1868,7 @@ const [width, setWidth] = useState(200);
         </div>
         
         <div className={`${isgrid?"flex flex-row":"hidden"}`}>
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
                 <div className="ms-2 flex flex-wrap">
 
