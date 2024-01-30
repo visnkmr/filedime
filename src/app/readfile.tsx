@@ -20,6 +20,7 @@ export const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
 export const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
+import { converttstodt } from "./greet";
 interface rfcprops {
   message:FileItem
 }
@@ -256,7 +257,8 @@ export default function ReadFileComp({message}:rfcprops){
                         {message.path}
                         <br/>
                         {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
-                        
+                        <br/>
+                          {converttstodt(message.timestamp)}
                         <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
             </>)}
 

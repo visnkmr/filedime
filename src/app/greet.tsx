@@ -51,6 +51,13 @@ import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from ".
 import { Button } from "../components/ui/button"
 import { FileItem,DriveItem } from "../shared/types"
 import { DataTable } from '../src/components/data-table';
+export function converttstodt(ts){
+
+  const dateTime = DateTime.fromMillis(ts * 1000); // Convert timestamp to DateTime object
+  const utcDateTime = dateTime.toUTC(); // Convert DateTime object to UTC time
+  const utcTime = utcDateTime.toFormat('dd MMM yy'); 
+  return utcTime
+ }
 type tabinfo = {
   id: number,
   path: string,
@@ -638,7 +645,7 @@ const columns: ColumnDef<FileItem>[] = [
       row,
       getValue,
       row: {
-        original: { path,name,foldercon,size,rawfs,is_dir },
+        original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
       },
     }) => {
       const rname = getValue()
@@ -682,7 +689,8 @@ const columns: ColumnDef<FileItem>[] = [
                {path}
                <br/>
                {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
-               
+               <br/>
+               {converttstodt(timestamp)}
               <FRc location={path} size={size} rawsize={rawfs}/>
               </HoverCardContent>
             </HoverCard>
@@ -1790,6 +1798,15 @@ const [width, setWidth] = useState(200);
                   // onCheckedChange={(value:boolean) => {}}
                   onClick={()=>{
                     changechoiceto("Name")
+                    fileslist.sort((a, b) => {
+                      if (a.name < b.name) {
+                          return -1;
+                      }
+                      if (a.name > b.name) {
+                          return 1;
+                      }
+                      return 0;
+                  });
                   }}
                 >
                   Name
@@ -1800,6 +1817,15 @@ const [width, setWidth] = useState(200);
                   // onCheckedChange={(value:boolean) => {}}
                   onClick={()=>{
                     changechoiceto("Type")
+                    fileslist.sort((a, b) => {
+                      if (a.ftype < b.ftype) {
+                          return -1;
+                      }
+                      if (a.ftype > b.ftype) {
+                          return 1;
+                      }
+                      return 0;
+                  });
                   }}
                 >
                   Type
@@ -1810,6 +1836,7 @@ const [width, setWidth] = useState(200);
                   // onCheckedChange={(value:boolean) => {}}
                   onClick={()=>{
                     changechoiceto("Date")
+                    fileslist.sort((b, a) => a.timestamp - b.timestamp);
                   }}
                 >
                   Date
@@ -1990,7 +2017,8 @@ const [width, setWidth] = useState(200);
                           {message.path}
                           <br/>
                           {`${message.foldercon>0?`Contains ${message.foldercon} ${message.is_dir?"files":"lines"}`:""}`}
-                          
+                          <br/>
+                          {converttstodt(message.timestamp)}
                           <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
                           </HoverCardContent>
                         </HoverCard>
