@@ -159,7 +159,7 @@ async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, 
   }
 
   #[tauri::command]
-async fn highlightfile(path:String,theme:String)->Result<String,()>{
+async fn highlightfile(path:String,theme:String)->Result<String,String>{
   let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
     // let dark="dark".to_string();
@@ -173,8 +173,15 @@ async fn highlightfile(path:String,theme:String)->Result<String,()>{
         &theme_set.themes["base16-ocean.light"]
       };
       // &theme_set.themes["base16-ocean.light"];
-  let src =syntect::html::highlighted_html_for_file(&path, &syntax_set, th).unwrap();
-  Ok(src)
+  match(syntect::html::highlighted_html_for_file(&path, &syntax_set, th)){
+    Ok(src) => {
+      Ok(src)
+    },
+    Err(e) => {
+      Err(e.to_string())
+    },
+}
+ 
 }
 #[tauri::command]
 async fn openpath(path: String) -> Result<(), String> {
@@ -237,8 +244,8 @@ fn startup(window: &AppHandle) -> Result<(),()>{
   // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
   for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
     buttonnames.push(i.clone());
-    // println!("name of file{:?}",i);//filename
-    // println!("{:?}",j);//contents
+    println!("name of file{:?}",i);//filename
+    println!("{:?}",j);//contents
   }
   sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
   Ok(())
@@ -266,13 +273,14 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
   args=args.replace("%f",&path);
   // format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
+  println!("{:?}",args);
 
   let output = Command::new(args[0])
           .args(&args[1..])
           // .stdout(Stdio::piped())
           .spawn()
           .unwrap();
-        // println!("{:?}",output);
+        println!("{:?}",output);
         Ok(())
 }
 // #[tauri::command]

@@ -115,7 +115,7 @@ export default function ReadFileComp({message}:rfcprops){
               })
                 .catch((e)=>{
                   setfailed(true)
-                  console.error(e);
+                  console.error("from rust: "+e);
 
                 })
            }
@@ -248,7 +248,7 @@ export default function ReadFileComp({message}:rfcprops){
           {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></audio>):""}
           {MARKDOWN_TYPES.some(type => message.name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}
             {/* {PLAIN_TEXT.some(type => name.includes(type))?( */}
-          {data.trim().length>0?(<pre data-type="code">
+          {!failed?(<pre data-type="code">
           <code dangerouslySetInnerHTML={{__html: (data)}}/>
             </pre>):(<>
             {message.name}

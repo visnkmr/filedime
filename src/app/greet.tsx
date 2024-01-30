@@ -1491,7 +1491,9 @@ const [width, setWidth] = useState(200);
                   bname: bn,
                   path: path,
                 }
-                );
+                ).catch((e)=>{
+                  console.log(`error: ${e}`)
+                });
             }
         }>
 
