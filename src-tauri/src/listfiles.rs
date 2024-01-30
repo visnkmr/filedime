@@ -49,9 +49,19 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   println!("lfiles");
 
   if(path=="drives://"){
-    sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
-    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
-    return Ok(())
+    // driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    // list_files(windowname, oid, path, ff, window, state);
+    match(dirs::home_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+      sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
+
+    },
+    None => {
+      return Err("home not found".to_string())
+    },
+};
+    // return Ok(())
   } 
   // window.emit("infiniteloader",
   //       json!({

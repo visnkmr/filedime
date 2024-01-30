@@ -157,6 +157,20 @@ async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, 
     }
     
   }
+#[tauri::command]
+async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) -> 
+  Result<String, String> 
+  {
+    match(dirs::home_dir()){
+      Some(val)=>{
+          return Ok(val.to_string_lossy().to_string())
+      },
+      None=>{
+        return Err("home not found".to_string());
+      }
+    }
+    
+  }
 
   #[tauri::command]
 async fn highlightfile(path:String,theme:String)->Result<String,String>{
@@ -251,8 +265,8 @@ fn startup(window: &AppHandle) -> Result<(),()>{
   // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
   for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
     buttonnames.push(i.clone().replace("_", " "));
-    // println!("name of file{:?}",i);//filename
-    // println!("{:?}",j);//contents
+    println!("name of file{:?}",i);//filename
+    println!("{:?}",j);//contents
   }
   sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
   Ok(())
@@ -650,6 +664,7 @@ fn main() {
         closetab,
         copynpaste,
         folcount,
+        defaulttoopen,
         foldersize,
         get_path_options,
         get_timestamp,

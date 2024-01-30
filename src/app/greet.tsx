@@ -79,6 +79,7 @@ import { table } from "console";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "../components/ui/dropdown-menu";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Input } from "../components/ui/input";
+import { escape } from "lodash";
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -269,6 +270,10 @@ export default function Greet() {
   type wtd={
     functionname:string,
     arguments:string[]
+  } 
+   type parentprops={
+    path:string,
+    tabid:string
   }
   
   // if(mdc){
@@ -385,6 +390,11 @@ export default function Greet() {
     listen("fopprogress", (data: { payload: string }) => {
       let progressinfo = JSON.parse(data.payload);
       console.log(JSON.stringify(progressinfo))
+    });listen("parent-loc", (data: { payload: string }) => {
+      let whattodo:parentprops=JSON.parse(data.payload)
+      setpath(whattodo.path)
+      setpsplitl(splitpath(whattodo.path))
+      setpit(whattodo.path)
     });
     listen("reloadlist", (data: { payload: string }) => {
       switch(data.payload){
@@ -556,9 +566,16 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        reset("drives://")
-        setpath("drives://")
-        newtab();
+        // invoke('defaulttoopen', { 
+        //           name: "0.6.6"
+        //       })
+        //         .then(result => {
+                  reset("drives://")
+                  setpath("drives://")
+                  newtab();
+              // })
+              //   .catch(console.error)
+        
       }
   },[appWindow])
 //   useEffect(() => {
@@ -632,7 +649,7 @@ const columns: ColumnDef<FileItem>[] = [
           <ContextMenuTrigger>
             <HoverCard>
               <HoverCardTrigger>
-              <button className="w-full h-full flex justify-start whitespace-nowrap focus:bg-gray-500" onDoubleClick={
+              <button className="w-full h-full flex justify-start whitespace-nowrap " onDoubleClick={
                 ()=>
                 { 
                   // console.log("gridlayout clicked");
@@ -1319,8 +1336,10 @@ const [width, setWidth] = useState(200);
       <main className="flex flex-col pt-3 ps-3 overflow-hidden">
         <div className="mb-4">
 
-<div className='flex flex-row overflow-x-auto whitespace-nowrap p-1'>
-          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+<div className='flex flex-row overflow-scroll p-1'>
+  <div>
+
+          <Button size={"sm"} variant={"ghost"} className="">
 
         <HoverCard>
               <HoverCardTrigger>
@@ -1340,7 +1359,10 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
           </Button>
-          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+  </div>
+  <div>
+
+          <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
@@ -1360,7 +1382,10 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
           </Button>
-          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+  </div>
+  <div>
+
+          <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
@@ -1380,6 +1405,7 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
           </Button>
+  </div>
             <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
 
             {/* <HoverCard>
@@ -1442,7 +1468,9 @@ const [width, setWidth] = useState(200);
                Show size of folder
               </HoverCardContent>
             </HoverCard> */}
-            <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+            <div>
+
+            <Button size={"sm"} variant={"ghost"} className=" ">
 
             <HoverCard>
               <HoverCardTrigger>
@@ -1462,7 +1490,10 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
             </Button>
-            <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap">
+            </div>
+            <div>
+              
+            <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
@@ -1482,8 +1513,11 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
             </Button>
+            </div>
         {custombuttonlist.map((bn, index) => (
-          <Button size={"sm"} variant={"ghost"} className="whitespace-nowrap " key={index} onClick={
+          <div key={index} className="">
+
+          <Button variant={"ghost"} className="overflow-hidden"  onClick={
             ()=>{
               invoke(
                 "otb",
@@ -1497,13 +1531,14 @@ const [width, setWidth] = useState(200);
             }
         }>
 
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm' >
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm  p-1' >
             <CardDescription className="flex items-center p-1">
               <CodeIcon className="h-4 w-4" />
-              <span className="font-medium text-sm">{bn}</span>
+              <span className="font-medium text-sm ps-2">{bn}</span>
             </CardDescription>
           </Card>
           </Button>
+          </div>
             ))}
         </div>
         </div>
