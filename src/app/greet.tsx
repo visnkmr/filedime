@@ -1550,8 +1550,10 @@ const [width, setWidth] = useState(200);
             ))}
         </div>
         </div>
-      <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+      <div className="justify-between mb-2 ">
+          <div className="flex flex-row gap-2 overflow-scroll">
+            <div>
+
             <Button variant={"ghost"} className={` ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} onClick={()=>{
                 // addTofwdHistory(activetabid.toString(),path)
                 let pathtogoto=getTabHistory(activetabid.toString())
@@ -1572,6 +1574,8 @@ const [width, setWidth] = useState(200);
                 }
               }}><ArrowLeft className="h-4 w-4"
               /></Button>
+            </div>
+          {/* <div className="flex items-center gap-2"> */}
             {/* <Button size="sm" variant="ghost"> */}
               
             {/* </Button> */}
@@ -1596,16 +1600,15 @@ const [width, setWidth] = useState(200);
               <ForwardIcon className="h-4 w-4" 
              />
             </Button>
-          </div>
-          <div className="flex flex-grow items-center gap-4">
-            <div className="flex-grow">
+          {/* </div> */}
+            {/* <div className="flex-grow"> */}
             <datalist id="path-list">
             {pathsuggestlist.map((message, index) => (
               <option key={index} value={message}/>
             ))}
             </datalist>
               <input
-                className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="min-w-64 max-w-full w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Path"
                 type="search"
                 list="path-list"
@@ -1660,7 +1663,9 @@ const [width, setWidth] = useState(200);
                 }
               />
               
-            </div>
+            {/* </div> */}
+            <div>
+
             <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
                reset(pathitype)
                updatetabs(pathitype)
@@ -1679,9 +1684,10 @@ const [width, setWidth] = useState(200);
             }}>
               <ArrowRightIcon className="h-4 w-4" />
               </Button>
-            <div className="flex-grow max-w-[20%]">
+            </div>
+            {/* <div className="flex-grow "> */}
               <input
-                className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="min-w-32 max-w-[20%] w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Search"
                 type="search"
                 value={searchstring}
@@ -1692,7 +1698,9 @@ const [width, setWidth] = useState(200);
                   }
                 }
               />
-            </div>
+            {/* </div> */}
+            <div>
+
             <Button variant={"ghost"}  onClick={
               ()=>{
                 if(searchstring.trim().length>0){
@@ -1709,14 +1717,17 @@ const [width, setWidth] = useState(200);
 
             <SearchIcon className="h-4 w-4"/>
             </Button>
-            <div className="flex items-center gap-2">
+            </div>
+            {/* <div className="flex items-center gap-2"> */}
               <span>{parentsize}</span>
               {/* <Button variant="ghost">Tab 2</Button>
               <Button variant="ghost">Tab 3</Button> */}
-            </div>
+            {/* </div> */}
           </div>
         </div>
-        <div className='flex items-center space-x-6 ms-2'>
+        <div>
+
+        <div className='flex items-center space-x-6 ms-2 overflow-scroll'>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -1746,6 +1757,7 @@ const [width, setWidth] = useState(200);
             }
             return;
         })}
+        </div>
         </div>
         <div className="">
 
