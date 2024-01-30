@@ -239,13 +239,20 @@ async fn check_if_installed(appname:&str) -> Result<bool, String> {
 }
 fn startup(window: &AppHandle) -> Result<(),()>{
   //define format for adding custom button as extensions to ui
-  getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
+  if cfg!(target_os = "linux"){
+
+    getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
+  }
+  else if cfg!(target_os = "windows"){
+    getcustom("filedime", "custom_scripts/terminal_open.fds", "cmd /k cd %f");
+  }
+  
   let mut buttonnames=Vec::new();
   // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
   for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
-    buttonnames.push(i.clone());
-    println!("name of file{:?}",i);//filename
-    println!("{:?}",j);//contents
+    buttonnames.push(i.clone().replace("_", " "));
+    // println!("name of file{:?}",i);//filename
+    // println!("{:?}",j);//contents
   }
   sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
   Ok(())
@@ -269,7 +276,7 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
     return Err(())
   }
   // let mut script1=getcustom("filedime", "custom_scripts/terminal_open.fds", "");
-  let mut args = state.buttonnames.get(&bname).unwrap().clone();
+  let mut args = state.buttonnames.get(&bname.replace(" ","_")).unwrap().clone();
   args=args.replace("%f",&path);
   // format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
