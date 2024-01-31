@@ -579,7 +579,7 @@ export default function Greet() {
         //         .then(result => {
                   reset("drives://")
                   setpath("drives://")
-                  newtab();
+                  newtab("drives://");
               // })
               //   .catch(console.error)
         
@@ -1046,13 +1046,13 @@ function closetab(closeid){
   }
 }
   function newtab(gotopath?:string){
-    (gotopath)?reset(gotopath):reset()
-    console.error(path)
+    reset()
+    console.error(gotopath)
     let newtabid=new Date().getTime();
                       invoke(
                         "tabname",
                         {
-                          path:path,
+                          path:gotopath,
                         }
                       ).then((returned:string)=>{
                         console.log("what was returned....."+returned)
@@ -1061,7 +1061,7 @@ function closetab(closeid){
                           {
                             windowname:appWindow?.label,
                             oid: newtabid.toString(),
-                            path: path,
+                            path: gotopath,
                             ff: ""
                           }
                         );
@@ -1070,14 +1070,14 @@ function closetab(closeid){
                           return (old && old?.length>0)?
                           [...old,{
                             id:newtabid,
-                            path:path,
+                            path:gotopath,
                             ff:"",
                             tabname:returned,
                             history:[]
                           } as tabinfo]:
                           [{
                             id:newtabid,
-                            path:path,
+                            path:gotopath,
                             ff:"",
                             tabname:returned,
                             history:[]
@@ -1098,12 +1098,12 @@ function closetab(closeid){
                         //     oid: newtabid.toString()
                         //   }
                         // );
-                        addToTabHistory(newtabid.toString(),path)
+                        addToTabHistory(newtabid.toString(),gotopath)
                         // addTofwdHistory(newtabid.toString(),path)
                         invoke('list_files', { 
                           windowname:appWindow?.label,
                           oid: newtabid.toString(),
-                          path: path,
+                          path: gotopath,
                           ff: "" 
                       })
                       });
@@ -1241,7 +1241,7 @@ const [width, setWidth] = useState(200);
                       
                       // openTab("drives://");
                       
-                      newtab();
+                      newtab("drives://");
                   }
                   }
               >
@@ -2060,16 +2060,19 @@ const [width, setWidth] = useState(200);
 
                         }}>Open in new window</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
-                          // openTab(message.path)
-                          invoke(
-                            "newtab",
-                            {
-                              windowname:appWindow?.label,
-                              oid: activetabid.toString(),
-                              path: message.path,
-                              ff: ""
-                            }
-                          );
+                          // reset(message.path)
+                          newtab(message.path)
+                          // sst("drives://")
+                          // updatetabs(message.path)
+                        //   // setpath()
+                        //   // console.log(message);
+                        //   addToTabHistory(activetabid.toString(),"drives://")
+                        //   invoke('list_files', { 
+                        //     windowname:appWindow?.label,
+                        //     oid: activetabid.toString(),
+                        //     path: message.path,
+                        //     ff: "" 
+                        // })
                         }}>Open in new tab</ContextMenuItem>
                         <ContextMenuItem onSelect={()=>{
                           invoke(
