@@ -12,7 +12,7 @@ use crate::{
   appstate::*,
   fileitem::*, 
   // partialratio::*, 
-  sendtofrontend::*, 
+  sendtofrontend::*, opendialogwindow, getuniquewindowlabel, filltrie::populate_try, 
   // loadjs::loadjs
 };
 use fuzzy_matcher::{*, clangd::fuzzy_match};
@@ -67,6 +67,10 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
   let searchthrough=state.stl.lock().unwrap();
   let map=searchthrough.clone();
   let filescount=map.len();
+  if(filescount<1){
+    opendialogwindow(&window.app_handle(), "Error #400: Populate search list first", "unknown file type",&getuniquewindowlabel());
+    return Err(());
+  }
   drop(searchthrough);
 
     sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());

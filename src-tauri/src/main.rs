@@ -45,7 +45,7 @@ use crate::{
   listfiles::*,
   openhtml::*, 
   searchfiles::*, 
-  recentfiles::*
+  recentfiles::*, filltrie::populate_try
 };
 mod trie;
 // mod r  esync;
@@ -72,6 +72,11 @@ const CACHE_EXPIRY:u64=60;
 use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
 #[tauri::command]
+async fn searchload(path:String,window: Window, state: State<'_, AppStateStore>) -> Result<(),String>{ 
+  populate_try(path.clone(), &window, &state).await;
+  Ok(())
+}
+   #[tauri::command]
 fn mirror(functionname:String,arguments: Vec<String>,window: Window){
   window.get_focused_window().unwrap().emit("mirror", serde_json::to_string(&json!({
     "functionname":functionname,
@@ -664,6 +669,7 @@ fn main() {
         closetab,
         copynpaste,
         folcount,
+        searchload,
         defaulttoopen,
         foldersize,
         get_path_options,
@@ -683,6 +689,7 @@ fn main() {
         otb,
         recent_files,
         removemark,
+        // populate_try,
         search_try,
         startserver,
         stopserver,

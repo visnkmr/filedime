@@ -68,8 +68,22 @@ use crate::{markdown::loadmarkdown,
 // }
 
 #[tauri::command]
-pub async fn populate_try(path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),()>{
+pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),String>{
   let orig = *state.process_count.lock().unwrap();
+  if(path=="drives://"){
+    // driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    // list_files(windowname, oid, path, ff, window, state);
+    match(dirs::home_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+
+    },
+    None => {
+      return Err("home not found".to_string())
+    },
+};
+    // return Ok(())
+  } 
   // populate_trie(oid, path, ff, window, state).await;
   // return ;
   

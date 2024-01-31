@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT } from "./readfile"
@@ -580,6 +580,7 @@ export default function Greet() {
                   reset("drives://")
                   setpath("drives://")
                   newtab("drives://");
+                  // populatesearchlist("drives://");
               // })
               //   .catch(console.error)
         
@@ -980,6 +981,12 @@ const columns: ColumnDef<FileItem>[] = [
           ff: ""
         });
 }
+function populatesearchlist(spath){
+  invoke(
+    "searchload", {
+      path:spath
+  }).catch((e)=>console.error(e))
+}
 function populateimmediatechildcount(){
   reset(path)
   invoke(
@@ -997,6 +1004,14 @@ function recentfiles(){
     "recent_files", {
       windowname:appWindow?.label,
       string: "",
+  })
+}
+function loadsearchdb(tospath){
+    invoke(
+    "loadsearchlist", {
+      windowname:appWindow?.label,
+      id: activetabid.toString(),
+      path: tospath
   })
 }
  
@@ -1333,6 +1348,9 @@ const [width, setWidth] = useState(200);
                   {/* {activetabid === tab.id ? sampletext: */}
                   {tab.tabname}
                   {/* } */}
+                  <ScanSearchIcon className="h-4 w-4" onClick={()=>{
+                    populatesearchlist(tab.path)
+                  }}/>
                   <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
                     e.stopPropagation();
                     closetab(tab.id);
@@ -1527,6 +1545,26 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
             </Button>
+            <Button size={"sm"} variant={"ghost"} className="">
+
+            <HoverCard>
+              <HoverCardTrigger>
+          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+                ()=>{
+                  loadsearchdb(path)
+                }
+            }>
+            <CardDescription className="flex items-center space-x-2 p-2">
+            <FolderClockIcon className="h-4 w-4"/>
+              
+            </CardDescription>
+          </Card>
+          </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               load Search from this directory
+              </HoverCardContent>
+            </HoverCard>
+            </Button>
             </div>
         {custombuttonlist.map((bn, index) => (
           <div key={index} className="">
@@ -1710,13 +1748,20 @@ const [width, setWidth] = useState(200);
             <Button variant={"ghost"}  onClick={
               ()=>{
                 if(searchstring.trim().length>0){
-
-                  invoke(
+                  // invoke(
+                  //   "populate_try", {
+                  //     path:path
+                  // })
+                  // .then(()=>{
+                    invoke(
                     "search_try", {
                       windowname:appWindow?.label,
                       // path: pathInput.value,
                       string: searchstring
-                  })
+                    }).catch((e)=>console.error(e))
+                  // })
+                  // .catch((e)=>console.error(e))
+                  
                 }
               }
             }>
