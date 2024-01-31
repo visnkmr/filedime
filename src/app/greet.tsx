@@ -1045,7 +1045,9 @@ function closetab(closeid){
     
   }
 }
-  function newtab(){
+  function newtab(gotopath?:string){
+    (gotopath)?reset(gotopath):reset()
+    console.error(path)
     let newtabid=new Date().getTime();
                       invoke(
                         "tabname",
@@ -1084,7 +1086,7 @@ function closetab(closeid){
                         })
       // console.log("opened tab now tablist is "+JSON.stringify(tablist))
 
-                        reset()
+                        
                         setactivetabid(newtabid)
                         // setpath(message.path)
                         // setpsplitl(splitpath(message.path))
@@ -1259,8 +1261,10 @@ const [width, setWidth] = useState(200);
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
                   onClick={()=>
                     { 
+                      reset(mark.path)
+                      updatetabs(mark.path)
                       invoke(
-                        "newtab",
+                        "list_files",
                         {
                           windowname:appWindow?.label,
                           oid: activetabid.toString(),
@@ -1268,6 +1272,8 @@ const [width, setWidth] = useState(200);
                           ff: ""
                         }
                       );
+                      // console.error(mark.path)
+                      // newtab(mark.path)
                         // setfileslist([])
                         // setdriveslist([])
                         // sst("drives://")
