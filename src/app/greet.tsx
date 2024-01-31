@@ -1770,7 +1770,7 @@ const [width, setWidth] = useState(200);
         </div>
         <div className="">
 
-        <div className='grid grid-flow-col justify-start overflow-x-auto'>
+        <div className='grid grid-flow-col justify-start overflow-x-auto'> 
         <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
           {
           Object.entries(filesetcollectionlist)
@@ -1778,7 +1778,7 @@ const [width, setWidth] = useState(200);
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <Button onClick={()=>setsftype(key)} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key={index}><Badge variant={"outline"}>{key}({value})</Badge></Button>
+            <Button onClick={()=>setsftype((old)=>old===key?"all":key)} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key={index}><Badge variant={"outline"}>{key}({value})</Badge></Button>
           ))}
         </div>
         </div>
