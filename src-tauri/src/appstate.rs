@@ -1,6 +1,6 @@
 #![warn(clippy::disallowed_types)]
 use filesize::PathExt;
-use prefstore::getallcustomwithin;
+use prefstore::{getallcustomwithin, savecustom};
 use std::collections::{HashSet, HashMap};
 use std::mem::{self};
 use std::path::{Path, PathBuf};
@@ -145,6 +145,7 @@ impl AppStateStore {
         self.bookmarks.write().unwrap().insert(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
     }
     pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
+        savecustom("filedime", format!("tabs/{}.tabinfo",id), path.clone());
         println!("{}---{}---{}",id,path,ff);
         // let id=format!("{}",(id.parse::<i32>().unwrap()+1));
         let mut tabhist=Vec::new();
