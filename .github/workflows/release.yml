@@ -2,8 +2,8 @@ name: Release
 on:
   push:
     branches:
-      # - 'main'
-      - '*'
+      - 'main'
+      # - '*'
       # - 'v*'
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: create release
         id: create-release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const currentDate = new Date();
@@ -129,6 +129,7 @@ jobs:
           prerelease: true
           releaseId: ${{ needs.create-release.outputs.release_id }}
   release-arm:
+    needs: create-release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -166,6 +167,21 @@ jobs:
             yarn 
             # Build the application
             cargo tauri build --verbose
+      - uses: AButler/upload-release-assets@v3.0
+        with:
+          files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.AppImage"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-id: ${{ needs.create-release.outputs.release_id }}
+      # - name: Upload Release Asset
+      #     id: upload-release-asset
+      #   uses: actions/upload-release-asset@v1
+      #    env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.steps.create-release.outputs.upload_url }}
+      #     asset_path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+      #     asset_name: your-artifact-name
+      #     asset_content_type: application/octet-stream
       - name: Upload deb bundle
         uses: actions/upload-artifact@v3
         with:
@@ -186,7 +202,7 @@ jobs:
     steps:
       - name: publish release
         id: publish-release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           release_id: ${{ needs.create-release.outputs.release_id }}
         with:
