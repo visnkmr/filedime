@@ -20,7 +20,7 @@ export const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
 export const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
-import { converttstodt, setcolorpertheme } from "./greet";
+import { converttstodt, scrollorauto, setcolorpertheme } from "./greet";
 import { SheetHeader, SheetTitle } from "../components/ui/sheet";
 import { VideoComponent } from "./videoplaycomp";
 interface rfcprops {
@@ -182,7 +182,7 @@ export default function ReadFileComp({message}:rfcprops){
         <>
         
 
-        <div className="flex flex-row whitespace-nowrap overflow-scroll">
+        <div className={`flex flex-row whitespace-nowrap overflow-${scrollorauto}`}>
         <SheetHeader className="pr-2">
                                     <SheetTitle>{message.name}</SheetTitle>
                                   </SheetHeader>
@@ -232,7 +232,7 @@ export default function ReadFileComp({message}:rfcprops){
             </HoverCard>
         </div>
         </div>
-            <div className="h-[90%] overflow-scroll">
+            <div className={`h-[90%] overflow-${scrollorauto}`}>
 
         {IMAGE_TYPES.some(type => message.name.includes(type))?(
            <div 

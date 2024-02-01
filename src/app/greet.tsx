@@ -104,7 +104,7 @@ import { escape } from "lodash";
 // 	});
 // });
 
-
+export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 export default function Greet() {
   async function setupAppWindow() {
@@ -116,6 +116,7 @@ export default function Greet() {
 
   useEffect(() => {
     setupAppWindow()
+    
     // console.log("windowname---------->"+winInfo.winname)
     // openTab("drives://")
   }, []) 
@@ -1156,16 +1157,12 @@ const [width, setWidth] = useState(200);
  const handleMouseUp = () => {
     setIsDragging(false);
  };
-  const videoRef = useRef();
  
   const handleMouseEnter = () => {
      const video = videoRef.current;
      video.play();
   };
  
-  const handleMouseLeave = () => {
-     const video = videoRef.current;
-     video.pause();
   };
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
@@ -1379,7 +1376,10 @@ const [width, setWidth] = useState(200);
       <main className="flex flex-col pt-3 ps-3 overflow-hidden">
         <div className="mb-4">
 
-<div className='flex flex-row overflow-scroll p-1'>
+<div 
+  className={`flex flex-row overflow-${scrollorauto} p-1`}
+  // className={`flex flex-row hover:${checkifwithinbounds()?"":"overflow-scroll"} p-1`}
+>
   <div>
 
           <Button size={"sm"} variant={"ghost"} className="">
@@ -1606,7 +1606,7 @@ const [width, setWidth] = useState(200);
         </div>
         </div>
       <div className="justify-between mb-2 ">
-          <div className="flex flex-row gap-2 overflow-scroll">
+          <div className={`flex flex-row gap-2 overflow-${scrollorauto}`}>
             <div>
 
             <Button variant={"ghost"} className={` ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} onClick={()=>{
@@ -1792,7 +1792,7 @@ const [width, setWidth] = useState(200);
         </div>
         <div>
 
-        <div className='flex items-center space-x-6 ms-2 overflow-scroll'>
+        <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -1849,11 +1849,11 @@ const [width, setWidth] = useState(200);
         {/* </span> */}
         {/* <p>{searchstring.trim().length>0?"":path}</p> */}
        
-        <span className={`overflow-scroll ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
+        <span className={`overflow-${scrollorauto} ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
         
           <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
         </span>
-        <div className={`${driveslist.length>0?(!isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-scroll":"space-y-4 overflow-scroll"):"hidden"}`}>
+        <div className={`${driveslist.length>0?(!isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-${scrollorauto}`:`space-y-4 overflow-${scrollorauto}`):"hidden"}`}>
           {/* <Other/> */}
         {driveslist.filter(function (el) {
                       return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -1991,7 +1991,7 @@ const [width, setWidth] = useState(200);
                 }/>
                 </div>
         </div>
-        <div className={`${isgrid?"grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-scroll":"hidden"}`}>
+        <div className={`${isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`:"hidden"}`}>
 
         {isgrid && fileslist.filter(function (el) {
                      return (searchstring.trim().length>0?
@@ -2009,7 +2009,7 @@ const [width, setWidth] = useState(200);
 
                            {IMAGE_TYPES.some(type => message.name.includes(type))?(
                               <div 
-                              className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
+                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-${scrollorauto}`}
                             >
                             <LazyLoadImage 
                             className="w-full object-fill" 
