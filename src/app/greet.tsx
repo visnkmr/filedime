@@ -1064,7 +1064,7 @@ function closetab(closeid){
 }
   function newtab(gotopath?:string){
     reset()
-    console.error(gotopath)
+    // console.error(gotopath)
     let newtabid=new Date().getTime();
                       invoke(
                         "tabname",

@@ -38,7 +38,7 @@ struct rstr{
 //   Ok(())
 // }
 #[tauri::command]
-pub async fn  search_try(windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),()>
+pub async fn  search_try(windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
 //  -> Vec<String> 
  {
   let mut exactmatch=false;
@@ -70,8 +70,8 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
  
   drop(searchthrough);
  if(filescount<1){
-    opendialogwindow(&window.app_handle(), "Error #400: Populate search list first", "unknown file type",&getuniquewindowlabel());
-    return Err(());
+    // opendialogwindow(&window.app_handle(), "Error #400: Populate search list first", "unknown file type",&getuniquewindowlabel());
+    return Err("No files to search through".to_string());
   }
     sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
