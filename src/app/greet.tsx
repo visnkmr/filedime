@@ -663,20 +663,24 @@ const columns: ColumnDef<FileItem>[] = [
                 ()=>
                 { 
                   // console.log("gridlayout clicked");
-                  reset(path)
-                  updatetabs(path)
-                 
-                  // setpath()
-                  // setpsplitl(splitpath(path))
-                  // sst(name)
-                  addToTabHistory(activetabid.toString(),path)
+                  
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
                       path: path,
                       ff: "" 
-                  });
+                  }).then(
+                    ()=>{
+                      reset(path)
+                      updatetabs(path)
+                    
+                      // setpath()
+                      // setpsplitl(splitpath(path))
+                      // sst(name)
+                      addToTabHistory(activetabid.toString(),path)
+                    }
+                  ).catch((e)=>console.error(e));
                   // },[])
                   }
                 }>
@@ -1198,7 +1202,7 @@ const [width, setWidth] = useState(200);
                       oid: activetabid.toString(),
                       path: path,
                       ff: "" 
-                  })
+                  }).catch((e)=>console.error(e))
                     
                   })
                   }
@@ -1279,8 +1283,7 @@ const [width, setWidth] = useState(200);
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
                   onClick={()=>
                     { 
-                      reset(mark.path)
-                      updatetabs(mark.path)
+                      
                       invoke(
                         "list_files",
                         {
@@ -1289,7 +1292,10 @@ const [width, setWidth] = useState(200);
                           path: mark.path,
                           ff: ""
                         }
-                      );
+                      ).then(()=>{
+                        reset(mark.path)
+                        updatetabs(mark.path)
+                      }).catch((e)=>console.error(e));
                       // console.error(mark.path)
                       // newtab(mark.path)
                         // setfileslist([])
@@ -1720,11 +1726,7 @@ const [width, setWidth] = useState(200);
             <div>
 
             <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
-               reset(pathitype)
-               updatetabs(pathitype)
-              //  setpath(message.name)
-              //  sst(message.path)
-              addToTabHistory(activetabid.toString(),pathitype)
+               
               invoke(
                 "list_files",
                 {
@@ -1733,7 +1735,14 @@ const [width, setWidth] = useState(200);
                 path: pathitype,
                 ff: ""
                 }
-                )
+                ).then(()=>{
+                  reset(pathitype)
+                  updatetabs(pathitype)
+                  //  setpath(message.name)
+                  //  sst(message.path)
+                  addToTabHistory(activetabid.toString(),pathitype)
+                })
+                .catch((e)=>console.error(e))
             }}>
               <ArrowRightIcon className="h-4 w-4" />
               </Button>
@@ -1874,7 +1883,7 @@ const [width, setWidth] = useState(200);
                     oid: activetabid.toString(),
                     path: message.mount_point,
                     ff: "" 
-                })
+                }).catch((e)=>console.error(e))
               }
             }>
             <CardContent className="flex items-center space-x-4">
@@ -2024,19 +2033,23 @@ const [width, setWidth] = useState(200);
                               ()=>
                               { 
                                 // console.log("gridlayout clicked");
-                                reset(message.path)
-                                updatetabs(message.path)
-                                addToTabHistory(activetabid.toString(),message.path)
+                                
                                 // setpath()
                                 // setpsplitl(splitpath(message.path))
                                 // sst(message.name)
                                 // useEffect(() => {
-                                  invoke('list_files', { 
-                                    windowname:appWindow?.label,
-                                    oid: activetabid.toString(),
-                                    path: message.path,
-                                    ff: "" 
-                                });
+                                invoke('list_files', { 
+                                  windowname:appWindow?.label,
+                                  oid: activetabid.toString(),
+                                  path: message.path,
+                                  ff: "" 
+                                }).then(
+                                  ()=>{
+                                    reset(message.path)
+                                    updatetabs(message.path)
+                                    addToTabHistory(activetabid.toString(),message.path)
+                                  }
+                                ).catch((e)=>console.error(e));
                                 // },[])
                                 }
                               }>

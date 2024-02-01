@@ -100,7 +100,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
 
   if(testpath.is_file()){
     openpath(path).await?;
-    return Ok(());
+    return Err("Opened file".to_string());
   }
 
   if(!testpath.is_dir()  && path!="drives://"){
