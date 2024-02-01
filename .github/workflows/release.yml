@@ -2,8 +2,8 @@ name: Release
 on:
   push:
     branches:
-      # - 'main'
-      - '*'
+      - 'main'
+      # - '*'
       # - 'v*'
 
 jobs:
@@ -169,7 +169,7 @@ jobs:
             cargo tauri build --verbose
       - uses: AButler/upload-release-assets@v3.0
         with:
-          files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.AppImage"
+          files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-id: ${{ needs.create-release.outputs.release_id }}
       # - name: Upload Release Asset
