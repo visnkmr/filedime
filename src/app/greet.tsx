@@ -2170,7 +2170,11 @@ const [width, setWidth] = useState(200);
                                   {/* <SheetDescription></SheetDescription> */}
                                 
                               </SheetContent>
-                            </Sheet>):""}
+                            </Sheet>):(<div className="h-full p-4 px-3 p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
+                              <Button size={"none"} variant={"ghost"}  onClick={()=>{
+                    populatesearchlist(message.path)
+                  }}><ScanSearchIcon className="h-4 w-4"/></Button>
+                            </div>)}
                         </Button>
                         </div>
         
