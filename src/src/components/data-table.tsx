@@ -16,7 +16,8 @@ import {
   VisibilityState,
   createColumnHelper,
 } from '@tanstack/react-table';
-
+export const hovercolor="hover:bg-gray-200 hover:dark:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-50";
+export const focuscolor="focus:bg-gray-200 focus:dark:bg-gray-700 focus:text-gray-900 dark:focus:text-gray-50";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -265,7 +266,7 @@ export function DataTable<TData, TValue,String>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow 
-                className={`${row.getIsSelected()?"bg-gray-200 dark:bg-gray-700":"hover:bg-gray-200 hover:dark:bg-gray-700"}`}
+                className={`${row.getIsSelected()?"bg-gray-200 dark:bg-gray-700":hovercolor}`}
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                 >

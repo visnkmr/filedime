@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
@@ -51,7 +51,7 @@ import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
 import { Button } from "../components/ui/button"
 import { FileItem,DriveItem } from "../shared/types"
-import { DataTable } from '../src/components/data-table';
+import { DataTable, focuscolor, hovercolor } from '../src/components/data-table';
 export function converttstodt(ts){
 
   const dateTime = DateTime.fromMillis(ts * 1000); // Convert timestamp to DateTime object
@@ -588,6 +588,7 @@ export default function Greet() {
         
       }
   },[appWindow])
+  const [showthumbnail,setst]=useState(false)
 //   useEffect(() => {
 //     invoke<string>('greet', { 
 //         name: "test"
@@ -1248,7 +1249,7 @@ const [width, setWidth] = useState(200);
                   })
                 }
                 }
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
                 
               >
                 <HomeIcon className="h-4 w-4" />
@@ -1259,14 +1260,14 @@ const [width, setWidth] = useState(200);
                 href="#"
               ><FolderIcon className="h-4 w-4" />{sampletext}</Link> */}
               <button
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 
               >
                 <TrashIcon className="h-4 w-4" />
                 Trash
               </button>
               <button
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
                   { 
                       // setfileslist([])
@@ -1295,7 +1296,7 @@ const [width, setWidth] = useState(200);
                 <ContextMenu>
                   <ContextMenuTrigger>
                 <button key={index}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                   onClick={()=>
                     { 
                       if(mark.is_dir){
@@ -1354,7 +1355,7 @@ const [width, setWidth] = useState(200);
                 
                tablist.map((tab, index) => (
                 <button key={index}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 ${activetabid === tab.id ? setcolorpertheme : ''}`}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
                     { 
                         // setfileslist([])
@@ -1998,7 +1999,9 @@ const [width, setWidth] = useState(200);
 </DropdownMenu>
 {/* </div> */}
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <Button className={`${isgrid?"":"hidden"}`} onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
+                
                 <div className="ms-2 flex whitespace-nowrap overflow-hidden">
 
                 <Input value={perpage}
@@ -2058,18 +2061,23 @@ const [width, setWidth] = useState(200);
                                 // },[])
                                 }
                               }>
-                                <div>
+                                <div className="w-full">
+                                  <div className={`w-full ${showthumbnail?"":"hidden"}`}>
+
                                {IMAGE_TYPES.some(type => message.name.includes(type))?(
                               <div 
-                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-${scrollorauto}`}
+                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
                             >
                             <LazyLoadImage 
                             className="w-full object-fill" 
                             src={`${convertFileSrc(message.path)}`}/></div>
                             
-                            ):(<></>)} 
+                            ):(<div 
+                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
+                            ></div>)} 
                             {VIDEO_TYPES.some(type => message.name.includes(type))?(
                             <VideoComponent path={message.path} hoverplay={true}/>):""}
+                                  </div>
                              <div className="flex flex-row justify-start gap-3 items-center">
 
                               <div className="overflow-visible">

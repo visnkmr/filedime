@@ -157,15 +157,16 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
     // let mut fcount;
     let walker = 
         WalkBuilder::new(&path)
+        
         .max_depth(Some(1))
         .threads(threads)
         .hidden(true) // Include hidden files and directories
         .follow_links(false)
         .parents(true)
-        
         .git_exclude(true)
         .ignore(false) // Disable the default ignore rules
-        .git_ignore(true).clone();
+        .git_ignore(true)
+        .clone();
       let walker2=walker.clone() // Respect the .gitignore file
         .build(); 
       let walker3 = 
@@ -363,10 +364,10 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     // })
     .for_each_with(Arc::clone(&state.whichthread),|(threadcontroller),e| {
       // if let wThread::Listing= get_enum_value(&threadcontroller){
-            window.emit("reloadlist",json!({
-                "message": "pariter1",
-                "status": "running",
-            }));
+            // window.emit("reloadlist",json!({
+            //     "message": "pariter1",
+            //     "status": "running",
+            // }));
             
           // }
           // else{
@@ -380,17 +381,19 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
           //   println!(".git folder found. skipping it");
           //   return Err("error"); // return an error to stop the iteration
           // }
-          
-          let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
-          let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
-          // println!("{:?}",file);
-          // println!("added--->{:?}",e);
-          *tfsize_clone.lock().unwrap()+=file.rawfs;
-          files.push(file.clone()); // push a clone of the file to the vector
-          // if files.len()<100
-          // {
-            fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
-            progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
+          if(!e.path().to_string_lossy().to_string().eq(&path)){
+
+            let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
+            let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+            // println!("{:?}",file);
+            // println!("added--->{:?}",e);
+            *tfsize_clone.lock().unwrap()+=file.rawfs;
+            files.push(file.clone()); // push a clone of the file to the vector
+            // if files.len()<100
+            // {
+              fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
+              progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
+          }
           // }
 
           // Ok(()) // return Ok to continue the iteration
