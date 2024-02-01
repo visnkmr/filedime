@@ -1157,13 +1157,7 @@ const [width, setWidth] = useState(200);
  const handleMouseUp = () => {
     setIsDragging(false);
  };
- 
-  const handleMouseEnter = () => {
-     const video = videoRef.current;
-     video.play();
-  };
- 
-  };
+  
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
