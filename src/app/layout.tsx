@@ -29,7 +29,7 @@ export default function RootLayout({
 
         {/* <Thedarkhtml> */}
         {/* <Topthread/> */}
-        <DarkButton/>
+        {/* <DarkButton/> */}
         {children}
         {/* </Thedarkhtml> */}
         </Providers>

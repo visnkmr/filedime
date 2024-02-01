@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
@@ -88,6 +88,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuChe
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Input } from "../components/ui/input";
 import { escape } from "lodash";
+import { useTheme } from "next-themes";
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -108,6 +109,7 @@ import { escape } from "lodash";
 export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 export default function Greet() {
+  const { theme, setTheme } = useTheme()
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
     console.log("windowname top---------->"+appWindow.label)
@@ -1179,6 +1181,22 @@ const [width, setWidth] = useState(200);
             
             
           </div>
+          {/* <div className=" w-full flex"> */}
+              <button
+                className={`text-sm font-medium flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+                onClick={()=>
+                  { 
+                    setTheme(theme === 'light' ? 'dark' : 'light')
+                  }
+                  }
+              >
+                {theme === 'light' ? (<MoonIcon className="h-4 w-4" />) : (<SunIcon className="h-4 w-4" />)}
+                <p>
+                  Switch to {theme === 'light' ? ("Dark Mode") : ("Light Mode")}
+                  </p>
+                
+              </button>
+              {/* </div> */}
          
 
           {fileopsrc.length>0?( 
@@ -1386,6 +1404,7 @@ const [width, setWidth] = useState(200);
 
               }
               </>):(null)}
+              
             </nav>
           </div>
         </div>
