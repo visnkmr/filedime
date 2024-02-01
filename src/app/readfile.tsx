@@ -22,6 +22,7 @@ import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
 import { converttstodt, setcolorpertheme } from "./greet";
 import { SheetHeader, SheetTitle } from "../components/ui/sheet";
+import { VideoComponent } from "./videoplaycomp";
 interface rfcprops {
   message:FileItem
 }
@@ -252,7 +253,7 @@ export default function ReadFileComp({message}:rfcprops){
         
         ):""}
           {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></video>):""}
+          {VIDEO_TYPES.some(type => message.name.includes(type))?(<VideoComponent path={message.path} hoverplay={false}/>):""}
           {HTML_TYPE.some(type => message.name.includes(type))?(<iframe src={message.path} title={message.path}></iframe>):""}
           {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></audio>):""}
           {MARKDOWN_TYPES.some(type => message.name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}

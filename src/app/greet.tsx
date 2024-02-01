@@ -1,13 +1,13 @@
 'use client'
 
 import FRc from "../components/findsizecomp"
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
-
+import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
-import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT } from "./readfile"
+import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -1156,6 +1156,17 @@ const [width, setWidth] = useState(200);
  const handleMouseUp = () => {
     setIsDragging(false);
  };
+  const videoRef = useRef();
+ 
+  const handleMouseEnter = () => {
+     const video = videoRef.current;
+     video.play();
+  };
+ 
+  const handleMouseLeave = () => {
+     const video = videoRef.current;
+     video.pause();
+  };
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -1994,19 +2005,19 @@ const [width, setWidth] = useState(200);
                       <ContextMenuTrigger>
                         <HoverCard>
                           <HoverCardTrigger>
-                            <div className="m-3 overflow-hidden">
+                            <div className="m-3">
 
-                          {/* {IMAGE_TYPES.some(type => message.name.includes(type))?(
+                           {IMAGE_TYPES.some(type => message.name.includes(type))?(
                               <div 
                               className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
                             >
                             <LazyLoadImage 
-                            className="w-full object-fill overflow-hidden" 
+                            className="w-full object-fill" 
                             src={`${convertFileSrc(message.path)}`}/></div>
                             
-                            ):(<div 
-                              className="flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-scroll"
-                            ></div>)} */}
+                            ):(<></>)} 
+                            {VIDEO_TYPES.some(type => message.name.includes(type))?(
+                            <VideoComponent path={message.path} hoverplay={true}/>):""}
                             
 
                             {/* <Card  key={index} > */}
