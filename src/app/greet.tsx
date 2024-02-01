@@ -145,7 +145,7 @@ export default function Greet() {
   const [path, setpath] = useState("drives://");
   const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
-  const [fileopsrc,setfos] = useState("");
+  const [fileopsrc,setfos] = useState(objinit);
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("")
@@ -748,7 +748,7 @@ const columns: ColumnDef<FileItem>[] = [
             },[])}}
             >Copy path to clipboard</ContextMenuItem>
             <ContextMenuItem onSelect={(e)=>{
-              setfos(path)
+              setfos((old)=>[...old,path])
             }}>Copy</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
@@ -1180,20 +1180,24 @@ const [width, setWidth] = useState(200);
           </div>
          
 
-          {fileopsrc?( 
+          {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
               <HoverCardTrigger>
               <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                   ()=>{
-                    invoke('fileop_with_progress', { 
+                    fileopsrc.map((eachsource)=>{
+                      invoke('fileop_with_progress', { 
                       windowname:appWindow?.label,
-                      src:fileopsrc,
+                      src:eachsource,
                       dst:path,
                       removefile:false
-                  }).then(()=>{
+                  }).catch((e)=>console.error(e))
+                    })
+                    
+                  // .then(()=>{
                     console.log("done");
-                    setfos("")
+                    setfos([])
                     setfod("")
                     reset(path)
                     sst(path)
@@ -1202,19 +1206,24 @@ const [width, setWidth] = useState(200);
                       oid: activetabid.toString(),
                       path: path,
                       ff: "" 
-                  }).catch((e)=>console.error(e))
+                  // })
                     
                   })
                   }
               }>
               <CardDescription className="flex items-center space-x-2 p-2">
-              Paste
+              Paste ({fileopsrc.length})
                 
               </CardDescription>
             </Card>
               </HoverCardTrigger>
               <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
-               {fileopsrc}
+               {fileopsrc.map((eachsource)=>{
+                return <>
+                <p>{eachsource}</p>
+                <br/>
+                </>
+               })}
               </HoverCardContent>
             </HoverCard>
                  
@@ -2143,7 +2152,7 @@ const [width, setWidth] = useState(200);
                           },[])}}
                         >Copy path to clipboard</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
-                          setfos(message.path)
+                          setfos((old)=>[...old,message.path])
                         }}>Copy</ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>

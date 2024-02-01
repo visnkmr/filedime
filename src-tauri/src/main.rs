@@ -88,7 +88,7 @@ async fn fileop_with_progress(windowname:String,src: String, dst: String,removef
   println!("copying function recieved rust from {}",windowname);
   
 
-  match(fileop(windowname, src, dst, removefile,&window.app_handle())){
+  match(fileop(windowname, src, dst, removefile,&window.app_handle()).await){
     Ok(_) => {
     Ok(())
       
@@ -99,7 +99,7 @@ async fn fileop_with_progress(windowname:String,src: String, dst: String,removef
     },
 }
 }
-fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> io::Result<()> {
+async fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> io::Result<()> {
    // Open the source file
    let mut src_file = File::open(src.clone())?;
 
@@ -121,7 +121,8 @@ fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHa
    let mut buffer = [0; 1024];
    let mut written = 0;
    println!("copying started");
-
+   let mut last_print = Instant::now();
+   
    // Read from the source file and write to the destination file
    loop {
        match src_file.read(&mut buffer) {
@@ -129,10 +130,15 @@ fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHa
            Ok(n) => {
                dst_file.write_all(&buffer[..n])?;
                written+=n;
+               if (last_print.elapsed() >= Duration::from_millis(20) || src_size==written as u64){ 
                sendprogress(&windowname, ah, (json!({
                 "progress": written,
                 "size":src_size,
              })).to_string());
+             last_print = Instant::now(); 
+            }
+            
+            
               //  pb.inc(n as u64);
            },
            Err(err) => return Err(err),
