@@ -84,17 +84,17 @@ fn mirror(functionname:String,arguments: Vec<String>,window: Window){
   })).unwrap());
 }
   #[tauri::command]
-async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window){
+async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<(),String>{
   println!("copying function recieved rust from {}",windowname);
   
 
   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
     Ok(_) => {
-    println!("copying succeeded");
+    Ok(())
       
     },
     Err(e) => {
-   println!("copying failed {}",e);
+   Err(format!("copying failed {}",e))
       
     },
 }

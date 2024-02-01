@@ -1182,7 +1182,9 @@ const [width, setWidth] = useState(200);
 
           {fileopsrc?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
-                 <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+                 <HoverCard>
+              <HoverCardTrigger>
+              <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                   ()=>{
                     invoke('fileop_with_progress', { 
                       windowname:appWindow?.label,
@@ -1210,6 +1212,12 @@ const [width, setWidth] = useState(200);
                 
               </CardDescription>
             </Card>
+              </HoverCardTrigger>
+              <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+               {fileopsrc}
+              </HoverCardContent>
+            </HoverCard>
+                 
             </div>
               )
               :(null)}
@@ -2170,7 +2178,7 @@ const [width, setWidth] = useState(200);
                                   {/* <SheetDescription></SheetDescription> */}
                                 
                               </SheetContent>
-                            </Sheet>):(<div className="h-full p-4 px-3 p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
+                            </Sheet>):(<div className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700">
                               <Button size={"none"} variant={"ghost"}  onClick={()=>{
                     populatesearchlist(message.path)
                   }}><ScanSearchIcon className="h-4 w-4"/></Button>
