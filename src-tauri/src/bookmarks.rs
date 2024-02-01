@@ -7,6 +7,7 @@ use crate::{appstate::AppStateStore, sendtofrontend::loadmarks};
 pub struct marks{
     pub path:String,
     pub name: String,
+    pub is_dir:bool
 }
 #[tauri::command]
 pub async fn removemark(windowname:&str,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{

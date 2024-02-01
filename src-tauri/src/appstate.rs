@@ -2,6 +2,7 @@
 use filesize::PathExt;
 use prefstore::{getallcustomwithin, savecustom};
 use std::collections::{HashSet, HashMap};
+use std::fs;
 use std::mem::{self};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
@@ -142,7 +143,13 @@ impl AppStateStore {
         }
     }
     pub fn addmark(&self,path:String){
-        self.bookmarks.write().unwrap().insert(marks { path: path.clone(), name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string() });
+        let pof=path.clone();
+        let pathoffile=Path::new(&pof);
+        self.bookmarks.write().unwrap().insert(marks {
+            path: path.clone(),
+            name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string(),
+            is_dir: fs::metadata(pathoffile).map(|m| m.is_dir()).unwrap_or(false)
+             });
     }
     pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
         savecustom("filedime", format!("tabs/{}.tabinfo",id), path.clone());

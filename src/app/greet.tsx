@@ -69,7 +69,7 @@ type tabinfo = {
 type mark = {
   path:string,
   name:string,
-  // is_dir:string
+  is_dir:string
 };
 interface wininfo{
   winname:string,
@@ -663,15 +663,7 @@ const columns: ColumnDef<FileItem>[] = [
                 ()=>
                 { 
                   // console.log("gridlayout clicked");
-                  
-                  // useEffect(() => {
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: path,
-                      ff: "" 
-                  }).then(
-                    ()=>{
+                    if(is_dir){
                       reset(path)
                       updatetabs(path)
                     
@@ -680,7 +672,13 @@ const columns: ColumnDef<FileItem>[] = [
                       // sst(name)
                       addToTabHistory(activetabid.toString(),path)
                     }
-                  ).catch((e)=>console.error(e));
+                  // useEffect(() => {
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: path,
+                      ff: "" 
+                  }).catch((e)=>console.error(e));
                   // },[])
                   }
                 }>
@@ -1283,7 +1281,10 @@ const [width, setWidth] = useState(200);
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50`}
                   onClick={()=>
                     { 
-                      
+                      if(mark.is_dir){
+                        reset(mark.path)
+                        updatetabs(mark.path)
+                      }
                       invoke(
                         "list_files",
                         {
@@ -1292,10 +1293,7 @@ const [width, setWidth] = useState(200);
                           path: mark.path,
                           ff: ""
                         }
-                      ).then(()=>{
-                        reset(mark.path)
-                        updatetabs(mark.path)
-                      }).catch((e)=>console.error(e));
+                      ).catch((e)=>console.error(e));
                       // console.error(mark.path)
                       // newtab(mark.path)
                         // setfileslist([])
@@ -1726,7 +1724,7 @@ const [width, setWidth] = useState(200);
             <div>
 
             <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
-               
+              reset(pathitype)
               invoke(
                 "list_files",
                 {
@@ -1736,7 +1734,7 @@ const [width, setWidth] = useState(200);
                 ff: ""
                 }
                 ).then(()=>{
-                  reset(pathitype)
+                  
                   updatetabs(pathitype)
                   //  setpath(message.name)
                   //  sst(message.path)
@@ -2007,31 +2005,27 @@ const [width, setWidth] = useState(200);
                     })
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
-                     
-                      <ContextMenu key={index}>
-                      <ContextMenuTrigger>
-                        <HoverCard>
-                          <HoverCardTrigger>
-                            <div className="m-3">
+                      <div key={index} className="m-3 flex flex-row">
+                      <Button size={"none"} variant={"outline"} className="m-0 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700">
 
-                           {IMAGE_TYPES.some(type => message.name.includes(type))?(
-                              <div 
-                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-${scrollorauto}`}
-                            >
-                            <LazyLoadImage 
-                            className="w-full object-fill" 
-                            src={`${convertFileSrc(message.path)}`}/></div>
+                      <ContextMenu >
+                      <ContextMenuTrigger className="h-full w-full overflow-hidden">
+                        <HoverCard >
+                          <HoverCardTrigger className="h-full w-full">
                             
-                            ):(<></>)} 
-                            {VIDEO_TYPES.some(type => message.name.includes(type))?(
-                            <VideoComponent path={message.path} hoverplay={true}/>):""}
-                            
+
+                           
 
                             {/* <Card  key={index} > */}
                               {/* <CardContent className=" overflow-hidden"> */}
-                              <Button className="h-full w-full p-6 flex justify-start overflow-hidden space-x-2 focus:bg-gray-200 focus:dark:bg-gray-700" variant={"outline"} onDoubleClick={
+                              <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
                               ()=>
                               { 
+                                if(message.is_dir){
+                                  reset(message.path)
+                                  updatetabs(message.path)
+                                  addToTabHistory(activetabid.toString(),message.path)
+                                }
                                 // console.log("gridlayout clicked");
                                 
                                 // setpath()
@@ -2043,62 +2037,39 @@ const [width, setWidth] = useState(200);
                                   oid: activetabid.toString(),
                                   path: message.path,
                                   ff: "" 
-                                }).then(
-                                  ()=>{
-                                    reset(message.path)
-                                    updatetabs(message.path)
-                                    addToTabHistory(activetabid.toString(),message.path)
-                                  }
-                                ).catch((e)=>console.error(e));
+                                }).catch((e)=>console.error(e));
                                 // },[])
                                 }
                               }>
+                                <div>
+                               {IMAGE_TYPES.some(type => message.name.includes(type))?(
+                              <div 
+                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[400px] overflow-${scrollorauto}`}
+                            >
+                            <LazyLoadImage 
+                            className="w-full object-fill" 
+                            src={`${convertFileSrc(message.path)}`}/></div>
+                            
+                            ):(<></>)} 
+                            {VIDEO_TYPES.some(type => message.name.includes(type))?(
+                            <VideoComponent path={message.path} hoverplay={true}/>):""}
+                             <div className="flex flex-row justify-start gap-3 items-center">
+
                               <div className="overflow-visible">
 
                               {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                               </div>
                               <div className="w-full flex justify-between overflow-hidden">
-                              <div className="overflow-hidden">
 
                                 <span className="font-medium text-lg overflow-hidden">{message.name}{message.foldercon>0 ? "(" + message.foldercon + ")" : ""}</span>
-                              </div>
-                                {!message.is_dir
-                                // &&
-                                // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
-                                // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
-                                ?(
-                            <Sheet modal={false}>
-                            <SheetTrigger className="p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
-                              <EyeIcon className="h-4 w-4 "/>
-                              
-                              </SheetTrigger>
-                              <SheetContent 
-                                // style={{ width: `${width}px` }}
-                                // onMouseDown={handleMouseDown}
-                                // onMouseMove={handleMouseMove}
-                                // onMouseUp={handleMouseUp}
-                                // onMouseLeave={handleMouseUp}
-                                className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                                  {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                                  <ResizablePanel/>
-                                  <ResizableHandle />
-                                  <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                                   
-                          
-                                  <ReadFileComp message={message}/>
-                                  {/* </ResizablePanel>
-                                </ResizablePanelGroup> */}
-                                  
-                            
-                                  {/* <SheetDescription></SheetDescription> */}
                                 
-                              </SheetContent>
-                            </Sheet>):""}
                               </div>
-                            </Button>
+                             </div>
+                              </div>
+                            </span>
                               {/* </CardContent> */}
                             {/* </Card> */}
-                            </div>
+                            {/* </div> */}
                             
                           </HoverCardTrigger>
                           <HoverCardContent className={`${setcolorpertheme} flex flex-col text-center`} >
@@ -2168,6 +2139,40 @@ const [width, setWidth] = useState(200);
                         }}>Copy</ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
+                    {!message.is_dir
+                                // &&
+                                // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
+                                // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
+                                ?(
+                            <Sheet modal={false}>
+                            <SheetTrigger className="h-full px-3 p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
+                              <EyeIcon className="h-4 w-4 "/>
+                              
+                              </SheetTrigger>
+                              <SheetContent 
+                                // style={{ width: `${width}px` }}
+                                // onMouseDown={handleMouseDown}
+                                // onMouseMove={handleMouseMove}
+                                // onMouseUp={handleMouseUp}
+                                // onMouseLeave={handleMouseUp}
+                                className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                                  {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+                                  <ResizablePanel/>
+                                  <ResizableHandle />
+                                  <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
+                                   
+                          
+                                  <ReadFileComp message={message}/>
+                                  {/* </ResizablePanel>
+                                </ResizablePanelGroup> */}
+                                  
+                            
+                                  {/* <SheetDescription></SheetDescription> */}
+                                
+                              </SheetContent>
+                            </Sheet>):""}
+                        </Button>
+                        </div>
         
         // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
