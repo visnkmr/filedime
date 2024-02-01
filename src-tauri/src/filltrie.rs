@@ -5,14 +5,14 @@ use ignore::{Walk, WalkBuilder, WalkState};
 use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State, Manager};
-use walkdir::{WalkDir, DirEntry};
+// use walkdir::{WalkDir, DirEntry};
 
 use crate::{markdown::loadmarkdown, 
   openpath, 
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml, trie::TrieNode, fileitem::{populatefileitem, is_hidden}, sendtofrontend::slist, searchfiles::memoisedfm, 
+  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml, trie::TrieNode, sendtofrontend::slist, searchfiles::memoisedfm, 
   // loadjs::loadjs
 };
 
@@ -100,7 +100,6 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
       .threads(threads)
       .hidden(true) // Include hidden files and directories
       .follow_links(false)
-      // .threads(n)
       .parents(true)
       // .git_exclude(true)
       // .ignore(true) // Disable the default ignore rules

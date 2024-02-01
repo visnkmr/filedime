@@ -5,7 +5,7 @@ use serde::Serialize;
 use serde_json::json;
 // use rust_search::similarity_sort;
 use tauri::{Window, State, Manager};
-use walkdir::WalkDir;
+// use walkdir::WalkDir;
 
 use crate::{
   FileItem,

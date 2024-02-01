@@ -17,7 +17,7 @@ use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
 use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
 
-use walkdir::WalkDir;
+// use walkdir::WalkDir;
 use std::fs;
 use std::path::PathBuf;
 use serde::{Serialize, Deserialize};

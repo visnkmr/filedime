@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
 use tauri::{Window, State, Manager};
-use walkdir::{WalkDir, DirEntry};
+// use walkdir::{WalkDir, DirEntry};
 
 use crate::{markdown::loadmarkdown, 
   openpath, 
@@ -152,11 +152,13 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
       &state.gettab(&oid,windowname.clone()).2
     ).unwrap())?;
     println!("load history");
+    let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
+
     // let mut fcount;
     let walker = 
         WalkBuilder::new(&path)
         .max_depth(Some(1))
-        
+        .threads(threads)
         .hidden(true) // Include hidden files and directories
         .follow_links(false)
         .parents(true)

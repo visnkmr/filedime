@@ -40,7 +40,7 @@ rustc-hash="1.1.0"
 # tao = { version = "0.19.0"}
 # du="0.1.1"
 # gio="0.17.4"
-walkdir="2.3.3"
+# walkdir="2.3.3"
 filesize = "0.2.0"
 # jwalk="0.8.1"
 # dua-cli="2.19.2"

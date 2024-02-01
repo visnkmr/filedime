@@ -5,11 +5,12 @@ use std::os::unix::fs::OpenOptionsExt;
 
 #[cfg(windows)]
 use std::os::windows::fs::OpenOptionsExt;
+use ignore::WalkBuilder;
 // use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State, Manager};
-use walkdir::{WalkDir, DirEntry};
+// use walkdir::{WalkDir, DirEntry};
 
 use crate::{markdown::loadmarkdown, 
   openpath, 
@@ -35,12 +36,19 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     };
     // let size=0;
     let mut foldercon=0;
-    
+    let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     if(*state.showfolderchildcount.read().unwrap()){
       if(path.is_dir()){
-        let count = WalkDir::new(&path)
-                  // .min_depth(1) // skip the root directory
-                  .max_depth(1)
+        let count = WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        .threads(threads)
+        .hidden(true) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        
+        .git_exclude(true)
+        .ignore(false) // Disable the default ignore rules
+        .git_ignore(true).build()
                   .into_iter()
                   .filter_map(|entry| entry.ok())
                   .par_bridge()
@@ -61,6 +69,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
 
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
+    let is_hidden = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
     // let path = path.to_string_lossy().into_owned(); // get their path
     // fs::metadata(e.path()).map(|m|{
     //   if(!m.is_dir()){
@@ -225,14 +234,14 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
   }
   }
 
-  pub fn is_hidden(entry: &DirEntry) -> bool {
-    let g=entry.file_name()
-      .to_str()
-      .map(|s| s.starts_with("."))
-      .unwrap_or(false);
-          // if(entry.file_name().to_string_lossy().to_string().contains("apps")){
-    // if(!g){
-    //   println!("-----------{:?}==={}",entry.path(),g);
-    // }
-    g
-  }
+  // pub fn is_hidden(entry: &DirEntry) -> bool {
+  //   let g=entry.file_name()
+  //     .to_str()
+  //     .map(|s| s.starts_with("."))
+  //     .unwrap_or(false);
+  //         // if(entry.file_name().to_string_lossy().to_string().contains("apps")){
+  //   // if(!g){
+  //   //   println!("-----------{:?}==={}",entry.path(),g);
+  //   // }
+  //   g
+  // }

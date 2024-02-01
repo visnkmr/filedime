@@ -2,7 +2,7 @@ use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State};
 use std::{fs, path::{PathBuf, Path}};
-use walkdir::WalkDir;
+use ignore::WalkBuilder;
 
 use crate::{appstate::AppStateStore, sizeunit::find_size};
 
@@ -16,7 +16,10 @@ fn file_size(path: &std::path::Path,w:&Window,g:&State<'_, AppStateStore>) -> u6
 // A function to calculate the total size of a directory and its subdirectories
 pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
     // Create a walkdir iterator over the directory
-    let walker = WalkDir::new(path)
+    let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
+    let walker = WalkBuilder::new(path)
+    .threads(threads)
+    .build()
     // .min_depth(1) // skip the root directory
     //   .max_depth(1)
         // Convert errors into options

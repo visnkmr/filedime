@@ -1,11 +1,12 @@
 use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering, AtomicI16}}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
+use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
 // use rust_search::similarity_sort;
 use tauri::{Window, State, Manager};
-use walkdir::WalkDir;
+// use walkdir::WalkDir;
 
 use crate::{
   FileItem,
@@ -583,40 +584,51 @@ pub async fn search_pop(path: String,string:String){
       // let st=state.searchtry.clone();
     
     // move||{
-        let walker2 = WalkDir::new(&path)
-        // .contents_first(true)
-          .min_depth(1) // skip the root directory
-          // .max_depth(1) // only look at the immediate subdirectories
-          .into_iter()
+        // let walker2 = WalkBuilder::new(&path)
+        // // .contents_first(true)
+        //   // .min_depth(1)
+        //   .build() // skip the root directory
+        //   // .max_depth(1) // only look at the immediate subdirectories
+        //   .into_iter()
           
-          .filter_entry(
-            |e| 
-            !e.path_is_symlink() 
-            // &&
-            // !e
-            // .file_name()
-            // .to_str()
-            // .map(|s| s.starts_with("."))
-            // .unwrap_or(false)
-            &&
-            !is_hidden(e)
-            // &&
-            // e.file_name()
-            // .to_string_lossy()
-            // .to_string().to_lowercase()
-            // .contains(&string)
-            // &&
-            // e.file_type().is_file()
-              // e.file_type().is_dir()
-          );
+        //   .filter_entry(
+        //     |e| 
+        //     !e.path_is_symlink() 
+        //     // &&
+        //     // !e
+        //     // .file_name()
+        //     // .to_str()
+        //     // .map(|s| s.starts_with("."))
+        //     // .unwrap_or(false)
+        //     &&
+        //     !is_hidden(e)
+        //     // &&
+        //     // e.file_name()
+        //     // .to_string_lossy()
+        //     // .to_string().to_lowercase()
+        //     // .contains(&string)
+        //     // &&
+        //     // e.file_type().is_file()
+        //       // e.file_type().is_dir()
+          // );
 
         let mut count=RwLock::new(0);
         
         
-        let par_walker2 = walker2.par_bridge(); // ignore errors
+        // let par_walker2 = walker2.par_bridge(); // ignore errors
         
         let k:HashSet<String>=
-        par_walker2
+        WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        
+        .hidden(true) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        
+        .git_exclude(true)
+        .ignore(false) // Disable the default ignore rules
+        .git_ignore(true).build()
+        .par_bridge()
         // .enumerate()
         .into_par_iter()
           
