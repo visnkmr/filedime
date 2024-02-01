@@ -2014,7 +2014,7 @@ const [width, setWidth] = useState(200);
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
-                      <Button size={"none"} variant={"outline"} className="m-0 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700">
+                      <Button size={"none"} variant={"outline"} className="relative m-0 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700">
 
                       <ContextMenu >
                       <ContextMenuTrigger className="h-full w-full overflow-hidden">
@@ -2147,13 +2147,15 @@ const [width, setWidth] = useState(200);
                         }}>Copy</ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
+                    <div className="absolute end-0 ">
+
                     {!message.is_dir
                                 // &&
                                 // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
                                 // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
                                 ?(
                             <Sheet modal={false}>
-                            <SheetTrigger className="h-full px-3 p-2 focus:bg-gray-200 focus:dark:bg-gray-700">
+                            <SheetTrigger className="h-full px-3 p-4 focus:bg-gray-200 focus:dark:bg-gray-700">
                               <EyeIcon className="h-4 w-4 "/>
                               
                               </SheetTrigger>
@@ -2183,6 +2185,7 @@ const [width, setWidth] = useState(200);
                     populatesearchlist(message.path)
                   }}><ScanSearchIcon className="h-4 w-4"/></Button>
                             </div>)}
+                    </div>
                         </Button>
                         </div>
         
