@@ -7,6 +7,7 @@ import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
+import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
@@ -1550,6 +1551,9 @@ const [width, setWidth] = useState(200);
               </HoverCardContent>
             </HoverCard>
             </Button>
+            </div>
+            <div>
+
             <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
@@ -1560,7 +1564,7 @@ const [width, setWidth] = useState(200);
                 }
             }>
             <CardDescription className="flex items-center space-x-2 p-2">
-            <FolderClockIcon className="h-4 w-4"/>
+            <ScanSearchIcon className="h-4 w-4"/>
               
             </CardDescription>
           </Card>
