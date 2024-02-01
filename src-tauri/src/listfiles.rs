@@ -153,8 +153,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
     ).unwrap())?;
     println!("load history");
     // let mut fcount;
-
-    let walker2 = 
+    let walker = 
         WalkBuilder::new(&path)
         .max_depth(Some(1))
         
@@ -163,8 +162,12 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
         .parents(true)
         
         .git_exclude(true)
-        .ignore(true) // Disable the default ignore rules
-        .git_ignore(true) // Respect the .gitignore file
+        .ignore(false) // Disable the default ignore rules
+        .git_ignore(true).clone();
+      let walker2=walker.clone() // Respect the .gitignore file
+        .build(); 
+      let walker3 = 
+        walker.clone() // Respect the .gitignore file
         .build();
       // WalkDir::new(&path)
       //   .contents_first(true)
@@ -190,6 +193,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
 
         
         let par_walker2 = walker2.par_bridge(); // ignore errors
+        let par_walker3 = walker3.par_bridge(); // ignore errors
         
         // let k:HashSet<String>=
         // let paths:Vec<String>=
@@ -312,21 +316,15 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
 //   set_enum_value((&state.whichthread), wThread::None)
 // });
 //    let mut finder = ;
-  let walker = WalkDir::new(&path)
-      .min_depth(1) // skip the root directory
-      .max_depth(1) // only look at the immediate subdirectories
-      .into_iter()
+  let walker = par_walker3 // only look at the immediate subdirectories
+      .into_par_iter()
       
       // .filter_entry(|e| e.file_type().is_dir()) // only yield directories
       .filter_map(|e|{
 
         e.ok()
       }
-      );
-    let par_walker = walker.par_bridge(); // ignore errors
-    // let files: Vec<FileItem> =
-     let i=par_walker
-    .into_par_iter()
+      )
     .filter(|(_)|{
 
       let local_thread_controller=stop_flag_local.clone();
@@ -348,9 +346,10 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     }
     return true;
     })
-    .filter(|rv|{
-          !rv.file_name().to_string_lossy().to_string().ends_with(".git")
-    })
+    // .filter(|rv|{
+    //       !rv.file_name().to_string_lossy().to_string().ends_with(".git")
+
+    // })
     // .filter(
     //    |entry| {
     //    let path = entry.path();
