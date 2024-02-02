@@ -134,16 +134,25 @@ fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
    let mut last_print = Instant::now();
    let mut last_copied=0;
    let mut laststate= dir::TransitState::Normal;
+   let mut lastfolder= "".to_string();
+   let mut lastfile= "".to_string();
+   let mut lastfilesize=0;
    let handle = |process_info: TransitProcess| {
     // println!("{}", process_info.total_bytes);
-    if (last_print.elapsed() >= Duration::from_millis(20) || process_info.copied_bytes==process_info.total_bytes as u64 || process_info.state==dir::TransitState::Exists ||process_info.state!=laststate ){ 
+    if (last_print.elapsed() >= Duration::from_millis(20) || process_info.copied_bytes==process_info.total_bytes as u64 || process_info.state==dir::TransitState::Exists ||process_info.state!=laststate ||process_info.file_name != lastfile||process_info.dir_name != lastfolder ||process_info.file_total_bytes!=lastfilesize ){ 
       //    sendprogress(&windowname, ah, (json!({
       //     "progress": process_info.copied_bytes,
       //     "size":process_info.total_bytes,
       //  })).to_string());
-      println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
+      println!("{}",format!("{}/{} done......{}",process_info.file_bytes_copied,process_info.file_total_bytes,process_info.copied_bytes-last_copied));
       last_copied=process_info.copied_bytes;
       last_print = Instant::now(); 
+      lastfile=process_info.file_name;
+      println!("{}",lastfile);
+      lastfolder=process_info.dir_name;
+      println!("{}",lastfolder);
+      lastfilesize=process_info.file_total_bytes;
+
     }
     if(process_info.state!=laststate){
       println!("{}",match(process_info.state){
