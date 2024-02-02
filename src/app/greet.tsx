@@ -1205,29 +1205,29 @@ const [width, setWidth] = useState(200);
               <HoverCardTrigger>
               <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                   ()=>{
-                    fileopsrc.map((eachsource)=>{
+                    // fileopsrc.map((eachsource)=>{
                       invoke('fileop_with_progress', { 
                       windowname:appWindow?.label,
-                      src:eachsource,
+                      src:JSON.stringify(fileopsrc),
                       dst:path,
                       removefile:false
                   }).catch((e)=>console.error(e))
-                    })
+                    // })
                     
                   // .then(()=>{
                     console.log("done");
                     setfos([])
                     setfod("")
-                    reset(path)
-                    sst(path)
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: path,
-                      ff: "" 
-                  // })
+                    // reset(path)
+                    // sst(path)
+                  //   invoke('list_files', { 
+                  //     windowname:appWindow?.label,
+                  //     oid: activetabid.toString(),
+                  //     path: path,
+                  //     ff: "" 
+                  // // })
                     
-                  })
+                  // })
                   }
               }>
               <CardDescription className="flex items-center space-x-2 p-2">

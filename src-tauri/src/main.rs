@@ -11,6 +11,7 @@ mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
 use fs_extra::{dir, TransitProcess};
+use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
@@ -84,10 +85,75 @@ fn mirror(functionname:String,arguments: Vec<String>,window: Window){
     "arguments":arguments
   })).unwrap());
 }
+
+fn checkforconflicts(srclist:String){
+  let src:Vec<String>=serde_json::from_str(&srclist).unwrap();
+  let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
+
+  for path in src{
+    match fs::metadata(path.clone()) {
+      Ok(metadata) => {
+          if metadata.is_file() {
+              println!("File {} exists, size: {} bytes", path, metadata.len());
+          } else if(metadata.is_dir()){
+            for entry in WalkBuilder::new(path)
+            .threads(threads)
+            .hidden(false) // Include hidden files and directories
+            .follow_links(false)
+            .parents(false)
+            
+            .git_exclude(false)
+            .ignore(false) // Disable the default ignore rules
+            .git_ignore(false).build()
+            .into_iter() {
+              println!("{:?}",entry);
+              match(entry){
+                  Ok(e) => if let Some(eft)=(e.file_type()){
+                    if(eft.is_file()){
+                      match(fs::metadata(e.path())){
+                          Ok(mdf) => {
+                      println!("File {} exists, size: {} bytes", e.path().to_string_lossy().to_string(), mdf.len());
+                            
+                          },
+                          Err(_) => {
+                            
+                          },
+                      }
+                    }
+                  },
+                  Err(_) => {
+                    
+                  },
+              }
+              // let entry = entry.expect("Failed to read directory entry");
+              // if entry.file_type().unwrap().is_file() {
+              //     println!("{}", entry.path().display());
+              // }
+          }
+              // println!("Path {} is not a file", path);
+          }
+      },
+      Err(_) => println!("File {} does not exist", path),
+  }
+  }
+  // println!("{:?}",src);
+}
+
+// "[\"/home/roger/seat_items.txt\",\"/home/roger/Downloads\"]"
+
   #[tauri::command]
 async 
 fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<(),String>{
   println!("copying function recieved rust from {}",windowname);
+  println!("{:?}",src);
+  
+  checkforconflicts(src);
+  // let src_path = Path::new(&src);
+  // let src_filename = src_path.file_name().unwrap().to_str().unwrap();
+  // let mut dst_path = Path::new(&dst).join(src_filename);
+  // if(dst_path.exists()){
+  //   //give user choice on what to do for the path
+  // }
   Ok(())
 
 //   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
@@ -118,10 +184,13 @@ fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
 
    // Append the filename to the destination path
    let mut dst_path = Path::new(&dst).join(src_filename);
-
+if(dst_path.exists()){
+    //give user choice on what to do for the path
+   }
    // Open the destination file
   //  let mut dst_file = File::create(dst_path.clone())?;
    println!("copy from  {} to {:?}",src,dst_path);
+   
    // Open the destination file
   //  let mut dst_file = File::create(dst)?;
 
@@ -130,7 +199,8 @@ fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
   //  let mut written = 0;
    println!("copying started");
   //  let mut last_print = Instant::now();
-   let options = dir::CopyOptions::new(); //Initialize default values for CopyOptions
+   let mut options = dir::CopyOptions::new(); //Initialize default values for CopyOptions
+  //  options.buffer_size = 1;
    let mut last_print = Instant::now();
    let mut last_copied=0;
    let mut laststate= dir::TransitState::Normal;
@@ -139,18 +209,26 @@ fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
    let mut lastfilesize=0;
    let handle = |process_info: TransitProcess| {
     // println!("{}", process_info.total_bytes);
-    if (last_print.elapsed() >= Duration::from_millis(20) || process_info.copied_bytes==process_info.total_bytes as u64 || process_info.state==dir::TransitState::Exists ||process_info.state!=laststate ||process_info.file_name != lastfile||process_info.dir_name != lastfolder ||process_info.file_total_bytes!=lastfilesize ){ 
+    if (
+      last_print.elapsed() >= Duration::from_millis(1000) ||
+      process_info.copied_bytes==process_info.total_bytes as u64 ||
+      // process_info.state==dir::TransitState::Exists ||
+      process_info.state!=laststate ||
+      process_info.file_name != lastfile||
+      process_info.dir_name != lastfolder ||
+      process_info.file_total_bytes!=lastfilesize )
+      { 
       //    sendprogress(&windowname, ah, (json!({
       //     "progress": process_info.copied_bytes,
       //     "size":process_info.total_bytes,
       //  })).to_string());
-      println!("{}",format!("{}/{} done......{}",process_info.file_bytes_copied,process_info.file_total_bytes,process_info.copied_bytes-last_copied));
+      println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
+      println!("{}",lastfile);
+      println!("{}",lastfolder);
       last_copied=process_info.copied_bytes;
       last_print = Instant::now(); 
       lastfile=process_info.file_name;
-      println!("{}",lastfile);
       lastfolder=process_info.dir_name;
-      println!("{}",lastfolder);
       lastfilesize=process_info.file_total_bytes;
 
     }
