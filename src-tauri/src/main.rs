@@ -10,6 +10,7 @@ mod sendtofrontend;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
 use filesize::PathExt;
+use fs_extra::{dir, TransitProcess};
 use prefstore::*;
 use rayon::prelude::*;
 use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
@@ -84,27 +85,34 @@ fn mirror(functionname:String,arguments: Vec<String>,window: Window){
   })).unwrap());
 }
   #[tauri::command]
-async fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<(),String>{
+async 
+fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<(),String>{
   println!("copying function recieved rust from {}",windowname);
-  
+  Ok(())
 
-  match(fileop(windowname, src, dst, removefile,&window.app_handle()).await){
-    Ok(_) => {
-    Ok(())
+//   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
+//     Ok(_) => {
+//     Ok(())
       
-    },
-    Err(e) => {
-   Err(format!("copying failed {}",e))
+//     },
+//     Err(e) => {
+//    Err(format!("copying failed {}",e))
       
-    },
+//     },
+// }
 }
+#[test]
+fn tryut(){
+  println!("{:?}",fileop("/run/media/roger/S/inst".to_string(), "/tmp/new".to_string(),false));
 }
-async fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> io::Result<()> {
+// async 
+fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
+// fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> Result<(),String> {
    // Open the source file
-   let mut src_file = File::open(src.clone())?;
+  //  let mut src_file = File::open(src.clone())?;
 
    // Get the size of the source file
-   let src_size = src_file.metadata()?.len();
+  //  let src_size = src_file.metadata().unwrap().len();
    let src_path = Path::new(&src);
    let src_filename = src_path.file_name().unwrap().to_str().unwrap();
 
@@ -112,46 +120,91 @@ async fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: 
    let mut dst_path = Path::new(&dst).join(src_filename);
 
    // Open the destination file
-   let mut dst_file = File::create(dst_path.clone())?;
+  //  let mut dst_file = File::create(dst_path.clone())?;
    println!("copy from  {} to {:?}",src,dst_path);
    // Open the destination file
   //  let mut dst_file = File::create(dst)?;
 
    // Buffer to hold the read data
-   let mut buffer = [0; 1024];
-   let mut written = 0;
+  //  let mut buffer = [0; 1024];
+  //  let mut written = 0;
    println!("copying started");
+  //  let mut last_print = Instant::now();
+   let options = dir::CopyOptions::new(); //Initialize default values for CopyOptions
    let mut last_print = Instant::now();
+   let mut last_copied=0;
+   let mut laststate= dir::TransitState::Normal;
+   let handle = |process_info: TransitProcess| {
+    // println!("{}", process_info.total_bytes);
+    if (last_print.elapsed() >= Duration::from_millis(20) || process_info.copied_bytes==process_info.total_bytes as u64 || process_info.state==dir::TransitState::Exists ||process_info.state!=laststate ){ 
+      //    sendprogress(&windowname, ah, (json!({
+      //     "progress": process_info.copied_bytes,
+      //     "size":process_info.total_bytes,
+      //  })).to_string());
+      println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
+      last_copied=process_info.copied_bytes;
+      last_print = Instant::now(); 
+    }
+    if(process_info.state!=laststate){
+      println!("{}",match(process_info.state){
+        dir::TransitState::Normal => "Status Normal",
+        dir::TransitState::Exists => "Status Exists",
+        dir::TransitState::NoAccess => "Status FS perm issue",
+    });
+    laststate=process_info.state
+    }
+    fs_extra::dir::TransitProcessResult::Skip
+ };
+
+   
    
    // Read from the source file and write to the destination file
-   loop {
-       match src_file.read(&mut buffer) {
-           Ok(0) => break,
-           Ok(n) => {
-               dst_file.write_all(&buffer[..n])?;
-               written+=n;
-               if (last_print.elapsed() >= Duration::from_millis(20) || src_size==written as u64){ 
-               sendprogress(&windowname, ah, (json!({
-                "progress": written,
-                "size":src_size,
-             })).to_string());
-             last_print = Instant::now(); 
-            }
+  //  loop {
+  //      match src_file.read(&mut buffer) {
+  //          Ok(0) => break,
+  //          Ok(n) => {
+  //              dst_file.write_all(&buffer[..n])?;
+  //              written+=n;
+  //              if (last_print.elapsed() >= Duration::from_millis(20) || src_size==written as u64){ 
+  //              sendprogress(&windowname, ah, (json!({
+  //               "progress": written,
+  //               "size":src_size,
+  //            })).to_string());
+  //            last_print = Instant::now(); 
+  //           }
             
             
-              //  pb.inc(n as u64);
-           },
-           Err(err) => return Err(err),
-       }
-   }
-   println!("copying done");
+  //             //  pb.inc(n as u64);
+  //          },
+  //          Err(err) => return Err(err),
+  //      }
+  //  }
+  //  println!("copying done");
 
-  //  pb.finish_with_message("done");
-  // Remove the source file
+  // //  pb.finish_with_message("done");
+  // // Remove the source file
   if(removefile){
-    fs::remove_file(src)?;
+    // fs::remove_file(src)?;
+    match(fs_extra::move_items_with_progress(&[src], dst,&options,handle)){
+      Ok(_) => {
+        Ok(())
+      },
+      Err(e) => {
+        Err(e.to_string())
+      },
   }
-   Ok(())
+  }
+  else{
+    match(fs_extra::copy_items_with_progress(&[src], dst,&options,handle)){
+      Ok(_) => {
+        Ok(())
+      },
+      Err(e) => {
+        Err(e.to_string())
+      },
+  }
+  }
+  
 }
 
 #[tauri::command]
