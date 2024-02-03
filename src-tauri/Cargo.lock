@@ -928,13 +928,14 @@ dependencies = [
 
 [[package]]
 name = "filedime"
-version = "0.6.6"
+version = "0.8.2"
 dependencies = [
  "chrono",
  "comrak",
  "dirs",
  "filesize",
  "filetime",
+ "fs_extra",
  "fuzzy-matcher",
  "ignore",
  "libc",
@@ -951,7 +952,6 @@ dependencies = [
  "sysinfo",
  "tauri",
  "tauri-build",
- "walkdir",
 ]
 
 [[package]]
@@ -1014,6 +1014,11 @@ checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
 ]
+
+[[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "git+https://github.com/visnkmr/fs_extra.git#242afc06a61fb60c8b12d91d32743a199a6444f4"
 
 [[package]]
 name = "futf"

@@ -85,18 +85,24 @@ fn mirror(functionname:String,arguments: Vec<String>,window: Window){
     "arguments":arguments
   })).unwrap());
 }
+fn checkiffileexists(path: &String,dst: &String,len:u64)->bool{
+  let src_path = Path::new(&path);
+  let src_filename = src_path.file_name().unwrap().to_str().unwrap();
 
-fn checkforconflicts(srclist:String){
-  let src:Vec<String>=serde_json::from_str(&srclist).unwrap();
+  // Append the filename to the destination path
+  let mut dst_path = Path::new(&dst).join(src_filename);
+  return if(dst_path.exists()){
+
+    println!("File {} exists, size: {} bytes", path, len);
+    true
+  }else{
+
+    false
+  }
+}
+fn checkindir(path: &String,dst: &String){
   let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
-
-  for path in src{
-    match fs::metadata(path.clone()) {
-      Ok(metadata) => {
-          if metadata.is_file() {
-              println!("File {} exists, size: {} bytes", path, metadata.len());
-          } else if(metadata.is_dir()){
-            for entry in WalkBuilder::new(path)
+  for entry in WalkBuilder::new(path)
             .threads(threads)
             .hidden(false) // Include hidden files and directories
             .follow_links(false)
@@ -112,13 +118,16 @@ fn checkforconflicts(srclist:String){
                     if(eft.is_file()){
                       match(fs::metadata(e.path())){
                           Ok(mdf) => {
-                      println!("File {} exists, size: {} bytes", e.path().to_string_lossy().to_string(), mdf.len());
+                      checkiffileexists(&e.path().to_string_lossy().to_string(), &dst,  mdf.len());
                             
                           },
                           Err(_) => {
                             
                           },
                       }
+                    }
+                    else{
+                      checkindir(path, dst);
                     }
                   },
                   Err(_) => {
@@ -130,6 +139,19 @@ fn checkforconflicts(srclist:String){
               //     println!("{}", entry.path().display());
               // }
           }
+}
+fn checkforconflicts(srclist:String,dst:String){
+  let src:Vec<String>=serde_json::from_str(&srclist).unwrap();
+  
+  
+// if(dst_path.exists())
+  for path in src{
+    match fs::metadata(path.clone()) {
+      Ok(metadata) => {
+          if metadata.is_file() {
+            checkiffileexists(&path, &dst, metadata.len().clone());
+          } else if(metadata.is_dir()){
+              checkindir(&path,&dst)
               // println!("Path {} is not a file", path);
           }
       },
@@ -147,7 +169,7 @@ fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: b
   println!("copying function recieved rust from {}",windowname);
   println!("{:?}",src);
   
-  checkforconflicts(src);
+  checkforconflicts(src,dst);
   // let src_path = Path::new(&src);
   // let src_filename = src_path.file_name().unwrap().to_str().unwrap();
   // let mut dst_path = Path::new(&dst).join(src_filename);
