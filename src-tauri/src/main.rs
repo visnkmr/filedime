@@ -9,7 +9,7 @@ mod sendtofrontend;
 
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
-use filesize::PathExt;
+// use filesize::PathExt;
 use fs_extra::{dir, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
@@ -85,6 +85,31 @@ fn mirror(functionname:String,arguments: Vec<String>,window: Window){
     "arguments":arguments
   })).unwrap());
 }
+trait PathExt {
+  fn exists_case_insensitive(&self) -> bool;
+}
+
+impl PathExt for Path {
+  fn exists_case_insensitive(&self) -> bool {
+      if self.exists() {
+          return true;
+      }
+
+      if let Some(parent) = self.parent() {
+          if let Ok(entries) = fs::read_dir(parent) {
+              for entry in entries {
+                  if let Ok(entry) = entry {
+                      if entry.file_name().to_string_lossy().to_lowercase() == self.file_name().unwrap().to_string_lossy().to_lowercase() {
+                          return true;
+                      }
+                  }
+              }
+          }
+      }
+
+      false
+  }
+}
 fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->bool{
   println!("--------------{:?} to {}",path,dst);
   let mut src_filename="";
@@ -105,7 +130,7 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->bool{
     Path::new(&destpath);
   
   println!("dest---->{:?}",dst_path);
-  return if(dst_path.exists()){
+  return if(dst_path.exists_case_insensitive()){
 
     println!("File {} exists, size: {} bytes", path, len);
     true
@@ -995,7 +1020,7 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
 }#[tauri::command]
 async fn doespathexist(mut path: String) -> Result<bool,()> {
   let pathasbuf=PathBuf::from(path.clone());
-  Ok(pathasbuf.exists()||path=="drives://")
+  Ok(pathasbuf.exists_case_insensitive()||path=="drives://")
    
   }
           // Use substring instead of path
