@@ -110,13 +110,20 @@ impl PathExt for Path {
       false
   }
 }
-fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->bool{
+fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<bool,String>{
   println!("--------------{:?} to {}",path,dst);
-  let mut src_filename="";
+  let mut src_filename="".to_string();
   if(!fromdir){
 
      let src_path = Path::new(&path);
-     src_filename = src_path.file_name().unwrap().to_str().unwrap();
+     match(src_path.file_name()){
+        Some(spath) => {
+          src_filename=spath.to_string_lossy().to_string();
+        },
+        None => {
+          return Err("File name not found".to_string());
+        },
+    };
   }
 
   // Append the filename to the destination path
@@ -133,13 +140,13 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->bool{
   return if(dst_path.exists_case_insensitive()){
 
     println!("File {} exists, size: {} bytes", path, len);
-    true
+    Ok(true)
   }else{
 
-    false
+    Ok(false)
   }
 }
-fn checkindir(path: &String,dst: &String,ltpt:&String){
+fn checkindir(path: &String,dst: &String,ltpt:&String)->Result<(),String>{
   let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
   for entry in WalkBuilder::new(path)
             .threads(threads)
@@ -161,7 +168,7 @@ fn checkindir(path: &String,dst: &String,ltpt:&String){
                       match(fs::metadata(e.path())){
                           Ok(mdf) => {
                             // println!("{:?}",mdf);
-                      checkiffileexists(&e.path().to_string_lossy().to_string().replace(ltpt, ""), &dst,  mdf.len(),true);
+                      checkiffileexists(&e.path().to_string_lossy().to_string().replace(ltpt, ""), &dst,  mdf.len(),true)?;
                             
                           },
                           Err(_) => {
@@ -184,6 +191,7 @@ fn checkindir(path: &String,dst: &String,ltpt:&String){
               //     println!("{}", entry.path().display());
               // }
           }
+          Ok(())
 }
 #[test]
 fn test2(){
@@ -193,9 +201,9 @@ fn test2(){
     "/home/roger/Documents".to_string(),
     "/home/roger/seat_items.txt".to_string()
     ],
-     "/tmp/new".to_string())
+     "/tmp/new".to_string()).unwrap()
 }
-fn checkforconflicts(srclist:Vec<String>,dst:String){
+fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
 // fn checkforconflicts(srclist:String,dst:String){
   // let src:Vec<String>=serde_json::from_str(&srclist).unwrap();
   
@@ -218,13 +226,14 @@ fn checkforconflicts(srclist:Vec<String>,dst:String){
               },
               None => locationtoputto="".to_string()
             }
-              checkindir(&path,&dst,&locationtoputto)
+              checkindir(&path,&dst,&locationtoputto)?
               // println!("Path {} is not a file", path);
           }
       },
       Err(_) => println!("File {} does not exist", path),
   }
   }
+  Ok(())
   // println!("{:?}",src);
 }
 
