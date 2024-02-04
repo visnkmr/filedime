@@ -33,8 +33,8 @@ Thanks Tauri, Typescript, Webpack->RSPack, NextJS, ShadCN
 ## Build from source
   
 clone the repo  
-npm i  
-npm run watch  
+bun i
+should use node version 20
 in a new terminal window "cargo tauri dev" for testing.  
-in a new terminal window "cargo tauri build" for making .exe.  
+in a new terminal window "cargo tauri build" for making executables (.exe for windows or bin file on linux).  
 
