@@ -146,7 +146,7 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<bo
     Ok(false)
   }
 }
-fn checkindir(path: &String,dst: &String,ltpt:&String)->Result<(),String>{
+fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>)->Result<(),String>{
   let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
   for entry in WalkBuilder::new(path)
             .threads(threads)
@@ -168,22 +168,27 @@ fn checkindir(path: &String,dst: &String,ltpt:&String)->Result<(),String>{
                       match(fs::metadata(e.path())){
                           Ok(mdf) => {
                             // println!("{:?}",mdf);
-                      checkiffileexists(&e.path().to_string_lossy().to_string().replace(ltpt, ""), &dst,  mdf.len(),true)?;
+                      match checkiffileexists(&e.path().to_string_lossy().to_string().replace(ltpt, ""), &dst,  mdf.len(),true){
+                        Ok(shadd) => {
+                          if(shadd){
+                            shouldadd.push(e.path().to_string_lossy().to_string())
+                          }
+                        },
+                        Err(e) => {
+                          return Err(e)
+                        },
+                    };
                             
                           },
-                          Err(_) => {
-                            
+                          Err(e) => {
+                            return Err(format!("{}",e))
                           },
                       }
                     }
-                    else if(eft.is_dir()){
-                      
-                      // checkindir(&e.path().to_string_lossy().to_string(), dst);
-                    }
                   }
                 },
-                  Err(_) => {
-                    
+                  Err(e) => {
+                    return Err(format!("{}",e))
                   },
               }
               // let entry = entry.expect("Failed to read directory entry");
@@ -193,47 +198,65 @@ fn checkindir(path: &String,dst: &String,ltpt:&String)->Result<(),String>{
           }
           Ok(())
 }
-#[test]
-fn test2(){
-  checkforconflicts(vec![
-    "/home/roger/Downloads/aps/old".to_string(),
-    "/home/roger/Downloads/aps/old/2022-10-12_134922.pdf".to_string(),
-    "/home/roger/Documents".to_string(),
-    "/home/roger/seat_items.txt".to_string()
-    ],
-     "/tmp/new".to_string()).unwrap()
-}
-fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
-// fn checkforconflicts(srclist:String,dst:String){
-  // let src:Vec<String>=serde_json::from_str(&srclist).unwrap();
+// #[test]
+// fn test2(){
+//   checkforconflicts(vec![
+//     "/home/roger/Downloads/aps/old".to_string(),
+//     "/home/roger/Downloads/aps/old/2022-10-12_134922.pdf".to_string(),
+//     "/home/roger/Documents".to_string(),
+//     "/home/roger/seat_items.txt".to_string()
+//     ],
+//      "/tmp/new".to_string()).unwrap()
+// }
+// fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
+fn checkforconflicts(srclist:String,dst:String)->Result<Vec<String>,String>{
+  let mut thatexists=vec![];
+  match serde_json::from_str(&srclist){
+    Ok(list) => {
+      
+  let src:Vec<String>=list;
   
-  
-// if(dst_path.exists())
-  for path in srclist{
-    println!("{}",path);
-    let mut locationtoputto="".to_string();
-    match fs::metadata(path.clone()) {
-      Ok(metadata) => {
-          if metadata.is_file() {
-            checkiffileexists(&path, &dst, metadata.len().clone(),false);
-          } else if(metadata.is_dir()){
-            
-            let parpath = Path::new(&path);
-            // println!("{}",path);
-            match parpath.parent() {
-              Some(parent) => {
-                locationtoputto=parent.to_string_lossy().to_string();
-              },
-              None => locationtoputto="".to_string()
+  // if(dst_path.exists())
+    for path in src{
+      println!("{}",path);
+      let mut locationtoputto="".to_string();
+      let shouldadd=false;
+      match fs::metadata(path.clone()) {
+        Ok(metadata) => {
+            if metadata.is_file() {
+              match checkiffileexists(&path, &dst, metadata.len().clone(),false){
+                Ok(shouldadd) => {
+                  if(shouldadd){
+                    thatexists.push(path)
+                  }
+                },
+                Err(e) => {return Err(e)
+                  
+                },
             }
-              checkindir(&path,&dst,&locationtoputto)?
-              // println!("Path {} is not a file", path);
-          }
-      },
-      Err(_) => println!("File {} does not exist", path),
-  }
-  }
-  Ok(())
+            } else if(metadata.is_dir()){
+              
+              let parpath = Path::new(&path);
+              // println!("{}",path);
+              match parpath.parent() {
+                Some(parent) => {
+                  locationtoputto=parent.to_string_lossy().to_string();
+                },
+                None => locationtoputto="".to_string()
+              }
+                checkindir(&path,&dst,&locationtoputto,&mut thatexists)?
+                // println!("Path {} is not a file", path);
+            }
+        },
+        Err(e) => {println!("File {} does not exist", path)},
+    }
+    }
+    },
+    Err(e) => { return Err(format!("{}",e))
+
+    },
+}
+  Ok(thatexists)
   // println!("{:?}",src);
 }
 
@@ -241,18 +264,27 @@ fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
 
   #[tauri::command]
 async 
-fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<(),String>{
+fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<String,String>{
   println!("copying function recieved rust from {}",windowname);
-  println!("{:?}",src);
+  let mut allthatexist=vec![];
+  // println!("{:?}",src);
   
-  // checkforconflicts(src,dst);
+  match checkforconflicts(src,dst){
+    Ok(a) => {
+      allthatexist=a.clone();
+      println!("{:?}",a)
+    },
+    Err(b) => {
+      print!("{}",b)
+    },
+}
   // let src_path = Path::new(&src);
   // let src_filename = src_path.file_name().unwrap().to_str().unwrap();
   // let mut dst_path = Path::new(&dst).join(src_filename);
   // if(dst_path.exists()){
   //   //give user choice on what to do for the path
   // }
-  Ok(())
+  Ok(serde_json::to_string(&allthatexist).unwrap_or("".to_string()))
 
 //   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
 //     Ok(_) => {
