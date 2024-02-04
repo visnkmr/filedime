@@ -272,6 +272,15 @@ fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: b
   match checkforconflicts(src,dst){
     Ok(a) => {
       allthatexist=a.clone();
+      let result:Result<(), tauri::Error> =window.eval(&format!("conflictsat({})",serde_json::to_string(&a).unwrap()));
+      match(result){
+    Ok(value) => {
+        println!("-------->{:?}",value);
+    },
+    Err(_) => {
+      
+    },
+}
       println!("{:?}",a)
     },
     Err(b) => {
@@ -299,27 +308,27 @@ fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: b
 }
 #[test]
 fn tryut(){
-  println!("{:?}",fileop("/run/media/roger/S/inst".to_string(), "/tmp/new".to_string(),false));
+  println!("{:?}",fileop(vec!["/run/media/roger/S/inst".to_string()], "/tmp/new".to_string(),false));
 }
 // async 
-fn fileop(src: String, dst: String, removefile: bool) -> Result<(),String> {
+fn fileop(src: Vec<String>, dst: String, removefile: bool) -> Result<(),String> {
 // fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> Result<(),String> {
    // Open the source file
   //  let mut src_file = File::open(src.clone())?;
 
    // Get the size of the source file
   //  let src_size = src_file.metadata().unwrap().len();
-   let src_path = Path::new(&src);
-   let src_filename = src_path.file_name().unwrap().to_str().unwrap();
+//    let src_path = Path::new(&src);
+//    let src_filename = src_path.file_name().unwrap().to_str().unwrap();
 
-   // Append the filename to the destination path
-   let mut dst_path = Path::new(&dst).join(src_filename);
-if(dst_path.exists()){
-    //give user choice on what to do for the path
-   }
-   // Open the destination file
-  //  let mut dst_file = File::create(dst_path.clone())?;
-   println!("copy from  {} to {:?}",src,dst_path);
+//    // Append the filename to the destination path
+//    let mut dst_path = Path::new(&dst).join(src_filename);
+// if(dst_path.exists()){
+//     //give user choice on what to do for the path
+//    }
+//    // Open the destination file
+//   //  let mut dst_file = File::create(dst_path.clone())?;
+//    println!("copy from  {:?} to {:?}",src,dst_path);
    
    // Open the destination file
   //  let mut dst_file = File::create(dst)?;
@@ -402,7 +411,7 @@ if(dst_path.exists()){
   // // Remove the source file
   if(removefile){
     // fs::remove_file(src)?;
-    match(fs_extra::move_items_with_progress(&[src], dst,&options,handle)){
+    match(fs_extra::move_items_with_progress(&src, dst,&options,handle)){
       Ok(_) => {
         Ok(())
       },
@@ -412,7 +421,7 @@ if(dst_path.exists()){
   }
   }
   else{
-    match(fs_extra::copy_items_with_progress(&[src], dst,&options,handle)){
+    match(fs_extra::copy_items_with_progress(&src, dst,&options,handle)){
       Ok(_) => {
         Ok(())
       },

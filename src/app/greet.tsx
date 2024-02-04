@@ -105,7 +105,10 @@ import { useTheme } from "next-themes";
 // 		footer: attribute.label,
 // 	});
 // });
-
+function conflictsat(a){
+  console.log(a)
+  return a
+}
 export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 export default function Greet() {
