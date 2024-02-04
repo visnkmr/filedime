@@ -1162,7 +1162,11 @@ const [width, setWidth] = useState(200);
  const handleMouseUp = () => {
     setIsDragging(false);
  };
-  
+  interface  existingfileinfo{
+    path:String,
+    existingfilesize:number,
+    srcfilesize:number
+  }
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -1210,9 +1214,10 @@ const [width, setWidth] = useState(200);
                       srclist:JSON.stringify(fileopsrc),
                       dst:path,
                   }).then((a)=>{
-                    console.log()
-                    let listofdupes=JSON.parse(a);
-                    
+                    console.log(a)
+                    let listofdupes:existingfileinfo[]=JSON.parse(a);
+                    console.log(typeof listofdupes[0])
+
                   })
                   // invoke('fileop_with_progress', { 
                   //     windowname:appWindow?.label,

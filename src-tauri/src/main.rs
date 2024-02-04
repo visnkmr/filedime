@@ -110,7 +110,7 @@ impl PathExt for Path {
       false
   }
 }
-fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<bool,String>{
+fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(bool,u64),String>{
   println!("--------------{:?} to {}",path,dst);
   let mut src_filename="".to_string();
   if(!fromdir){
@@ -138,15 +138,15 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<bo
   
   println!("dest---->{:?}",dst_path);
   return if(dst_path.exists_case_insensitive()){
-
+    let destfilesize=fs::metadata(dst_path.clone()).unwrap().len();
     println!("File {} exists, size: {} bytes", path, len);
-    Ok(true)
+    Ok((true,destfilesize))
   }else{
 
-    Ok(false)
+    Ok((false,0))
   }
 }
-fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>)->Result<(),String>{
+fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existingfileinfo>)->Result<(),String>{
   let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
   for entry in WalkBuilder::new(path)
             .threads(threads)
@@ -170,8 +170,11 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>
                             // println!("{:?}",mdf);
                       match checkiffileexists(&e.path().to_string_lossy().to_string().replace(ltpt, ""), &dst,  mdf.len(),true){
                         Ok(shadd) => {
-                          if(shadd){
-                            shouldadd.push(e.path().to_string_lossy().to_string())
+                          if(shadd.0){
+                            shouldadd.push(
+                              existingfileinfo { 
+                                path: (e.path().to_string_lossy().to_string()), existingfilesize: shadd.1, 
+                                srcfilesize: mdf.len() })
                           }
                         },
                         Err(e) => {
@@ -209,6 +212,12 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>
 //      "/tmp/new".to_string()).unwrap()
 // }
 // fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
+  #[derive(Serialize)]
+  struct existingfileinfo{
+    path:String,
+    existingfilesize:u64,
+    srcfilesize:u64
+  }
   #[tauri::command]
   async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
   let mut thatexists=vec![];
@@ -226,8 +235,11 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>
             if metadata.is_file() {
               match checkiffileexists(&path, &dst, metadata.len().clone(),false){
                 Ok(shouldadd) => {
-                  if(shouldadd){
-                    thatexists.push(path)
+                  if(shouldadd.0){
+                    thatexists.push(existingfileinfo{
+                      path,
+                    existingfilesize:shouldadd.1,
+                  srcfilesize:metadata.len()})
                   }
                 },
                 Err(e) => {return Err(e)
