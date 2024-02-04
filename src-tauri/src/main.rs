@@ -209,7 +209,8 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<String>
 //      "/tmp/new".to_string()).unwrap()
 // }
 // fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
-fn checkforconflicts(srclist:String,dst:String)->Result<Vec<String>,String>{
+  #[tauri::command]
+  async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
   let mut thatexists=vec![];
   match serde_json::from_str(&srclist){
     Ok(list) => {
@@ -220,7 +221,6 @@ fn checkforconflicts(srclist:String,dst:String)->Result<Vec<String>,String>{
     for path in src{
       println!("{}",path);
       let mut locationtoputto="".to_string();
-      let shouldadd=false;
       match fs::metadata(path.clone()) {
         Ok(metadata) => {
             if metadata.is_file() {
@@ -256,7 +256,7 @@ fn checkforconflicts(srclist:String,dst:String)->Result<Vec<String>,String>{
 
     },
 }
-  Ok(thatexists)
+  Ok(serde_json::to_string(&thatexists).unwrap())
   // println!("{:?}",src);
 }
 
@@ -266,34 +266,34 @@ fn checkforconflicts(srclist:String,dst:String)->Result<Vec<String>,String>{
 async 
 fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<String,String>{
   println!("copying function recieved rust from {}",windowname);
-  let mut allthatexist=vec![];
+  // let mut allthatexist=vec![];
   // println!("{:?}",src);
   
-  match checkforconflicts(src,dst){
-    Ok(a) => {
-      allthatexist=a.clone();
-      let result:Result<(), tauri::Error> =window.eval(&format!("conflictsat({})",serde_json::to_string(&a).unwrap()));
-      match(result){
-    Ok(value) => {
-        println!("-------->{:?}",value);
-    },
-    Err(_) => {
+//   match checkforconflicts(src,dst){
+//     Ok(a) => {
+//       allthatexist=a.clone();
+//       let result:Result<(), tauri::Error> =window.eval(&format!("conflictsat({})",serde_json::to_string(&a).unwrap()));
+//       match(result){
+//     Ok(value) => {
+//         println!("-------->{:?}",value);
+//     },
+//     Err(_) => {
       
-    },
-}
-      println!("{:?}",a)
-    },
-    Err(b) => {
-      print!("{}",b)
-    },
-}
+//     },
+// }
+//       println!("{:?}",a)
+//     },
+//     Err(b) => {
+//       print!("{}",b)
+//     },
+// }
   // let src_path = Path::new(&src);
   // let src_filename = src_path.file_name().unwrap().to_str().unwrap();
   // let mut dst_path = Path::new(&dst).join(src_filename);
   // if(dst_path.exists()){
   //   //give user choice on what to do for the path
   // }
-  Ok(serde_json::to_string(&allthatexist).unwrap_or("".to_string()))
+  Ok(src)
 
 //   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
 //     Ok(_) => {
@@ -950,6 +950,7 @@ fn main() {
         mirror,
         fileop_with_progress,
         addmark,
+        checkforconflicts,
         backbutton,
         closetab,
         copynpaste,

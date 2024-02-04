@@ -105,10 +105,6 @@ import { useTheme } from "next-themes";
 // 		footer: attribute.label,
 // 	});
 // });
-function conflictsat(a){
-  console.log(a)
-  return a
-}
 export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 export default function Greet() {
@@ -1209,12 +1205,21 @@ const [width, setWidth] = useState(200);
               <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
                   ()=>{
                     // fileopsrc.map((eachsource)=>{
-                      invoke('fileop_with_progress', { 
-                      windowname:appWindow?.label,
-                      src:JSON.stringify(fileopsrc),
+
+                      invoke('checkforconflicts', { 
+                      srclist:JSON.stringify(fileopsrc),
                       dst:path,
-                      removefile:false
-                  }).catch((e)=>console.error(e))
+                  }).then((a)=>{
+                    console.log()
+                    let listofdupes=JSON.parse(a);
+                    
+                  })
+                  // invoke('fileop_with_progress', { 
+                  //     windowname:appWindow?.label,
+                  //     src:JSON.stringify(fileopsrc),
+                  //     dst:path,
+                  //     removefile:false
+                  // }).catch((e)=>console.error(e))
                     // })
                     
                   // .then(()=>{
