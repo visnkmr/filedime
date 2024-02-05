@@ -46,6 +46,12 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../components/ui/hover-card"
+export interface  operationfileinfo{
+  path:String,
+  existingfilesize:number,
+  srcfilesize:number,
+  replace:boolean
+}
 
 // import Link from "next/link"
 import { CardContent, Card, CardDescription } from "../components/ui/card"
@@ -149,6 +155,7 @@ export default function Greet() {
   const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState(objinit);
+  let srclist=JSON.stringify(fileopsrc);
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("")
@@ -1167,9 +1174,11 @@ const [width, setWidth] = useState(200);
   interface  existingfileinfo{
     path:String,
     existingfilesize:number,
-    srcfilesize:number
+    srcfilesize:number,
   }
-  const[dupes,setdupes]=useState([] as existingfileinfo[])
+  
+  
+  const[dupes,setdupes]=useState([] as operationfileinfo[])
   const[showalertdialog,setsal]=useState(false)
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
@@ -1206,7 +1215,7 @@ const [width, setWidth] = useState(200);
               </button>
               {/* </div> */}
          
-              <Dupelist dupes={dupes}/>
+              <Dupelist srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
@@ -1221,13 +1230,17 @@ const [width, setWidth] = useState(200);
                   }).then((a)=>{
                     console.log(a)
                     let listofdupes:existingfileinfo[]=JSON.parse(a);
+                    let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
+                      ...item,
+                      replace: false
+                  }));
                     console.log(typeof listofdupes[0])
                     if(listofdupes.length===0)
                     {
 
                     }
                     else{
-                      setdupes(listofdupes)
+                      setdupes(newArray)
                       setsal(true);
                       return 
                     }
