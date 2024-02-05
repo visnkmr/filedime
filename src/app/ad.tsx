@@ -87,13 +87,14 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
                     destPath: item.destpath,
                     replace: item.replace
                    }));
-                   
+                   console.log(srclist)
+                   console.log(typeof srclist)
                 invoke('fileop', { 
                     srclist:srclist,
                     dst:dst,
                     dlastore:JSON.stringify(newArray)
                 }).then((a)=>{
-                
+                    
                 
                 })
             }}>Continue</AlertDialogAction>

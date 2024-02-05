@@ -395,6 +395,7 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
     // let mut lastfile= "".to_string();
     // let mut lastfilesize=0;
     let handle = |process_info: TransitProcess| {
+      println!("{:?}",process_info);
      // println!("{}", process_info.total_bytes);
     //  if (
     //    last_print.elapsed() >= Duration::from_millis(1000) ||
@@ -437,23 +438,32 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
         match exists{
             Some(a) => {
               if(a){
+                println!("Overwrite {}",process_info.file_name);
                 return fs_extra::dir::TransitProcessResult::Overwrite
               }
               else{
+                println!("Skip {}",process_info.file_name);
+
                 return fs_extra::dir::TransitProcessResult::Skip
               }
             },
             None => {
+              println!("Unknown {}",process_info.file_name);
+
               return fs_extra::dir::TransitProcessResult::ContinueOrAbort
             },
         }
       }
       else {
+        println!("Unknown2 {}",process_info.file_name);
+
         return fs_extra::dir::TransitProcessResult::ContinueOrAbort
           
       }
     },
-    Err(_) => {
+    Err(i) => {
+      println!("Error {} @ {}",i,process_info.file_name);
+
       fs_extra::dir::TransitProcessResult::Abort
     },
 }

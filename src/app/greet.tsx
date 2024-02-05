@@ -165,10 +165,10 @@ export default function Greet() {
   const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState(objinit);
-  let srclist;
-  useEffect(()=>{
-   srclist= JSON.stringify(fileopsrc)
-  },[fileopsrc])
+  let srclist=JSON.stringify(fileopsrc);
+  // useEffect(()=>{
+  //  srclist= JSON.stringify(fileopsrc)
+  // },[fileopsrc])
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("")
@@ -598,37 +598,9 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
-        const testing=()=>{
-          invoke('checkforconflicts', { 
-            srclist:JSON.stringify(["/tmp/new/a","/tmp/new/ab.pdf"]),
-            dst:"/tmp/new/b",
-        }).then((a)=>{
-          console.log(a)
-          let listofdupes:existingfileinfo[]=JSON.parse(a);
-          let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
-            ...item,
-            replace: false
-        }));
-          console.log(typeof listofdupes[0])
-          if(listofdupes.length===0)
-          {
-
-          }
-          else{
-            setdupes(newArray)
-            setsal(true);
-            return 
-          }
-        })
-        };
-        testing();
-        // invoke('defaulttoopen', { 
-        //           name: "0.6.6"
-        //       })
-        //         .then(result => {
-                  // reset("drives://")
-                  // setpath("drives://")
-                  // newtab("drives://");
+                  reset("drives://")
+                  setpath("drives://")
+                  newtab("drives://");
                   // populatesearchlist("drives://");
               // })
               //   .catch(console.error)
@@ -1271,7 +1243,11 @@ const [width, setWidth] = useState(200);
                     console.log(typeof listofdupes[0])
                     if(listofdupes.length===0)
                     {
-
+                      invoke('fileop', { 
+                        srclist:JSON.stringify(fileopsrc),
+                        dst:path,
+                        dlastore:JSON.stringify([])
+                    })
                     }
                     else{
                       setdest(path)
