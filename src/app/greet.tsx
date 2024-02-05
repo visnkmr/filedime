@@ -595,13 +595,37 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
+        const testing=()=>{
+          invoke('checkforconflicts', { 
+            srclist:JSON.stringify(["/tmp/new/a","/tmp/new/ab.pdf"]),
+            dst:"/tmp/new/b",
+        }).then((a)=>{
+          console.log(a)
+          let listofdupes:existingfileinfo[]=JSON.parse(a);
+          let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
+            ...item,
+            replace: false
+        }));
+          console.log(typeof listofdupes[0])
+          if(listofdupes.length===0)
+          {
+
+          }
+          else{
+            setdupes(newArray)
+            setsal(true);
+            return 
+          }
+        })
+        };
+        testing();
         // invoke('defaulttoopen', { 
         //           name: "0.6.6"
         //       })
         //         .then(result => {
-                  reset("drives://")
-                  setpath("drives://")
-                  newtab("drives://");
+                  // reset("drives://")
+                  // setpath("drives://")
+                  // newtab("drives://");
                   // populatesearchlist("drives://");
               // })
               //   .catch(console.error)
@@ -1186,6 +1210,7 @@ const [width, setWidth] = useState(200);
   
   const[dupes,setdupes]=useState([] as operationfileinfo[])
   const[showalertdialog,setsal]=useState(false)
+  const[dest,setdest]=useState("")
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       
@@ -1221,7 +1246,7 @@ const [width, setWidth] = useState(200);
               </button>
               {/* </div> */}
          
-              <Dupelist srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
+              <Dupelist dst={dest} srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
@@ -1246,6 +1271,7 @@ const [width, setWidth] = useState(200);
 
                     }
                     else{
+                      setdest(path)
                       setdupes(newArray)
                       setsal(true);
                       return 

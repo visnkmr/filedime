@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter, AlertDialogTrigger } from "../components/ui/alertdialog";
 import { operationfileinfo, setcolorpertheme } from "./greet";
 import { Checkbox } from "../components/ui/checkbox";
-export default function Dupelist({srclist,dupes,showad,setshowad}){
+import { invoke } from "@tauri-apps/api/tauri";
+export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
     let [dlastore,setdlastore]=useState([] as operationfileinfo[])
     useEffect(() => {
         setdlastore(dupes);
@@ -20,14 +21,38 @@ export default function Dupelist({srclist,dupes,showad,setshowad}){
               <table>
                 <tr>
                     <th className="p-4">Path</th>
-                    <th className="p-4">Existing file size</th>
-                    <th className="p-4">Source File Size</th>
+                    <th className="p-4">file size</th>
+                    <th className="p-4">Date</th>
                     <th className="p-4">Replace or not</th>
                 </tr>
                 <tr>
-                    <td className="p-4">{a.path}</td>
-                    <td className="p-4">{a.existingfilesize}</td>
-                    <td className="p-4">{a.srcfilesize}</td>
+                    <td className="p-4">
+                        <p>
+                            {a.sourcepath}
+                        </p>
+                        <br/>
+                        <p>
+                            {a.destpath}
+                        </p>
+                    </td>
+                    <td className="p-4">
+                    <p>
+                            {a.srcfilesize}
+                        </p>
+                        <br/>
+                        <p>
+                            {a.existingfilesize}
+                        </p>
+                    </td>
+                    <td className="p-4">
+                    <p>
+                            {a.srcfiledate}
+                        </p>
+                        <br/>
+                        <p>
+                            {a.existingdate}
+                        </p>
+                    </td>
                     <td className="p-4">
                     <Checkbox
                         checked={a.replace}
@@ -57,7 +82,14 @@ export default function Dupelist({srclist,dupes,showad,setshowad}){
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={()=>{
-
+                invoke('fileop', { 
+                    srclist:srclist,
+                    dst:dst,
+                    dlastore:JSON.stringify(dlastore)
+                }).then((a)=>{
+                
+                
+                })
             }}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
