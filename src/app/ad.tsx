@@ -19,8 +19,14 @@ export default function Dupelist({srclist,dupes,showad,setshowad}){
               return <>
               <table>
                 <tr>
-                    <td className="p-4">{a.existingfilesize}</td>
+                    <th className="p-4">Path</th>
+                    <th className="p-4">Existing file size</th>
+                    <th className="p-4">Source File Size</th>
+                    <th className="p-4">Replace or not</th>
+                </tr>
+                <tr>
                     <td className="p-4">{a.path}</td>
+                    <td className="p-4">{a.existingfilesize}</td>
                     <td className="p-4">{a.srcfilesize}</td>
                     <td className="p-4">
                     <Checkbox

@@ -6,7 +6,7 @@ mod dirsize;
 mod fileitem;
 mod filltrie;
 mod sendtofrontend;
-
+mod lastmodcalc;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
 // use filesize::PathExt;
@@ -36,9 +36,9 @@ mod bookmarks;
 mod openhtml;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 mod markdown;
-mod lastmodcalc;
 mod listfiles;
 // mod partialratio;
+use lastmodcalc::lastmodified;
 use crate::{
   markdown::*, 
   filechangewatcher::*,
@@ -110,7 +110,12 @@ impl PathExt for Path {
       false
   }
 }
-fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(bool,u64),String>{
+struct infodest{
+  path:String,
+  size:u64,
+  date:String
+}
+fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(bool,infodest),String>{
   println!("--------------{:?} to {}",path,dst);
   let mut src_filename="".to_string();
   if(!fromdir){
@@ -140,10 +145,18 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(b
   return if(dst_path.exists_case_insensitive()){
     let destfilesize=fs::metadata(dst_path.clone()).unwrap().len();
     println!("File {} exists, size: {} bytes", path, len);
-    Ok((true,destfilesize))
+    Ok((true,infodest{
+      path:destpath.clone(),
+      size:destfilesize,
+      date:lastmodified(&destpath).0
+    }))
   }else{
 
-    Ok((false,0))
+    Ok((false,infodest{
+      path:"".to_string(),
+      size:0,
+      date:"".to_string()
+    }))
   }
 }
 fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existingfileinfo>)->Result<(),String>{
@@ -173,8 +186,13 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
                           if(shadd.0){
                             shouldadd.push(
                               existingfileinfo { 
-                                path: (e.path().to_string_lossy().to_string()), existingfilesize: shadd.1, 
-                                srcfilesize: mdf.len() })
+                                sourcepath: (e.path().to_string_lossy().to_string()), 
+                                destpath:shadd.1.path,
+                                existingfilesize: sizeunit::size(shadd.1.size,true), 
+                                srcfilesize: sizeunit::size(mdf.len(),true),
+                                existingdate:shadd.1.date,
+                                srcfiledate:lastmodified(&e.path().to_string_lossy().to_string()).0
+                               })
                           }
                         },
                         Err(e) => {
@@ -214,9 +232,12 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
 // fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
   #[derive(Serialize)]
   struct existingfileinfo{
-    path:String,
-    existingfilesize:u64,
-    srcfilesize:u64
+    sourcepath:String,
+    destpath:String,
+    existingfilesize:String,
+    existingdate:String,
+    srcfilesize:String,
+    srcfiledate:String
   }
   #[tauri::command]
   async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
@@ -237,9 +258,14 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
                 Ok(shouldadd) => {
                   if(shouldadd.0){
                     thatexists.push(existingfileinfo{
-                      path,
-                    existingfilesize:shouldadd.1,
-                  srcfilesize:metadata.len()})
+                      sourcepath:path.clone(),
+                      destpath:shouldadd.1.path.clone(),
+                      existingfilesize:sizeunit::size((shouldadd.1.size),true),
+                      srcfilesize:sizeunit::size(metadata.len(),true),
+                      existingdate:lastmodified(&shouldadd.1.path).0,
+                      srcfiledate:lastmodified(&path).0,
+
+                })
                   }
                 },
                 Err(e) => {return Err(e)

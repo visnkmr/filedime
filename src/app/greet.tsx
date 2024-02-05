@@ -47,12 +47,22 @@ import {
   HoverCardTrigger,
 } from "../components/ui/hover-card"
 export interface  operationfileinfo{
-  path:String,
-  existingfilesize:number,
-  srcfilesize:number,
+  sourcepath:String,
+  destpath:String,
+  existingfilesize:String,
+  existingdate:String,
+  srcfilesize:String,
+  srcfiledate:String,
   replace:boolean
 }
-
+interface existingfileinfo{
+  sourcepath:String,
+  destpath:String,
+  existingfilesize:String,
+  existingdate:String,
+  srcfilesize:String,
+  srcfiledate:String
+}
 // import Link from "next/link"
 import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
@@ -1171,11 +1181,7 @@ const [width, setWidth] = useState(200);
  const handleMouseUp = () => {
     setIsDragging(false);
  };
-  interface  existingfileinfo{
-    path:String,
-    existingfilesize:number,
-    srcfilesize:number,
-  }
+  
   
   
   const[dupes,setdupes]=useState([] as operationfileinfo[])
