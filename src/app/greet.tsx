@@ -165,7 +165,10 @@ export default function Greet() {
   const [pathitype, setpit] = useState("drives://");
   const [searchstring,setss] = useState("");
   const [fileopsrc,setfos] = useState(objinit);
-  let srclist=JSON.stringify(fileopsrc);
+  let srclist;
+  useEffect(()=>{
+   srclist= JSON.stringify(fileopsrc)
+  },[fileopsrc])
   const [fileopdest,setfod] = useState("");
   const [parentsize,setps] = useState("");
   const [sampletext,sst]=useState("")

@@ -82,10 +82,16 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={()=>{
+                let newArray = dlastore.map(item => ({
+                    sourcePath: item.sourcepath,
+                    destPath: item.destpath,
+                    replace: item.replace
+                   }));
+                   
                 invoke('fileop', { 
                     srclist:srclist,
                     dst:dst,
-                    dlastore:JSON.stringify(dlastore)
+                    dlastore:JSON.stringify(newArray)
                 }).then((a)=>{
                 
                 
