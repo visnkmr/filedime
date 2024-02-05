@@ -10,7 +10,7 @@ mod lastmodcalc;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
 // use filesize::PathExt;
-use fs_extra::{dir, TransitProcess};
+use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
@@ -348,6 +348,12 @@ fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: b
 fn tryut(){
   // println!("{:?}",fileop(vec!["/run/media/roger/S/inst".to_string()], "/tmp/new".to_string(),false));
 }
+#[derive(Deserialize,Serialize,Debug)]
+struct dlads{
+  sourcepath:String,
+  destpath:String,
+  replace:bool,
+}
 #[tauri::command]
 async 
 fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String> {
@@ -382,46 +388,76 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
    //  let mut last_print = Instant::now();
     let mut options = dir::CopyOptions::new(); //Initialize default values for CopyOptions
    //  options.buffer_size = 1;
-    let mut last_print = Instant::now();
-    let mut last_copied=0;
-    let mut laststate= dir::TransitState::Normal;
-    let mut lastfolder= "".to_string();
-    let mut lastfile= "".to_string();
-    let mut lastfilesize=0;
+    // let mut last_print = Instant::now();
+    // let mut last_copied=0;
+    // let mut laststate= dir::TransitState::Normal;
+    // let mut lastfolder= "".to_string();
+    // let mut lastfile= "".to_string();
+    // let mut lastfilesize=0;
     let handle = |process_info: TransitProcess| {
      // println!("{}", process_info.total_bytes);
-     if (
-       last_print.elapsed() >= Duration::from_millis(1000) ||
-       process_info.copied_bytes==process_info.total_bytes as u64 ||
-       // process_info.state==dir::TransitState::Exists ||
-       process_info.state!=laststate ||
-       process_info.file_name != lastfile||
-       process_info.dir_name != lastfolder ||
-       process_info.file_total_bytes!=lastfilesize )
-       { 
-       //    sendprogress(&windowname, ah, (json!({
-       //     "progress": process_info.copied_bytes,
-       //     "size":process_info.total_bytes,
-       //  })).to_string());
-       println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
-       println!("{}",lastfile);
-       println!("{}",lastfolder);
-       last_copied=process_info.copied_bytes;
-       last_print = Instant::now(); 
-       lastfile=process_info.file_name;
-       lastfolder=process_info.dir_name;
-       lastfilesize=process_info.file_total_bytes;
+    //  if (
+    //    last_print.elapsed() >= Duration::from_millis(1000) ||
+    //    process_info.copied_bytes==process_info.total_bytes as u64 ||
+    //    // process_info.state==dir::TransitState::Exists ||
+    //    process_info.state!=laststate ||
+    //    process_info.file_name != lastfile||
+    //    process_info.dir_name != lastfolder ||
+    //    process_info.file_total_bytes!=lastfilesize )
+    //    { 
+    //    //    sendprogress(&windowname, ah, (json!({
+    //    //     "progress": process_info.copied_bytes,
+    //    //     "size":process_info.total_bytes,
+    //    //  })).to_string());
+    //    println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
+    //    println!("{}",lastfile);
+    //    println!("{}",lastfolder);
+    //    last_copied=process_info.copied_bytes;
+    //    last_print = Instant::now(); 
+    //    lastfile=process_info.file_name;
+    //    lastfolder=process_info.dir_name;
+    //    lastfilesize=process_info.file_total_bytes;
  
-     }
-     if(process_info.state!=laststate){
-       println!("{}",match(process_info.state){
-         dir::TransitState::Normal => "Status Normal",
-         dir::TransitState::Exists => "Status Exists",
-         dir::TransitState::NoAccess => "Status FS perm issue",
-     });
-     laststate=process_info.state
-     }
-     fs_extra::dir::TransitProcessResult::Skip
+    //  }
+    //  if(process_info.state!=laststate){
+    //    println!("{}",match(process_info.state){
+    //      dir::TransitState::Normal => "Status Normal",
+    //      dir::TransitState::Exists => "Status Exists",
+    //      dir::TransitState::NoAccess => "Status FS perm issue",
+    //  });
+    //  laststate=process_info.state
+    //  }
+    match serde_json::from_str(&dlastore){
+    Ok(a) => {
+      let dlas:Vec<dlads>=a;
+      if(process_info.state==TransitState::Exists){
+
+
+        let exists = dlas.iter().find(|dlad| dlad.destpath == process_info.file_name).map(|dlad| dlad.replace);
+        match exists{
+            Some(a) => {
+              if(a){
+                return fs_extra::dir::TransitProcessResult::Overwrite
+              }
+              else{
+                return fs_extra::dir::TransitProcessResult::Skip
+              }
+            },
+            None => {
+              return fs_extra::dir::TransitProcessResult::ContinueOrAbort
+            },
+        }
+      }
+      else {
+        return fs_extra::dir::TransitProcessResult::ContinueOrAbort
+          
+      }
+    },
+    Err(_) => {
+      fs_extra::dir::TransitProcessResult::Abort
+    },
+}
+     
   };
  
     
@@ -479,7 +515,6 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
     },
 }
 
-  Ok(true)
 }
 
 #[tauri::command]
