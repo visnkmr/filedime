@@ -95,17 +95,17 @@ impl PathExt for Path {
           return true;
       }
 
-      if let Some(parent) = self.parent() {
-          if let Ok(entries) = fs::read_dir(parent) {
-              for entry in entries {
-                  if let Ok(entry) = entry {
-                      if entry.file_name().to_string_lossy().to_lowercase() == self.file_name().unwrap().to_string_lossy().to_lowercase() {
-                          return true;
-                      }
-                  }
-              }
-          }
-      }
+      // if let Some(parent) = self.parent() {
+      //     if let Ok(entries) = fs::read_dir(parent) {
+      //         for entry in entries {
+      //             if let Ok(entry) = entry {
+      //                 if entry.file_name().to_string_lossy().to_lowercase() == self.file_name().unwrap().to_string_lossy().to_lowercase() {
+      //                     return true;
+      //                 }
+      //             }
+      //         }
+      //     }
+      // }
 
       false
   }
