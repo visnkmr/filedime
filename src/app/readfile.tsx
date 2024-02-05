@@ -23,10 +23,12 @@ import { EyeIcon } from "lucide-react";
 import { converttstodt, scrollorauto, setcolorpertheme } from "./greet";
 import { SheetHeader, SheetTitle } from "../components/ui/sheet";
 import { VideoComponent } from "./videoplaycomp";
+import { useTheme } from "next-themes";
 interface rfcprops {
   message:FileItem
 }
 export default function ReadFileComp({message}:rfcprops){
+  const { theme, setTheme } = useTheme()
     async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
     console.log("windowname top---------->"+appWindow.label)
@@ -70,7 +72,7 @@ export default function ReadFileComp({message}:rfcprops){
 
                 invoke('highlightfile', { 
                   path: message.path,
-                  theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
+                  theme:theme
               })
                 .then(result => {
                   // console.log("whats in file:"+result)
@@ -109,7 +111,7 @@ export default function ReadFileComp({message}:rfcprops){
 
             invoke('highlightfile', { 
                   path: message.path,
-                  theme:document.getElementById("theme-toggle-dark-icon")!.style.display!=="none"?"dark":"light"
+                  theme:theme
               })
                 .then(result => {
                   setfailed(false)

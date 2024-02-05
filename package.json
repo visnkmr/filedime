@@ -4,7 +4,7 @@
   "private": true,
   "engines": {
     "node": "20.x"
- },
+  },
   "scripts": {
     "start": "next start",
     "build": "next build",
@@ -68,6 +68,7 @@
   "sideEffects": false,
   "dependencies": {
     "@next/bundle-analyzer": "^14.0.4",
+    "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",

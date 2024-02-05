@@ -9,6 +9,7 @@ import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
+import Dupelist from "./ad"
 // import parse from 'html-react-parser';
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -89,6 +90,7 @@ import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Input } from "../components/ui/input";
 import { escape } from "lodash";
 import { useTheme } from "next-themes";
+
 
 // const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
 // 	return columnHelper.accessor(attribute.id, {
@@ -1167,8 +1169,11 @@ const [width, setWidth] = useState(200);
     existingfilesize:number,
     srcfilesize:number
   }
+  const[dupes,setdupes]=useState([] as existingfileinfo[])
+  const[showalertdialog,setsal]=useState(false)
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
+      
       <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
         <div className="flex h-full flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
@@ -1201,7 +1206,7 @@ const [width, setWidth] = useState(200);
               </button>
               {/* </div> */}
          
-
+              <Dupelist dupes={dupes}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
@@ -1217,7 +1222,15 @@ const [width, setWidth] = useState(200);
                     console.log(a)
                     let listofdupes:existingfileinfo[]=JSON.parse(a);
                     console.log(typeof listofdupes[0])
+                    if(listofdupes.length===0)
+                    {
 
+                    }
+                    else{
+                      setdupes(listofdupes)
+                      setsal(true);
+                      return 
+                    }
                   })
                   // invoke('fileop_with_progress', { 
                   //     windowname:appWindow?.label,
