@@ -1,6 +1,6 @@
 [package]
 name = "filedime"
-version = "0.8.2"
+version = "0.8.5"
 description = "rust based file explorer."
 authors = ["visnk"]
 license = ""
