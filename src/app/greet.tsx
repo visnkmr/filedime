@@ -1441,9 +1441,19 @@ const [width, setWidth] = useState(200);
                   {/* {activetabid === tab.id ? sampletext: */}
                   {tab.tabname}
                   {/* } */}
-                  <ScanSearchIcon className="h-4 w-4" onClick={()=>{
-                    populatesearchlist(tab.path)
-                  }}/>
+                  <HoverCard>
+                    <HoverCardTrigger>
+                      <Button onClick={()=>{
+                        populatesearchlist(tab.path)
+                      }}>
+
+                      <ScanSearchIcon className="h-4 w-4"/>
+                      </Button>
+                   </HoverCardTrigger>
+                    <HoverCardContent  className={`${setcolorpertheme}`}>
+                    Load folder contents to search
+                    </HoverCardContent>
+                  </HoverCard>
                   <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
                     e.stopPropagation();
                     closetab(tab.id);
@@ -2068,7 +2078,14 @@ const [width, setWidth] = useState(200);
 </DropdownMenu>
 {/* </div> */}
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
-                <Button className={`${isgrid?"":"hidden"}`} onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
+                <HoverCard>
+                <HoverCardTrigger>
+                <Button variant={"outline"} className={`${isgrid?"":"hidden"}`} onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
+                </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               Reload
+              </HoverCardContent>
+            </HoverCard>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
                 
                 <div className="ms-2 flex whitespace-nowrap overflow-hidden">
@@ -2242,8 +2259,14 @@ const [width, setWidth] = useState(200);
                                 ?(
                             <Sheet modal={false}>
                             <SheetTrigger className="h-full px-3 p-4 focus:bg-gray-200 focus:dark:bg-gray-700">
-                              <EyeIcon className="h-4 w-4 "/>
-                              
+                              <HoverCard>
+                                <HoverCardTrigger>
+                                  <EyeIcon className="h-4 w-4 "/>
+                                  </HoverCardTrigger>
+                                <HoverCardContent  className={`${setcolorpertheme}`}>
+                                Preview
+                                </HoverCardContent>
+                              </HoverCard>
                               </SheetTrigger>
                               <SheetContent 
                                 // style={{ width: `${width}px` }}
