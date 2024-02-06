@@ -1250,7 +1250,7 @@ const [width, setWidth] = useState(200);
           {/* </div> */}
             
           
-          <div className="overflow-auto">
+          <div className="overflow-y-auto overflow-x-hidden">
             
           
               {/* </div> */}
