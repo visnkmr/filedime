@@ -1192,14 +1192,27 @@ const [width, setWidth] = useState(200);
   const[dupes,setdupes]=useState([] as operationfileinfo[])
   const[showalertdialog,setsal]=useState(false)
   const[dest,setdest]=useState("")
-  return (
-    <div className="grid grid-cols-[300px_1fr] h-screen">
-      
-      <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40 overflow-auto">
-        <div className="flex h-full flex-col gap-2">
-          <div>
+  const [size, setSize] = useState({
+    a: 10,
+    b: 90,
+  });
 
-          <div className="flex h-[60px] items-center border-b px-6">
+  useEffect(() => {
+    // Can't change size.
+    setTimeout(() => setSize({ a: 50, b: 50 }), 1000);
+  }, []);
+
+  return (
+    // <div className="overflow-hidden">
+      <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
+        <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
+
+        <div className="flex h-full flex-col gap-2">
+
+          <div className="flex p-3  border-b">
+            
+            <div className="flex flex-row p-2 items-center">
+
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
               <span className="">Filedime</span>
@@ -1209,28 +1222,37 @@ const [width, setWidth] = useState(200);
               console.log(JSON.stringify(tabHistories))
               console.log(JSON.stringify(tabForward))
             }}/>
-            
-            
+            </div>
+            {/* <div className="grid items-start px-4 text-sm font-medium"> */}
+              
           </div>
-          </div>
-          {/* <div className=" w-full flex"> */}
-          <div className="grid items-start px-4 text-sm font-medium">
-              <button
-                className={`text-sm font-medium flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+          <div className="px-4 p-2">
+
+            <button
+                className={`text-sm font-medium flex w-full items-center  gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
                   { 
                     setTheme(theme === 'light' ? 'dark' : 'light')
                   }
                   }
               >
+                <div>
+
                 {theme === 'light' ? (<MoonIcon className="h-4 w-4" />) : (<SunIcon className="h-4 w-4" />)}
-                <p>
+                </div>
+                <p className="overflow-hidden line-clamp-1">
                   Switch to {theme === 'light' ? ("Dark Mode") : ("Light Mode")}
                   </p>
                 
               </button>
-
           </div>
+
+          {/* </div> */}
+            
+          
+          <div className="overflow-auto">
+            
+          
               {/* </div> */}
          
               <Dupelist dst={dest} srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
@@ -1374,7 +1396,7 @@ const [width, setWidth] = useState(200);
 
               {bookmarks && bookmarks.length>0 ?(<>
           <span className='h-8'/>
-              <h1 className=''>Bookmarks</h1>
+              <h1 className='p-2'>Bookmarks</h1>
               {
                 
                bookmarks.map((mark, index) => (
@@ -1436,7 +1458,7 @@ const [width, setWidth] = useState(200);
               
               {tablist?(<>
               <span className='h-8'/>
-              <h1 className='ps-2'>Tabs</h1>
+              <h1 className='p-2'>Tabs</h1>
               {
                 
                tablist.map((tab, index) => (
@@ -1484,14 +1506,14 @@ const [width, setWidth] = useState(200);
               </>):(null)}
               {driveslist && driveslist.length>0 ?(<>
               <span className='h-8'/>
-              <h1 className='ps-2'>Drives</h1>
+              <h1 className='p-2'>Drives</h1>
               {
                 
                driveslist.map((message, index) => (
                 <ContextMenu>
                   <ContextMenuTrigger>
                 <button key={index}
-                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
                   onClick={()=>
                     { 
                       reset(message.mount_point)
@@ -1526,9 +1548,12 @@ const [width, setWidth] = useState(200);
               }
               </>):(null)}
           </div>
+          </div>
+          {/* <div className=" w-full flex"> */}
         </div>
-      </aside>
-      <main className="flex flex-col pt-3 ps-3 overflow-hidden">
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={size.b} className="flex flex-col pt-3 ps-3">
         <div className="mb-4">
 
 <div 
@@ -2321,51 +2346,11 @@ const [width, setWidth] = useState(200);
           {mdc}
         </span> */}
         </div>
-        {/* <h2 className="font-semibold text-lg md:text-xl mt-6">Recent Files</h2>
-        <Table className="mt-4">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Date Modified</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell>report.txt</TableCell>
-              <TableCell>15 KB</TableCell>
-              <TableCell>Dec 1, 2023</TableCell>
-              <TableCell>
-                <Button size="icon" variant="ghost">
-                  <PencilIcon className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-                <Button size="icon" variant="ghost">
-                  <TrashIcon className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>image.png</TableCell>
-              <TableCell>500 KB</TableCell>
-              <TableCell>Nov 30, 2023</TableCell>
-              <TableCell>
-                <Button size="icon" variant="ghost">
-                  <PencilIcon className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-                <Button size="icon" variant="ghost">
-                  <TrashIcon className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table> */}
-      </main>
-    </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+      
+     
+    // </div>
   )
 }
 
