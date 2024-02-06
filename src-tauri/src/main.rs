@@ -14,7 +14,7 @@ use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
-use sendtofrontend::{sendbuttonnames, lfat, sendprogress};
+use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
 use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
@@ -239,6 +239,12 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
     srcfilesize:String,
     srcfiledate:String
   }
+  #[tauri::command]
+  async fn senddriveslist(windowname:String,window:Window){  
+    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+
+  }
+    
   #[tauri::command]
   async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
   let mut thatexists=vec![];
@@ -1058,6 +1064,7 @@ fn main() {
         getuniquewindowlabel,
         list_files,
         load_tab,
+        senddriveslist,
         loadfromhtml,
         loadmarkdown,
         loadsearchlist,

@@ -244,7 +244,7 @@ export default function Greet() {
     }
     setsftype("all")
       setfileslist([])
-      setdriveslist([])
+      // setdriveslist([])
       setfc(0)
       setss("")
       console.log("reset done")
@@ -537,8 +537,8 @@ export default function Greet() {
     listen('list-drives', (event) => {
       // sst("")
       // spi("drives://")
-      setcbl([])
-      setfscl([])
+      // setcbl([])
+      // setfscl([])
         console.log("loading drives---->"+event.payload);
         setdriveslist(JSON.parse(event.payload));
     })
@@ -598,6 +598,12 @@ export default function Greet() {
     if(!appWindow)
       return
       if(!startstopfilewatch){
+        invoke('senddriveslist', { 
+          windowname:appWindow?.label,
+          
+      }).then(
+
+      )
                   reset("drives://")
                   setpath("drives://")
                   newtab("drives://");
@@ -1189,8 +1195,10 @@ const [width, setWidth] = useState(200);
   return (
     <div className="grid grid-cols-[300px_1fr] h-screen">
       
-      <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40">
+      <aside className="border-r bg-gray-100/40 dark:bg-gray-800/40 overflow-auto">
         <div className="flex h-full flex-col gap-2">
+          <div>
+
           <div className="flex h-[60px] items-center border-b px-6">
             <button className="flex items-center gap-2 font-semibold">
               <FolderIcon className="h-6 w-6" />
@@ -1204,7 +1212,9 @@ const [width, setWidth] = useState(200);
             
             
           </div>
+          </div>
           {/* <div className=" w-full flex"> */}
+          <div className="grid items-start px-4 text-sm font-medium">
               <button
                 className={`text-sm font-medium flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
@@ -1219,6 +1229,8 @@ const [width, setWidth] = useState(200);
                   </p>
                 
               </button>
+
+          </div>
               {/* </div> */}
          
               <Dupelist dst={dest} srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
@@ -1299,7 +1311,7 @@ const [width, setWidth] = useState(200);
             </div>
               )
               :(null)}
-          <div className="flex-1 overflow-auto py-2">
+          <div className="">
             <nav className="grid items-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
@@ -1355,8 +1367,13 @@ const [width, setWidth] = useState(200);
                 New Tab
               </button>
               
+              
+            </nav>
+          </div>
+          <div className="grid items-start px-4 text-sm font-medium">
+
               {bookmarks && bookmarks.length>0 ?(<>
-              <span className='h-16'/>
+          <span className='h-8'/>
               <h1 className=''>Bookmarks</h1>
               {
                 
@@ -1416,9 +1433,10 @@ const [width, setWidth] = useState(200);
 
               }
               </>):(null)}
-              <span className='h-16'/>
+              
               {tablist?(<>
-              <h1 className=''>Tabs</h1>
+              <span className='h-8'/>
+              <h1 className='ps-2'>Tabs</h1>
               {
                 
                tablist.map((tab, index) => (
@@ -1464,8 +1482,49 @@ const [width, setWidth] = useState(200);
 
               }
               </>):(null)}
-              
-            </nav>
+              {driveslist && driveslist.length>0 ?(<>
+              <span className='h-8'/>
+              <h1 className='ps-2'>Drives</h1>
+              {
+                
+               driveslist.map((message, index) => (
+                <ContextMenu>
+                  <ContextMenuTrigger>
+                <button key={index}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+                  onClick={()=>
+                    { 
+                      reset(message.mount_point)
+                      updatetabs(message.mount_point)
+                      // spi(message.mount_point)
+                      // setpath()
+                      // sst(message.mount_point)
+                      // console.log(message);
+                      invoke('list_files', { 
+                        windowname:appWindow?.label,
+                        oid: activetabid.toString(),
+                        path: message.mount_point,
+                        ff: "" 
+                    }).catch((e)=>console.error(e))
+                    }
+                    }
+                >
+                   {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+                   <HardDriveIcon className="h-6 w-6" />
+                    {message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}
+                
+                </button>
+                    
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                  <ContextMenuItem>Open in new tab</ContextMenuItem>
+                  <ContextMenuItem>Open in new window</ContextMenuItem>
+                </ContextMenuContent>
+                </ContextMenu>
+                ))
+
+              }
+              </>):(null)}
           </div>
         </div>
       </aside>
@@ -1955,50 +2014,6 @@ const [width, setWidth] = useState(200);
         
           <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
         </span>
-        <div className={`${driveslist.length>0?(!isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-${scrollorauto}`:`space-y-4 overflow-${scrollorauto}`):"hidden"}`}>
-          {/* <Other/> */}
-        {driveslist.filter(function (el) {
-                      return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
-                    }).map((message, index) => (
-                      <div className={`${!isgrid?"":"flex  "}`}>
-          <ContextMenu key={index}>
-          <ContextMenuTrigger>
-          
-            <Card key={index} onClick={
-                ()=>
-                { 
-                  reset(message.mount_point)
-                  updatetabs(message.mount_point)
-                  // spi(message.mount_point)
-                  // setpath()
-                  // sst(message.mount_point)
-                  // console.log(message);
-                  invoke('list_files', { 
-                    windowname:appWindow?.label,
-                    oid: activetabid.toString(),
-                    path: message.mount_point,
-                    ff: "" 
-                }).catch((e)=>console.error(e))
-              }
-            }>
-            <CardContent className="flex items-center space-x-4">
-              <HardDriveIcon className="h-6 w-6" />
-              <span className="font-medium text-lg ">{message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}</span>
-            </CardContent>
-          </Card>
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <p className='pl-4'>{message.mount_point}</p>
-            <ContextMenuItem>Open in new tab</ContextMenuItem>
-            <ContextMenuItem>Open in new window</ContextMenuItem>
-            <ContextMenuItem>Add bookmark</ContextMenuItem>
-            <ContextMenuItem>Copy to clipboard</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-                         </div>
-        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
-        ))}
-        </div>
         
         <div className={`${isgrid?"flex flex-row":"hidden"}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
@@ -2149,7 +2164,9 @@ const [width, setWidth] = useState(200);
                               }>
                                 <div className="w-full">
                                   <div className={`w-full ${showthumbnail?"":"hidden"}`}>
-
+                              {![...IMAGE_TYPES,...VIDEO_TYPES].some(type => message.name.includes(type))?<div 
+                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
+                            ></div>:""}
                                {IMAGE_TYPES.some(type => message.name.includes(type))?(
                               <div 
                               className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
@@ -2158,9 +2175,7 @@ const [width, setWidth] = useState(200);
                             className="w-full object-fill" 
                             src={`${convertFileSrc(message.path)}`}/></div>
                             
-                            ):(<div 
-                              className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
-                            ></div>)} 
+                            ):""} 
                             {VIDEO_TYPES.some(type => message.name.includes(type))?(
                             <VideoComponent path={message.path} hoverplay={true}/>):""}
                                   </div>

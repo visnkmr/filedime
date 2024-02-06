@@ -21,7 +21,7 @@ use crate::{markdown::loadmarkdown,
   // loadjs::loadjs
 };
 #[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
-struct DriveItem{
+pub struct DriveItem{
   pub name: String,
   pub mount_point: String,
   pub total: String,
@@ -30,7 +30,7 @@ struct DriveItem{
   pub disk_type: String,
   pub file_system: String,
 }
-fn populatedrivelist()->Vec<DriveItem>{
+pub fn populatedrivelist()->Vec<DriveItem>{
   get_drives().unwrap().array_of_drives.iter().map(|ed|{
     
     return DriveItem { 
@@ -49,7 +49,6 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   println!("lfiles");
 
   if(path=="drives://"){
-    // driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
     // list_files(windowname, oid, path, ff, window, state);
     match(dirs::home_dir()){
     Some(spath) => {
