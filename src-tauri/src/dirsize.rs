@@ -19,6 +19,8 @@ pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(path)
     .threads(threads)
+    .follow_links(false)
+    .git_ignore(true)
     .build()
     // .min_depth(1) // skip the root directory
     //   .max_depth(1)
@@ -37,9 +39,10 @@ pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
             // eprintln!("checking size");
             
             let path = entry.path();
-            path.is_file() &&
-             !path.is_symlink() &&
-             !path.to_string_lossy().to_string().contains("/.git/")
+            path.is_file() 
+            // &&
+            //  !path.is_symlink() &&
+            //  !path.to_string_lossy().to_string().contains("/.git/")
         })
         // Filter out paths that start with "./.git"
         // .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))

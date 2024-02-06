@@ -1,6 +1,6 @@
 #![warn(clippy::disallowed_types)]
 use filesize::PathExt;
-use prefstore::{getallcustomwithin, savecustom};
+use prefstore::{clearcustom, getallcustomwithin, getcustom, savecustom};
 use std::collections::{HashSet, HashMap};
 use std::fs;
 use std::mem::{self};
@@ -50,6 +50,7 @@ pub struct cachestore{
 pub struct AppStateStore {
     pub cstore:RwLock<FxHashMap<String,cachestore>>,
     pub nosize:RwLock<bool>,
+    pub excludehidden:RwLock<bool>,
     pub filesetcollection:RwLock<HashMap<String,i32>>,
     pub showfolderchildcount:RwLock<bool>,
     pub loadsearchlist:RwLock<bool>,
@@ -113,6 +114,12 @@ impl AppStateStore {
             whichthread:Arc::new(AtomicI8::new(0)),
             searchcounter:Arc::new(AtomicI16::new(0)),
             nosize:RwLock::new(true),
+            excludehidden:RwLock::new({
+                let truechecker="true".to_string();
+                match(getcustom("filedime", "storevals/excludehidden.set", "false")){
+                truechecker=>true,
+                _=>false
+            }}),
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),
             loadsearchlist:RwLock::new(false),
@@ -186,6 +193,7 @@ impl AppStateStore {
         );
     }
     pub fn removetab(&self,id:String,windowname:String){
+        clearcustom("filedime", format!("tabs/{}.tabinfo",id));
         // println!("{}---{}---{}",id,path,ff);
         
         let mut tabs=self.tabs.write().unwrap();
@@ -440,6 +448,21 @@ impl AppStateStore {
     let mut setsize=self.nosize.write().unwrap();
     *setsize=shouldsize;
     drop(setsize)
+    // {
+    //     println!("{:?}",*self.nosize.read().unwrap())
+    // }
+  }
+  pub fn togglehidden(&self){
+    let eh;
+    {
+
+        eh=!*self.excludehidden.read().unwrap();
+    }
+    savecustom("filedime", "storevals/excludehidden.set", eh);
+
+    let mut seteh=self.excludehidden.write().unwrap();
+    *seteh=eh;
+    drop(seteh)
     // {
     //     println!("{:?}",*self.nosize.read().unwrap())
     // }

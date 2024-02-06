@@ -49,19 +49,19 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
         .git_exclude(true)
         .ignore(false) // Disable the default ignore rules
         .git_ignore(true).build()
-                  .into_iter()
-                  .filter_map(|entry| entry.ok())
-                  .par_bridge()
-                  .filter(|entry| {
-                  //   window.emit("reloadlist",json!({
-                  //     "message": "immediatechildcount",
-                  //     "status": "running",
-                  // }));
-                    // entry.file_type().is_file()
-                    true
-                  })
-                  .count();
-                foldercon=count as i32;
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+        .par_bridge()
+        .filter(|entry| {
+        //   window.emit("reloadlist",json!({
+        //     "message": "immediatechildcount",
+        //     "status": "running",
+        // }));
+          // entry.file_type().is_file()
+          true
+        })
+        .count();
+      foldercon=count as i32;
       }
     }
 

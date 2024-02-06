@@ -47,7 +47,7 @@ pub fn populatedrivelist()->Vec<DriveItem>{
 #[tauri::command]
 pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   println!("lfiles");
-
+  let ignorehiddenfiles=*state.excludehidden.read().unwrap();
   if(path=="drives://"){
     // list_files(windowname, oid, path, ff, window, state);
     match(dirs::home_dir()){
@@ -159,11 +159,11 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
         
         .max_depth(Some(1))
         .threads(threads)
-        .hidden(true) // Include hidden files and directories
+        .hidden(ignorehiddenfiles) // Include hidden files and directories
         .follow_links(false)
         .parents(true)
         .git_exclude(true)
-        .ignore(false) // Disable the default ignore rules
+        .ignore(true) // Disable the default ignore rules
         .git_ignore(true)
         .clone();
       let walker2=walker.clone() // Respect the .gitignore file

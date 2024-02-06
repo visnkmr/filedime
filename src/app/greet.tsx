@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
@@ -249,6 +249,7 @@ export default function Greet() {
       setss("")
       console.log("reset done")
   }
+  
    function activateTab(tab: tabinfo){
     console.log("activating"+JSON.stringify(tab))
     // console.log("activate tab "+tabid)
@@ -1076,6 +1077,11 @@ function updatetabs(tabpath){
   })
 }
 function closetab(closeid){
+  invoke("closetab",{
+    windowname:appWindow?.label,
+    id: closeid.toString(),
+  }
+  )
   if(tablist && tablist.length>1){
       
     let tempstoreoldtablist=tablist;
@@ -1156,13 +1162,15 @@ function closetab(closeid){
                       })
                       });
   }
-  function reloadsize(){
+  function reloadsize(togglewhat="size"){
     reset(path)
     console.log("loading size js---->1");
     if(appWindow){
-      const thensobj={windowname: appWindow?.label,
+      const thensobj={
+      windowname: appWindow?.label,
       id: activetabid.toString(),
       path: path,
+      togglewhat:togglewhat
     };
     console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
     invoke(
@@ -1499,6 +1507,7 @@ const [width, setWidth] = useState(200);
                   </HoverCard>
                   <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
                     e.stopPropagation();
+                    
                     closetab(tab.id);
                     activateTab(tablist[tablist.length-1])
                   }}/>
@@ -1623,6 +1632,25 @@ const [width, setWidth] = useState(200);
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Show size of folder
+              </HoverCardContent>
+            </HoverCard>
+  </div>
+  <div>
+
+
+            <HoverCard>
+              <HoverCardTrigger>
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+                ()=>{
+                  reloadsize("excludehidden")
+                }
+            }>
+            <EyeOffIcon className="h-4 w-4"/>
+              
+          </ Button>
+          </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               Exclude hidden files
               </HoverCardContent>
             </HoverCard>
   </div>

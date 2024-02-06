@@ -71,6 +71,7 @@ use crate::{markdown::loadmarkdown,
 #[tauri::command]
 pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),String>{
   let orig = *state.process_count.lock().unwrap();
+  let ignorehiddenfiles=false;
   if(path=="drives://"){
     // driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
     // list_files(windowname, oid, path, ff, window, state);
@@ -98,7 +99,7 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
 
       WalkBuilder::new(&path)
       .threads(threads)
-      .hidden(true) // Include hidden files and directories
+      .hidden(ignorehiddenfiles) // Include hidden files and directories
       .follow_links(false)
       .parents(true)
       // .git_exclude(true)

@@ -706,12 +706,23 @@ fn get_timestamp() -> String {
     timestamp
 }
 #[tauri::command]
-async fn nosize(windowname:String,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  println!("loading size rust---->1");
+async fn nosize(windowname:String,id:String,path:String,togglewhat:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  println!("loading toggle rust---->1");
 
-  state.togglenosize();
+  match(togglewhat.as_str()){
+    "size"=>{
+      state.togglenosize()
+    },
+    "excludehidden"=>{
+      println!("togglehidden");
+      state.togglehidden()},
+    _=>{
+
+      }
+
+  }
   list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
-  println!("loading size rust---->2");
+  println!("loading toggle rust---->2");
 
   Ok(())
 }
