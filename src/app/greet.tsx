@@ -709,7 +709,10 @@ const columns: ColumnDef<FileItem>[] = [
                   }
                 }>
                 {/* <CardContent > */}
+                <div>
+
                   {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
+                </div>
                   {/* <span className="font-medium text-lg"> */}
                     {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
                     {/* </span> */}
@@ -1458,7 +1461,7 @@ const [width, setWidth] = useState(200);
               
               {tablist?(<>
               <span className='h-8'/>
-              <h1 className='p-2'>Tabs</h1>
+              <h1 className='p-2'>Tabs ({tablist.length})</h1>
               {
                 
                tablist.map((tab, index) => (
@@ -1506,7 +1509,7 @@ const [width, setWidth] = useState(200);
               </>):(null)}
               {driveslist && driveslist.length>0 ?(<>
               <span className='h-8'/>
-              <h1 className='p-2'>Drives</h1>
+              <h1 className='p-2'>Drives ({driveslist.length})</h1>
               {
                 
                driveslist.map((message, index) => (
@@ -1557,77 +1560,71 @@ const [width, setWidth] = useState(200);
         <div className="mb-4">
 
 <div 
-  className={`flex flex-row overflow-${scrollorauto} p-1`}
+  className={`flex flex-row overflow-${scrollorauto} p-1 gap-2`}
   // className={`flex flex-row hover:${checkifwithinbounds()?"":"overflow-scroll"} p-1`}
 >
   <div>
 
-          <Button size={"sm"} variant={"ghost"} className="">
+          {/* <Button size={"sm"} variant={"ghost"} className=""> */}
 
         <HoverCard>
               <HoverCardTrigger>
-            <Card className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+            <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
                 ()=>{
                   setig((old)=>{return !old})
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
+            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             {isgrid?<LayoutGrid className="h-4 w-4"/>:<LayoutList className="h-4 w-4"/>}
               
-            </CardDescription>
-          </Card>
+            {/* </CardDescription> */}
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent className={`${setcolorpertheme}`} >
                List / Grid
               </HoverCardContent>
             </HoverCard>
-          </Button>
+          {/* </Button> */}
   </div>
   <div>
 
-          <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
                 ()=>{
                   reloadlist()
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
+            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             <RefreshCcwIcon className="h-4 w-4"/>
               
-            </CardDescription>
-          </Card>
+            {/* </CardDescription> */}
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Reload
               </HoverCardContent>
             </HoverCard>
-          </Button>
   </div>
   <div>
 
-          <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   reloadsize()
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
             <RulerIcon className="h-4 w-4"/>
               
-            </CardDescription>
-          </Card>
+          </ Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Show size of folder
               </HoverCardContent>
             </HoverCard>
-          </Button>
   </div>
             <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
 
@@ -1693,77 +1690,66 @@ const [width, setWidth] = useState(200);
             </HoverCard> */}
             <div>
 
-            <Button size={"sm"} variant={"ghost"} className=" ">
 
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   populateimmediatechildcount()
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
             <FolderTreeIcon className="h-4 w-4"/>
               
-            </CardDescription>
-          </Card>
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent   className={`${setcolorpertheme}`}>
                Count immediate children of folders
               </HoverCardContent>
             </HoverCard>
-            </Button>
             </div>
             <div>
               
-            <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   recentfiles()
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
             <FolderClockIcon className="h-4 w-4"/>
               
-            </CardDescription>
-          </Card>
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Recent Files
               </HoverCardContent>
             </HoverCard>
-            </Button>
             </div>
             <div>
 
-            <Button size={"sm"} variant={"ghost"} className="">
 
             <HoverCard>
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   loadsearchdb(path)
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
             <ScanSearchIcon className="h-4 w-4"/>
               
-            </CardDescription>
-          </Card>
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                load Search from this directory
               </HoverCardContent>
             </HoverCard>
-            </Button>
             </div>
         {custombuttonlist.map((bn, index) => (
           <div key={index} className="">
 
-          <Button variant={"ghost"} className="overflow-hidden"  onClick={
+
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm  p-1'   onClick={
             ()=>{
               invoke(
                 "otb",
@@ -1775,14 +1761,9 @@ const [width, setWidth] = useState(200);
                   console.log(`error: ${e}`)
                 });
             }
-        }>
-
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm  p-1' >
-            <CardDescription className="flex items-center p-1">
+        } >
               <CodeIcon className="h-4 w-4" />
               <span className="font-medium text-sm ps-2">{bn}</span>
-            </CardDescription>
-          </Card>
           </Button>
           </div>
             ))}
@@ -2329,11 +2310,21 @@ const [width, setWidth] = useState(200);
                                   {/* <SheetDescription></SheetDescription> */}
                                 
                               </SheetContent>
-                            </Sheet>):(<div className="">
-                              <Button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+                            </Sheet>):(
+                            <div className="">
+                              <HoverCard>
+
+                              <HoverCardTrigger>
+                              <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
                     populatesearchlist(message.path)
-                  }}><ScanSearchIcon className="h-4 w-4"/></Button>
-                            </div>)}
+                  }}><ScanSearchIcon className="h-4 w-4"/></button>
+                  </HoverCardTrigger>
+                    <HoverCardContent  className={`${setcolorpertheme}`}>
+                    Load folder contents to search
+                    </HoverCardContent>
+                  </HoverCard>
+                            </div>
+                            )}
                     </div>
                         </Button>
                         </div>
