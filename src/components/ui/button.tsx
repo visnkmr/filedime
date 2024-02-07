@@ -23,7 +23,7 @@ const buttonVariants = cva(
         default: "h-10 py-2 px-4 inline-flex items-center justify-center",
         sm: "h-9 px-3 rounded-md inline-flex items-center justify-center",
         lg: "h-11 px-8 rounded-md inline-flex items-center justify-center",
-        none:"h-10"
+        none:""
       },
     },
     defaultVariants: {

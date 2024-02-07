@@ -62,6 +62,34 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
 };
     // return Ok(())
   } 
+  if(path=="downloads://"){
+    // list_files(windowname, oid, path, ff, window, state);
+  match(dirs::download_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+      sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
+
+    },
+    None => {
+      return Err("home not found".to_string())
+    },
+  };
+    // return Ok(())
+  } 
+  if(path=="documents://"){
+    // list_files(windowname, oid, path, ff, window, state);
+  match(dirs::document_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+      sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
+
+    },
+    None => {
+      return Err("home not found".to_string())
+    },
+  };
+    // return Ok(())
+  } 
   // window.emit("infiniteloader",
   //       json!({
   //           "message": "lfiles",
@@ -146,11 +174,11 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
 
   starttimer(&windowname,&app_handle)?;
   println!("start timer");
-  loadhistory(&windowname,&app_handle,
-    serde_json::to_string(
-      &state.gettab(&oid,windowname.clone()).2
-    ).unwrap())?;
-    println!("load history");
+  // loadhistory(&windowname,&app_handle,
+  //   serde_json::to_string(
+  //     &state.gettab(&oid,windowname.clone()).2
+  //   ).unwrap())?;
+    // println!("load history");
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
 
     // let mut fcount;

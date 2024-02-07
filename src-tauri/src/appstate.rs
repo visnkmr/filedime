@@ -7,7 +7,7 @@ use std::mem::{self};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
 // use std::sync::mpsc::{Sender, Receiver};
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::{RwLock, Mutex, Arc};
 use crate::trie::TrieNode;
@@ -54,7 +54,7 @@ pub struct AppStateStore {
     pub filesetcollection:RwLock<HashMap<String,i32>>,
     pub showfolderchildcount:RwLock<bool>,
     pub loadsearchlist:RwLock<bool>,
-    tabs:RwLock<FxHashMap<String,tab>>,
+    tabs:RwLock<FxHashSet<String>>,
     pub expiration:Duration,
     pub whichthread:Arc<AtomicI8>,
     pub searchcounter:Arc<AtomicI16>,
@@ -123,7 +123,14 @@ impl AppStateStore {
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),
             loadsearchlist:RwLock::new(false),
-            tabs:RwLock::new(FxHashMap::default()),
+            tabs:RwLock::new({
+                let mut fxhs=FxHashSet::default();
+                for (filename,content) in getallcustomwithin("filedime", "tabs","tabinfo"){
+                    fxhs.insert(content);
+                    clearcustom("filedime", format!("tabs/{}.tabinfo",filename))
+                }
+                fxhs
+            }),
             expiration:Duration::from_secs(expiration),
             bookmarks:RwLock::new(HashSet::new()),
             messagetothread:RwLock::new(String::new()),
@@ -158,39 +165,44 @@ impl AppStateStore {
             is_dir: fs::metadata(pathoffile).map(|m| m.is_dir()).unwrap_or(false)
              });
     }
+    pub fn listtabs(&self)->FxHashSet<String>{
+       let tabs=self.tabs.read().unwrap().clone();
+       tabs
+    }
     pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
         savecustom("filedime", format!("tabs/{}.tabinfo",id), path.clone());
         println!("{}---{}---{}",id,path,ff);
         // let id=format!("{}",(id.parse::<i32>().unwrap()+1));
-        let mut tabhist=Vec::new();
-        match(self.tabs.read().unwrap().get(&(windowname.clone()+"."+&id))){
-            Some(tabi)=>{
-                tabhist=tabi.history.clone();
-                if(
-                    ff!="back" 
-                    && 
-                    ff!="newtab"
-                ){
-                    let tabprevurl=tabi.path.clone();
-                    tabhist.push(tabprevurl);
-                }
-                else{
-                    ff="".to_string();
-                }
-            },
-            None=>{
+        // let mut tabhist=Vec::new();
+        // match(self.tabs.read().unwrap().get(&(windowname.clone()+"."+&id))){
+        //     Some(tabi)=>{
+        //         tabhist=tabi.history.clone();
+        //         if(
+        //             ff!="back" 
+        //             && 
+        //             ff!="newtab"
+        //         ){
+        //             let tabprevurl=tabi.path.clone();
+        //             tabhist.push(tabprevurl);
+        //         }
+        //         else{
+        //             ff="".to_string();
+        //         }
+        //     },
+        //     None=>{
 
-            }
-        }
+        //     }
+        // }
 
         let mut tabs=self.tabs.write().unwrap();
-        tabs.insert((windowname.clone()+"."+&id),tab {
-                path: path, 
-                focusfolder: ff,
-                history: tabhist,
-                windowname:windowname
-            }
-        );
+        tabs.insert(path);
+        // tabs.insert((windowname.clone()+"."+&id),tab {
+        //         path: path, 
+        //         focusfolder: ff,
+        //         history: tabhist,
+        //         windowname:windowname
+        //     }
+        // );
     }
     pub fn removetab(&self,id:String,windowname:String){
         clearcustom("filedime", format!("tabs/{}.tabinfo",id));
@@ -232,71 +244,71 @@ impl AppStateStore {
     //     // self.tabs.read().unwrap().clone()
     // }
     
-    pub fn getlasthistory(&self,id:String,windowname:String)->Option<String>{
-        let gtab= self.tabs.read().unwrap();
-        let path=gtab.get(&(windowname.clone()+"."+&id)).unwrap().path.clone();
-        let ff=gtab.get(&(windowname.clone()+"."+&id)).unwrap().focusfolder.clone();
-        let mut tabhist=gtab.get(&(windowname.clone()+"."+&id)).unwrap().history.clone();
-        let mut windowname=gtab.get(&(windowname.clone()+"."+&id)).unwrap().windowname.clone();
-        let lastval=tabhist.pop();
+    // pub fn getlasthistory(&self,id:String,windowname:String)->Option<String>{
+    //     let gtab= self.tabs.read().unwrap();
+    //     let path=gtab.get(&(windowname.clone()+"."+&id)).unwrap().path.clone();
+    //     let ff=gtab.get(&(windowname.clone()+"."+&id)).unwrap().focusfolder.clone();
+    //     let mut tabhist=gtab.get(&(windowname.clone()+"."+&id)).unwrap().history.clone();
+    //     let mut windowname=gtab.get(&(windowname.clone()+"."+&id)).unwrap().windowname.clone();
+    //     let lastval=tabhist.pop();
         
-        drop(gtab);
+    //     drop(gtab);
         
         
         
-        let mut tabs= self.tabs.write().unwrap();
-        // let mut tabhist=tabs.get(&id).unwrap().history;
-        tabs.insert(
-            (windowname.clone()+"."+&id),
-            tab 
-            {
-                path: path, 
-                focusfolder: ff,
-                history: tabhist,
-                windowname:windowname
-            }
-        );
-        lastval
+    //     let mut tabs= self.tabs.write().unwrap();
+    //     // let mut tabhist=tabs.get(&id).unwrap().history;
+    //     tabs.insert(
+    //         (windowname.clone()+"."+&id),
+    //         tab 
+    //         {
+    //             path: path, 
+    //             focusfolder: ff,
+    //             history: tabhist,
+    //             windowname:windowname
+    //         }
+    //     );
+    //     lastval
 
-    }
-    pub fn gettab(&self,id:&String,windowname:String)->(String,String,Vec<String>){
-        let tab= self.tabs.read().unwrap().get(&(windowname+"."+id)).unwrap().clone();
-        return (
-            tab.path,
-            tab.focusfolder,
-            tab.history
-        )
-    }
-    pub fn gettabfromwinlabel(&self,winlabel:&String)->Option<(String,String)>{
-        let elements=self.tabs.read().unwrap().clone();
-        for (id,others) in elements{
-            if(others.windowname==winlabel.clone()){
-                return Some((others.path,id))
-            }
-        }
-        None
-    }
+    // }
+    // pub fn gettab(&self,id:&String,windowname:String)->(String,String,Vec<String>){
+    //     let tab= self.tabs.read().unwrap().clone();
+    //     // return (
+    //     //     tab.path,
+    //     //     tab.focusfolder,
+    //     //     tab.history
+    //     // )
+    // }
+    // pub fn gettabfromwinlabel(&self,winlabel:&String)->Option<(String,String)>{
+    //     let elements=self.tabs.read().unwrap().clone();
+    //     for (id,others) in elements{
+    //         if(others.windowname==winlabel.clone()){
+    //             return Some((others.path,id))
+    //         }
+    //     }
+    //     None
+    // }
 
-    pub fn gettabsfromwinlabel(&self,winlabel:&String)->Vec<String>
-    {
-        let elements=self.tabs.read().unwrap().clone();
-        let mut tabsofwindow=vec![];
-        for (id,others) in elements{
-            if(others.windowname==winlabel.clone()){
-                tabsofwindow.push(id);
-            // return Some((others.path,id))
-            }
-        }
-        tabsofwindow
-    }
-    pub fn getactivepath(&self,id:&str,windowname:String)->(String,String,Vec<String>){
-        let tab= self.tabs.read().unwrap().get(&(windowname+"."+id)).unwrap().clone();
-        return (
-            tab.path,
-            tab.focusfolder,
-            tab.history
-        )
-    }
+    // pub fn gettabsfromwinlabel(&self,winlabel:&String)->Vec<String>
+    // {
+    //     let elements=self.tabs.read().unwrap().clone();
+    //     let mut tabsofwindow=vec![];
+    //     for (id,others) in elements{
+    //         if(others.windowname==winlabel.clone()){
+    //             tabsofwindow.push(id);
+    //         // return Some((others.path,id))
+    //         }
+    //     }
+    //     tabsofwindow
+    // }
+    // pub fn getactivepath(&self,id:&str,windowname:String)->(String,String,Vec<String>){
+    //     let tab= self.tabs.read().unwrap().get(&(windowname+"."+id)).unwrap().clone();
+    //     return (
+    //         tab.path,
+    //         tab.focusfolder,
+    //         tab.history
+    //     )
+    // }
     
     
 // pub fn find_size(&self, path: &str) -> u64 {

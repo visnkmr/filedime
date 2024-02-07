@@ -78,6 +78,14 @@ async fn searchload(path:String,window: Window, state: State<'_, AppStateStore>)
   populate_try(path.clone(), &window, &state).await;
   Ok(())
 }
+#[tauri::command]
+async fn closealltabs(state: State<'_, AppStateStore>) -> Result<(),String>{
+  clearall("filedime","tabinfo");
+  Ok(())
+}#[tauri::command]
+async fn listtabs(state: State<'_, AppStateStore>) -> Result<String,String>{
+  Ok(serde_json::to_string(&state.listtabs()).unwrap())
+}
    #[tauri::command]
 fn mirror(functionname:String,arguments: Vec<String>,window: Window){
   window.get_focused_window().unwrap().emit("mirror", serde_json::to_string(&json!({
@@ -533,20 +541,20 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
 
 }
 
-#[tauri::command]
-async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
-  Result<String, String> 
-  {
-    match(state.getlasthistory(oid,windowname.to_string().clone())){
-      Some(val)=>{
-          return Ok(val)
-      },
-      None=>{
-        return Err("no more history".to_string());
-      }
-    }
+// #[tauri::command]
+// async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
+//   Result<String, String> 
+//   {
+//     match(state.getlasthistory(oid,windowname.to_string().clone())){
+//       Some(val)=>{
+//           return Ok(val)
+//       },
+//       None=>{
+//         return Err("no more history".to_string());
+//       }
+//     }
     
-  }
+//   }
 #[tauri::command]
 async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
@@ -774,15 +782,15 @@ async fn folcount(windowname:&str,id:String,path:String,window: Window,state: St
 // fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
 //   state.gettab(&id).0
 // }
-#[tauri::command]
-async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
-  // state.togglefolcount();
-  // state.addtab(id.clone(),"./".to_string(), "newtab".to_string(),windowname.to_string());//move to where you open new window
-  let whichpath=state.gettabfromwinlabel(&windowname.to_string()).unwrap();
-  println!("{}",whichpath.0);
-  list_files(windowname.to_string(),whichpath.1,whichpath.0.clone(),"".to_string(), window, state).await.unwrap();
-  Ok(whichpath.0)
-}
+// #[tauri::command]
+// async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
+//   // state.togglefolcount();
+//   // state.addtab(id.clone(),"./".to_string(), "newtab".to_string(),windowname.to_string());//move to where you open new window
+//   let whichpath=state.gettabfromwinlabel(&windowname.to_string()).unwrap();
+//   println!("{}",whichpath.0);
+//   list_files(windowname.to_string(),whichpath.1,whichpath.0.clone(),"".to_string(), window, state).await.unwrap();
+//   Ok(whichpath.0)
+// }
 #[tauri::command]
 async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
    let absolute_date=getuniquewindowlabel();
@@ -1058,12 +1066,14 @@ fn main() {
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
+        listtabs,
+        closealltabs,
         mirror,
         fileop_with_progress,
         addmark,
         fileop,
         checkforconflicts,
-        backbutton,
+        // backbutton,
         closetab,
         copynpaste,
         folcount,
@@ -1074,7 +1084,7 @@ fn main() {
         get_timestamp,
         getuniquewindowlabel,
         list_files,
-        load_tab,
+        // load_tab,
         senddriveslist,
         loadfromhtml,
         loadmarkdown,
@@ -1093,7 +1103,7 @@ fn main() {
         startserver,
         stopserver,
         tabname,
-        whattoload,
+        // whattoload,
         // get_window_label
         ]
       )

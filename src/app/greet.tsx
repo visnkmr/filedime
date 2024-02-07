@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
@@ -375,7 +375,10 @@ export default function Greet() {
  const [currentchoice,changechoiceto]=useState("")
 
   useEffect(() => {
-
+    listen('load', () => {
+      console.log(`New page loaded --->${window.location.href}`);
+      
+    });
     // listen("load-markdown", (data: { payload: string }) => {
     //   let markdowninfo=JSON.parse(data.payload);
     //     console.log("loadmarkdown")
@@ -605,9 +608,17 @@ export default function Greet() {
       }).then(
 
       )
-                  reset("drives://")
-                  setpath("drives://")
-                  newtab("drives://");
+      invoke("listtabs",{})
+      .then((e)=>{
+        let tabslist=JSON.parse(e) as string[];
+        for (const ei of tabslist){
+          reset(ei)
+        setpath(ei)
+        newtab(ei);
+        }
+        
+      })
+                  
                   // populatesearchlist("drives://");
               // })
               //   .catch(console.error)
@@ -681,7 +692,10 @@ const columns: ColumnDef<FileItem>[] = [
       const rname = getValue()
 
       return (
-        <div className={`max-w-sm overflow-hidden`}>
+        <div className={`max-w-sm overflow-hidden justify-between flex items-center`}>
+         
+         <div className="overflow-hidden">
+
           <ContextMenu>
           <ContextMenuTrigger>
             <HoverCard>
@@ -710,14 +724,23 @@ const columns: ColumnDef<FileItem>[] = [
                   }
                 }>
                 {/* <CardContent > */}
+                <div className="flex items-center w-full">
+                  
                 <div>
 
                   {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
                 </div>
                   {/* <span className="font-medium text-lg"> */}
+                  {/* <div className="w-full"> */}
+                  <div className=""> 
+
                     {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
+                  </div>
+                  {/* </div> */}
                     {/* </span> */}
                 {/* </CardContent> */}
+                
+                </div>
               </button>
               </HoverCardTrigger>
               <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
@@ -782,6 +805,21 @@ const columns: ColumnDef<FileItem>[] = [
             }}>Copy</ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+         </div>
+        <div className="">
+
+                <HoverCard>
+
+                              <HoverCardTrigger>
+                              <Button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" variant={"ghost"}  onClick={()=>{
+                    populatesearchlist(path)
+                  }}><ScanSearchIcon className="h-4 w-4"/></Button>
+                  </HoverCardTrigger>
+                    <HoverCardContent  className={`${setcolorpertheme}`}>
+                    Load folder contents to search
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
           {/* <button className='w-32' onDoubleClick={
             ()=>
             { 
@@ -1368,17 +1406,61 @@ const [width, setWidth] = useState(200);
                 <HomeIcon className="h-4 w-4" />
                 Home
               </button>
+              <button onClick={()=>
+                { 
+                    reset("downloads://")
+                    // sst("drives://")
+                    updatetabs("downloads://")
+                    // setpath()
+                    // console.log(message);
+                    addToTabHistory(activetabid.toString(),"downloads://")
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: "downloads://",
+                      ff: "" 
+                  })
+                }
+                }
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
+                
+              >
+                <DownloadIcon className="h-4 w-4" />
+                Downloads
+              </button>
+              <button onClick={()=>
+                { 
+                    reset("documents://")
+                    // sst("drives://")
+                    updatetabs("documents://")
+                    // setpath()
+                    // console.log(message);
+                    addToTabHistory(activetabid.toString(),"documents://")
+                    invoke('list_files', { 
+                      windowname:appWindow?.label,
+                      oid: activetabid.toString(),
+                      path: "documents://",
+                      ff: "" 
+                  })
+                }
+                }
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
+                
+              >
+                <FileTextIcon className="h-4 w-4" />
+                Documents
+              </button>
               {/* <Link
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900  transition-all hover:text-gray-900  dark:text-gray-50 dark:hover:text-gray-50"
                 href="#"
               ><FolderIcon className="h-4 w-4" />{sampletext}</Link> */}
-              <button
+              {/* <button
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 
               >
                 <TrashIcon className="h-4 w-4" />
                 Trash
-              </button>
+              </button> */}
               <button
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
@@ -1469,12 +1551,23 @@ const [width, setWidth] = useState(200);
               
               {tablist?(<>
               <span className='h-8'/>
-              <h1 className='p-2'>Tabs ({tablist.length})</h1>
+              <h1 className='p-2'>Tabs ({tablist.length}) 
+              <Button className="ms-2 ps-2 pr-2" size="none" variant={"outline"} onClick={()=>{
+                for (const tab of tablist){
+                  invoke("closealltabs",{
+                    })
+                }
+                console.log("closed all")
+                settbl([])
+                reset("drives://")
+                setpath("drives://")
+                newtab("drives://");
+              }}>Close All</Button></h1>
               {
                 
                tablist.map((tab, index) => (
                 <button key={index}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
+                className={`flex items-center rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
                     { 
                         // setfileslist([])
@@ -1488,9 +1581,16 @@ const [width, setWidth] = useState(200);
                     }
                     }
                 >
-                  <FolderIcon className="h-4 w-4" />
-                  {/* {activetabid === tab.id ? sampletext: */}
+                  {/* <div className="flex flex-row  items-center justify-between"> */}
+
+                  <div>
+                    <FolderIcon className="h-4 w-4" />
+                    </div>
+                    {/* <div className="ps-2  overflow-hidden"> */}
+
                   {tab.tabname}
+                    {/* </div> */}
+                  {/* {activetabid === tab.id ? sampletext: */}
                   {/* } */}
                   <HoverCard>
                     <HoverCardTrigger>
@@ -1505,12 +1605,16 @@ const [width, setWidth] = useState(200);
                     Load folder contents to search
                     </HoverCardContent>
                   </HoverCard>
-                  <XIcon className={`h-4 w-4  ${tablist.length>1 ? '' : 'hidden'}`} onClick={(e)=>{
+
+                  <Button className={`${tablist.length>1 ? '' : 'hidden'}`}>
+                    <XIcon  className={`h-4 w-4`} onClick={(e)=>{
                     e.stopPropagation();
                     
                     closetab(tab.id);
                     activateTab(tablist[tablist.length-1])
                   }}/>
+                    </Button>
+                  {/* </div> */}
                 </button>
                 ))
 
@@ -1545,7 +1649,7 @@ const [width, setWidth] = useState(200);
                 >
                    {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
                    <HardDriveIcon className="h-6 w-6" />
-                    {message.name ? message.name + "(" + message.mount_point + ")" : message.mount_point}
+                    {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
                 
                 </button>
                     
