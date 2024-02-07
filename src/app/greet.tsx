@@ -188,6 +188,7 @@ export default function Greet() {
   const [fileslist, setfileslist] = useState(filesobjinit);
   const [sftype,setsftype]=useState("all")
 
+  
   useMemo(()=>{
     let filestocount=fileslist.filter(function (el) {
       return (searchstring.trim().length>0?
@@ -613,8 +614,13 @@ export default function Greet() {
         let tabslist=JSON.parse(e) as string[];
         for (const ei of tabslist){
           reset(ei)
-        setpath(ei)
-        newtab(ei);
+          setpath(ei)
+          newtab(ei);
+        }
+        if(tabslist.length<1){
+          reset("drives://")
+          setpath("drives://")
+          newtab("drives://");
         }
         
       })
@@ -689,6 +695,7 @@ const columns: ColumnDef<FileItem>[] = [
         original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
       },
     }) => {
+      
       const rname = getValue()
 
       return (
@@ -808,17 +815,61 @@ const columns: ColumnDef<FileItem>[] = [
          </div>
         <div className="">
 
-                <HoverCard>
+        <div className=" ">
 
-                              <HoverCardTrigger>
-                              <Button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" variant={"ghost"}  onClick={()=>{
-                    populatesearchlist(path)
-                  }}><ScanSearchIcon className="h-4 w-4"/></Button>
-                  </HoverCardTrigger>
-                    <HoverCardContent  className={`${setcolorpertheme}`}>
-                    Load folder contents to search
-                    </HoverCardContent>
-                  </HoverCard>
+{!is_dir
+            // &&
+            // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
+            // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
+            ?(
+        <Sheet modal={false}>
+        <SheetTrigger className="h-full px-3 p-4 focus:bg-gray-200 focus:dark:bg-gray-700">
+          <HoverCard>
+            <HoverCardTrigger>
+              <EyeIcon className="h-4 w-4 "/>
+              </HoverCardTrigger>
+            <HoverCardContent  className={`${setcolorpertheme}`}>
+            Preview
+            </HoverCardContent>
+          </HoverCard>
+          </SheetTrigger>
+          <SheetContent 
+            // style={{ width: `${width}px` }}
+            // onMouseDown={handleMouseDown}
+            // onMouseMove={handleMouseMove}
+            // onMouseUp={handleMouseUp}
+            // onMouseLeave={handleMouseUp}
+            className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+              {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+              <ResizablePanel/>
+              <ResizableHandle />
+              <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
+               
+      
+              <ReadFileComp message={row.original}/>
+              {/* </ResizablePanel>
+            </ResizablePanelGroup> */}
+              
+        
+              {/* <SheetDescription></SheetDescription> */}
+            
+          </SheetContent>
+        </Sheet>):(
+        <div className="">
+          <HoverCard>
+
+          <HoverCardTrigger>
+          <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+populatesearchlist(path)
+}}><ScanSearchIcon className="h-4 w-4"/></button>
+</HoverCardTrigger>
+<HoverCardContent  className={`${setcolorpertheme}`}>
+Load folder contents to search
+</HoverCardContent>
+</HoverCard>
+        </div>
+        )}
+</div>
                 </div>
           {/* <button className='w-32' onDoubleClick={
             ()=>
@@ -1299,7 +1350,7 @@ const [width, setWidth] = useState(200);
           {/* </div> */}
             
           
-          <div className="overflow-y-auto overflow-x-hidden">
+          <div className="overflow-y-auto">
             
           
               {/* </div> */}
@@ -1383,7 +1434,7 @@ const [width, setWidth] = useState(200);
               )
               :(null)}
           <div className="">
-            <nav className="grid items-start px-4 text-sm font-medium">
+            <nav className="justify-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
                     reset("drives://")
@@ -1485,7 +1536,7 @@ const [width, setWidth] = useState(200);
               
             </nav>
           </div>
-          <div className="grid items-start px-4 text-sm font-medium">
+          <div className="justify-start px-4 text-sm font-medium">
 
               {bookmarks && bookmarks.length>0 ?(<>
           <span className='h-8'/>
@@ -1550,8 +1601,7 @@ const [width, setWidth] = useState(200);
               </>):(null)}
               
               {tablist?(<>
-              <span className='h-8'/>
-              <h1 className='p-2'>Tabs ({tablist.length}) 
+              <h1 className='pt-8 p-2'>Tabs ({tablist.length}) 
               <Button className="ms-2 ps-2 pr-2" size="none" variant={"outline"} onClick={()=>{
                 for (const tab of tablist){
                   invoke("closealltabs",{
@@ -1563,10 +1613,14 @@ const [width, setWidth] = useState(200);
                 setpath("drives://")
                 newtab("drives://");
               }}>Close All</Button></h1>
+              <div className="overflow-hidden">
+
               {
                 
                tablist.map((tab, index) => (
-                <button key={index}
+                <div key={index} className="overflow-hidden">
+
+                <button 
                 className={`flex items-center rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
                     { 
@@ -1587,8 +1641,10 @@ const [width, setWidth] = useState(200);
                     <FolderIcon className="h-4 w-4" />
                     </div>
                     {/* <div className="ps-2  overflow-hidden"> */}
+                  <div className="line-clamp-1 ps-2">
 
                   {tab.tabname}
+                  </div>
                     {/* </div> */}
                   {/* {activetabid === tab.id ? sampletext: */}
                   {/* } */}
@@ -1605,6 +1661,7 @@ const [width, setWidth] = useState(200);
                     Load folder contents to search
                     </HoverCardContent>
                   </HoverCard>
+                    <div>
 
                   <Button className={`${tablist.length>1 ? '' : 'hidden'}`}>
                     <XIcon  className={`h-4 w-4`} onClick={(e)=>{
@@ -1614,15 +1671,17 @@ const [width, setWidth] = useState(200);
                     activateTab(tablist[tablist.length-1])
                   }}/>
                     </Button>
+                    </div>
                   {/* </div> */}
                 </button>
+                </div>
                 ))
 
               }
+              </div>
               </>):(null)}
               {driveslist && driveslist.length>0 ?(<>
-              <span className='h-8'/>
-              <h1 className='p-2'>Drives ({driveslist.length})</h1>
+              <h1 className='pt-8 p-2'>Drives ({driveslist.length})</h1>
               {
                 
                driveslist.map((message, index) => (
@@ -1648,7 +1707,10 @@ const [width, setWidth] = useState(200);
                     }
                 >
                    {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+                   <div>
+
                    <HardDriveIcon className="h-6 w-6" />
+                   </div>
                     {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
                 
                 </button>
@@ -1668,7 +1730,7 @@ const [width, setWidth] = useState(200);
           {/* <div className=" w-full flex"> */}
         </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle className="bg-gray-100" />
         <ResizablePanel defaultSize={size.b} className="flex flex-col pt-3 ps-3">
         <div className="mb-4">
 
