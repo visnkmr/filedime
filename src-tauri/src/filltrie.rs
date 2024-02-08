@@ -12,7 +12,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml, trie::TrieNode, sendtofrontend::slist, searchfiles::memoisedfm, 
+  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml,  sendtofrontend::slist, searchfiles::memoisedfm, 
   // loadjs::loadjs
 };
 
@@ -140,7 +140,7 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
                 }
               },
               Err(_)=>{
-                println!("unknown filetype");
+                // println!("unknown filetype");
               }
             }
               // if *state.process_count.lock().unwrap() != orig { // check if the current count value is different from the original one

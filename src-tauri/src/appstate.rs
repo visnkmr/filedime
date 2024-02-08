@@ -10,7 +10,6 @@ use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::{RwLock, Mutex, Arc};
-use crate::trie::TrieNode;
 use crate::{tabinfo::*};
 use crate::bookmarks::*;
 #[derive(Clone,Debug)]
@@ -64,7 +63,7 @@ pub struct AppStateStore {
     pub aborted:Arc<Mutex<bool>>,
     filechanged:Arc<Mutex<bool>>,
     pub searchtry:Arc<Mutex<HashSet<String>>>,
-    pub st:Arc<Mutex<TrieNode>>,
+    // pub st:Arc<Mutex<TrieNode>>,
     pub stl:Arc<Mutex<FxHashMap<String,HashSet<String>>>>,
     pub process_count: Arc<Mutex<i32>>,
     pub buttonnames:HashMap<String,String>
@@ -138,7 +137,7 @@ impl AppStateStore {
             aborted:Arc::new(Mutex::new(false)),
             filechanged:Arc::new(Mutex::new(false)),
             searchtry:Arc::new(Mutex::new(HashSet::new())),
-            st:Arc::new(Mutex::new(TrieNode::new())),
+            // st:Arc::new(Mutex::new(TrieNode::new())),
             stl:Arc::new(Mutex::new(FxHashMap::default())),
             process_count: Arc::new(Mutex::new(0)),
             buttonnames: {
