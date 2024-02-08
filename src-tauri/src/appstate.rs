@@ -49,7 +49,7 @@ pub struct cachestore{
 // Define a struct that holds the cache and the expiration time
 pub struct AppStateStore {
     pub cstore:RwLock<FxHashMap<String,cachestore>>,
-    pub includefolderinsearch:bool,
+    pub includefolderinsearch:RwLock<bool>,
     pub nosize:RwLock<bool>,
     pub excludehidden:RwLock<bool>,
     pub filesetcollection:RwLock<HashMap<String,i32>>,
@@ -113,12 +113,12 @@ impl AppStateStore {
         Self {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
-            includefolderinsearch:{
+            includefolderinsearch:RwLock::new({
                 let truechecker=getcustom("filedime", "storevals/includefolderinsearch.set", "false");
                 match(truechecker.as_str()){
                 "true"=>true,
                 _=>false
-            }},
+            }}),
             whichthread:Arc::new(AtomicI8::new(0)),
             searchcounter:Arc::new(AtomicI16::new(0)),
             nosize:RwLock::new(true),
@@ -482,6 +482,21 @@ impl AppStateStore {
     savecustom("filedime", "storevals/excludehidden.set", eh);
 
     let mut seteh=self.excludehidden.write().unwrap();
+    *seteh=eh;
+    drop(seteh)
+    // {
+    //     println!("{:?}",*self.nosize.read().unwrap())
+    // }
+  }
+  pub fn toggleif(&self){
+    let eh;
+    {
+
+        eh=!*self.includefolderinsearch.read().unwrap();
+    }
+    savecustom("filedime", "storevals/includefolderinsearch.set", eh);
+
+    let mut seteh=self.includefolderinsearch.write().unwrap();
     *seteh=eh;
     drop(seteh)
     // {

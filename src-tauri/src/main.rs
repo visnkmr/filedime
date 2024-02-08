@@ -753,6 +753,9 @@ async fn nosize(windowname:String,id:String,path:String,togglewhat:String,window
     "excludehidden"=>{
       println!("togglehidden");
       state.togglehidden()},
+      "includefolder"=>{
+        state.toggleif();
+      },
     _=>{
 
       }
@@ -959,6 +962,7 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
+    // opendialogwindow(&app_handle, "Error #404: File not found", "File not found.",&getuniquewindowlabel());
     // opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {

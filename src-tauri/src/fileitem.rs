@@ -24,6 +24,7 @@ use crate::{markdown::loadmarkdown,
 pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, AppStateStore>)->FileItem{
     // println!("{}",name);
     let pathtf=path.to_string_lossy().into_owned();
+    let ignorehiddenfiles=*state.excludehidden.read().unwrap();
     // println!("-----------{}",path.clone());
   
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
@@ -42,7 +43,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
         let count = WalkBuilder::new(&path)
         .max_depth(Some(1))
         .threads(threads)
-        .hidden(true) // Include hidden files and directories
+        .hidden(ignorehiddenfiles) // Include hidden files and directories
         .follow_links(false)
         .parents(true)
         
