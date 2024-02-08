@@ -309,70 +309,39 @@ export default function Greet() {
     path:string,
     tabid:string
   }
-  
+  let [hideback,sethb]=useState(true)
+  let [hidefwd,sethf]=useState(true)
+  useEffect(()=>{
+
+    invoke("disablenav",{
+      tabid:activetabid.toString(),
+      dir:true
+    }).then(()=>sethb(false)
+    ).catch(()=>sethb(true))
+    invoke("disablenav",{
+      tabid:activetabid.toString(),
+      dir:false
+    }).then(()=>sethf(false)
+    ).catch(()=>sethf(true))
+  },[path])
   // if(mdc){
   //   reset()
   // }
   const [tabHistories, setTabHistories] = useState({});
   const [tabForward, setTabf] = useState({});
-    const addToTabHistory = (tabId, item) => {
-      setTabHistories((prevHistories) => ({
-        ...prevHistories,
-        [tabId]: [...(prevHistories[tabId] || []), item],
-      }));
+    const addToTabHistory = (tabId, item=path) => {
+      invoke("addtotabhistory",{
+        tabid:tabId,
+        path:item
+      })
+      // setTabHistories((prevHistories) => ({
+      //   ...prevHistories,
+      //   [tabId]: [...(prevHistories[tabId] || []), item],
+      // }));
    };
-    const addTofwdHistory = (tabId, item) => {
-      setTabf((fwds) => {({
-        ...fwds,
-          [tabId]: [...(fwds[tabId] || []), item],
-        })}
-      );
-   }; 
-   const getTabHistory = (tabId) => {
-    let poppedItem;
-    setTabHistories((prevHistories) => {
-      const history = prevHistories[tabId] || [];
-      if (history.length === 0) {
-        return prevHistories;
-      }
-      // history.pop()
-      do{
-        poppedItem=history.pop();
-      }while((poppedItem===path))
-      return {
-        ...prevHistories,
-        [tabId]: history,
-      };
-    });
     
-    return poppedItem;
- };
- const getTabfwd = (tabId) => {
-    let poppedItem;
-    setTabf((fwds) => {
-      const fwdt = fwds[tabId] || [];
-      if (fwdt.length === 0) {
-        return fwds;
-      }
-      // history.pop()
-      do{
-        poppedItem=fwdt.pop();
-      }while((poppedItem===path))
-      return {
-        ...fwds,
-        [tabId]: fwdt,
-      };
-    });
-    return poppedItem;
- };
 
- // Memoized function to get the length of a tab's history
- const getTabHistoryLength = useMemo(() => (tabId) => {
-    return (tabHistories[tabId] || []).length;
- }, [tabHistories]); 
- const getTabfwdLength = useMemo(() => (tabId) => {
-    return (tabForward[tabId] || []).length;
- }, [tabForward]);
+ 
  const [currentchoice,changechoiceto]=useState("")
 
   useEffect(() => {
@@ -692,7 +661,7 @@ const columns: ColumnDef<FileItem>[] = [
       row,
       getValue,
       row: {
-        original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
+        original: { name,foldercon,size,rawfs,is_dir,timestamp },
       },
     }) => {
       
@@ -710,21 +679,22 @@ const columns: ColumnDef<FileItem>[] = [
               <button className="w-full h-full flex justify-start whitespace-nowrap " onDoubleClick={
                 ()=>
                 { 
+                  let clickpath=row.original.path;
                   // console.log("gridlayout clicked");
                     if(is_dir){
-                      reset(path)
-                      updatetabs(path)
+                      addToTabHistory(activetabid.toString(),clickpath)
+                      reset(clickpath)
+                      updatetabs(clickpath)
                     
                       // setpath()
                       // setpsplitl(splitpath(path))
                       // sst(name)
-                      addToTabHistory(activetabid.toString(),path)
                     }
                   // useEffect(() => {
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
-                      path: path,
+                      path: clickpath,
                       ff: "" 
                   }).catch((e)=>console.error(e));
                   // },[])
@@ -1241,7 +1211,7 @@ function closetab(closeid){
                         //     oid: newtabid.toString()
                         //   }
                         // );
-                        addToTabHistory(newtabid.toString(),gotopath)
+                        // addToTabHistory(newtabid.toString(),gotopath)
                         // addTofwdHistory(newtabid.toString(),path)
                         invoke('list_files', { 
                           windowname:appWindow?.label,
@@ -1437,12 +1407,12 @@ const [width, setWidth] = useState(200);
             <nav className="justify-start px-4 text-sm font-medium">
               <button onClick={()=>
                 { 
+                  addToTabHistory(activetabid.toString(),"drives://")
                     reset("drives://")
                     // sst("drives://")
                     updatetabs("drives://")
                     // setpath()
                     // console.log(message);
-                    addToTabHistory(activetabid.toString(),"drives://")
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
@@ -1459,12 +1429,12 @@ const [width, setWidth] = useState(200);
               </button>
               <button onClick={()=>
                 { 
+                  addToTabHistory(activetabid.toString(),"downloads://")
                     reset("downloads://")
                     // sst("drives://")
                     updatetabs("downloads://")
                     // setpath()
                     // console.log(message);
-                    addToTabHistory(activetabid.toString(),"downloads://")
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
@@ -1481,12 +1451,12 @@ const [width, setWidth] = useState(200);
               </button>
               <button onClick={()=>
                 { 
+                  addToTabHistory(activetabid.toString(),"documents://")
                     reset("documents://")
                     // sst("drives://")
                     updatetabs("documents://")
                     // setpath()
                     // console.log(message);
-                    addToTabHistory(activetabid.toString(),"documents://")
                     invoke('list_files', { 
                       windowname:appWindow?.label,
                       oid: activetabid.toString(),
@@ -1965,26 +1935,35 @@ const [width, setWidth] = useState(200);
         </div>
       <div className="justify-between mb-2 ">
           <div className={`flex flex-row gap-2 overflow-${scrollorauto}`}>
-            <div>
+            <div className={`
+              ${hideback?"hidden":""}
+            `} >
 
-            <Button variant={"ghost"} className={` ${getTabHistoryLength(activetabid.toString())>0?"":"hidden"}`} onClick={()=>{
-                // addTofwdHistory(activetabid.toString(),path)
-                let pathtogoto=getTabHistory(activetabid.toString())
-                if(pathtogoto && pathtogoto.trim().length>0){
-
-                  reset(pathtogoto)
-                  updatetabs(pathtogoto)
-                  // setpath()
-                  // setpsplitl(splitpath(pathtogoto))
-                  // sst("")
-                  // useEffect(() => {
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: pathtogoto,
-                      ff: "" 
-                  });
-                }
+            <Button variant={"ghost"}onClick={()=>{
+                 invoke("navbrowsetimeline",{
+                  tabid:activetabid.toString(),
+                  dir:true
+                }).then((ei)=>{
+                  console.log(ei)
+                  // addTofwdHistory(activetabid.toString(),path)
+                  // addTofwdHistory(activetabid.toString())
+                  let pathtogoto=ei
+                  if(pathtogoto){
+                    
+                    reset(pathtogoto)
+                    updatetabs(pathtogoto)
+                    // setpath()
+                    // setpsplitl(splitpath(pathtogoto))
+                    // sst("")
+                    // useEffect(() => {
+                      invoke('list_files', { 
+                        windowname:appWindow?.label,
+                        oid: activetabid.toString(),
+                        path: pathtogoto,
+                        ff: "" 
+                    });
+                  }
+                }).catch((e)=>console.error(e))
               }}><ArrowLeft className="h-4 w-4"
               /></Button>
             </div>
@@ -1992,9 +1971,14 @@ const [width, setWidth] = useState(200);
             {/* <Button size="sm" variant="ghost"> */}
               
             {/* </Button> */}
-            <Button className={` ${getTabfwdLength(activetabid.toString())>0?"":"hidden"}`} variant="ghost"  onClick={()=>{
-                let pathtogoto=getTabfwd(activetabid.toString())
-                if(pathtogoto && pathtogoto.trim().length>0){
+            <Button className={`${hidefwd?"hidden":""} `} variant="ghost"  onClick={()=>{
+               invoke("navbrowsetimeline",{
+                tabid:activetabid.toString(),
+                dir:false
+              }).then((ei)=>{
+                console.log(ei)
+                let pathtogoto=ei
+                if(pathtogoto ){
 
                   reset(pathtogoto)
                   updatetabs(pathtogoto)
@@ -2009,6 +1993,7 @@ const [width, setWidth] = useState(200);
                       ff: "" 
                   });
                 }
+              }).catch((e)=>console.error(e))
               }}>
               <ForwardIcon className="h-4 w-4" 
              />
@@ -2091,10 +2076,10 @@ const [width, setWidth] = useState(200);
                 }
                 ).then(()=>{
                   
+                  addToTabHistory(activetabid.toString(),pathitype)
                   updatetabs(pathitype)
                   //  setpath(message.name)
                   //  sst(message.path)
-                  addToTabHistory(activetabid.toString(),pathitype)
                 })
                 .catch((e)=>console.error(e))
             }}>
@@ -2164,12 +2149,12 @@ const [width, setWidth] = useState(200);
               return <button key={index} onClick={
                 ()=>
                 { 
+                  addToTabHistory(activetabid.toString(),eachif.pathtofol)
                   reset(eachif.pathtofol)
                   updatetabs(eachif.pathtofol)
                   // spi(message.mount_point)
                   // setpath()
                   // sst(eachif.pathtofol)
-                  addToTabHistory(activetabid.toString(),eachif.pathtofol)
                   // console.log(message);
                   invoke('list_files', { 
                     windowname:appWindow?.label,
@@ -2343,9 +2328,9 @@ const [width, setWidth] = useState(200);
                               ()=>
                               { 
                                 if(message.is_dir){
+                                  addToTabHistory(activetabid.toString(),message.path)
                                   reset(message.path)
                                   updatetabs(message.path)
-                                  addToTabHistory(activetabid.toString(),message.path)
                                 }
                                 // console.log("gridlayout clicked");
                                 

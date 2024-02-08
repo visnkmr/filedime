@@ -7,8 +7,10 @@ mod fileitem;
 mod filltrie;
 mod sendtofrontend;
 mod lastmodcalc;
+mod dq;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
+use dq::{BrowserHistory, Page};
 // use filesize::PathExt;
 use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
@@ -73,6 +75,46 @@ const CACHE_EXPIRY:u64=60;
 
 use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
+#[tauri::command]
+async fn disablenav(tabid:String,dir:bool, state: State<'_, AppStateStore>) -> Result<(),()>{ 
+  let writetohistory=state.history.read().unwrap();
+    let history_entry = writetohistory.get(&tabid).unwrap();
+  println!("CPvalue-------{:?}",history_entry.current_page);
+
+    if(dir){ //back check
+       if(history_entry.current_page==0) {return Err(())}
+       return Ok(())
+      }else{ //forward check
+        if(history_entry.current_page==history_entry.browser_timeline.len()-1) {return Err(())}
+       return Ok(())
+      }
+    Ok(())
+}
+  #[tauri::command]
+async fn addtotabhistory(tabid:String,path:String, state: State<'_, AppStateStore>) -> Result<(),String>{ 
+  println!("added to{}-------{}",tabid,path);
+  let mut writetohistory=state.history.write().unwrap();
+  let history_entry = writetohistory.entry(tabid).or_insert_with(||BrowserHistory::default());
+    history_entry.visit_page( path.clone(), tabname(path) );
+    println!("go to-------{:?}",history_entry);
+  Ok(())
+}  
+#[tauri::command]
+async fn navbrowsetimeline(tabid:String,dir:bool, state: State<'_, AppStateStore>) -> 
+  Result<String, String> 
+  {
+  println!("go to{}-------{}",tabid,dir);
+
+    let mut writetohistory=state.history.write().unwrap();
+    let history_entry = writetohistory.entry(tabid).or_insert_with(||BrowserHistory::default());
+  println!("go to-------{:?}",history_entry);
+
+    match(if(dir){ history_entry.go_back()}else{history_entry.go_forward()}){
+    Some(page) => return Ok(page.url.clone()),
+    None => return Err("None found".to_string()),
+}
+    
+  }
 #[tauri::command]
 async fn searchload(path:String,window: Window, state: State<'_, AppStateStore>) -> Result<(),String>{ 
   populate_try(path.clone(), &window, &state).await;
@@ -541,20 +583,7 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
 
 }
 
-// #[tauri::command]
-// async fn backbutton(windowname:&str,oid:String,window: Window, state: State<'_, AppStateStore>) -> 
-//   Result<String, String> 
-//   {
-//     match(state.getlasthistory(oid,windowname.to_string().clone())){
-//       Some(val)=>{
-//           return Ok(val)
-//       },
-//       None=>{
-//         return Err("no more history".to_string());
-//       }
-//     }
-    
-//   }
+
 #[tauri::command]
 async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) -> 
   Result<String, String> 
@@ -1075,6 +1104,7 @@ fn main() {
         checkforconflicts,
         // backbutton,
         closetab,
+        disablenav,
         copynpaste,
         folcount,
         searchload,
@@ -1103,6 +1133,8 @@ fn main() {
         startserver,
         stopserver,
         tabname,
+        navbrowsetimeline,
+        addtotabhistory
         // whattoload,
         // get_window_label
         ]

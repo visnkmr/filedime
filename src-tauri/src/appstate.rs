@@ -10,6 +10,7 @@ use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::{RwLock, Mutex, Arc};
+use crate::dq::BrowserHistory;
 use crate::{tabinfo::*};
 use crate::bookmarks::*;
 #[derive(Clone,Debug)]
@@ -51,6 +52,7 @@ pub struct AppStateStore {
     pub nosize:RwLock<bool>,
     pub excludehidden:RwLock<bool>,
     pub filesetcollection:RwLock<HashMap<String,i32>>,
+    pub history:RwLock<HashMap<String,BrowserHistory>>,
     pub showfolderchildcount:RwLock<bool>,
     pub loadsearchlist:RwLock<bool>,
     tabs:RwLock<FxHashSet<String>>,
@@ -119,6 +121,7 @@ impl AppStateStore {
                 truechecker=>true,
                 _=>false
             }}),
+            history:RwLock::new(HashMap::new()),
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),
             loadsearchlist:RwLock::new(false),
