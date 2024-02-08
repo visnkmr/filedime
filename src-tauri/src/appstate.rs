@@ -49,6 +49,7 @@ pub struct cachestore{
 // Define a struct that holds the cache and the expiration time
 pub struct AppStateStore {
     pub cstore:RwLock<FxHashMap<String,cachestore>>,
+    pub includefolderinsearch:bool,
     pub nosize:RwLock<bool>,
     pub excludehidden:RwLock<bool>,
     pub filesetcollection:RwLock<HashMap<String,i32>>,
@@ -112,13 +113,19 @@ impl AppStateStore {
         Self {
             // Wrap the cache in a RwLock
             cstore:RwLock::new(FxHashMap::default()),
+            includefolderinsearch:{
+                let truechecker=getcustom("filedime", "storevals/includefolderinsearch.set", "false");
+                match(truechecker.as_str()){
+                "true"=>true,
+                _=>false
+            }},
             whichthread:Arc::new(AtomicI8::new(0)),
             searchcounter:Arc::new(AtomicI16::new(0)),
             nosize:RwLock::new(true),
             excludehidden:RwLock::new({
-                let truechecker="true".to_string();
-                match(getcustom("filedime", "storevals/excludehidden.set", "false")){
-                truechecker=>true,
+                let truechecker=getcustom("filedime", "storevals/excludehidden.set", "false");
+                match(truechecker.as_str()){
+                "true"=>true,
                 _=>false
             }}),
             history:RwLock::new(HashMap::new()),

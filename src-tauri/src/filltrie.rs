@@ -2,6 +2,7 @@ use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duratio
 
 use fuzzy_matcher::clangd::fuzzy_match;
 use ignore::{Walk, WalkBuilder, WalkState};
+use libc::stat;
 use rayon::prelude::*;
 use serde_json::json;
 use tauri::{Window, State, Manager};
@@ -116,8 +117,11 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
             match(entry){
               Ok(e)=>{
                 if let Some(eft)=(e.file_type()){
-                  
-                  if(!eft.is_dir())
+                  let mut searchfor=eft.is_file();
+                  if(state.includefolderinsearch){
+                    searchfor = eft.is_file()||eft.is_dir();
+                  }
+                  if(searchfor)
                   {
                     
                     // println!("{:?}",e.path());

@@ -661,7 +661,7 @@ const columns: ColumnDef<FileItem>[] = [
       row,
       getValue,
       row: {
-        original: { name,foldercon,size,rawfs,is_dir,timestamp },
+        original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
       },
     }) => {
       
@@ -679,7 +679,7 @@ const columns: ColumnDef<FileItem>[] = [
               <button className="w-full h-full flex justify-start whitespace-nowrap " onDoubleClick={
                 ()=>
                 { 
-                  let clickpath=row.original.path;
+                  let clickpath=path;
                   // console.log("gridlayout clicked");
                     if(is_dir){
                       addToTabHistory(activetabid.toString(),clickpath)
@@ -1162,6 +1162,7 @@ function closetab(closeid){
     reset()
     // console.error(gotopath)
     let newtabid=new Date().getTime();
+
                       invoke(
                         "tabname",
                         {
@@ -1199,7 +1200,7 @@ function closetab(closeid){
                         })
       // console.log("opened tab now tablist is "+JSON.stringify(tablist))
 
-                        
+                        addToTabHistory(newtabid.toString(),gotopath)
                         setactivetabid(newtabid)
                         // setpath(message.path)
                         // setpsplitl(splitpath(message.path))
@@ -1663,6 +1664,7 @@ const [width, setWidth] = useState(200);
                     { 
                       reset(message.mount_point)
                       updatetabs(message.mount_point)
+                      addToTabHistory(activetabid.toString(),message.mount_point)
                       // spi(message.mount_point)
                       // setpath()
                       // sst(message.mount_point)
