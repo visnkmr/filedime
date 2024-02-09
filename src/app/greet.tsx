@@ -14,6 +14,9 @@ import Dupelist from "./ad"
 // import {appWindow as appWindow2} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
 import React from 'react';
+import { useKeyboardShortcut } from "./keyboardshortcuts";
+import { useMouseShortcut } from "./mouseshortcuts";
+
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 // import {columns} from "../src/components/columns"
@@ -304,7 +307,157 @@ export default function Greet() {
   
   useEffect(() => {
     console.log(Math.random());
+    
   }, []);
+  useKeyboardShortcut(()=>{
+    newtab("drives://");
+  }, {
+    ctrlKey: true,
+    code: "KeyT",
+  }); 
+  useKeyboardShortcut(()=>{
+    invoke("newwindow",
+    {
+      // id: (winInfo.tabidsalloted++).toString(),
+      path: "drives://",
+      ff:""
+    });
+  }, {
+    ctrlKey: true,
+    code: "KeyN", 
+  });
+  useKeyboardShortcut(()=>{
+    invoke(
+      "addmark",
+      {
+    windowname:appWindow?.label,
+        path: path
+      }
+    );
+  }, {
+    ctrlKey: true,
+    code: "KeyD", 
+  });
+  useKeyboardShortcut(()=>{
+    setfos((old)=>[...old,path])
+  }, {
+    ctrlKey: true,
+    code: "KeyC", 
+  });
+  
+  useKeyboardShortcut(()=>{
+    reloadsize("excludehidden")
+  }, {
+    ctrlKey: true,
+    code: "KeyH", 
+  });
+  useKeyboardShortcut((e)=>{
+    e.preventDefault(); 
+    console.log("closetab")
+    if(!tablist)return
+    if(tablist?.length<1) return;
+    closetab(activetabid);
+    activateTab(tablist[tablist.length-1])
+  }, {
+    // ctrlKey: true,
+    code: "F4", 
+  });
+  useKeyboardShortcut((e)=>{
+    e.preventDefault(); 
+    reloadlist()
+  }, {
+    // ctrlKey: true,
+    code: "F5", 
+  });
+  useKeyboardShortcut(()=>{
+    invoke("navbrowsetimeline",{
+      tabid:activetabid.toString(),
+      dir:true
+    }).then((ei)=>{
+      console.log(ei)
+      // addTofwdHistory(activetabid.toString(),path)
+      // addTofwdHistory(activetabid.toString())
+      let pathtogoto=ei
+      if(pathtogoto){
+        
+        reset(pathtogoto)
+        updatetabs(pathtogoto)
+        // setpath()
+        // setpsplitl(splitpath(pathtogoto))
+        // sst("")
+        // useEffect(() => {
+          invoke('list_files', { 
+            windowname:appWindow?.label,
+            oid: activetabid.toString(),
+            path: pathtogoto,
+            ff: "" 
+        });
+      }
+    }).catch((e)=>console.error(e))
+  }, {
+    altKey: true,
+    code: "ArrowLeft", 
+  });
+  useKeyboardShortcut(()=>{
+    invoke("navbrowsetimeline",{
+      tabid:activetabid.toString(),
+      dir:false
+    }).then((ei)=>{
+      console.log(ei)
+      let pathtogoto=ei
+      if(pathtogoto ){
+
+        reset(pathtogoto)
+        updatetabs(pathtogoto)
+        // setpath()
+        // setpsplitl(splitpath(pathtogoto))
+        // sst("")
+        // useEffect(() => {
+          invoke('list_files', { 
+            windowname:appWindow?.label,
+            oid: activetabid.toString(),
+            path: pathtogoto,
+            ff: "" 
+        });
+      }
+    }).catch((e)=>console.error(e))
+  }, {
+    altKey: true,
+    code: "ArrowRight", 
+  });
+  useKeyboardShortcut(()=>{
+    invoke("getparentpath",{
+      path
+    }).then((ei)=>{
+      console.log(ei)
+      // addTofwdHistory(activetabid.toString(),path)
+      // addTofwdHistory(activetabid.toString())
+      let pathtogoto=ei
+      if(pathtogoto){
+        reset(pathtogoto)
+        updatetabs(pathtogoto)
+        // setpath()
+        // setpsplitl(splitpath(pathtogoto))
+        // sst("")
+        // useEffect(() => {
+          invoke('list_files', { 
+            windowname:appWindow?.label,
+            oid: activetabid.toString(),
+            path: pathtogoto,
+            ff: "" 
+        });
+      }
+    }).catch((e)=>console.error(e))
+  }, {
+    altKey: true,
+    code: "ArrowUp", 
+  });
+  useMouseShortcut(()=>{
+    // reloadlist()
+  },{
+    
+  })
+
   type wtd={
     functionname:string,
     arguments:string[]
@@ -1284,10 +1437,6 @@ const [width, setWidth] = useState(200);
     b: 90,
   });
 
-  useEffect(() => {
-    // Can't change size.
-    setTimeout(() => setSize({ a: 50, b: 50 }), 1000);
-  }, []);
 
   return (
     // <div className="overflow-hidden">
