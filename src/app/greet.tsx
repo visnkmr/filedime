@@ -125,7 +125,11 @@ import { useTheme } from "next-themes";
 // });
 export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
+import { useToast } from "../components/ui/use-toast"
+import { Toaster } from "../components/ui/toaster"
+
 export default function Greet() {
+  const { toast } = useToast()
   const { theme, setTheme } = useTheme()
   async function setupAppWindow() {
     const appWindow = (await import('@tauri-apps/api/window')).appWindow
@@ -348,6 +352,16 @@ export default function Greet() {
     listen('load', () => {
       console.log(`New page loaded --->${window.location.href}`);
       
+    });
+    listen('dialogshow', (pl) => {
+      let recieved=JSON.parse(pl.payload);
+      let content=(recieved.content)
+      let title=(recieved.title)
+      toast({
+        title: title,
+        description: content,
+      })
+      // console.log(`New page loaded --->${window.location.href}`);
     });
     // listen("load-markdown", (data: { payload: string }) => {
     //   let markdowninfo=JSON.parse(data.payload);
@@ -1264,7 +1278,7 @@ const [width, setWidth] = useState(200);
   const[showalertdialog,setsal]=useState(false)
   const[dest,setdest]=useState("")
   const [size, setSize] = useState({
-    a: 10,
+    a: 20,
     b: 90,
   });
 
@@ -1705,7 +1719,7 @@ const [width, setWidth] = useState(200);
         <ResizableHandle className="bg-gray-100" />
         <ResizablePanel defaultSize={size.b} className="flex flex-col pt-3 ps-3">
         <div className="mb-4">
-
+        <Toaster />
 <div 
   className={`flex flex-row overflow-${scrollorauto} p-1 gap-2`}
   // className={`flex flex-row hover:${checkifwithinbounds()?"":"overflow-scroll"} p-1`}

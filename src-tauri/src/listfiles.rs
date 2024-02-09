@@ -105,7 +105,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   let testpath=PathBuf::from(path.clone());
 
   if(!testpath.exists() && path!="drives://"){
-    opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.",&getuniquewindowlabel());
+    opendialogwindow(&window.app_handle(), "Error #404: File not found", "File not found.",&windowname);
     return Ok(())
   }
   // if(path.ends_with(".md")){
@@ -130,7 +130,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   }
 
   if(!testpath.is_dir()  && path!="drives://"){
-    opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&getuniquewindowlabel());
+    opendialogwindow(&window.app_handle(), "Error #400: Unknown file type", "unknown file type",&windowname);
     return Ok(())
   }
   window.emit_to(&wname,"reloadlist","resettable").unwrap();

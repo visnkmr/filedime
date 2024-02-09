@@ -962,7 +962,21 @@ fn main() {
     // .build()
     // .unwrap();
     let app_handle = app.handle();
-    // opendialogwindow(&app_handle, "Error #404: File not found", "File not found.",&getuniquewindowlabel());
+    // let uwl=&getuniquewindowlabel();
+    // tauri::WindowBuilder::new(
+    //                   &app_handle,
+    //                   uwl,
+    //                   tauri::WindowUrl::App("dialog.html".into())
+    //                 )
+                    
+    //                 .inner_size(320.0, 320.0)
+    //                 // .initialization_script(&INIT_SCRIPT)
+    //                 .title("error")
+    //                 .build()
+    //                 .unwrap();
+    // // let uwl=getuniquewindowlabel();
+    // opendialogwindow(&app_handle, "Error #404: File not found","File not found",&uwl);
+    
     // opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {
@@ -1116,7 +1130,7 @@ fn main() {
         foldersize,
         get_path_options,
         get_timestamp,
-        getuniquewindowlabel,
+        // getuniquewindowlabel,
         list_files,
         // load_tab,
         senddriveslist,
@@ -1250,26 +1264,39 @@ pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
                 // .initialization_script(&INIT_SCRIPT)
                 .title(title).build().unwrap()
 }
-pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str){
-  println!("{:?}",getwindowlist(app_handle));
-  let menu = Menu::new();
 
-  // let INIT_SCRIPT= [r#"
-  //             console.log("poiu");
-  //              let kpg="#,pathtt,r#"
-  //                 "#].concat();
-                tauri::WindowBuilder::new(
-                  app_handle,
-                  label,
-                  tauri::WindowUrl::App("dialog.html".into())
-                )
+pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str){
+  // println!("{:?}",getwindowlist(app_handle));
+  // let menu = Menu::new();
+
+  // // let INIT_SCRIPT= [r#"
+  // //             console.log("poiu");
+  // //              let kpg="#,pathtt,r#"
+  // //                 "#].concat();
+  // println!("create window ======>{}",label);
+  //               tauri::WindowBuilder::new(
+  //                 app_handle,
+  //                 label,
+  //                 tauri::WindowUrl::App("dialog.html".into())
+  //               )
                 
-                .inner_size(320.0, 320.0)
-                .menu(menu)
-                // .initialization_script(&INIT_SCRIPT)
-                .title(title)
-                .build()
-                .unwrap();
+  //               .inner_size(320.0, 320.0)
+  //               .menu(menu)
+  //               // .initialization_script(&INIT_SCRIPT)
+  //               .title(title)
+  //               .build()
+  //               .unwrap();
+  //             println!("dialog opened ======>{}",label);
+              app_handle.emit_all(
+                // label,
+                "dialogshow",
+                serde_json::to_string(&json!({
+                  "title":title,
+                  "content":content,
+                  // "arguments":arguments
+                })).unwrap(),
+              ).unwrap();
+              
 }
 // pub fn opennewtab(app_handle:&AppHandle,title:&str,pathtt:&str){
 //                 let now = SystemTime::now();
@@ -1302,7 +1329,7 @@ pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
 }
   
 }
-#[tauri::command]
+// #[tauri::command]
 fn getuniquewindowlabel()->String{
   let now = SystemTime::now();
 
