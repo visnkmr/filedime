@@ -358,6 +358,7 @@ export default function Greet() {
       let content=(recieved.content)
       let title=(recieved.title)
       toast({
+        variant:"destructive",
         title: title,
         description: content,
       })
@@ -2120,7 +2121,7 @@ const [width, setWidth] = useState(200);
 
             <Button variant={"ghost"}  onClick={
               ()=>{
-                if(searchstring.trim().length>0){
+                // if(searchstring.trim().length>0){
                   // invoke(
                   //   "populate_try", {
                   //     path:path
@@ -2136,7 +2137,7 @@ const [width, setWidth] = useState(200);
                   // .catch((e)=>console.error(e))
                   
                 }
-              }
+              // }
             }>
 
             <SearchIcon className="h-4 w-4"/>

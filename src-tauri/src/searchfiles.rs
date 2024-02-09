@@ -60,6 +60,7 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
 
 
   let wname=windowname.clone();
+  opendialogwindow(&window.app_handle(),"yu","iop",&windowname);
     // populate_try(path, &state);
     if(string.len()<3){
       return Ok(());
