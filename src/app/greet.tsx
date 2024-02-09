@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import '../styles/globals.css'
@@ -779,6 +779,7 @@ const columns: ColumnDef<FileItem>[] = [
                 }
               );
             }}>Add bookmark</ContextMenuItem>
+            <div className="hidden bg-red"></div>
             <ContextMenuItem onSelect={(e)=>{
               useEffect(() => {
               if (typeof window !== 'undefined'){
@@ -808,7 +809,7 @@ const columns: ColumnDef<FileItem>[] = [
             // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
             ?(
         <Sheet modal={false}>
-        <SheetTrigger className="h-full px-3 p-4 focus:bg-gray-200 focus:dark:bg-gray-700">
+        <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
           <HoverCard>
             <HoverCardTrigger>
               <EyeIcon className="h-4 w-4 "/>
@@ -1984,10 +1985,40 @@ const [width, setWidth] = useState(200);
               }}><ArrowLeft className="h-4 w-4"
               /></Button>
             </div>
+            <div>
+
+            <Button variant={"ghost"}onClick={()=>{
+                 invoke("getparentpath",{
+                  path
+                }).then((ei)=>{
+                  console.log(ei)
+                  // addTofwdHistory(activetabid.toString(),path)
+                  // addTofwdHistory(activetabid.toString())
+                  let pathtogoto=ei
+                  if(pathtogoto){
+                    reset(pathtogoto)
+                    updatetabs(pathtogoto)
+                    // setpath()
+                    // setpsplitl(splitpath(pathtogoto))
+                    // sst("")
+                    // useEffect(() => {
+                      invoke('list_files', { 
+                        windowname:appWindow?.label,
+                        oid: activetabid.toString(),
+                        path: pathtogoto,
+                        ff: "" 
+                    });
+                  }
+                }).catch((e)=>console.error(e))
+              }}><ArrowUp className="h-4 w-4"
+              /></Button>
+            </div>
           {/* <div className="flex items-center gap-2"> */}
             {/* <Button size="sm" variant="ghost"> */}
               
             {/* </Button> */}
+            <div>
+
             <Button className={`${hidefwd?"hidden":""} `} variant="ghost"  onClick={()=>{
                invoke("navbrowsetimeline",{
                 tabid:activetabid.toString(),
@@ -2012,9 +2043,10 @@ const [width, setWidth] = useState(200);
                 }
               }).catch((e)=>console.error(e))
               }}>
-              <ForwardIcon className="h-4 w-4" 
+              <ArrowRight className="h-4 w-4" 
              />
             </Button>
+            </div>
           {/* </div> */}
             {/* <div className="flex-grow"> */}
             <datalist id="path-list">
@@ -2100,7 +2132,7 @@ const [width, setWidth] = useState(200);
                 })
                 .catch((e)=>console.error(e))
             }}>
-              <ArrowRightIcon className="h-4 w-4" />
+              Go
               </Button>
             </div>
             {/* <div className="flex-grow "> */}

@@ -1115,6 +1115,7 @@ fn main() {
         // getpathfromid,
         listtabs,
         closealltabs,
+        getparentpath,
         mirror,
         fileop_with_progress,
         addmark,
@@ -1207,6 +1208,14 @@ fn on_window_event(event: GlobalWindowEvent) {
 // }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
+async fn getparentpath(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<String,()> {
+  match(PathBuf::from(&path).parent()){
+    Some(k) => return Ok(k.to_string_lossy().to_string()),
+    None => return Err(()),
+}
+  
+}
+  #[tauri::command]
 async fn get_path_options(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<Vec<String>,()> {
   let mut options = Vec::new();
   let pathasbuf=PathBuf::from(path.clone());
