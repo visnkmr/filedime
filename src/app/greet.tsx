@@ -359,8 +359,8 @@ export default function Greet() {
     closetab(activetabid);
     activateTab(tablist[tablist.length-1])
   }, {
-    // ctrlKey: true,
-    code: "F4", 
+    ctrlKey: true,
+    code: "KeyW", 
   });
   useKeyboardShortcut((e)=>{
     e.preventDefault(); 

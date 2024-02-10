@@ -53,8 +53,18 @@ pub fn get_drives() -> Result<Drives, String> {
             };
 
             DriveInformation {
-                name,
-                mount_point,
+                name:if !cfg!(unix) {
+                    name.clone()
+                }
+                else{
+                    mount_point.clone()
+                },
+                mount_point:if !cfg!(unix) {
+                    mount_point
+                }
+                else{
+                    name
+                },
                 total,
                 free,
                 is_removable,

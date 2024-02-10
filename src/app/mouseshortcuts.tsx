@@ -24,7 +24,7 @@ function useMouseShortcut(
         // if (isTextSelected()) return;
       const keyboardEvent = event as MouseEvent;
       const { button } = keyboardEvent;
-      console.log(button)
+      console.log(keyboardEvent)
       if (config.button !== undefined && config.button !== button) return;
       shortcutFunction(keyboardEvent);
     },
