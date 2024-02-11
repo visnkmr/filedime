@@ -141,7 +141,19 @@ impl AppStateStore {
                 fxhs
             }),
             expiration:Duration::from_secs(expiration),
-            bookmarks:RwLock::new(HashSet::new()),
+            bookmarks:RwLock::new({
+                let mut fxhs=HashSet::default();
+                for (id,path) in getallcustomwithin("filedime", "bookmarks","mark"){
+                    fxhs.insert(
+                        marks { 
+                            path: path.clone(),
+                            name: PathBuf::from(path.clone()).file_stem().unwrap().to_string_lossy().to_string(),
+                            is_dir: fs::metadata(Path::new(&path)).map(|m| m.is_dir()).unwrap_or(false),
+                            id:id
+                        });
+                }
+                fxhs
+            }),
             messagetothread:RwLock::new(String::new()),
             recents:Vec::new(),
             aborted:Arc::new(Mutex::new(false)),
@@ -165,13 +177,16 @@ impl AppStateStore {
             // size:0
         }
     }
-    pub fn addmark(&self,path:String){
+    pub fn addmark(&self,path:String,id:String){
+        savecustom("filedime", format!("bookmarks/{}.mark",id), path.clone());
         let pof=path.clone();
         let pathoffile=Path::new(&pof);
-        self.bookmarks.write().unwrap().insert(marks {
-            path: path.clone(),
-            name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string(),
-            is_dir: fs::metadata(pathoffile).map(|m| m.is_dir()).unwrap_or(false)
+        self.bookmarks.write().unwrap().insert(
+            marks {
+                path: path.clone(),
+                name: PathBuf::from(path).file_stem().unwrap().to_string_lossy().to_string(),
+                is_dir: fs::metadata(pathoffile).map(|m| m.is_dir()).unwrap_or(false),
+                id:id
              });
     }
     pub fn listtabs(&self)->FxHashSet<String>{
@@ -220,7 +235,8 @@ impl AppStateStore {
         let mut tabs=self.tabs.write().unwrap();
         tabs.remove(&(windowname+"."+&id));
     }
-    pub fn removemark(&self,path:String){
+    pub fn removemark(&self,path:String,id:String){
+        clearcustom("filedime", format!("bookmarks/{}.mark",id));
         // println!("{}---{}---{}",id,path,ff);
         
         let mut marks=self.bookmarks.write().unwrap();

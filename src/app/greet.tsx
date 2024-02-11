@@ -89,7 +89,8 @@ type tabinfo = {
 type mark = {
   path:string,
   name:string,
-  is_dir:string
+  is_dir:string,
+  id:string
 };
 interface wininfo{
   winname:string,
@@ -331,7 +332,8 @@ export default function Greet() {
       "addmark",
       {
     windowname:appWindow?.label,
-        path: path
+        path: path,
+        id: new Date().getTime().toString()
       }
     );
   }, {
@@ -745,7 +747,8 @@ export default function Greet() {
           
       }).then(
 
-      )
+      );
+      reloadsize("loadmarks")
       invoke("listtabs",{})
       .then((e)=>{
         let tabslist=JSON.parse(e) as string[];
@@ -928,7 +931,8 @@ const columns: ColumnDef<FileItem>[] = [
                 "addmark",
                 {
               windowname:appWindow?.label,
-                  path: path
+                  path: path,
+                  id: new Date().getTime().toString()
                 }
               );
             }}>Add bookmark</ContextMenuItem>
@@ -1725,7 +1729,8 @@ const [width, setWidth] = useState(200);
                         "removemark",
                         {
                       windowname:appWindow?.label,
-                          path: mark.path
+                          path: mark.path,
+                          id:mark.id,
                         }
                       );
                     }}>Remove bookmark</ContextMenuItem>
@@ -2626,7 +2631,8 @@ const [width, setWidth] = useState(200);
                             "addmark",
                             {
                           windowname:appWindow?.label,
-                              path: message.path
+                              path: message.path,
+                              id:new Date().getTime().toString()
                             }
                           );
                         }}>Add bookmark</ContextMenuItem>

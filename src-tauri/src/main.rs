@@ -49,7 +49,7 @@ use crate::{
   listfiles::*,
   openhtml::*, 
   searchfiles::*, 
-  recentfiles::*, filltrie::populate_try
+  recentfiles::*, filltrie::populate_try, sendtofrontend::loadmarks
 };
 mod trie;
 // mod r  esync;
@@ -752,10 +752,14 @@ async fn nosize(windowname:String,id:String,path:String,togglewhat:String,window
     },
     "excludehidden"=>{
       println!("togglehidden");
-      state.togglehidden()},
-      "includefolder"=>{
-        state.toggleif();
-      },
+      state.togglehidden()
+    },
+    "includefolder"=>{
+      state.toggleif();
+    },
+    "loadmarks"=>{
+      loadmarks(&windowname, &window.app_handle(), serde_json::to_string(&state.getmarks()).unwrap());
+    },
     _=>{
 
       }
