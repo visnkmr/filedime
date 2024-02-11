@@ -134,6 +134,7 @@ export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 import { useToast } from "../components/ui/use-toast"
 import { Toaster } from "../components/ui/toaster"
+import { Switch } from "../components/ui/switch";
 
 export default function Greet() {
   const { toast } = useToast()
@@ -712,7 +713,7 @@ export default function Greet() {
         }
         return newFileCount;
        });
-        console.log("loading files---->"+event.payload);
+        // console.log("loading files---->"+event.payload);
     })
     .then(result => {
             // console.log(uio.getCurrent().label)
@@ -2751,7 +2752,10 @@ const [width, setWidth] = useState(200);
         </div>
         </ResizablePanel>
       </ResizablePanelGroup>):(
-        <FiledimeSettings/>
+        <div>
+          <FiledimeSettings theme={theme}/>
+          
+        </div>  
       )
       
      
