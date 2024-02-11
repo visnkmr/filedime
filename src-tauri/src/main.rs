@@ -844,6 +844,17 @@ async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStat
 
   Ok(())
 }
+#[tauri::command]
+async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+  // state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
+  let nwindow=opennewwindow(&window.app_handle(),&name,&winlabel);
+  println!("new winodw==============");
+  // whattoload(&absolute_date, id, nwindow, state).await;
+  // listtabs(windowname,window, state).await;
+  // list_files(absolute_date.to_string(),id,path,"".to_string(), window, state).await;
+
+  Ok(())
+}
 
 #[tauri::command]
 fn tabname(path:String)->String{
@@ -1157,6 +1168,7 @@ fn main() {
         stopserver,
         tabname,
         navbrowsetimeline,
+        newspecwindow,
         addtotabhistory
         // whattoload,
         // get_window_label

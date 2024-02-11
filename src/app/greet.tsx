@@ -13,7 +13,7 @@ import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
 // import parse from 'html-react-parser';
-// import {appWindow as appWindow2} from "@tauri-apps/api/window"
+import {appWindow as activewindow} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
@@ -21,6 +21,7 @@ import { useMouseShortcut } from "./mouseshortcuts";
 
 // import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
+import FiledimeSettings from "./filedimesettings"
 // import {columns} from "../src/components/columns"
 // import {
 //   Popover,
@@ -1446,9 +1447,10 @@ const [width, setWidth] = useState(200);
     b: 90,
   });
 
-
-  return (
+  
+  return (activewindow.label!=="settings"?(
     // <div className="overflow-hidden">
+    
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
 
@@ -1467,6 +1469,12 @@ const [width, setWidth] = useState(200);
               console.log(JSON.stringify(tabHistories))
               console.log(JSON.stringify(tabForward))
             }}/>
+            <Button className="ml-2" variant={"outline"} onClick={()=>{
+              invoke("newspecwindow",{
+                winlabel:"settings",
+                name:"Settings"
+              })
+            }}>Settings</Button>
             </div>
             {/* <div className="grid items-start px-4 text-sm font-medium"> */}
               
@@ -2727,7 +2735,9 @@ const [width, setWidth] = useState(200);
         </span> */}
         </div>
         </ResizablePanel>
-      </ResizablePanelGroup>
+      </ResizablePanelGroup>):(
+        <FiledimeSettings/>
+      )
       
      
     // </div>
