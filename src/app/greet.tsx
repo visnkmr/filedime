@@ -1604,10 +1604,13 @@ const [width, setWidth] = useState(200);
                   })
                 }
                 }
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
+                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
                 
               >
+               <div>
+
                 <HomeIcon className="h-4 w-4" />
+               </div>
                 Home
               </button>
               <button onClick={()=>
@@ -1626,10 +1629,13 @@ const [width, setWidth] = useState(200);
                   })
                 }
                 }
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
+                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
                 
               >
+                <div>
+
                 <DownloadIcon className="h-4 w-4" />
+                </div>
                 Downloads
               </button>
               <button onClick={()=>
@@ -1648,10 +1654,13 @@ const [width, setWidth] = useState(200);
                   })
                 }
                 }
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
+                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
                 
               >
+                <div>
+
                 <FileTextIcon className="h-4 w-4" />
+                </div>
                 Documents
               </button>
               {/* <Link
@@ -1666,7 +1675,7 @@ const [width, setWidth] = useState(200);
                 Trash
               </button> */}
               <button
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
                   { 
                       // setfileslist([])
@@ -1682,7 +1691,10 @@ const [width, setWidth] = useState(200);
                   }
                   }
               >
+                <div>
+
                 <PlusIcon className="h-4 w-4" />
+                </div>
                 New Tab
               </button>
               
@@ -1730,7 +1742,10 @@ const [width, setWidth] = useState(200);
                     }
                 >
                    {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+                   <div>
+
                    <BookIcon className="h-6 w-6 mr-3" />
+                   </div>
                   {mark.name}
                   
                 </button>
@@ -1795,7 +1810,7 @@ const [width, setWidth] = useState(200);
                     <FolderIcon className="h-4 w-4" />
                     </div>
                     {/* <div className="ps-2  overflow-hidden"> */}
-                  <div className="line-clamp-1 ps-2">
+                  <div className="ps-2 w-full text-start">
 
                   {tab.tabname}
                   </div>
@@ -1815,15 +1830,15 @@ const [width, setWidth] = useState(200);
                     Load folder contents to search
                     </HoverCardContent>
                   </HoverCard>
-                    <div>
+                    <div >
 
-                  <Button className={`${tablist.length>1 ? '' : 'hidden'}`}>
-                    <XIcon  className={`h-4 w-4`} onClick={(e)=>{
+                  <Button  onClick={(e)=>{
                     e.stopPropagation();
                     
                     closetab(tab.id);
                     activateTab(tablist[tablist.length-1])
-                  }}/>
+                  }} className={`rounded-full ${tablist.length>1 ? '' : 'hidden'}`}>
+                    <XIcon  className={`h-4 w-4`} />
                     </Button>
                     </div>
                   {/* </div> */}
