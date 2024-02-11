@@ -7,6 +7,8 @@ import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
+import { arch, platform, type, version } from '@tauri-apps/api/os';
+
 import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
@@ -305,9 +307,12 @@ export default function Greet() {
   //   }
   //  }
   // Import appWindow and save it inside the state for later usage
-  
+  const [p,setp]=useState("")
   useEffect(() => {
     console.log(Math.random());
+    let wfp=async()=>{setp(await platform())
+    console.log(await platform())};
+    wfp();
     
   }, []);
   useKeyboardShortcut(()=>{
@@ -1687,7 +1692,7 @@ const [width, setWidth] = useState(200);
                 <ContextMenu>
                   <ContextMenuTrigger>
                 <button key={index}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
+                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                   onClick={()=>
                     { 
                       if(mark.is_dir){
@@ -1759,10 +1764,10 @@ const [width, setWidth] = useState(200);
               {
                 
                tablist.map((tab, index) => (
-                <div key={index} className="overflow-hidden">
+                // <div key={index} className="overflow-hidden">
 
                 <button 
-                className={`flex items-center rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
+                className={`w-full flex items-center rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
                     { 
                         // setfileslist([])
@@ -1791,7 +1796,7 @@ const [width, setWidth] = useState(200);
                   {/* } */}
                   <HoverCard>
                     <HoverCardTrigger>
-                      <Button onClick={()=>{
+                      <Button size={"default"} onClick={()=>{
                         populatesearchlist(tab.path)
                       }}>
 
@@ -1815,7 +1820,7 @@ const [width, setWidth] = useState(200);
                     </div>
                   {/* </div> */}
                 </button>
-                </div>
+                // </div>
                 ))
 
               }
@@ -1842,7 +1847,8 @@ const [width, setWidth] = useState(200);
                       invoke('list_files', { 
                         windowname:appWindow?.label,
                         oid: activetabid.toString(),
-                        path: message.mount_point,
+                        path:p=="linux"?message.name:message.mount_point
+                        ,
                         ff: "" 
                     }).catch((e)=>console.error(e))
                     }
