@@ -743,7 +743,7 @@ fn get_timestamp() -> String {
     timestamp
 }
 #[tauri::command]
-async fn nosize(windowname:String,id:String,path:String,togglewhat:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   println!("loading toggle rust---->1");
 
   match(togglewhat.as_str()){
@@ -765,8 +765,8 @@ async fn nosize(windowname:String,id:String,path:String,togglewhat:String,window
       }
 
   }
-  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
-  println!("loading toggle rust---->2");
+  // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  // println!("loading toggle rust---->2");
 
   Ok(())
 }
@@ -857,8 +857,16 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
 }
 
 #[tauri::command]
-fn configfolpath()->String{
-  config_folder_path("filedime").as_path().to_string_lossy().to_string()
+fn configfolpath(state: State<'_, AppStateStore>)->String{
+  serde_json::to_string(&json!({
+    "excludehidden":state.excludehidden.read().unwrap().clone(),
+    "includefolder":state.includefolderinsearch.read().unwrap().clone(),
+    "childcount":state.showfolderchildcount.read().unwrap().clone(),
+    "folsize":state.nosize.read().unwrap().clone(),
+    "cfpath":config_folder_path("filedime").as_path().to_string_lossy().to_string(),
+    // "arguments":arguments
+  })).unwrap()
+  
 }
   #[tauri::command]
 fn tabname(path:String)->String{

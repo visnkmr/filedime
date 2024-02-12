@@ -3,8 +3,8 @@ import React from "react";
 
 
 //display system info using os api
-export default function EachSetting({name,callback}){
-    const [isSelected, setIsSelected] = React.useState(false);
+export default function EachSetting({name,callback,currentstatus}){
+    const [isSelected, setIsSelected] = React.useState(currentstatus);
     console.log(isSelected)
     return (
 

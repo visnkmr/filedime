@@ -1408,8 +1408,6 @@ function closetab(closeid){
     if(appWindow){
       const thensobj={
       windowname: appWindow?.label,
-      id: activetabid.toString(),
-      path: path,
       togglewhat:togglewhat
     };
     console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
