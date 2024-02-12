@@ -759,10 +759,10 @@ export default function Greet() {
       invoke("listtabs",{})
       .then((e)=>{
         let tabslist=JSON.parse(e) as string[];
-        for (const ei of tabslist){
+        for (const [index,ei] of tabslist.entries()){
           reset(ei)
           setpath(ei)
-          newtab(ei);
+          newtab(ei,index.toString());
         }
         if(tabslist.length<1){
           reset("drives://")
@@ -1338,10 +1338,10 @@ function closetab(closeid){
     
   }
 }
-  function newtab(gotopath?:string){
+  function newtab(gotopath?:string,salt=""){
     reset()
     // console.error(gotopath)
-    let newtabid=new Date().getTime();
+    let newtabid=`${new Date().getTime()}${salt}`;
 
                       invoke(
                         "tabname",
