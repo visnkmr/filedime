@@ -6,36 +6,31 @@
 //load search list
 //showchildfoldercount
 //config folder location
-import { useTheme } from "next-themes";
-import { Switch } from "../components/ui/switch"
-import React from "react";
-import { Label } from "../components/ui/label"
-
+import React, { useEffect, useState } from "react";
+import EachSetting from "./switchsettingseach"
+import { invoke } from "@tauri-apps/api/tauri";
 
 //display system info using os api
 export default function FiledimeSettings({theme}){
     // const { theme, setTheme } = useTheme()
-    const [isSelected, setIsSelected] = React.useState(false);
-    console.log(isSelected)
+    const [configfol,setcf]=useState("")
+    useEffect(()=>{
+        invoke("configfolpath",{}).then((e)=>{
+            setcf(e);
+            invoke("foldersize", { path: e }).then((i)=>{
+                setcf((old)=>`${old}(${i})`)    
+            })
+        })
+        
+    },[])
     return (
     <>
     <div>
-
-    <div className="flex flex-row ">
-        <div className="items-center flex font-bold">
-            Exclude hidden files
-        </div>
-        <div className="p-2">
-
-        <Switch 
-        checked={isSelected}
-        onCheckedChange={() => setIsSelected(!isSelected)} />
-        </div>
-        <div className="ps-2 items-center flex">
-
-        {isSelected ? 'Enabled' : 'Disabled'}
-        </div>
-    </div>
+        <EachSetting name="Exclude hidden files" callback={()=>{}} />
+        <EachSetting name="Session restore" callback={()=>{}}/>
+        <EachSetting name="Compute folder sizes on open" callback={()=>{}}/>
+        <EachSetting name="Estimate folder child count" callback={()=>{}}/>
+        <p>Config files are stored @ {configfol}</p>
     </div>
     </>
     );

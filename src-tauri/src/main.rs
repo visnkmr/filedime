@@ -857,6 +857,10 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
 }
 
 #[tauri::command]
+fn configfolpath()->String{
+  config_folder_path("filedime").as_path().to_string_lossy().to_string()
+}
+  #[tauri::command]
 fn tabname(path:String)->String{
   let p=path.clone();
   let result=
@@ -1128,6 +1132,7 @@ fn main() {
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
+        configfolpath,
         listtabs,
         closealltabs,
         getparentpath,
