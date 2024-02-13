@@ -44,7 +44,7 @@ pub fn populatedrivelist()->Vec<DriveItem>{
   }).collect::<Vec<DriveItem>>()
 }
 #[tauri::command]
-pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
+pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
   println!("lfiles");
   let ignorehiddenfiles=*state.excludehidden.read().unwrap();
   if(path=="drives://"){
@@ -100,7 +100,7 @@ pub async fn list_files(windowname:String,oid:String,mut path: String,ff:String,
   // if(path=="./"){
   //   path="/home/roger/Downloads/github/notes/".to_string();
   // }
-
+    lct(&windowname, &window.app_handle(), starttime.clone());
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
 
@@ -408,7 +408,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
           //   return Err("error"); // return an error to stop the iteration
           // }
           if(!e.path().to_string_lossy().to_string().eq(&path)){
-            // thread::sleep(Duration::from_millis(2000));
+            thread::sleep(Duration::from_millis(2000));
 
             let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
             let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -418,7 +418,10 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
             files.push(file.clone()); // push a clone of the file to the vector
             // if files.len()<100
             // {
-              fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
+              fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&json!({
+                "caller":starttime,
+                "files":&serde_json::to_string(&file.clone()).unwrap(),
+              })).unwrap());
               progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
           }
           // }
@@ -459,9 +462,9 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     // println!("{:?}",serde_json::to_string(&files.clone()).unwrap());
     stoptimer(&wname,&app_handle)?;
   
-    if(*state.loadsearchlist.read().unwrap()){
-      populate_try(path, &window,&state).await;
-    }
+    // if(*state.loadsearchlist.read().unwrap()){
+    //   populate_try(path, &window,&state).await;
+    // }
 
     let now = SystemTime::now();
     let duration = now.duration_since(UNIX_EPOCH).unwrap();

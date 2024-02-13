@@ -919,8 +919,9 @@ async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)-
 }
 #[tauri::command]
 async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.togglelsl();
-  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+  // state.togglelsl();
+  populate_try(path, &window,&state);
+  // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
   Ok(())
 }
 // use url::Url;

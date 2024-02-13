@@ -168,6 +168,7 @@ export default function Greet() {
     const [noofpages,setnop]=useState(1);
     const [currentpage,setpageno]=useState(0)
     const [perpage,setperpage]=useState(15)
+    const [lastcalledtime,setlct]=useState("")
     useMemo(()=>{
       setnop(Math.ceil(filecount/perpage))
     },[filecount])
@@ -263,28 +264,40 @@ export default function Greet() {
         setss("")
         console.log("reset done")
     }
+    let lct=new Date().getTime().toString();
+    function listfiles(oid,path){
+      lct=new Date().getTime().toString();
     
+      setlct(lct)
+      // console.error(lct)
+      // console.error("----------asdasdsd-------"+lastcalledtime)
+      // invoke(
+      //   "load_tab",
+      //   {
+      //     windowname:appWindow?.label,
+      //     oid: tab.id.toString()
+      //   }
+      // );
+      
+      invoke('list_files', { 
+        starttime:lct,
+        windowname:appWindow?.label,
+        oid: oid.toString(),
+        path: path,
+        ff: "" 
+    }).catch((e)=>console.error(e))
+
+    }
      function activateTab(tab: tabinfo){
       console.log("activating"+JSON.stringify(tab))
       // console.log("activate tab "+tabid)
       // let activeTab = tablist.find(tab => tab.id === tabid );
       // if (activeTab) {
         // setpath(tab.path)s
+        
         setactivetabid(tab.id)
         reset(tab.path)
-        // invoke(
-        //   "load_tab",
-        //   {
-        //     windowname:appWindow?.label,
-        //     oid: tab.id.toString()
-        //   }
-        // );
-        invoke('list_files', { 
-          windowname:appWindow?.label,
-          oid: tab.id.toString(),
-          path: tab.path,
-          ff: "" 
-      })
+        listfiles(tab.id,tab.path)
       // }
     //  }
     //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
@@ -396,12 +409,7 @@ export default function Greet() {
           // setpsplitl(splitpath(pathtogoto))
           // sst("")
           // useEffect(() => {
-            invoke('list_files', { 
-              windowname:appWindow?.label,
-              oid: activetabid.toString(),
-              path: pathtogoto,
-              ff: "" 
-          });
+            listfiles(activetabid,pathtogoto);
         }
       }).catch((e)=>console.error(e))
     }, {
@@ -423,12 +431,7 @@ export default function Greet() {
           // setpsplitl(splitpath(pathtogoto))
           // sst("")
           // useEffect(() => {
-            invoke('list_files', { 
-              windowname:appWindow?.label,
-              oid: activetabid.toString(),
-              path: pathtogoto,
-              ff: "" 
-          });
+            listfiles(activetabid,pathtogoto);
         }
       }).catch((e)=>console.error(e))
     }, {
@@ -450,12 +453,7 @@ export default function Greet() {
           // setpsplitl(splitpath(pathtogoto))
           // sst("")
           // useEffect(() => {
-            invoke('list_files', { 
-              windowname:appWindow?.label,
-              oid: activetabid.toString(),
-              path: pathtogoto,
-              ff: "" 
-          });
+            listfiles(activetabid,pathtogoto);
         }
       }).catch((e)=>console.error(e))
     }, {
@@ -699,21 +697,34 @@ export default function Greet() {
               console.log(result)
           })
       .catch(console.error);
-      
+      // listen('lct',(event)=>{
+      //   setlct((event.payload))
+      //   console.error("----------"+lastcalledtime)
+      // })
       // const unlisten1=
       listen('list-files', (event) => {
-        setwbv(false)
-        setfc((old) => {
-          const newFileCount = old + 1;
-          // if (newFileCount < 11)
-           {
-            // setpsplitl(splitpath(path))
-  
-            setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
-            
-          }
-          return newFileCount;
-         });
+        console.log(event)
+        let returned=JSON.parse(event.payload);
+        console.log(returned)
+        // setlct((returned.caller))
+        // console.log(lastcalledtime+"-------"+returned.caller)
+            if(returned.caller===lastcalledtime){
+              let tocompute=JSON.parse(returned.files)
+              console.log(tocompute)
+              setwbv(false)
+              setfc((old) => {
+                const newFileCount = old + 1;
+                // if (newFileCount < 11)
+                 {
+                  
+                  // setpsplitl(splitpath(path))
+        
+                  setfileslist((plog) => [...plog, tocompute]);
+                  
+                }
+                return newFileCount;
+               });
+            }
           // console.log("loading files---->"+event.payload);
       })
       .then(result => {
@@ -866,12 +877,7 @@ export default function Greet() {
                         // sst(name)
                       }
                     // useEffect(() => {
-                      invoke('list_files', { 
-                        windowname:appWindow?.label,
-                        oid: activetabid.toString(),
-                        path: clickpath,
-                        ff: "" 
-                    }).catch((e)=>console.error(e));
+                      listfiles(activetabid,clickpath);
                     // },[])
                     }
                   }>
@@ -1384,12 +1390,7 @@ export default function Greet() {
                           // );
                           // addToTabHistory(newtabid.toString(),gotopath)
                           // addTofwdHistory(newtabid.toString(),path)
-                          invoke('list_files', { 
-                            windowname:appWindow?.label,
-                            oid: newtabid.toString(),
-                            path: gotopath,
-                            ff: "" 
-                        })
+                          listfiles(newtabid,gotopath);
                         });
     }
     function reloadsize(togglewhat="size"){
@@ -1438,7 +1439,7 @@ export default function Greet() {
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
-
+        {lastcalledtime}
         <div className="flex h-full flex-col gap-2">
 
           <div className="flex p-3  border-b">
@@ -1581,12 +1582,7 @@ export default function Greet() {
                     updatetabs("drives://")
                     // setpath()
                     // console.log(message);
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: "drives://",
-                      ff: "" 
-                  })
+                    listfiles(activetabid,"drives://");
                 }
                 }
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
@@ -1606,12 +1602,7 @@ export default function Greet() {
                     updatetabs("downloads://")
                     // setpath()
                     // console.log(message);
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: "downloads://",
-                      ff: "" 
-                  })
+                    listfiles(activetabid,"downloads://");
                 }
                 }
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
@@ -1631,12 +1622,7 @@ export default function Greet() {
                     updatetabs("documents://")
                     // setpath()
                     // console.log(message);
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: "documents://",
-                      ff: "" 
-                  })
+                    listfiles(activetabid,"documents://");
                 }
                 }
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all  dark:text-gray-400  ${hovercolor} ${focuscolor}`}
@@ -1852,13 +1838,8 @@ export default function Greet() {
                       // setpath()
                       // sst(message.mount_point)
                       // console.log(message);
-                      invoke('list_files', { 
-                        windowname:appWindow?.label,
-                        oid: activetabid.toString(),
-                        path:p=="linux"?message.name:message.mount_point
-                        ,
-                        ff: "" 
-                    }).catch((e)=>console.error(e))
+                      listfiles(activetabid,p=="linux"?message.name:message.mount_point);
+                        
                     }
                     }
                 >
@@ -2142,12 +2123,7 @@ export default function Greet() {
                     // setpsplitl(splitpath(pathtogoto))
                     // sst("")
                     // useEffect(() => {
-                      invoke('list_files', { 
-                        windowname:appWindow?.label,
-                        oid: activetabid.toString(),
-                        path: pathtogoto,
-                        ff: "" 
-                    });
+                      listfiles(activetabid,pathtogoto);
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowLeft className="h-4 w-4"
@@ -2170,12 +2146,7 @@ export default function Greet() {
                     // setpsplitl(splitpath(pathtogoto))
                     // sst("")
                     // useEffect(() => {
-                      invoke('list_files', { 
-                        windowname:appWindow?.label,
-                        oid: activetabid.toString(),
-                        path: pathtogoto,
-                        ff: "" 
-                    });
+                      listfiles(activetabid,pathtogoto);
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowUp className="h-4 w-4"
@@ -2202,12 +2173,7 @@ export default function Greet() {
                   // setpsplitl(splitpath(pathtogoto))
                   // sst("")
                   // useEffect(() => {
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: pathtogoto,
-                      ff: "" 
-                  });
+                    listfiles(activetabid,pathtogoto);
                 }
               }).catch((e)=>console.error(e))
               }}>
@@ -2373,12 +2339,8 @@ export default function Greet() {
                   // setpath()
                   // sst(eachif.pathtofol)
                   // console.log(message);
-                  invoke('list_files', { 
-                    windowname:appWindow?.label,
-                    oid: activetabid.toString(),
-                    path: eachif.pathtofol,
-                    ff: "" 
-                })}
+                  listfiles(activetabid,eachif.pathtofol);
+              }
             }>
               {/* <TreesIcon className="h-4 w-4 "/> */}
               {eachif.interfolpath}</button>
@@ -2555,12 +2517,7 @@ export default function Greet() {
                                 // setpsplitl(splitpath(message.path))
                                 // sst(message.name)
                                 // useEffect(() => {
-                                invoke('list_files', { 
-                                  windowname:appWindow?.label,
-                                  oid: activetabid.toString(),
-                                  path: message.path,
-                                  ff: "" 
-                                }).catch((e)=>console.error(e));
+                                  listfiles(activetabid,message.path);
                                 // },[])
                                 }
                               }>

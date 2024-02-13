@@ -550,19 +550,19 @@ impl AppStateStore {
     //     println!("{:?}",*self.nosize.read().unwrap())
     // }
   }
-  pub fn togglelsl(&self){
-    let tempstore;
-    {
+//   pub fn togglelsl(&self){
+//     let tempstore;
+//     {
 
-        tempstore=!*self.loadsearchlist.read().unwrap();
-    }
-    let mut setstore=self.loadsearchlist.write().unwrap();
-    *setstore=tempstore;
-    drop(setstore)
-    // {
-    //     println!("{:?}",*self.nosize.read().unwrap())
-    // }
-  }
+//         tempstore=!*self.loadsearchlist.read().unwrap();
+//     }
+//     let mut setstore=self.loadsearchlist.write().unwrap();
+//     *setstore=tempstore;
+//     drop(setstore)
+//     // {
+//     //     println!("{:?}",*self.nosize.read().unwrap())
+//     // }
+//   }
   pub fn foldercon(&self,path:&str)
   ->i32
 //   ->(u64,u64) 

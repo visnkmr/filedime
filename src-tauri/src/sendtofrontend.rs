@@ -119,6 +119,15 @@ pub fn loadmarks(windowname:&str,ah:&AppHandle,string:String){
   .map_err(|e| e.to_string()).unwrap();
 }
 
+pub fn lct(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
+    ah.emit_to(
+        windowname,
+        "lct",
+        string,
+      )
+      .map_err(|e| e.to_string())?; 
+    Ok(())
+}
 pub fn folsize(windowname:&str,ah:&AppHandle,string:String)->Result<(),String>{
     ah.emit_to(
         windowname,
