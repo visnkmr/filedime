@@ -1261,14 +1261,7 @@ function populatesearchlist(spath){
   }).catch((e)=>console.error(e))
 }
 function populateimmediatechildcount(){
-  reset(path)
-  invoke(
-    "folcount",
-    {
-    windowname:appWindow?.label,
-      id: activetabid.toString(),
-      path: path
-    });
+  reloadsize("folcount")
 }
 
 function recentfiles(){

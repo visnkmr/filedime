@@ -46,11 +46,11 @@ export default function FiledimeSettings({theme}){
     return (
     <>
     <div>
-        <EachSetting name="Exclude hidden files" callback={()=>{}} currentstatus={data?.excludehidden}/>
+        <EachSetting name="Exclude hidden files" callback={()=>{reloadsize("excludehidden")}} currentstatus={data?.excludehidden}/>
         <EachSetting name="Session restore" callback={()=>{}} currentstatus={data?.excludehidden}/>
-        <EachSetting name="Include folder names in search" callback={()=>{}} currentstatus={data?.includefolder}/>
+        <EachSetting name="Include folder names in search" callback={()=>{reloadsize("includefolder")}} currentstatus={data?.includefolder}/>
         <EachSetting name="Compute folder sizes on open" callback={()=>{reloadsize()}} currentstatus={data?.folsize}/>
-        <EachSetting name="Estimate folder child count" callback={()=>{}} currentstatus={data?.childcount}/>
+        <EachSetting name="Estimate folder child count" callback={()=>{reloadsize("folcount")}} currentstatus={data?.childcount}/>
         <p>Config files are stored @ {configfol}</p>
     </div>
     </>

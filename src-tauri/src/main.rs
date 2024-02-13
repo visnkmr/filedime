@@ -757,6 +757,9 @@ async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<
     "includefolder"=>{
       state.toggleif();
     },
+    "folcount"=>{
+      state.togglefolcount();
+    },
     "loadmarks"=>{
       loadmarks(&windowname, &window.app_handle(), serde_json::to_string(&state.getmarks()).unwrap());
     },
@@ -807,12 +810,6 @@ async fn copynpaste(source:Vec<String>,dest:String,window: Window,state: State<'
   Ok("".to_string())
 }
 
-#[tauri::command] 
-async fn folcount(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.togglefolcount();
-  list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
-  Ok(())
-}
 
 // #[tauri::command]
 // fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
@@ -1153,7 +1150,6 @@ fn main() {
         closetab,
         disablenav,
         copynpaste,
-        folcount,
         searchload,
         defaulttoopen,
         foldersize,
