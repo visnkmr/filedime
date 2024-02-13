@@ -761,6 +761,18 @@ async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<
     "folcount"=>{
       state.togglefolcount();
     },
+    "sessionsave"=>{
+      savecustom("filedime", "storevals/savetabs.set", 
+      {
+        let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
+        match(truechecker.as_str()){
+        "true"=>{
+            false
+        },
+        _=>true
+        }
+      });
+    },
     "loadmarks"=>{
       loadmarks(&windowname, &window.app_handle(), serde_json::to_string(&state.getmarks()).unwrap());
     },

@@ -41,7 +41,7 @@ export default function FiledimeSettings(){
             let stateinf=JSON.parse(e) as stateinfo;
             setdfs(<>
                 <EachSetting name="Exclude hidden files" callback={()=>{reloadsize("excludehidden")}} currentstatus={stateinf.excludehidden}/>
-                    <EachSetting name="Restore tabs on open" callback={()=>{}} currentstatus={stateinf.sessionstore}/>
+                    <EachSetting name="Restore tabs on open" callback={()=>{reloadsize("sessionsave")}} currentstatus={stateinf.sessionstore}/>
                     <EachSetting name="Include folder names in search" callback={()=>{reloadsize("includefolder")}} currentstatus={stateinf.includefolder}/>
                     <EachSetting name="Compute folder sizes" callback={()=>{reloadsize()}} currentstatus={!stateinf.folsize}/>
                     <EachSetting name="Estimate folder child count" callback={()=>{reloadsize("folcount")}} currentstatus={stateinf.childcount}/>
