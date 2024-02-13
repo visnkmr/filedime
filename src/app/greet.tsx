@@ -2749,10 +2749,11 @@ export default function Greet() {
     // <div className="overflow-hidden">
     
       
-        <div>
-          <FiledimeSettings theme={theme}/>
+        // <div>
+          <FiledimeSettings/>
           
-        </div>  )
+        // </div>  
+        )
   }
   
       

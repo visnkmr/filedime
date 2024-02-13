@@ -854,13 +854,18 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
 }
 
 #[tauri::command]
-fn configfolpath(state: State<'_, AppStateStore>)->String{
+fn configfolpath(window:Window,state: State<'_, AppStateStore>)->String{
   serde_json::to_string(&json!({
     "excludehidden":state.excludehidden.read().unwrap().clone(),
     "includefolder":state.includefolderinsearch.read().unwrap().clone(),
     "childcount":state.showfolderchildcount.read().unwrap().clone(),
     "folsize":state.nosize.read().unwrap().clone(),
     "cfpath":config_folder_path("filedime").as_path().to_string_lossy().to_string(),
+    "cfpathsize":(sizeunit::size(dirsize::dir_size(
+        &config_folder_path("filedime").as_path().to_string_lossy().to_string(),
+        &window,
+        &state,
+    ),true)),
     // "arguments":arguments
   })).unwrap()
   
