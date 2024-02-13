@@ -16,6 +16,7 @@ use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
+use rustc_hash::FxHashSet;
 use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
@@ -857,6 +858,15 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
 fn configfolpath(window:Window,state: State<'_, AppStateStore>)->String{
   serde_json::to_string(&json!({
     "excludehidden":state.excludehidden.read().unwrap().clone(),
+    "sessionstore":({
+        let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
+        match(truechecker.as_str()){
+        "true"=>{
+            true
+        },
+        _=>false
+        }
+      }),
     "includefolder":state.includefolderinsearch.read().unwrap().clone(),
     "childcount":state.showfolderchildcount.read().unwrap().clone(),
     "folsize":state.nosize.read().unwrap().clone(),

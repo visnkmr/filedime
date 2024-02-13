@@ -759,16 +759,12 @@ export default function Greet() {
         reloadsize("loadmarks")
         invoke("listtabs",{})
         .then((e)=>{
+          console.log("onopen---->"+e)
           let tabslist=JSON.parse(e) as string[];
           for (const [index,ei] of tabslist.entries()){
             reset(ei)
             setpath(ei)
             newtab(ei,index.toString());
-          }
-          if(tabslist.length<1){
-            reset("drives://")
-            setpath("drives://")
-            newtab("drives://");
           }
           
         })

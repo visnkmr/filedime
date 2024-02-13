@@ -1,6 +1,6 @@
 #![warn(clippy::disallowed_types)]
 use filesize::PathExt;
-use prefstore::{clearcustom, getallcustomwithin, getcustom, savecustom};
+use prefstore::{clearcustom, getallcustomwithin, getcustom, savecustom, clearall};
 use std::collections::{HashSet, HashMap};
 use std::fs;
 use std::mem::{self};
@@ -127,18 +127,36 @@ impl AppStateStore {
                 match(truechecker.as_str()){
                 "true"=>true,
                 _=>false
-            }}),
+                }
+            }),
             history:RwLock::new(HashMap::new()),
             filesetcollection:RwLock::new(HashMap::new()),
             showfolderchildcount:RwLock::new(false),
             loadsearchlist:RwLock::new(false),
             tabs:RwLock::new({
+                let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
                 let mut fxhs=FxHashSet::default();
-                for (filename,content) in getallcustomwithin("filedime", "tabs","tabinfo"){
-                    fxhs.insert(content);
-                    clearcustom("filedime", format!("tabs/{}.tabinfo",filename))
+                match(truechecker.as_str()){
+                    "true"=>{
+                        for (_,content) in getallcustomwithin("filedime", "tabs","tabinfo"){
+                            fxhs.insert(content);
+                        }
+                    },
+                    _=>{
+                        match(dirs::home_dir()){
+                            Some(dn) => {
+                                fxhs.insert(dn.to_string_lossy().to_string());
+                            },
+                            None => {
+                                
+                            },
+                        }
+                        
+                    }
                 }
+                clearall("filedime/tabs/", "tabinfo");
                 fxhs
+                
             }),
             expiration:Duration::from_secs(expiration),
             bookmarks:RwLock::new({
