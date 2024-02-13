@@ -137,1312 +137,1309 @@ import { Toaster } from "../components/ui/toaster"
 import { Switch } from "../components/ui/switch";
 
 export default function Greet() {
-  const { toast } = useToast()
   const { theme, setTheme } = useTheme()
-  async function setupAppWindow() {
-    const appWindow = (await import('@tauri-apps/api/window')).appWindow
-    console.log("windowname top---------->"+appWindow.label)
-
-    setAppWindow(appWindow)
-  }
-
-  useEffect(() => {
-    setupAppWindow()
-    
-    // console.log("windowname---------->"+winInfo.winname)
-    // openTab("drives://")
-  }, []) 
-  const filesobjinit:FileItem[]=[]
-  const objinit:string[]=[]
-  const driveobjinit:DriveItem[]=[]
-  const pathsplitobjinit:pathsplit[]=[]
-  const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
-  const [driveslist, setdriveslist] = useState(driveobjinit);
-  const [activetabid,setactivetabid]=useState(0)
-  const [listlimit,setll]=useState(true)
-  const [isgrid,setig]=useState(false)
-  const [startstopfilewatch,setstartstopfilewatch]=useState(false)
-  const [watchbuttonvisibility,setwbv]=useState(false)
-  const [filecount, setfc] = useState(0);
-  const [noofpages,setnop]=useState(1);
-  const [currentpage,setpageno]=useState(0)
-  const [perpage,setperpage]=useState(15)
-  useMemo(()=>{
-    setnop(Math.ceil(filecount/perpage))
-  },[filecount])
+  if(activewindow.label!=="settings"){
+    const { toast } = useToast()
+    async function setupAppWindow() {
+      const appWindow = (await import('@tauri-apps/api/window')).appWindow
+      console.log("windowname top---------->"+appWindow.label)
   
-  const [tablist,settbl]=useState<tabinfo[]>()
-  const [bookmarks,setbms]=useState<mark[]>()
-  const [path, setpath] = useState("drives://");
-  const [pathitype, setpit] = useState("drives://");
-  const [searchstring,setss] = useState("");
-  const [fileopsrc,setfos] = useState(objinit);
-  let srclist=JSON.stringify(fileopsrc);
-  // useEffect(()=>{
-  //  srclist= JSON.stringify(fileopsrc)
-  // },[fileopsrc])
-  const [fileopdest,setfod] = useState("");
-  const [parentsize,setps] = useState("");
-  const [sampletext,sst]=useState("")
-  const [filesetcollectionlist,setfscl]=useState(objinit)
-  const [custombuttonlist,setcbl]=useState(objinit)
-  // const [pathinput,spi]=useState("")
-  const [pathsuggestlist,setpsl]=useState(objinit)
-  const [appWindow, setAppWindow] = useState()
-  // let wininfo: wininfo = {
-  //   winname: appWindow?.label,
-  //   winname: appWindow?.label,
-  //   tablist: [],
-  //   tabidsalloted: 0
-  //  };
-  //  const [winInfo,setwi]= useState(wininfo)
-  // const [history,sethistory]=useState(objinit)
-  const [fileslist, setfileslist] = useState(filesobjinit);
-  const [sftype,setsftype]=useState("all")
-
-  
-  useMemo(()=>{
-    let filestocount=fileslist.filter(function (el) {
-      return (searchstring.trim().length>0?
-        el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
-        (el.ftype===sftype || sftype ==="all"):(true))))
-     }).length;
-    !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
-    // !!fileslist && setfileslist((old)=>{
-    //   return [...old]
-    // })
-    setpageno((old)=>{
-      console.error(old+"---"+noofpages)
-     return old>noofpages?(noofpages-1):(old)
-    })
-  },[perpage,sftype])
-  const [isSheetOpen, setiso] = useState(false);
-  // const [backpressed,setbackpressed]=useState(false)
-  
-
-  // function openTab(tabPath: string): void {
-  //   let temptab=winInfo.tabidsalloted++;
-  //   let newTab: tabinfo = {
-  //     tabid: temptab,
-  //     tabpath: tabPath,
-  //     history: []
-  //   };
-  //   winInfo.tablist.push(newTab);
-  //   invoke('list_files', { 
-  //     windowname:winInfo.winname,
-  //     oid: temptab.toString(),
-  //     path: tabPath,
-  //     ff: "" 
-  // })
-  //  }
-  //  function navigateToNewPath(tabid: number, newPath: string,oldpath:string): void {
-  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-  //   if (tabIndex !== -1 && !backpressed) {
-  //     winInfo.tablist[tabIndex].tabpath = newPath;
-  //     winInfo.tablist[tabIndex].history.push(oldpath);
-  //   }
-  //   setbackpressed(false)
-  //  }
-  //  function closeTab(tabid: number): void {
-  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-  //   if (tabIndex !== -1) {
-  //    winInfo.tablist.splice(tabIndex, 1);
-  //   }
-  //  } 
-  function reset(p?:string){
-    if(p){
-      setpath(p);
-      setpsplitl(splitpath(p))
-      // sst(p)
+      setAppWindow(appWindow)
     }
-    setsftype("all")
-      setfileslist([])
-      // setdriveslist([])
-      setfc(0)
-      setss("")
-      console.log("reset done")
-  }
   
-   function activateTab(tab: tabinfo){
-    console.log("activating"+JSON.stringify(tab))
-    // console.log("activate tab "+tabid)
-    // let activeTab = tablist.find(tab => tab.id === tabid );
-    // if (activeTab) {
-      // setpath(tab.path)s
-      setactivetabid(tab.id)
-      reset(tab.path)
-      // invoke(
-      //   "load_tab",
-      //   {
-      //     windowname:appWindow?.label,
-      //     oid: tab.id.toString()
-      //   }
-      // );
-      invoke('list_files', { 
-        windowname:appWindow?.label,
-        oid: tab.id.toString(),
-        path: tab.path,
-        ff: "" 
-    })
-    // }
-  //  }
-  //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-  //   if (tabIndex !== -1) {
-  //     sethistory(winInfo.tablist[tabIndex].history)
-  //     setactivetabid(tabid)
-  //     invoke('list_files', { 
-  //       windowname:winInfo.winname,
-  //       oid: tabid.toString(),
-  //       path: winInfo.tablist[tabIndex].tabpath,
-  //       ff: "" 
-  //   })
-  //    // Activate the tab...
-  //   }
-   }
-
-  //  function goBack(): void {
-  //   let activeTab = winInfo.tablist.find(tab => tab.tabid === activetabid );
-  //   if (activeTab && activeTab.history.length > 1) {
-  //     setbackpressed(true)
-  //     navigateToNewPath(activetabid, activeTab.history[activeTab.history.length - 1],path);
-  //     activeTab.history.pop();
-  //   }
-  //  }
-  // Import appWindow and save it inside the state for later usage
-  const [p,setp]=useState("")
-  useEffect(() => {
-    console.log(Math.random());
-    let wfp=async()=>{setp(await platform())
-    console.log(await platform())};
-    wfp();
+    useEffect(() => {
+      setupAppWindow()
+      
+      // console.log("windowname---------->"+winInfo.winname)
+      // openTab("drives://")
+    }, []) 
+    const filesobjinit:FileItem[]=[]
+    const objinit:string[]=[]
+    const driveobjinit:DriveItem[]=[]
+    const pathsplitobjinit:pathsplit[]=[]
+    const [pathsplitlist, setpsplitl] = useState(pathsplitobjinit);
+    const [driveslist, setdriveslist] = useState(driveobjinit);
+    const [activetabid,setactivetabid]=useState(0)
+    const [listlimit,setll]=useState(true)
+    const [isgrid,setig]=useState(false)
+    const [startstopfilewatch,setstartstopfilewatch]=useState(false)
+    const [watchbuttonvisibility,setwbv]=useState(false)
+    const [filecount, setfc] = useState(0);
+    const [noofpages,setnop]=useState(1);
+    const [currentpage,setpageno]=useState(0)
+    const [perpage,setperpage]=useState(15)
+    useMemo(()=>{
+      setnop(Math.ceil(filecount/perpage))
+    },[filecount])
     
-  }, []);
-  useKeyboardShortcut(()=>{
-    newtab("drives://");
-  }, {
-    ctrlKey: true,
-    code: "KeyT",
-  }); 
-  useKeyboardShortcut(()=>{
-    invoke("newwindow",
-    {
-      // id: (winInfo.tabidsalloted++).toString(),
-      path: "drives://",
-      ff:""
-    });
-  }, {
-    ctrlKey: true,
-    code: "KeyN", 
-  });
-  useKeyboardShortcut(()=>{
-    invoke(
-      "addmark",
-      {
-    windowname:appWindow?.label,
-        path: path,
-        id: new Date().getTime().toString()
-      }
-    );
-  }, {
-    ctrlKey: true,
-    code: "KeyD", 
-  });
-  useKeyboardShortcut(()=>{
-    setfos((old)=>[...old,path])
-  }, {
-    ctrlKey: true,
-    code: "KeyC", 
-  });
+    const [tablist,settbl]=useState<tabinfo[]>()
+    const [bookmarks,setbms]=useState<mark[]>()
+    const [path, setpath] = useState("drives://");
+    const [pathitype, setpit] = useState("drives://");
+    const [searchstring,setss] = useState("");
+    const [fileopsrc,setfos] = useState(objinit);
+    let srclist=JSON.stringify(fileopsrc);
+    // useEffect(()=>{
+    //  srclist= JSON.stringify(fileopsrc)
+    // },[fileopsrc])
+    const [fileopdest,setfod] = useState("");
+    const [parentsize,setps] = useState("");
+    const [sampletext,sst]=useState("")
+    const [filesetcollectionlist,setfscl]=useState(objinit)
+    const [custombuttonlist,setcbl]=useState(objinit)
+    // const [pathinput,spi]=useState("")
+    const [pathsuggestlist,setpsl]=useState(objinit)
+    const [appWindow, setAppWindow] = useState()
+    // let wininfo: wininfo = {
+    //   winname: appWindow?.label,
+    //   winname: appWindow?.label,
+    //   tablist: [],
+    //   tabidsalloted: 0
+    //  };
+    //  const [winInfo,setwi]= useState(wininfo)
+    // const [history,sethistory]=useState(objinit)
+    const [fileslist, setfileslist] = useState(filesobjinit);
+    const [sftype,setsftype]=useState("all")
   
-  useKeyboardShortcut(()=>{
-    reloadsize("excludehidden")
-  }, {
-    ctrlKey: true,
-    code: "KeyH", 
-  });
-  useKeyboardShortcut((e)=>{
-    e.preventDefault(); 
-    console.log("closetab")
-    if(!tablist)return
-    if(tablist?.length<1) return;
-    closetab(activetabid);
-    activateTab(tablist[tablist.length-1])
-  }, {
-    ctrlKey: true,
-    code: "KeyW", 
-  });
-  useKeyboardShortcut((e)=>{
-    e.preventDefault(); 
-    reloadlist()
-  }, {
-    // ctrlKey: true,
-    code: "F5", 
-  });
-  useKeyboardShortcut(()=>{
-    invoke("navbrowsetimeline",{
-      tabid:activetabid.toString(),
-      dir:true
-    }).then((ei)=>{
-      console.log(ei)
-      // addTofwdHistory(activetabid.toString(),path)
-      // addTofwdHistory(activetabid.toString())
-      let pathtogoto=ei
-      if(pathtogoto){
-        
-        reset(pathtogoto)
-        updatetabs(pathtogoto)
-        // setpath()
-        // setpsplitl(splitpath(pathtogoto))
-        // sst("")
-        // useEffect(() => {
-          invoke('list_files', { 
-            windowname:appWindow?.label,
-            oid: activetabid.toString(),
-            path: pathtogoto,
-            ff: "" 
-        });
-      }
-    }).catch((e)=>console.error(e))
-  }, {
-    altKey: true,
-    code: "ArrowLeft", 
-  });
-  useKeyboardShortcut(()=>{
-    invoke("navbrowsetimeline",{
-      tabid:activetabid.toString(),
-      dir:false
-    }).then((ei)=>{
-      console.log(ei)
-      let pathtogoto=ei
-      if(pathtogoto ){
-
-        reset(pathtogoto)
-        updatetabs(pathtogoto)
-        // setpath()
-        // setpsplitl(splitpath(pathtogoto))
-        // sst("")
-        // useEffect(() => {
-          invoke('list_files', { 
-            windowname:appWindow?.label,
-            oid: activetabid.toString(),
-            path: pathtogoto,
-            ff: "" 
-        });
-      }
-    }).catch((e)=>console.error(e))
-  }, {
-    altKey: true,
-    code: "ArrowRight", 
-  });
-  useKeyboardShortcut(()=>{
-    invoke("getparentpath",{
-      path
-    }).then((ei)=>{
-      console.log(ei)
-      // addTofwdHistory(activetabid.toString(),path)
-      // addTofwdHistory(activetabid.toString())
-      let pathtogoto=ei
-      if(pathtogoto){
-        reset(pathtogoto)
-        updatetabs(pathtogoto)
-        // setpath()
-        // setpsplitl(splitpath(pathtogoto))
-        // sst("")
-        // useEffect(() => {
-          invoke('list_files', { 
-            windowname:appWindow?.label,
-            oid: activetabid.toString(),
-            path: pathtogoto,
-            ff: "" 
-        });
-      }
-    }).catch((e)=>console.error(e))
-  }, {
-    altKey: true,
-    code: "ArrowUp", 
-  });
-  useMouseShortcut(()=>{
-    // reloadlist()
-  },{
     
-  })
-
-  type wtd={
-    functionname:string,
-    arguments:string[]
-  } 
-   type parentprops={
-    path:string,
-    tabid:string
-  }
-  let [hideback,sethb]=useState(true)
-  let [hidefwd,sethf]=useState(true)
-  useEffect(()=>{
-
-    invoke("disablenav",{
-      tabid:activetabid.toString(),
-      dir:true
-    }).then(()=>sethb(false)
-    ).catch(()=>sethb(true))
-    invoke("disablenav",{
-      tabid:activetabid.toString(),
-      dir:false
-    }).then(()=>sethf(false)
-    ).catch(()=>sethf(true))
-  },[path])
-  // if(mdc){
-  //   reset()
-  // }
-  const [tabHistories, setTabHistories] = useState({});
-  const [tabForward, setTabf] = useState({});
-    const addToTabHistory = (tabId, item=path) => {
-      invoke("addtotabhistory",{
-        tabid:tabId,
-        path:item
+    useMemo(()=>{
+      let filestocount=fileslist.filter(function (el) {
+        return (searchstring.trim().length>0?
+          el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
+          (el.ftype===sftype || sftype ==="all"):(true))))
+       }).length;
+      !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
+      // !!fileslist && setfileslist((old)=>{
+      //   return [...old]
+      // })
+      setpageno((old)=>{
+        console.error(old+"---"+noofpages)
+       return old>noofpages?(noofpages-1):(old)
       })
-      // setTabHistories((prevHistories) => ({
-      //   ...prevHistories,
-      //   [tabId]: [...(prevHistories[tabId] || []), item],
-      // }));
-   };
+    },[perpage,sftype])
+    const [isSheetOpen, setiso] = useState(false);
+    // const [backpressed,setbackpressed]=useState(false)
     
-
- 
- const [currentchoice,changechoiceto]=useState("")
-
-  useEffect(() => {
-    listen('load', () => {
-      console.log(`New page loaded --->${window.location.href}`);
-      
-    });
-    listen('dialogshow', (pl) => {
-      let recieved=JSON.parse(pl.payload);
-      let content=(recieved.content)
-      let title=(recieved.title)
-      toast({
-        variant:"destructive",
-        title: title,
-        description: content,
-      })
-      // console.log(`New page loaded --->${window.location.href}`);
-    });
-    // listen("load-markdown", (data: { payload: string }) => {
-    //   let markdowninfo=JSON.parse(data.payload);
-    //     console.log("loadmarkdown")
-    //     sst(markdowninfo.filename)
-    //     openmarkdown(markdowninfo.htmlfmd)
-    //   });
-      // listen("send-log", (data: { payload: string }) => {
-      //   // console.log("grandloc")
-      //   let status=data.payload;
-      //   switch(status){
-      //       case "stopped":
-      //           console.log("file watching stopped")
-      //           break;
-      //       case "changed":
-      //           invoke(
-      //               "list_files",
-      //               {
-      //                 windowname:appWindow?.label,
-      //                 oid: activetabid.toString(),
-      //                 path: path,
-      //                 ff: ""
-      //               });
-      //           break;
-      //   }
-      //   // lastfolder = data.payload.toString();
-      //   // console.log(data.payload.toString())
-      // });
-    //   listen("load-html", (data: { payload: string }) => {
-    //     setmdc(data.payload)
-
-    //     // lastfolder = data.payload.toString();
-    //     // console.log(data.payload.toString())
-    //   }
-    // );
-    // listen("mirror", (data: { payload: string }) => {
-    //   let whattodo:wtd=JSON.parse(data.payload)
-    //   switch(whattodo.functionname){
-    //     case "loadinglist":{
-    //       console.log("reload called from "+appWindow2?.label)
-          
-    //     }
-    //   }
-      
-    // })
-    listen("fopprogress", (data: { payload: string }) => {
-      let progressinfo = JSON.parse(data.payload);
-      console.log(JSON.stringify(progressinfo))
-    });listen("parent-loc", (data: { payload: string }) => {
-      let whattodo:parentprops=JSON.parse(data.payload)
-      setpath(whattodo.path)
-      setpsplitl(splitpath(whattodo.path))
-      setpit(whattodo.path)
-    });
-    listen("reloadlist", (data: { payload: string }) => {
-      switch(data.payload){
-        case 'reload':reloadlist();
-        break;
-        case 'nosize': reloadsize();
-        break;
-        case 'folcount': populateimmediatechildcount();
-        break;
-        case 'recent': recentfiles();
-        break;
-        default: {
-          // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
-          // console.log(statusofpar.message)
-          console.log(JSON.stringify(data.payload))
-          // console.log(JSON.stringify(data.payload)+"-------->"+statusofpar.message)
-        }
-        // default:reloadlist();
-      }
-      //  reloadlist();
-      });
-    // listen("list-tabs", (data: { payload: string }) => {
-    //   console.log("listtabs ")
-    
-      
-    //   let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
-    //   settbl(tabs)
-    //   // // console.log("files")
-    //   // clear the file list
-    //   // tablist.innerHTML = "";
-    //   // // console.log(data.payload)
-    //   // loop through the files array
-    //   // for (let tb of tabs) {
-    //   //   // create a table row element for each file
-    //   //   // let border=document.createElement("span");
-    //   //   // border.className="border-bx"
-    //   //   // globals.tablist.appendChild(border);
-    //   //   // let tbt=document.createElement("span");
-    //   //   // tbt.className="tbt"
   
-    //   //   let b = document.createElement("div");
-    //   //   b.className = "tab-button";
-    //   //   if(tb.path===globalThis.activetab){
-    //   //     b.classList.add("active");
-    //   //     b.classList.remove("inactive");
-    //   //   }
-    //   //   else{
-    //   //     b.classList.add("inactive");
-    //   //     b.classList.remove("active");
-    //   //   }
-    //   //  invoke(
-    //   //     "getuniquewindowlabel",
-    //   //     {
-            
-    //   //     }
-    //   //     ).then((returned:string)=>{
-    //   //       b.dataset.ul=returned;
-    //   //     })
-  
-    //   //   let sn = document.createElement("span");
-    //   //   sn.className = "tab-name"
-        
-    //   //   let sc = document.createElement("span");
-    //   //   sc.className = "tab-close"
-    //   //   sn.textContent = tb.tabname;
-    //   //   sc.textContent = "x";
-    //   //   b.appendChild(sn);
-    //   //   b.appendChild(sc);
-    //   //   b.id = tb.id.toString();
-    //   //   b.dataset.path = tb.path;
-    //   //   b.dataset.ff = tb.ff;
-    //   //   // b.appendChild(tbt)
-    //   //   globals.tablist.appendChild(b);
-    //   // }
-    // });
-    listen("button-names", (data: { payload: string }) => {
-      setcbl(JSON.parse(data.payload) as string[]);
-      console.log("winnames: "+data.payload.toString())
-    });
-    listen("folder-size", (data: { payload: string }) => {
-      console.log("foldersize")
-    
-      setps(data.payload.toString())
-      // console.log(data.payload.toString())
-    });
-    listen("fsc", (data: { payload: string }) => {
-      // console.log("-------------__>"+((data.payload)))
-      // console.log("fscl----->"+JSON.parse(data.payload));
-      setfscl(JSON.parse(data.payload));
-    });
-    listen("load-sresults", (data: { payload: string }) => {
-      let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
-      sst("Search Results")
-      console.log("Found----->"+fl.length)
-      // fl=fl.splice(0,500);
-      setfileslist(fl)
-      setfc(fl.length)
-      // // if(globalThis.lastpopfilelist.length>10)
-      // // return
-      // if (fileList.length>100){
-      //   fileList=fileList.slice(0,100)
-      // }
-      // fileList.forEach(function(ef){
-      //   eachfile(ef)
-      // });
-    });
-    // const unlisten=
-    listen('list-drives', (event) => {
-      // sst("")
-      // spi("drives://")
-      // setcbl([])
-      // setfscl([])
-        console.log("loading drives---->"+event.payload);
-        setdriveslist(JSON.parse(event.payload));
-    })
-    .then(result => {
-            // console.log(uio.getCurrent().label)
-            console.log(result)
-        })
-    .catch(console.error);
-    
-    // const unlisten1=
-    listen('list-files', (event) => {
-      setwbv(false)
-      setfc((old) => {
-        const newFileCount = old + 1;
-        // if (newFileCount < 11)
-         {
-          // setpsplitl(splitpath(path))
-
-          setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
-          
-        }
-        return newFileCount;
-       });
-        // console.log("loading files---->"+event.payload);
-    })
-    .then(result => {
-            // console.log(uio.getCurrent().label)
-            console.log(result)
-            
-        })
-    .catch(console.error);
-    listen("load-marks", (data: { payload:string }) => {
-      console.log("listmarks ")
-      setbms(JSON.parse(data.payload) as mark[])
-    });
-    // lfiles();
-    
-    // openTab("drives://")
-    // invoke('list_files', { 
+    // function openTab(tabPath: string): void {
+    //   let temptab=winInfo.tabidsalloted++;
+    //   let newTab: tabinfo = {
+    //     tabid: temptab,
+    //     tabpath: tabPath,
+    //     history: []
+    //   };
+    //   winInfo.tablist.push(newTab);
+    //   invoke('list_files', { 
     //     windowname:winInfo.winname,
-    //     oid: activetabid,
-    //     path: "drives://",
+    //     oid: temptab.toString(),
+    //     path: tabPath,
     //     ff: "" 
     // })
-    // .then(result => {
-    //     // console.log(uio.getCurrent().label)
-    //     console.log(result)
-        
-    // })
-    // .catch(console.error)
-    // return () => {
-    //   unlisten.then(f => f());
-    //   unlisten1.then(f => f());
-    // }
-  },[])
-  useEffect(()=>{
-    if(!appWindow)
-      return
-      if(!startstopfilewatch){
-        invoke('senddriveslist', { 
-          windowname:appWindow?.label,
-          
-      }).then(
-
-      );
-      reloadsize("loadmarks")
-      invoke("listtabs",{})
-      .then((e)=>{
-        let tabslist=JSON.parse(e) as string[];
-        for (const [index,ei] of tabslist.entries()){
-          reset(ei)
-          setpath(ei)
-          newtab(ei,index.toString());
-        }
-        if(tabslist.length<1){
-          reset("drives://")
-          setpath("drives://")
-          newtab("drives://");
-        }
-        
-      })
-                  
-                  // populatesearchlist("drives://");
-              // })
-              //   .catch(console.error)
-        
+    //  }
+    //  function navigateToNewPath(tabid: number, newPath: string,oldpath:string): void {
+    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+    //   if (tabIndex !== -1 && !backpressed) {
+    //     winInfo.tablist[tabIndex].tabpath = newPath;
+    //     winInfo.tablist[tabIndex].history.push(oldpath);
+    //   }
+    //   setbackpressed(false)
+    //  }
+    //  function closeTab(tabid: number): void {
+    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+    //   if (tabIndex !== -1) {
+    //    winInfo.tablist.splice(tabIndex, 1);
+    //   }
+    //  } 
+    function reset(p?:string){
+      if(p){
+        setpath(p);
+        setpsplitl(splitpath(p))
+        // sst(p)
       }
-  },[appWindow])
-  const [showthumbnail,setst]=useState(false)
-//   useEffect(() => {
-//     invoke<string>('greet', { 
-//         name: "test"
-//     })
-//       .then(result => {
-//         console.log(uio.getCurrent().label)
-//         console.log(result)
-//         addone(result)
-//     })
-//       .catch(console.error)
-//   }, [count])
-
-const columns: ColumnDef<FileItem>[] = [
-   
-  // {
-  //   accessorKey: 'reponame',
-  //   header: 'Reponame',
-  // },
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: true,
-  },
-
-  {
-    accessorKey: 'name',
-    header: ({ column }) => {
-      return (
-        <Button
-          // variant='ghost'
-          onClick={() => {
-            // console.error("pressed name")
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }}
-        >
-          FileName
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      );
-    },
-    cell: ({
-      row,
-      getValue,
-      row: {
-        original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
-      },
-    }) => {
+      setsftype("all")
+        setfileslist([])
+        // setdriveslist([])
+        setfc(0)
+        setss("")
+        console.log("reset done")
+    }
+    
+     function activateTab(tab: tabinfo){
+      console.log("activating"+JSON.stringify(tab))
+      // console.log("activate tab "+tabid)
+      // let activeTab = tablist.find(tab => tab.id === tabid );
+      // if (activeTab) {
+        // setpath(tab.path)s
+        setactivetabid(tab.id)
+        reset(tab.path)
+        // invoke(
+        //   "load_tab",
+        //   {
+        //     windowname:appWindow?.label,
+        //     oid: tab.id.toString()
+        //   }
+        // );
+        invoke('list_files', { 
+          windowname:appWindow?.label,
+          oid: tab.id.toString(),
+          path: tab.path,
+          ff: "" 
+      })
+      // }
+    //  }
+    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
+    //   if (tabIndex !== -1) {
+    //     sethistory(winInfo.tablist[tabIndex].history)
+    //     setactivetabid(tabid)
+    //     invoke('list_files', { 
+    //       windowname:winInfo.winname,
+    //       oid: tabid.toString(),
+    //       path: winInfo.tablist[tabIndex].tabpath,
+    //       ff: "" 
+    //   })
+    //    // Activate the tab...
+    //   }
+     }
+  
+    //  function goBack(): void {
+    //   let activeTab = winInfo.tablist.find(tab => tab.tabid === activetabid );
+    //   if (activeTab && activeTab.history.length > 1) {
+    //     setbackpressed(true)
+    //     navigateToNewPath(activetabid, activeTab.history[activeTab.history.length - 1],path);
+    //     activeTab.history.pop();
+    //   }
+    //  }
+    // Import appWindow and save it inside the state for later usage
+    const [p,setp]=useState("")
+    useEffect(() => {
+      console.log(Math.random());
+      let wfp=async()=>{setp(await platform())
+      console.log(await platform())};
+      wfp();
       
-      const rname = getValue()
-
-      return (
-        <div className={`max-w-sm overflow-hidden justify-between flex items-center`}>
-         
-         <div className="overflow-hidden">
-
-          <ContextMenu>
-          <ContextMenuTrigger>
+    }, []);
+    useKeyboardShortcut(()=>{
+      newtab("drives://");
+    }, {
+      ctrlKey: true,
+      code: "KeyT",
+    }); 
+    useKeyboardShortcut(()=>{
+      invoke("newwindow",
+      {
+        // id: (winInfo.tabidsalloted++).toString(),
+        path: "drives://",
+        ff:""
+      });
+    }, {
+      ctrlKey: true,
+      code: "KeyN", 
+    });
+    useKeyboardShortcut(()=>{
+      invoke(
+        "addmark",
+        {
+      windowname:appWindow?.label,
+          path: path,
+          id: new Date().getTime().toString()
+        }
+      );
+    }, {
+      ctrlKey: true,
+      code: "KeyD", 
+    });
+    useKeyboardShortcut(()=>{
+      setfos((old)=>[...old,path])
+    }, {
+      ctrlKey: true,
+      code: "KeyC", 
+    });
+    
+    useKeyboardShortcut(()=>{
+      reloadsize("excludehidden")
+    }, {
+      ctrlKey: true,
+      code: "KeyH", 
+    });
+    useKeyboardShortcut((e)=>{
+      e.preventDefault(); 
+      console.log("closetab")
+      if(!tablist)return
+      if(tablist?.length<1) return;
+      closetab(activetabid);
+      activateTab(tablist[tablist.length-1])
+    }, {
+      ctrlKey: true,
+      code: "KeyW", 
+    });
+    useKeyboardShortcut((e)=>{
+      e.preventDefault(); 
+      reloadlist()
+    }, {
+      // ctrlKey: true,
+      code: "F5", 
+    });
+    useKeyboardShortcut(()=>{
+      invoke("navbrowsetimeline",{
+        tabid:activetabid.toString(),
+        dir:true
+      }).then((ei)=>{
+        console.log(ei)
+        // addTofwdHistory(activetabid.toString(),path)
+        // addTofwdHistory(activetabid.toString())
+        let pathtogoto=ei
+        if(pathtogoto){
+          
+          reset(pathtogoto)
+          updatetabs(pathtogoto)
+          // setpath()
+          // setpsplitl(splitpath(pathtogoto))
+          // sst("")
+          // useEffect(() => {
+            invoke('list_files', { 
+              windowname:appWindow?.label,
+              oid: activetabid.toString(),
+              path: pathtogoto,
+              ff: "" 
+          });
+        }
+      }).catch((e)=>console.error(e))
+    }, {
+      altKey: true,
+      code: "ArrowLeft", 
+    });
+    useKeyboardShortcut(()=>{
+      invoke("navbrowsetimeline",{
+        tabid:activetabid.toString(),
+        dir:false
+      }).then((ei)=>{
+        console.log(ei)
+        let pathtogoto=ei
+        if(pathtogoto ){
+  
+          reset(pathtogoto)
+          updatetabs(pathtogoto)
+          // setpath()
+          // setpsplitl(splitpath(pathtogoto))
+          // sst("")
+          // useEffect(() => {
+            invoke('list_files', { 
+              windowname:appWindow?.label,
+              oid: activetabid.toString(),
+              path: pathtogoto,
+              ff: "" 
+          });
+        }
+      }).catch((e)=>console.error(e))
+    }, {
+      altKey: true,
+      code: "ArrowRight", 
+    });
+    useKeyboardShortcut(()=>{
+      invoke("getparentpath",{
+        path
+      }).then((ei)=>{
+        console.log(ei)
+        // addTofwdHistory(activetabid.toString(),path)
+        // addTofwdHistory(activetabid.toString())
+        let pathtogoto=ei
+        if(pathtogoto){
+          reset(pathtogoto)
+          updatetabs(pathtogoto)
+          // setpath()
+          // setpsplitl(splitpath(pathtogoto))
+          // sst("")
+          // useEffect(() => {
+            invoke('list_files', { 
+              windowname:appWindow?.label,
+              oid: activetabid.toString(),
+              path: pathtogoto,
+              ff: "" 
+          });
+        }
+      }).catch((e)=>console.error(e))
+    }, {
+      altKey: true,
+      code: "ArrowUp", 
+    });
+    useMouseShortcut(()=>{
+      // reloadlist()
+    },{
+      
+    })
+  
+    type wtd={
+      functionname:string,
+      arguments:string[]
+    } 
+     type parentprops={
+      path:string,
+      tabid:string
+    }
+    let [hideback,sethb]=useState(true)
+    let [hidefwd,sethf]=useState(true)
+    useEffect(()=>{
+  
+      invoke("disablenav",{
+        tabid:activetabid.toString(),
+        dir:true
+      }).then(()=>sethb(false)
+      ).catch(()=>sethb(true))
+      invoke("disablenav",{
+        tabid:activetabid.toString(),
+        dir:false
+      }).then(()=>sethf(false)
+      ).catch(()=>sethf(true))
+    },[path])
+    // if(mdc){
+    //   reset()
+    // }
+    const [tabHistories, setTabHistories] = useState({});
+    const [tabForward, setTabf] = useState({});
+      const addToTabHistory = (tabId, item=path) => {
+        invoke("addtotabhistory",{
+          tabid:tabId,
+          path:item
+        })
+        // setTabHistories((prevHistories) => ({
+        //   ...prevHistories,
+        //   [tabId]: [...(prevHistories[tabId] || []), item],
+        // }));
+     };
+      
+  
+   
+   const [currentchoice,changechoiceto]=useState("")
+  
+    useEffect(() => {
+      listen('load', () => {
+        console.log(`New page loaded --->${window.location.href}`);
+        
+      });
+      listen('dialogshow', (pl) => {
+        let recieved=JSON.parse(pl.payload);
+        let content=(recieved.content)
+        let title=(recieved.title)
+        toast({
+          variant:"destructive",
+          title: title,
+          description: content,
+        })
+        // console.log(`New page loaded --->${window.location.href}`);
+      });
+      // listen("load-markdown", (data: { payload: string }) => {
+      //   let markdowninfo=JSON.parse(data.payload);
+      //     console.log("loadmarkdown")
+      //     sst(markdowninfo.filename)
+      //     openmarkdown(markdowninfo.htmlfmd)
+      //   });
+        // listen("send-log", (data: { payload: string }) => {
+        //   // console.log("grandloc")
+        //   let status=data.payload;
+        //   switch(status){
+        //       case "stopped":
+        //           console.log("file watching stopped")
+        //           break;
+        //       case "changed":
+        //           invoke(
+        //               "list_files",
+        //               {
+        //                 windowname:appWindow?.label,
+        //                 oid: activetabid.toString(),
+        //                 path: path,
+        //                 ff: ""
+        //               });
+        //           break;
+        //   }
+        //   // lastfolder = data.payload.toString();
+        //   // console.log(data.payload.toString())
+        // });
+      //   listen("load-html", (data: { payload: string }) => {
+      //     setmdc(data.payload)
+  
+      //     // lastfolder = data.payload.toString();
+      //     // console.log(data.payload.toString())
+      //   }
+      // );
+      // listen("mirror", (data: { payload: string }) => {
+      //   let whattodo:wtd=JSON.parse(data.payload)
+      //   switch(whattodo.functionname){
+      //     case "loadinglist":{
+      //       console.log("reload called from "+appWindow2?.label)
+            
+      //     }
+      //   }
+        
+      // })
+      listen("fopprogress", (data: { payload: string }) => {
+        let progressinfo = JSON.parse(data.payload);
+        console.log(JSON.stringify(progressinfo))
+      });listen("parent-loc", (data: { payload: string }) => {
+        let whattodo:parentprops=JSON.parse(data.payload)
+        setpath(whattodo.path)
+        setpsplitl(splitpath(whattodo.path))
+        setpit(whattodo.path)
+      });
+      listen("reloadlist", (data: { payload: string }) => {
+        switch(data.payload){
+          case 'reload':reloadlist();
+          break;
+          case 'nosize': reloadsize();
+          break;
+          case 'folcount': populateimmediatechildcount();
+          break;
+          case 'recent': recentfiles();
+          break;
+          default: {
+            // let statusofpar:statusmesg=JSON.parse(JSON.stringify(data.payload)) as statusmesg;
+            // console.log(statusofpar.message)
+            console.log(JSON.stringify(data.payload))
+            // console.log(JSON.stringify(data.payload)+"-------->"+statusofpar.message)
+          }
+          // default:reloadlist();
+        }
+        //  reloadlist();
+        });
+      // listen("list-tabs", (data: { payload: string }) => {
+      //   console.log("listtabs ")
+      
+        
+      //   let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
+      //   settbl(tabs)
+      //   // // console.log("files")
+      //   // clear the file list
+      //   // tablist.innerHTML = "";
+      //   // // console.log(data.payload)
+      //   // loop through the files array
+      //   // for (let tb of tabs) {
+      //   //   // create a table row element for each file
+      //   //   // let border=document.createElement("span");
+      //   //   // border.className="border-bx"
+      //   //   // globals.tablist.appendChild(border);
+      //   //   // let tbt=document.createElement("span");
+      //   //   // tbt.className="tbt"
+    
+      //   //   let b = document.createElement("div");
+      //   //   b.className = "tab-button";
+      //   //   if(tb.path===globalThis.activetab){
+      //   //     b.classList.add("active");
+      //   //     b.classList.remove("inactive");
+      //   //   }
+      //   //   else{
+      //   //     b.classList.add("inactive");
+      //   //     b.classList.remove("active");
+      //   //   }
+      //   //  invoke(
+      //   //     "getuniquewindowlabel",
+      //   //     {
+              
+      //   //     }
+      //   //     ).then((returned:string)=>{
+      //   //       b.dataset.ul=returned;
+      //   //     })
+    
+      //   //   let sn = document.createElement("span");
+      //   //   sn.className = "tab-name"
+          
+      //   //   let sc = document.createElement("span");
+      //   //   sc.className = "tab-close"
+      //   //   sn.textContent = tb.tabname;
+      //   //   sc.textContent = "x";
+      //   //   b.appendChild(sn);
+      //   //   b.appendChild(sc);
+      //   //   b.id = tb.id.toString();
+      //   //   b.dataset.path = tb.path;
+      //   //   b.dataset.ff = tb.ff;
+      //   //   // b.appendChild(tbt)
+      //   //   globals.tablist.appendChild(b);
+      //   // }
+      // });
+      listen("button-names", (data: { payload: string }) => {
+        setcbl(JSON.parse(data.payload) as string[]);
+        console.log("winnames: "+data.payload.toString())
+      });
+      listen("folder-size", (data: { payload: string }) => {
+        console.log("foldersize")
+      
+        setps(data.payload.toString())
+        // console.log(data.payload.toString())
+      });
+      listen("fsc", (data: { payload: string }) => {
+        // console.log("-------------__>"+((data.payload)))
+        // console.log("fscl----->"+JSON.parse(data.payload));
+        setfscl(JSON.parse(data.payload));
+      });
+      listen("load-sresults", (data: { payload: string }) => {
+        let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
+        sst("Search Results")
+        console.log("Found----->"+fl.length)
+        // fl=fl.splice(0,500);
+        setfileslist(fl)
+        setfc(fl.length)
+        // // if(globalThis.lastpopfilelist.length>10)
+        // // return
+        // if (fileList.length>100){
+        //   fileList=fileList.slice(0,100)
+        // }
+        // fileList.forEach(function(ef){
+        //   eachfile(ef)
+        // });
+      });
+      // const unlisten=
+      listen('list-drives', (event) => {
+        // sst("")
+        // spi("drives://")
+        // setcbl([])
+        // setfscl([])
+          console.log("loading drives---->"+event.payload);
+          setdriveslist(JSON.parse(event.payload));
+      })
+      .then(result => {
+              // console.log(uio.getCurrent().label)
+              console.log(result)
+          })
+      .catch(console.error);
+      
+      // const unlisten1=
+      listen('list-files', (event) => {
+        setwbv(false)
+        setfc((old) => {
+          const newFileCount = old + 1;
+          // if (newFileCount < 11)
+           {
+            // setpsplitl(splitpath(path))
+  
+            setfileslist((plog) => [...plog, JSON.parse(event.payload)]);
+            
+          }
+          return newFileCount;
+         });
+          // console.log("loading files---->"+event.payload);
+      })
+      .then(result => {
+              // console.log(uio.getCurrent().label)
+              console.log(result)
+              
+          })
+      .catch(console.error);
+      listen("load-marks", (data: { payload:string }) => {
+        console.log("listmarks ")
+        setbms(JSON.parse(data.payload) as mark[])
+      });
+      // lfiles();
+      
+      // openTab("drives://")
+      // invoke('list_files', { 
+      //     windowname:winInfo.winname,
+      //     oid: activetabid,
+      //     path: "drives://",
+      //     ff: "" 
+      // })
+      // .then(result => {
+      //     // console.log(uio.getCurrent().label)
+      //     console.log(result)
+          
+      // })
+      // .catch(console.error)
+      // return () => {
+      //   unlisten.then(f => f());
+      //   unlisten1.then(f => f());
+      // }
+    },[])
+    useEffect(()=>{
+      if(!appWindow)
+        return
+        if(!startstopfilewatch){
+          invoke('senddriveslist', { 
+            windowname:appWindow?.label,
+            
+        }).then(
+  
+        );
+        reloadsize("loadmarks")
+        invoke("listtabs",{})
+        .then((e)=>{
+          let tabslist=JSON.parse(e) as string[];
+          for (const [index,ei] of tabslist.entries()){
+            reset(ei)
+            setpath(ei)
+            newtab(ei,index.toString());
+          }
+          if(tabslist.length<1){
+            reset("drives://")
+            setpath("drives://")
+            newtab("drives://");
+          }
+          
+        })
+                    
+                    // populatesearchlist("drives://");
+                // })
+                //   .catch(console.error)
+          
+        }
+    },[appWindow])
+    const [showthumbnail,setst]=useState(false)
+  //   useEffect(() => {
+  //     invoke<string>('greet', { 
+  //         name: "test"
+  //     })
+  //       .then(result => {
+  //         console.log(uio.getCurrent().label)
+  //         console.log(result)
+  //         addone(result)
+  //     })
+  //       .catch(console.error)
+  //   }, [count])
+  
+  const columns: ColumnDef<FileItem>[] = [
+     
+    // {
+    //   accessorKey: 'reponame',
+    //   header: 'Reponame',
+    // },
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: true,
+    },
+  
+    {
+      accessorKey: 'name',
+      header: ({ column }) => {
+        return (
+          <Button
+            // variant='ghost'
+            onClick={() => {
+              // console.error("pressed name")
+              column.toggleSorting(column.getIsSorted() === 'asc')
+            }}
+          >
+            FileName
+            <ArrowUpDown className='ml-2 h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({
+        row,
+        getValue,
+        row: {
+          original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
+        },
+      }) => {
+        
+        const rname = getValue()
+  
+        return (
+          <div className={`max-w-sm overflow-hidden justify-between flex items-center`}>
+           
+           <div className="overflow-hidden">
+  
+            <ContextMenu>
+            <ContextMenuTrigger>
+              <HoverCard>
+                <HoverCardTrigger>
+                <button className="w-full h-full flex justify-start whitespace-nowrap " onDoubleClick={
+                  ()=>
+                  { 
+                    let clickpath=path;
+                    // console.log("gridlayout clicked");
+                      if(is_dir){
+                        addToTabHistory(activetabid.toString(),clickpath)
+                        reset(clickpath)
+                        updatetabs(clickpath)
+                      
+                        // setpath()
+                        // setpsplitl(splitpath(path))
+                        // sst(name)
+                      }
+                    // useEffect(() => {
+                      invoke('list_files', { 
+                        windowname:appWindow?.label,
+                        oid: activetabid.toString(),
+                        path: clickpath,
+                        ff: "" 
+                    }).catch((e)=>console.error(e));
+                    // },[])
+                    }
+                  }>
+                  {/* <CardContent > */}
+                  <div className="flex items-center w-full">
+                    
+                  <div>
+  
+                    {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
+                  </div>
+                    {/* <span className="font-medium text-lg"> */}
+                    {/* <div className="w-full"> */}
+                    <div className=""> 
+  
+                      {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
+                    </div>
+                    {/* </div> */}
+                      {/* </span> */}
+                  {/* </CardContent> */}
+                  
+                  </div>
+                </button>
+                </HoverCardTrigger>
+                <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+                 {path}
+                 <br/>
+                 {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
+                 <br/>
+                 {converttstodt(timestamp)}
+                <FRc location={path} size={size} rawsize={rawfs}/>
+                </HoverCardContent>
+              </HoverCard>
+  
+              
+            </ContextMenuTrigger>
+            <ContextMenuContent className=''>
+              <p className='text-sm'>{path}</p>
+              <ContextMenuItem onSelect={(e)=>{
+                invoke("newwindow",
+                {
+                  // id: (winInfo.tabidsalloted++).toString(),
+                  path: path,
+                  ff:""
+                });
+  
+              }}>Open in new window</ContextMenuItem>
+              <ContextMenuItem onSelect={(e)=>{
+                // openTab(path)
+                invoke(
+                  "newtab",
+                  {
+                    windowname:appWindow?.label,
+                    oid: activetabid.toString(),
+                    path: path,
+                    ff: ""
+                  }
+                );
+              }}>Open in new tab</ContextMenuItem>
+              <ContextMenuItem onSelect={()=>{
+                invoke(
+                  "addmark",
+                  {
+                windowname:appWindow?.label,
+                    path: path,
+                    id: new Date().getTime().toString()
+                  }
+                );
+              }}>Add bookmark</ContextMenuItem>
+              <div className="hidden bg-red"></div>
+              <ContextMenuItem onSelect={(e)=>{
+                useEffect(() => {
+                if (typeof window !== 'undefined'){
+  
+                  try {
+                    navigator.clipboard.writeText(path);
+                    console.log('Content copied to clipboard');
+                  } catch (err) {
+                    console.error('Failed to copy: ', err);
+                  }
+                }
+              },[])}}
+              >Copy path to clipboard</ContextMenuItem>
+              <ContextMenuItem onSelect={(e)=>{
+                setfos((old)=>[...old,path])
+              }}>Copy</ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
+           </div>
+          <div className="">
+  
+          <div className=" ">
+  
+  {!is_dir
+              // &&
+              // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
+              // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
+              ?(
+          <Sheet modal={false}>
+          <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
             <HoverCard>
               <HoverCardTrigger>
-              <button className="w-full h-full flex justify-start whitespace-nowrap " onDoubleClick={
-                ()=>
-                { 
-                  let clickpath=path;
-                  // console.log("gridlayout clicked");
-                    if(is_dir){
-                      addToTabHistory(activetabid.toString(),clickpath)
-                      reset(clickpath)
-                      updatetabs(clickpath)
-                    
-                      // setpath()
-                      // setpsplitl(splitpath(path))
-                      // sst(name)
-                    }
-                  // useEffect(() => {
-                    invoke('list_files', { 
-                      windowname:appWindow?.label,
-                      oid: activetabid.toString(),
-                      path: clickpath,
-                      ff: "" 
-                  }).catch((e)=>console.error(e));
-                  // },[])
-                  }
-                }>
-                {/* <CardContent > */}
-                <div className="flex items-center w-full">
-                  
-                <div>
-
-                  {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
-                </div>
-                  {/* <span className="font-medium text-lg"> */}
-                  {/* <div className="w-full"> */}
-                  <div className=""> 
-
-                    {name}{foldercon>0 ? "(" + foldercon + ")" : ""}
-                  </div>
-                  {/* </div> */}
-                    {/* </span> */}
-                {/* </CardContent> */}
-                
-                </div>
-              </button>
-              </HoverCardTrigger>
-              <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
-               {path}
-               <br/>
-               {`${foldercon>0?`Contains ${foldercon} ${is_dir?"files":"lines"}`:""}`}
-               <br/>
-               {converttstodt(timestamp)}
-              <FRc location={path} size={size} rawsize={rawfs}/>
+                <EyeIcon className="h-4 w-4 "/>
+                </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+              Preview
               </HoverCardContent>
             </HoverCard>
-
-            
-          </ContextMenuTrigger>
-          <ContextMenuContent className=''>
-            <p className='text-sm'>{path}</p>
-            <ContextMenuItem onSelect={(e)=>{
-              invoke("newwindow",
-              {
-                // id: (winInfo.tabidsalloted++).toString(),
-                path: path,
-                ff:""
-              });
-
-            }}>Open in new window</ContextMenuItem>
-            <ContextMenuItem onSelect={(e)=>{
-              // openTab(path)
-              invoke(
-                "newtab",
-                {
-                  windowname:appWindow?.label,
-                  oid: activetabid.toString(),
-                  path: path,
-                  ff: ""
-                }
-              );
-            }}>Open in new tab</ContextMenuItem>
-            <ContextMenuItem onSelect={()=>{
-              invoke(
-                "addmark",
-                {
-              windowname:appWindow?.label,
-                  path: path,
-                  id: new Date().getTime().toString()
-                }
-              );
-            }}>Add bookmark</ContextMenuItem>
-            <div className="hidden bg-red"></div>
-            <ContextMenuItem onSelect={(e)=>{
-              useEffect(() => {
-              if (typeof window !== 'undefined'){
-
-                try {
-                  navigator.clipboard.writeText(path);
-                  console.log('Content copied to clipboard');
-                } catch (err) {
-                  console.error('Failed to copy: ', err);
-                }
-              }
-            },[])}}
-            >Copy path to clipboard</ContextMenuItem>
-            <ContextMenuItem onSelect={(e)=>{
-              setfos((old)=>[...old,path])
-            }}>Copy</ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-         </div>
-        <div className="">
-
-        <div className=" ">
-
-{!is_dir
-            // &&
-            // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
-            // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
-            ?(
-        <Sheet modal={false}>
-        <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
-          <HoverCard>
-            <HoverCardTrigger>
-              <EyeIcon className="h-4 w-4 "/>
-              </HoverCardTrigger>
-            <HoverCardContent  className={`${setcolorpertheme}`}>
-            Preview
-            </HoverCardContent>
-          </HoverCard>
-          </SheetTrigger>
-          <SheetContent 
-            // style={{ width: `${width}px` }}
-            // onMouseDown={handleMouseDown}
-            // onMouseMove={handleMouseMove}
-            // onMouseUp={handleMouseUp}
-            // onMouseLeave={handleMouseUp}
-            className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-              {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-              <ResizablePanel/>
-              <ResizableHandle />
-              <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-               
-      
-              <ReadFileComp message={row.original}/>
-              {/* </ResizablePanel>
-            </ResizablePanelGroup> */}
-              
+            </SheetTrigger>
+            <SheetContent 
+              // style={{ width: `${width}px` }}
+              // onMouseDown={handleMouseDown}
+              // onMouseMove={handleMouseMove}
+              // onMouseUp={handleMouseUp}
+              // onMouseLeave={handleMouseUp}
+              className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+                <ResizablePanel/>
+                <ResizableHandle />
+                <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
+                 
         
-              {/* <SheetDescription></SheetDescription> */}
-            
-          </SheetContent>
-        </Sheet>):(
-        <div className="">
-          <HoverCard>
-
-          <HoverCardTrigger>
-          <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
-populatesearchlist(path)
-}}><ScanSearchIcon className="h-4 w-4"/></button>
-</HoverCardTrigger>
-<HoverCardContent  className={`${setcolorpertheme}`}>
-Load folder contents to search
-</HoverCardContent>
-</HoverCard>
-        </div>
-        )}
-</div>
-                </div>
-          {/* <button className='w-32' onDoubleClick={
-            ()=>
-            { 
-              reset(path)
-          updatetabs(path)
-          // setpath()
-          // setpsplitl(splitpath(message.path))
-          sst(path)
-          console.log(path)
-          invoke('list_files', { 
-            windowname:appWindow?.label,
+                <ReadFileComp message={row.original}/>
+                {/* </ResizablePanel>
+              </ResizablePanelGroup> */}
+                
+          
+                {/* <SheetDescription></SheetDescription> */}
+              
+            </SheetContent>
+          </Sheet>):(
+          <div className="">
+            <HoverCard>
+  
+            <HoverCardTrigger>
+            <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+  populatesearchlist(path)
+  }}><ScanSearchIcon className="h-4 w-4"/></button>
+  </HoverCardTrigger>
+  <HoverCardContent  className={`${setcolorpertheme}`}>
+  Load folder contents to search
+  </HoverCardContent>
+  </HoverCard>
+          </div>
+          )}
+  </div>
+                  </div>
+            {/* <button className='w-32' onDoubleClick={
+              ()=>
+              { 
+                reset(path)
+            updatetabs(path)
+            // setpath()
+            // setpsplitl(splitpath(message.path))
+            sst(path)
+            console.log(path)
+            invoke('list_files', { 
+              windowname:appWindow?.label,
+              oid: activetabid.toString(),
+              path: path,
+              ff: "" 
+          })
+            }
+            }>{`${name}`}</button> */}
+          </div>
+          // <div className="text-right">
+          //   {original_price_incl_tax !== price && (
+          //     <Tooltip
+          //       content="The price has been overridden in a price list, that is applicable to this order."
+          //       side="top"
+          //     >
+          //       <p className="cursor-default text-grey-40 line-through">
+          //         {formatAmountWithSymbol({
+          //           amount: original_price_incl_tax || 0,
+          //           currency: order.currency_code,
+          //         })}
+          //       </p>
+          //     </Tooltip>
+          //   )}
+          //   <p>
+          //     {formatAmountWithSymbol({
+          //       amount: price || 0,
+          //       currency: order.currency_code,
+          //     })}
+          //   </p>
+          // </div>
+        )
+      },
+      
+    }
+    // ,{
+    //   accessorKey: 'additions',
+    //   header: ({ column }) => {
+    //     return (
+    //       <Button
+    //         // variant='ghost'
+    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+    //       >
+    //         Additions
+    //         <ArrowUpDown className='ml-2 h-4 w-4' />
+    //       </Button>
+    //     );
+    //   },
+    // },{
+    //   accessorKey: 'deletions',
+    //   header: ({ column }) => {
+    //     return (
+    //       <Button
+    //         // variant='ghost'
+    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+    //       >
+    //         Deletions
+    //         <ArrowUpDown className='ml-2 h-4 w-4' />
+    //       </Button>
+    //     );
+    //   },
+    // }
+    ,{
+      accessorKey: 'ftype',
+      header: ({ column }) => {
+        return (
+          <Button
+            // variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Filetype
+            <ArrowUpDown className='ml-2 h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({
+        getValue,
+        row: {
+          original: { ftype },
+        },
+      }) => {
+        const rname = getValue()
+  
+        return (
+            <p className='w-10 sm:w-64 wolc'>{ftype}</p>
+        )
+      },
+    },{
+      accessorKey: 'rawfs',
+      header: ({ column }) => {
+        return (
+          <Button
+            // variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Size
+            <ArrowUpDown className='ml-2 h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({
+        getValue,
+        row: {
+          original: { size,rawfs },
+        },
+      }) => {
+        const rname = getValue()
+  
+        return (
+            <p className='w-10 sm:w-64 wolc'>{size}</p>
+        )
+      },
+    },{
+      accessorKey: 'timestamp',
+      header: ({ column }) => {
+        return (
+          <Button
+            // variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Date Modified
+            <ArrowUpDown className='ml-2 h-4 w-4' />
+          </Button>
+        );
+      },
+      cell: ({
+        row: {
+          original: { timestamp },
+        },
+      }) => {
+        const dateTime = DateTime.fromMillis(timestamp * 1000); // Convert timestamp to DateTime object
+        const utcDateTime = dateTime.toUTC(); // Convert DateTime object to UTC time
+        const utcTime = utcDateTime.toFormat('dd MMM yy'); // Format UTC time in ddmmyyhhss format
+  
+        return (
+            <p>{utcTime}</p>
+        )
+      },
+    },
+    
+    // {
+    //   accessorKey: 'deletions',
+    //   header: () => <div className='text-right'>Deletions</div>,
+    //   cell: ({ row }) => {
+    //     const amount = parseFloat(row.getValue('amount'));
+    //     const formatted = new Intl.NumberFormat('en-US', {
+    //       style: 'currency',
+    //       currency: 'USD',
+    //     }).format(amount);
+  
+    //     return <div className='text-right font-medium'>{formatted}</div>;
+    //   },
+    // },
+    // {
+    //   id: 'actions',
+    //   cell: ({ row }) => {
+    //     const payment = row.original;
+  
+    //     return (
+    //       <DropdownMenu>
+    //         <DropdownMenuTrigger asChild>
+    //           <Button 
+    //           // variant='ghost' 
+    //           className='h-8 w-4 p-0'>
+    //             <span className='sr-only'>Open menu</span>
+    //             {/* <MoreHorizontal className='h-4 w-4' /> */}
+    //           </Button>
+    //         </DropdownMenuTrigger>
+    //         <DropdownMenuContent align='end'>
+    //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+    //           <DropdownMenuItem
+    //             onClick={() => navigator.clipboard.writeText(payment.id)}
+    //           >
+    //             Copy payment ID
+    //           </DropdownMenuItem>
+    //           <DropdownMenuSeparator />
+    //           <DropdownMenuItem>View customer</DropdownMenuItem>
+    //           <DropdownMenuItem>View payment details</DropdownMenuItem>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu>
+    //     );
+    //   },
+    // },
+    // ...
+  ];
+  // const useActiveElement = () => {
+  //   const [active, setActive] = useState(document.activeElement);
+     
+  //   const handleFocusIn = (e) => {
+  //      setActive(document.activeElement);
+  //   }
+     
+  //   useEffect(() => {
+  //      document.addEventListener('focusin', handleFocusIn)
+  //      return () => {
+  //        document.removeEventListener('focusin', handleFocusIn)
+  //   };
+  //   }, [])
+     
+  //   return active;
+  //  }
+  //  const focusedElement = useActiveElement();
+    
+  //  useEffect(() => {
+  //      if (focusedElement) {
+  //        focusedElement.value && console.log(focusedElement.value);
+  //      }
+  //     console.log(focusedElement);
+  //  }, [focusedElement])
+    
+   
+   function reloadlist(){
+        reset(path)
+            // setpath()
+            // setpsplitl(splitpath(message.path))
+        // invoke the list_files command from the backend with the path as argument
+        invoke(
+          "list_files",
+          {
+          windowname:appWindow?.label,
             oid: activetabid.toString(),
             path: path,
-            ff: "" 
-        })
-          }
-          }>{`${name}`}</button> */}
-        </div>
-        // <div className="text-right">
-        //   {original_price_incl_tax !== price && (
-        //     <Tooltip
-        //       content="The price has been overridden in a price list, that is applicable to this order."
-        //       side="top"
-        //     >
-        //       <p className="cursor-default text-grey-40 line-through">
-        //         {formatAmountWithSymbol({
-        //           amount: original_price_incl_tax || 0,
-        //           currency: order.currency_code,
-        //         })}
-        //       </p>
-        //     </Tooltip>
-        //   )}
-        //   <p>
-        //     {formatAmountWithSymbol({
-        //       amount: price || 0,
-        //       currency: order.currency_code,
-        //     })}
-        //   </p>
-        // </div>
-      )
-    },
-    
+            ff: ""
+          });
   }
-  // ,{
-  //   accessorKey: 'additions',
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button
-  //         // variant='ghost'
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-  //       >
-  //         Additions
-  //         <ArrowUpDown className='ml-2 h-4 w-4' />
-  //       </Button>
-  //     );
-  //   },
-  // },{
-  //   accessorKey: 'deletions',
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button
-  //         // variant='ghost'
-  //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-  //       >
-  //         Deletions
-  //         <ArrowUpDown className='ml-2 h-4 w-4' />
-  //       </Button>
-  //     );
-  //   },
-  // }
-  ,{
-    accessorKey: 'ftype',
-    header: ({ column }) => {
-      return (
-        <Button
-          // variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Filetype
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      );
-    },
-    cell: ({
-      getValue,
-      row: {
-        original: { ftype },
-      },
-    }) => {
-      const rname = getValue()
-
-      return (
-          <p className='w-10 sm:w-64 wolc'>{ftype}</p>
-      )
-    },
-  },{
-    accessorKey: 'rawfs',
-    header: ({ column }) => {
-      return (
-        <Button
-          // variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Size
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      );
-    },
-    cell: ({
-      getValue,
-      row: {
-        original: { size,rawfs },
-      },
-    }) => {
-      const rname = getValue()
-
-      return (
-          <p className='w-10 sm:w-64 wolc'>{size}</p>
-      )
-    },
-  },{
-    accessorKey: 'timestamp',
-    header: ({ column }) => {
-      return (
-        <Button
-          // variant='ghost'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Date Modified
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </Button>
-      );
-    },
-    cell: ({
-      row: {
-        original: { timestamp },
-      },
-    }) => {
-      const dateTime = DateTime.fromMillis(timestamp * 1000); // Convert timestamp to DateTime object
-      const utcDateTime = dateTime.toUTC(); // Convert DateTime object to UTC time
-      const utcTime = utcDateTime.toFormat('dd MMM yy'); // Format UTC time in ddmmyyhhss format
-
-      return (
-          <p>{utcTime}</p>
-      )
-    },
-  },
+  function populatesearchlist(spath){
+    invoke(
+      "searchload", {
+        path:spath
+    }).catch((e)=>console.error(e))
+  }
+  function populateimmediatechildcount(){
+    reloadsize("folcount")
+  }
   
-  // {
-  //   accessorKey: 'deletions',
-  //   header: () => <div className='text-right'>Deletions</div>,
-  //   cell: ({ row }) => {
-  //     const amount = parseFloat(row.getValue('amount'));
-  //     const formatted = new Intl.NumberFormat('en-US', {
-  //       style: 'currency',
-  //       currency: 'USD',
-  //     }).format(amount);
-
-  //     return <div className='text-right font-medium'>{formatted}</div>;
-  //   },
-  // },
-  // {
-  //   id: 'actions',
-  //   cell: ({ row }) => {
-  //     const payment = row.original;
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button 
-  //           // variant='ghost' 
-  //           className='h-8 w-4 p-0'>
-  //             <span className='sr-only'>Open menu</span>
-  //             {/* <MoreHorizontal className='h-4 w-4' /> */}
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align='end'>
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(payment.id)}
-  //           >
-  //             Copy payment ID
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>View customer</DropdownMenuItem>
-  //           <DropdownMenuItem>View payment details</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
-  // ...
-];
-// const useActiveElement = () => {
-//   const [active, setActive] = useState(document.activeElement);
-   
-//   const handleFocusIn = (e) => {
-//      setActive(document.activeElement);
-//   }
-   
-//   useEffect(() => {
-//      document.addEventListener('focusin', handleFocusIn)
-//      return () => {
-//        document.removeEventListener('focusin', handleFocusIn)
-//   };
-//   }, [])
-   
-//   return active;
-//  }
-//  const focusedElement = useActiveElement();
-  
-//  useEffect(() => {
-//      if (focusedElement) {
-//        focusedElement.value && console.log(focusedElement.value);
-//      }
-//     console.log(focusedElement);
-//  }, [focusedElement])
-  
- 
- function reloadlist(){
-      reset(path)
-          // setpath()
-          // setpsplitl(splitpath(message.path))
-      // invoke the list_files command from the backend with the path as argument
+  function recentfiles(){
+      console.log("recent");
       invoke(
-        "list_files",
-        {
+      "recent_files", {
         windowname:appWindow?.label,
-          oid: activetabid.toString(),
-          path: path,
-          ff: ""
-        });
-}
-function populatesearchlist(spath){
-  invoke(
-    "searchload", {
-      path:spath
-  }).catch((e)=>console.error(e))
-}
-function populateimmediatechildcount(){
-  reloadsize("folcount")
-}
-
-function recentfiles(){
-    console.log("recent");
+        string: "",
+    })
+  }
+  function loadsearchdb(tospath){
+      invoke(
+      "loadsearchlist", {
+        windowname:appWindow?.label,
+        id: activetabid.toString(),
+        path: tospath
+    })
+  }
+   
+  function updatetabs(tabpath){
+    console.log("update tabs called")
     invoke(
-    "recent_files", {
+      "tabname",
+      {
+        path:tabpath,
+      }
+    ).then((returned:string)=>{
+      sst(returned)
+      console.log("preupdate tablist--->"+JSON.stringify(tablist))
+       if(tablist && tablist.length>0){
+  
+      let tempstoreoldtablist=tablist;
+      let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+      if(objIndex !== -1){
+  
+        tempstoreoldtablist![objIndex!].path = tabpath;
+        tempstoreoldtablist![objIndex!].tabname = returned;
+        settbl(tempstoreoldtablist!);
+      }
+      console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
+    }
+    })
+    .catch((e)=>{
+      console.error(e)
+    })
+  }
+  function closetab(closeid){
+    invoke("closetab",{
       windowname:appWindow?.label,
-      string: "",
-  })
-}
-function loadsearchdb(tospath){
-    invoke(
-    "loadsearchlist", {
-      windowname:appWindow?.label,
-      id: activetabid.toString(),
-      path: tospath
-  })
-}
- 
-function updatetabs(tabpath){
-  console.log("update tabs called")
-  invoke(
-    "tabname",
-    {
-      path:tabpath,
+      id: closeid.toString(),
     }
-  ).then((returned:string)=>{
-    sst(returned)
-    console.log("preupdate tablist--->"+JSON.stringify(tablist))
-     if(tablist && tablist.length>0){
-
-    let tempstoreoldtablist=tablist;
-    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
-    if(objIndex !== -1){
-
-      tempstoreoldtablist![objIndex!].path = tabpath;
-      tempstoreoldtablist![objIndex!].tabname = returned;
-      settbl(tempstoreoldtablist!);
-    }
-    console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
-  }
-  })
-  .catch((e)=>{
-    console.error(e)
-  })
-}
-function closetab(closeid){
-  invoke("closetab",{
-    windowname:appWindow?.label,
-    id: closeid.toString(),
-  }
-  )
-  if(tablist && tablist.length>1){
-      
-    let tempstoreoldtablist=tablist;
-    let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === closeid));
-    if(objIndex !== -1){
-      const removed=tempstoreoldtablist.splice(objIndex,1)
-      console.log("closed tab now tablist is "+JSON.stringify(tempstoreoldtablist)+"\t removed"+JSON.stringify(removed))
-      // closeall();
-      // tempstoreoldtablist.map((tab,index)=>{
-      
-    // })
-      settbl(tempstoreoldtablist!);
+    )
+    if(tablist && tablist.length>1){
+        
+      let tempstoreoldtablist=tablist;
+      let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === closeid));
+      if(objIndex !== -1){
+        const removed=tempstoreoldtablist.splice(objIndex,1)
+        console.log("closed tab now tablist is "+JSON.stringify(tempstoreoldtablist)+"\t removed"+JSON.stringify(removed))
+        // closeall();
+        // tempstoreoldtablist.map((tab,index)=>{
+        
+      // })
+        settbl(tempstoreoldtablist!);
+        
+      }
       
     }
-    
   }
-}
-  function newtab(gotopath?:string,salt=""){
-    reset()
-    // console.error(gotopath)
-    let newtabid=`${new Date().getTime()}${salt}`;
-
-                      invoke(
-                        "tabname",
-                        {
-                          path:gotopath,
-                        }
-                      ).then((returned:string)=>{
-                        console.log("what was returned....."+returned)
+    function newtab(gotopath?:string,salt=""){
+      reset()
+      // console.error(gotopath)
+      let newtabid=`${new Date().getTime()}${salt}`;
+  
                         invoke(
-                          "newtab",
+                          "tabname",
                           {
+                            path:gotopath,
+                          }
+                        ).then((returned:string)=>{
+                          console.log("what was returned....."+returned)
+                          invoke(
+                            "newtab",
+                            {
+                              windowname:appWindow?.label,
+                              oid: newtabid.toString(),
+                              path: gotopath,
+                              ff: ""
+                            }
+                          );
+                          
+                          settbl((old)=>{
+                            return (old && old?.length>0)?
+                            [...old,{
+                              id:newtabid,
+                              path:gotopath,
+                              ff:"",
+                              tabname:returned,
+                              history:[]
+                            } as tabinfo]:
+                            [{
+                              id:newtabid,
+                              path:gotopath,
+                              ff:"",
+                              tabname:returned,
+                              history:[]
+                            } as tabinfo]
+                          
+                          })
+        // console.log("opened tab now tablist is "+JSON.stringify(tablist))
+  
+                          addToTabHistory(newtabid.toString(),gotopath)
+                          setactivetabid(newtabid)
+                          // setpath(message.path)
+                          // setpsplitl(splitpath(message.path))
+                          // sst(message.name)
+                          // invoke(
+                          //   "load_tab",
+                          //   {
+                          //     windowname:appWindow?.label,
+                          //     oid: newtabid.toString()
+                          //   }
+                          // );
+                          // addToTabHistory(newtabid.toString(),gotopath)
+                          // addTofwdHistory(newtabid.toString(),path)
+                          invoke('list_files', { 
                             windowname:appWindow?.label,
                             oid: newtabid.toString(),
                             path: gotopath,
-                            ff: ""
-                          }
-                        );
-                        
-                        settbl((old)=>{
-                          return (old && old?.length>0)?
-                          [...old,{
-                            id:newtabid,
-                            path:gotopath,
-                            ff:"",
-                            tabname:returned,
-                            history:[]
-                          } as tabinfo]:
-                          [{
-                            id:newtabid,
-                            path:gotopath,
-                            ff:"",
-                            tabname:returned,
-                            history:[]
-                          } as tabinfo]
-                        
+                            ff: "" 
                         })
-      // console.log("opened tab now tablist is "+JSON.stringify(tablist))
-
-                        addToTabHistory(newtabid.toString(),gotopath)
-                        setactivetabid(newtabid)
-                        // setpath(message.path)
-                        // setpsplitl(splitpath(message.path))
-                        // sst(message.name)
-                        // invoke(
-                        //   "load_tab",
-                        //   {
-                        //     windowname:appWindow?.label,
-                        //     oid: newtabid.toString()
-                        //   }
-                        // );
-                        // addToTabHistory(newtabid.toString(),gotopath)
-                        // addTofwdHistory(newtabid.toString(),path)
-                        invoke('list_files', { 
-                          windowname:appWindow?.label,
-                          oid: newtabid.toString(),
-                          path: gotopath,
-                          ff: "" 
-                      })
-                      });
-  }
-  function reloadsize(togglewhat="size"){
-    reset(path)
-    console.log("loading size js---->1");
-    if(appWindow){
-      const thensobj={
-      windowname: appWindow?.label,
-      togglewhat:togglewhat
-    };
-    console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
-    invoke(
-      "nosize",
-      thensobj);
-    console.log("loading size js----->2")
+                        });
     }
-  }
-const [isvalid,setvalid]=useState(true);
-  
-const [width, setWidth] = useState(200);
- const [isDragging, setIsDragging] = useState(false);
-
- const handleMouseDown = (event) => {
-    setIsDragging(true);
-    event.stopPropagation();
- };
-
- const handleMouseMove = (event) => {
-    if (!isDragging) return;
-    setWidth(window.innerWidth - event.clientX);
- };
-
- const handleMouseUp = () => {
-    setIsDragging(false);
- };
-  
-  
-  
-  const[dupes,setdupes]=useState([] as operationfileinfo[])
-  const[showalertdialog,setsal]=useState(false)
-  const[dest,setdest]=useState("")
-  const [size, setSize] = useState({
-    a: 20,
-    b: 90,
-  });
-
-  
-  return (activewindow.label!=="settings"?(
-    // <div className="overflow-hidden">
+    function reloadsize(togglewhat="size"){
+      reset(path)
+      console.log("loading size js---->1");
+      if(appWindow){
+        const thensobj={
+        windowname: appWindow?.label,
+        togglewhat:togglewhat
+      };
+      console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
+      invoke(
+        "nosize",
+        thensobj);
+      console.log("loading size js----->2")
+      }
+    }
+  const [isvalid,setvalid]=useState(true);
     
+  const [width, setWidth] = useState(200);
+   const [isDragging, setIsDragging] = useState(false);
+  
+   const handleMouseDown = (event) => {
+      setIsDragging(true);
+      event.stopPropagation();
+   };
+  
+   const handleMouseMove = (event) => {
+      if (!isDragging) return;
+      setWidth(window.innerWidth - event.clientX);
+   };
+  
+   const handleMouseUp = () => {
+      setIsDragging(false);
+   };
+    
+    
+    
+    const[dupes,setdupes]=useState([] as operationfileinfo[])
+    const[showalertdialog,setsal]=useState(false)
+    const[dest,setdest]=useState("")
+    const [size, setSize] = useState({
+      a: 20,
+      b: 90,
+    });
+    return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
 
@@ -2742,16 +2739,27 @@ const [width, setWidth] = useState(200);
         </span> */}
         </div>
         </ResizablePanel>
-      </ResizablePanelGroup>):(
+      </ResizablePanelGroup>
+    )
+  }
+  
+  else{
+
+  return (
+    // <div className="overflow-hidden">
+    
+      
         <div>
           <FiledimeSettings theme={theme}/>
           
-        </div>  
-      )
+        </div>  )
+  }
+  
+      
       
      
     // </div>
-  )
+  
 }
 
 function FolderIcon(props) {
