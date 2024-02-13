@@ -32,7 +32,7 @@ function useKeyboardShortcut(
         if (isTextSelected()) return;
       const keyboardEvent = event as KeyboardEvent;
       const { code, ctrlKey, altKey, shiftKey } = keyboardEvent;
-      console.log(keyboardEvent)
+      // console.log(keyboardEvent)
 
       if (config.code !== code) return;
       if (config.ctrlKey && !ctrlKey) return;

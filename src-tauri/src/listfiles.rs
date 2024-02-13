@@ -316,7 +316,12 @@ let handle=thread::spawn(move|| {
             
               // fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
-          folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
+          folsize(&windowname.clone(),&app_handle,
+          serde_json::to_string(&json!({
+            "caller":startime,
+            "size":sizeunit::size(*tfsize.lock().unwrap(),true)
+          })).unwrap(),
+          );
           
           if *don || fcount==files.len() {
             // window2.emit("infiniteloader",
@@ -408,7 +413,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
           //   return Err("error"); // return an error to stop the iteration
           // }
           if(!e.path().to_string_lossy().to_string().eq(&path)){
-            thread::sleep(Duration::from_millis(2000));
+            // thread::sleep(Duration::from_millis(1000));
 
             let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
             let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -444,7 +449,10 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     let app_handle=window.clone().app_handle();
     // fileslist(&wname,&app_handle.clone(),&serde_json::to_string(&files.lock().unwrap().clone()).unwrap())?;
   
-    folsize(&wname,&app_handle,sizeunit::size(*tfsize_clone.lock().unwrap(),true))?;
+    folsize(&wname,&app_handle,serde_json::to_string(&json!({
+      "caller":startime,
+      "size":sizeunit::size(*tfsize_clone.lock().unwrap(),true)
+    })).unwrap())?;
     // sort the vector by name
     // files.sort_by(|a, b| a.name.cmp(&b.name));
     // emit an event to the frontend with the vector as payload

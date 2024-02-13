@@ -264,10 +264,11 @@ export default function Greet() {
         setss("")
         console.log("reset done")
     }
-    let lct=new Date().getTime().toString();
     function listfiles(oid,path){
-      lct=new Date().getTime().toString();
-    
+      let lct=new Date().getTime().toString();
+      // console.log(lct)
+    // console.log("update issuedfor-----"+lct)
+
       setlct(lct)
       // console.error(lct)
       // console.error("----------asdasdsd-------"+lastcalledtime)
@@ -278,7 +279,7 @@ export default function Greet() {
       //     oid: tab.id.toString()
       //   }
       // );
-      
+      console.log(appWindow?.label)
       invoke('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
@@ -508,7 +509,58 @@ export default function Greet() {
   
    
    const [currentchoice,changechoiceto]=useState("")
-  
+  useEffect(()=>{
+    // console.log("update listen-----"+lastcalledtime)
+    reset() 
+    const unl=listen("folder-size", (event) => {
+      let returned=JSON.parse(event.payload);
+      if(returned.caller===lastcalledtime){
+        console.log("foldersize")
+        setps(returned.size)
+      }
+    
+      // console.log(data.payload.toString())
+    });
+    const unlistenPromise = listen('list-files', (event) => {
+      // console.log(event)
+      let returned=JSON.parse(event.payload);
+      // console.log(returned.caller)
+      // setlct((returned.caller))
+      // console.log(lastcalledtime+"-------"+returned.caller)
+          if(returned.caller===lastcalledtime){
+            let tocompute=JSON.parse(returned.files)
+            console.log(tocompute)
+            setwbv(false)
+            setfc((old) => {
+              const newFileCount = old + 1;
+              // if (newFileCount < 11)
+               {
+                
+                // setpsplitl(splitpath(path))
+      
+                setfileslist((plog) => [...plog, tocompute]);
+                
+              }
+              return newFileCount;
+             });
+          }
+        // console.log("loading files---->"+event.payload);
+    })
+    // .then(result => {
+    //         // console.log(uio.getCurrent().label)
+    //         console.log(result)
+            
+    //     })
+    // .catch(console.error);
+    return () => {
+      unlistenPromise.then((unlisten) => {
+        unlisten();
+      });
+      unl.then((unlisten) => {
+        unlisten();
+      });
+    };
+  },[lastcalledtime])
     useEffect(() => {
       listen('load', () => {
         console.log(`New page loaded --->${window.location.href}`);
@@ -656,12 +708,7 @@ export default function Greet() {
         setcbl(JSON.parse(data.payload) as string[]);
         console.log("winnames: "+data.payload.toString())
       });
-      listen("folder-size", (data: { payload: string }) => {
-        console.log("foldersize")
       
-        setps(data.payload.toString())
-        // console.log(data.payload.toString())
-      });
       listen("fsc", (data: { payload: string }) => {
         // console.log("-------------__>"+((data.payload)))
         // console.log("fscl----->"+JSON.parse(data.payload));
@@ -697,42 +744,9 @@ export default function Greet() {
               console.log(result)
           })
       .catch(console.error);
-      // listen('lct',(event)=>{
-      //   setlct((event.payload))
-      //   console.error("----------"+lastcalledtime)
-      // })
+      
       // const unlisten1=
-      listen('list-files', (event) => {
-        console.log(event)
-        let returned=JSON.parse(event.payload);
-        console.log(returned)
-        // setlct((returned.caller))
-        // console.log(lastcalledtime+"-------"+returned.caller)
-            if(returned.caller===lastcalledtime){
-              let tocompute=JSON.parse(returned.files)
-              console.log(tocompute)
-              setwbv(false)
-              setfc((old) => {
-                const newFileCount = old + 1;
-                // if (newFileCount < 11)
-                 {
-                  
-                  // setpsplitl(splitpath(path))
-        
-                  setfileslist((plog) => [...plog, tocompute]);
-                  
-                }
-                return newFileCount;
-               });
-            }
-          // console.log("loading files---->"+event.payload);
-      })
-      .then(result => {
-              // console.log(uio.getCurrent().label)
-              console.log(result)
-              
-          })
-      .catch(console.error);
+      
       listen("load-marks", (data: { payload:string }) => {
         console.log("listmarks ")
         setbms(JSON.parse(data.payload) as mark[])
@@ -1248,14 +1262,7 @@ export default function Greet() {
             // setpath()
             // setpsplitl(splitpath(message.path))
         // invoke the list_files command from the backend with the path as argument
-        invoke(
-          "list_files",
-          {
-          windowname:appWindow?.label,
-            oid: activetabid.toString(),
-            path: path,
-            ff: ""
-          });
+        listfiles(activetabid,path)
   }
   function populatesearchlist(spath){
     invoke(
@@ -1407,6 +1414,7 @@ export default function Greet() {
         thensobj);
       console.log("loading size js----->2")
       }
+      listfiles(activetabid,path)
     }
   const [isvalid,setvalid]=useState(true);
     
@@ -1690,15 +1698,7 @@ export default function Greet() {
                         reset(mark.path)
                         updatetabs(mark.path)
                       }
-                      invoke(
-                        "list_files",
-                        {
-                          windowname:appWindow?.label,
-                          oid: activetabid.toString(),
-                          path: mark.path,
-                          ff: ""
-                        }
-                      ).catch((e)=>console.error(e));
+                     listfiles(activetabid,mark.path)
                       // console.error(mark.path)
                       // newtab(mark.path)
                         // setfileslist([])
@@ -2249,22 +2249,7 @@ export default function Greet() {
 
             <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
               reset(pathitype)
-              invoke(
-                "list_files",
-                {
-                windowname:appWindow?.label,
-                oid: activetabid.toString(),
-                path: pathitype,
-                ff: ""
-                }
-                ).then(()=>{
-                  
-                  addToTabHistory(activetabid.toString(),pathitype)
-                  updatetabs(pathitype)
-                  //  setpath(message.name)
-                  //  sst(message.path)
-                })
-                .catch((e)=>console.error(e))
+              listfiles(activetabid,pathitype)
             }}>
               Go
               </Button>

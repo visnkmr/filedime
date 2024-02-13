@@ -16,9 +16,9 @@ pub fn loadfromhtml(windowname:&str,name: String, window: Window,g:State<AppStat
     let mut file = std::fs::File::open(name).unwrap();
     
   
-  folsize(windowname, &app_handle,{
-        sizeunit::size(find_size(&path.to_string_lossy(),&window,&g),true)
-      });
+  // folsize(windowname, &app_handle,{
+        // sizeunit::size(find_size(&path.to_string_lossy(),&window,&g),true)
+      // });
   
   sendgparentloc(windowname, &app_handle,parent.parent().unwrap().to_string_lossy().to_string());
 sendparentloc(windowname, &app_handle, parent.to_string_lossy().to_string(),&("").to_string());
