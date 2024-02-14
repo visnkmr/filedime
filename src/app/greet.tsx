@@ -168,7 +168,7 @@ export default function Greet() {
     const [noofpages,setnop]=useState(1);
     const [currentpage,setpageno]=useState(0)
     const [perpage,setperpage]=useState(15)
-    const [lastcalledtime,setlct]=useState("")
+    const lastcalledtime=useRef()
     useMemo(()=>{
       setnop(Math.ceil(filecount/perpage))
     },[filecount])
@@ -269,7 +269,7 @@ export default function Greet() {
       // console.log(lct)
     // console.log("update issuedfor-----"+lct)
 
-      setlct(lct)
+      lastcalledtime.current=(lct)
       // console.error(lct)
       // console.error("----------asdasdsd-------"+lastcalledtime)
       // invoke(
@@ -514,7 +514,7 @@ export default function Greet() {
     reset() 
     const unl=listen("folder-size", (event) => {
       let returned=JSON.parse(event.payload);
-      if(returned.caller===lastcalledtime){
+      if(returned.caller===lastcalledtime.current){
         console.log("foldersize")
         setps(returned.size)
       }
@@ -527,7 +527,7 @@ export default function Greet() {
       // console.log(returned.caller)
       // setlct((returned.caller))
       // console.log(lastcalledtime+"-------"+returned.caller)
-          if(returned.caller===lastcalledtime){
+          if(returned.caller===lastcalledtime.current){
             let tocompute=JSON.parse(returned.files)
             console.log(tocompute)
             setwbv(false)
@@ -543,6 +543,9 @@ export default function Greet() {
               }
               return newFileCount;
              });
+          }
+          else{
+            console.log("obsolete results recieved.")
           }
         // console.log("loading files---->"+event.payload);
     })
@@ -560,7 +563,7 @@ export default function Greet() {
         unlisten();
       });
     };
-  },[lastcalledtime])
+  },[lastcalledtime.current])
     useEffect(() => {
       listen('load', () => {
         console.log(`New page loaded --->${window.location.href}`);
@@ -1447,7 +1450,7 @@ export default function Greet() {
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
-        {lastcalledtime}
+        {/* {lastcalledtime.current} */}
         <div className="flex h-full flex-col gap-2">
 
           <div className="flex p-3  border-b">
