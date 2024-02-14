@@ -269,7 +269,7 @@ export default function Greet() {
       // console.log(lct)
     // console.log("update issuedfor-----"+lct)
 
-      lastcalledtime.current=(lct)
+      lastcalledtime.current=lct
       // console.error(lct)
       // console.error("----------asdasdsd-------"+lastcalledtime)
       // invoke(
@@ -279,7 +279,7 @@ export default function Greet() {
       //     oid: tab.id.toString()
       //   }
       // );
-      console.log(appWindow?.label)
+      // console.log(appWindow?.label)
       invoke('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
@@ -287,6 +287,8 @@ export default function Greet() {
         path: path,
         ff: "" 
     }).catch((e)=>console.error(e))
+    reset(path)
+
 
     }
      function activateTab(tab: tabinfo){
@@ -512,33 +514,39 @@ export default function Greet() {
   useEffect(()=>{
     // console.log("update listen-----"+lastcalledtime)
     reset() 
-    const unl=listen("folder-size", (event) => {
-      let returned=JSON.parse(event.payload);
-      if(returned.caller===lastcalledtime.current){
-        console.log("foldersize")
-        setps(returned.size)
-      }
+    let printtxt=Math.random();
+    // const unl=listen("folder-size", (event) => {
+    //   let returned=JSON.parse(event.payload);
+    //   if(returned.caller===lastcalledtime.current){
+    //     console.log("foldersize")
+    //     setps(returned.size)
+    //   }
     
-      // console.log(data.payload.toString())
-    });
-    const unlistenPromise = listen('list-files', (event) => {
-      // console.log(event)
+    //   // console.log(data.payload.toString())
+    // });
+    let unlisten: (() => void) | undefined = undefined
+    listen('list-files', (event) => {
+      // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
       let returned=JSON.parse(event.payload);
       // console.log(returned.caller)
       // setlct((returned.caller))
       // console.log(lastcalledtime+"-------"+returned.caller)
           if(returned.caller===lastcalledtime.current){
             let tocompute=JSON.parse(returned.files)
-            console.log(tocompute)
+            // console.log(printtxt+"------->"+returned.caller+"---------------->"+JSON.stringify(tocompute))
             setwbv(false)
             setfc((old) => {
+              // console.log(old+"------------"+lastcalledtime.current )
               const newFileCount = old + 1;
               // if (newFileCount < 11)
                {
                 
                 // setpsplitl(splitpath(path))
       
-                setfileslist((plog) => [...plog, tocompute]);
+                setfileslist((plog) => {
+                  // console.log(plog)
+                  return [...plog, tocompute]
+                });
                 
               }
               return newFileCount;
@@ -556,14 +564,9 @@ export default function Greet() {
     //     })
     // .catch(console.error);
     return () => {
-      unlistenPromise.then((unlisten) => {
-        unlisten();
-      });
-      unl.then((unlisten) => {
-        unlisten();
-      });
-    };
-  },[lastcalledtime.current])
+      unlisten?.()
+  }
+  },[])
     useEffect(() => {
       listen('load', () => {
         console.log(`New page loaded --->${window.location.href}`);
@@ -2453,7 +2456,7 @@ export default function Greet() {
                Reload
               </HoverCardContent>
             </HoverCard>
-                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages</p>
+                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({fileslist.length})</p>
                 
                 <div className="ms-2 flex whitespace-nowrap overflow-hidden">
 

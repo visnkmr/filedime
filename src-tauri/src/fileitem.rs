@@ -22,6 +22,7 @@ use crate::{markdown::loadmarkdown,
 };
 
 pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, AppStateStore>)->FileItem{
+  // println!("path=-------->{:?}",path);
     // println!("{}",name);
     let pathtf=path.to_string_lossy().into_owned();
     let ignorehiddenfiles=*state.excludehidden.read().unwrap();

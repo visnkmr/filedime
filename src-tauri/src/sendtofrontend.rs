@@ -159,6 +159,7 @@ pub fn folcount(windowname:&str,ah:&AppHandle,fcount:usize)->Result<(),String>{
 }
 
 pub fn fileslist(windowname:&str,ah:&AppHandle,fl:&String)->Result<(),String>{
+  // println!("{}",fl);
     ah.emit_to(
         windowname,
         "list-files",

@@ -414,7 +414,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
           // }
           if(!e.path().to_string_lossy().to_string().eq(&path)){
             // thread::sleep(Duration::from_millis(1000));
-
+            // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
             let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
             let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
             // println!("{:?}",file);
