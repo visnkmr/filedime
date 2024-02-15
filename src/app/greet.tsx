@@ -141,6 +141,7 @@ export default function Greet() {
   const { theme, setTheme } = useTheme()
   if(activewindow.label!=="settings"){
     const { toast } = useToast()
+    
     async function setupAppWindow() {
       const appWindow = (await import('@tauri-apps/api/window')).appWindow
       console.log("windowname top---------->"+appWindow.label)

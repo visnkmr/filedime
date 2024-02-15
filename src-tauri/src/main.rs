@@ -298,28 +298,47 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
     
   #[tauri::command]
   fn new(dest:String,isdir:bool,name:String,window:Window)->Result<(),String>{
+    
+    
+    // Create the directory
+    let dest_path = Path::new(&dest);
+    fs::create_dir_all(&dest).map_err(|e| {
+      let title="Failed";
+      let desc=format!("Failed to find/create folder: {}", e);
+      opendialogwindow(&window.app_handle(), title,&desc,"");
+      desc
+    })?;
+    
     let whatwascreated=if(isdir){
+      // Combine the destination path with the folder name using join
+    let dir_path = dest_path.join(name.clone());
+    fs::create_dir_all(&dir_path).map_err(|e| {
+      let title="Failed";
+      let desc=format!("Failed to create folder: {}", e);
+      opendialogwindow(&window.app_handle(), title,&desc,"");
+      desc
+    })?;
       "Folder"
     }
     else{
-      "File"
+      // Combine the directory path with the file name using join
+    let file_path = dest_path.join(name.clone());
+    fs::File::create(&file_path).map_err(|e| {
+      let title="Failed";
+      let desc=format!("Failed to create file: {}", e);
+      opendialogwindow(&window.app_handle(), title,&desc,"");
+      desc
+    })?;
+      "File" 
     };
+    
+    
+    
+   
     let title=&format!("{} created",whatwascreated);
     let desc=&format!("{} was created @ {}",name,dest);
     opendialogwindow(&window.app_handle(), title,desc,"");
-    // Create the directory
-    let dest_path = Path::new(&dest);
-    fs::create_dir_all(&dest).map_err(|e| format!("Failed to find dest path: {}", e))?;
-
-    // Combine the destination path with the folder name using join
-    let dir_path = dest_path.join(name.clone());
-    fs::create_dir_all(&dir_path).map_err(|e| format!("Failed to create folder: {}", e))?;
-
-    // Combine the directory path with the file name using join
-    let file_path = dir_path.join(name);
-    fs::File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
-    
-  Ok(())
+    Ok(())
   }
       #[tauri::command]
   async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
