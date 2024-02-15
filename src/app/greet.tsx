@@ -4,7 +4,7 @@ import FRc from "../components/findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus} from "lucide-react"
 import { Badge } from "../components/ui/badge"
 import {Checkbox} from "../components/ui/checkbox"
 import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -12,6 +12,7 @@ import { arch, platform, type, version } from '@tauri-apps/api/os';
 import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
+import NewLeaf from "./new"
 // import parse from 'html-react-parser';
 import {appWindow as activewindow} from "@tauri-apps/api/window"
 // import { platform } from '@tauri-apps/api/os'
@@ -1445,6 +1446,8 @@ export default function Greet() {
     
     const[dupes,setdupes]=useState([] as operationfileinfo[])
     const[showalertdialog,setsal]=useState(false)
+    const[shownewleafdialog,setsnld]=useState(false)
+    const[isldir,setild]=useState(false)
     const[dest,setdest]=useState("")
     const [size, setSize] = useState({
       a: 20,
@@ -1930,6 +1933,52 @@ export default function Greet() {
 
             <HoverCard>
               <HoverCardTrigger>
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+                ()=>{
+                  setdest(path)
+                  setild(true);
+                  setsnld(true);
+                }
+            }>
+            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
+            <FolderPlus className="h-4 w-4"/>
+              
+            {/* </CardDescription> */}
+          </Button>
+          </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               New Folder
+              </HoverCardContent>
+            </HoverCard>
+  </div><div>
+
+
+            <HoverCard>
+              <HoverCardTrigger>
+          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+                ()=>{
+                  setdest(path)
+                  setild(false);
+                  setsnld(true);
+                }
+            }>
+            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
+            <FilePlus className="h-4 w-4"/>
+              
+            {/* </CardDescription> */}
+          </Button>
+          </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               New File
+              </HoverCardContent>
+            </HoverCard>
+  </div>
+  <NewLeaf dest={dest} isdir={isldir} showad={shownewleafdialog} setshowad={setsnld}/>
+  {/* <div>
+
+
+            <HoverCard>
+              <HoverCardTrigger>
           <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
                 ()=>{
                   reloadsize()
@@ -1962,7 +2011,7 @@ export default function Greet() {
                Exclude hidden files
               </HoverCardContent>
             </HoverCard>
-  </div>
+  </div> */}
             <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
 
             {/* <HoverCard>
@@ -2025,7 +2074,7 @@ export default function Greet() {
                Show size of folder
               </HoverCardContent>
             </HoverCard> */}
-            <div>
+            {/* <div>
 
 
             <HoverCard>
@@ -2081,7 +2130,7 @@ export default function Greet() {
                load Search from this directory
               </HoverCardContent>
             </HoverCard>
-            </div>
+            </div> */}
         {custombuttonlist.map((bn, index) => (
           <div key={index} className="">
 

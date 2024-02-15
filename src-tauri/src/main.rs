@@ -297,6 +297,20 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
   }
     
   #[tauri::command]
+  fn new(dest:String,isdir:bool,name:String,window:Window)->Result<(),String>{
+    let whatwascreated=if(isdir){
+      "Folder"
+    }
+    else{
+      "File"
+    };
+    let title=&format!("{} created",whatwascreated);
+    let desc=&format!("{} was created @ {}",name,dest);
+    opendialogwindow(&window.app_handle(), title,desc,"");
+    
+  Ok(())
+  }
+      #[tauri::command]
   async fn checkforconflicts(srclist:String,dst:String)->Result<String,String>{
   let mut thatexists=vec![];
   match serde_json::from_str(&srclist){
@@ -1176,6 +1190,7 @@ fn main() {
         checkforconflicts,
         // backbutton,
         closetab,
+        new,
         disablenav,
         copynpaste,
         searchload,
