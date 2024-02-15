@@ -68,6 +68,7 @@
   "sideEffects": false,
   "dependencies": {
     "@next/bundle-analyzer": "^14.0.4",
+    "@panzoom/panzoom": "^4.5.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-label": "^2.0.2",

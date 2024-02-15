@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 // import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
 import FRc from "../components/findsizecomp"
-
+import Panzoom from "@panzoom/panzoom"
 import {
   HoverCard,
   HoverCardContent,
@@ -178,7 +178,37 @@ export default function ReadFileComp({message}:rfcprops){
  const handleMouseUp = () => {
     setIsDragging(false);
  };
-      
+ useEffect(()=>{
+
+   const elem = document.getElementById('panzoom-element')
+   const panzoom = Panzoom(elem, {
+    cursor: "default",
+    maxScale: 7,
+    minScale: 1,
+    canvas:true,
+    // panOnlyWhenZoomed: true,
+    step: 0.1,
+    contain:"outside"
+   })
+  //  panzoom.pan(10, 10)
+  //  panzoom.zoom(2, { animate: true })
+  
+   elem.parentElement.addEventListener('wheel', 
+   function (event: any) {
+    if (!event.ctrlKey) return
+    const pan = panzoom.getPan()
+    panzoom.zoomWithWheel
+    (event);
+    panzoom.pan(pan.x, pan.y);
+  }
+  )
+ })
+ 
+ // Panning and pinch zooming are bound automatically (unless disablePan is true).
+ // There are several available methods for zooming
+ // that can be bound on button clicks or mousewheel.
+//  button.addEventListener('click', panzoom.zoomIn)
+//  elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel)
        
     return (
         <>
@@ -238,19 +268,9 @@ export default function ReadFileComp({message}:rfcprops){
 
         {IMAGE_TYPES.some(type => message.name.includes(type))?(
            <div 
-           ref={containerRef} 
-           onWheel={handleScroll} 
-           onMouseDown={handleMouseDown} 
-           onMouseMove={handleMouseMove} 
-           onMouseUp={handleMouseUp} 
-           onMouseLeave={handleMouseUp} 
-           className="relative overflow-hidden"
+            id="panzoom-element"
          >
-        <img 
-        ref={imgRef}
-        alt="Zoomable"
-        style={{ transform: `scale(${scale})  translate(${position.x}px, ${position.y}px)`, transition: 'transform 0.2s' }}
-        className="w-full" 
+        <img
         src={`${convertFileSrc(message.path)}`}/></div>
         
         ):""}
