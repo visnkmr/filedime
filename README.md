@@ -38,3 +38,7 @@ should use node version 20
 in a new terminal window "cargo tauri dev" for testing.  
 in a new terminal window "cargo tauri build" for making executables (.exe for windows or bin file on linux).  
 
+when browsing through code use the extensions listed in extensions.code-profile in vscodium/vscode
+when building on nixos use the shell.nix file provided if necessary
+
+currently the code may contains lots of comments in rust it will be cleared up in the future.
