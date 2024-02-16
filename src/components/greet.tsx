@@ -91,6 +91,9 @@ export default function Greet() {
       console.log("windowname top---------->"+appWindow.label)
   
       setAppWindow(appWindow)
+      const pl = await(await import('@tauri-apps/api/os')).platform()
+      console.log("windowname top---------->"+appWindow.label)
+      setp(pl)
     }
   
     useEffect(() => {
@@ -348,20 +351,6 @@ export default function Greet() {
           path:item
         })
      };
-      
-     import("@tauri-apps/api").then
-     (
-      (tauri) =>
-      {
-      useEffect(() => {
-        //check if react is in strict mode
-        console.log(Math.random());
-        let wfp=async()=>{setp(await tauri.os.platform())
-        console.log(await tauri.os.platform())};
-        wfp();
-        
-      }, []);
-    })
    
    const [currentchoice,changechoiceto]=useState("")
   useEffect(()=>{

@@ -75,7 +75,7 @@ const nextConfig =
         tls: false
       };
       config.optimization = {
-        minimize: false,
+        minimize: true,
         minimizer: [
           new TerserPlugin({
             // minify: TerserPlugin.swcMinify,
@@ -93,29 +93,29 @@ const nextConfig =
                 wrap_iife: true,
               },
               compress: {
-                drop_console: false,
-                drop_debugger: false,
-                hoist_funs: false,
-                hoist_props: false,
-                hoist_vars: false,
-                inline: false,
-                loops: false,
-                negate_iife: false,
+                drop_console: true,
+                drop_debugger: true,
+                hoist_funs: true,
+                hoist_props: true,
+                hoist_vars: true,
+                inline: true,
+                loops: true,
+                negate_iife: true,
                 passes: 3,
-                reduce_funcs: false,
-                reduce_vars: false,
-                switches: false,
-                toplevel: false,
-                typeofs: false,
-                unsafe: false,
-                unsafe_arrows: false,
-                unsafe_comps: false,
-                unsafe_Function: false,
-                unsafe_math: false,
-                unsafe_methods: false,
-                unsafe_proto: false,
-                unsafe_regexp: false,
-                unsafe_undefined: false,
+                reduce_funcs: true,
+                reduce_vars: true,
+                switches: true,
+                toplevel: true,
+                typeofs: true,
+                unsafe: true,
+                unsafe_arrows: true,
+                unsafe_comps: true,
+                unsafe_Function: true,
+                unsafe_math: true,
+                unsafe_methods: true,
+                unsafe_proto: true,
+                unsafe_regexp: true,
+                unsafe_undefined: true,
               },
               ie8: false
             }
@@ -146,7 +146,7 @@ const nextConfig =
     // };
 
     // Merge chunks instead of creating new ones
-    config.optimization.minimize = false;
+    config.optimization.minimize = true;
 //     if (typeof nextRuntime === "undefined") {
 //       config.resolve.fallback = {
 //                 ...config.resolve.fallback,
