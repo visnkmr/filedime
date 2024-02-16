@@ -16,10 +16,15 @@ fn file_size(path: &std::path::Path,w:&Window,g:&State<'_, AppStateStore>) -> u6
 // A function to calculate the total size of a directory and its subdirectories
 pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
     // Create a walkdir iterator over the directory
+    let ignorehiddenfiles=*g.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(path)
     .threads(threads)
+    .hidden(ignorehiddenfiles) // Include hidden files and directories
     .follow_links(false)
+    .parents(true)
+    .git_exclude(true)
+    .ignore(true) // Disable the default ignore rules
     .git_ignore(true)
     .build()
     // .min_depth(1) // skip the root directory
@@ -40,12 +45,7 @@ pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
             
             let path = entry.path();
             path.is_file() 
-            // &&
-            //  !path.is_symlink() &&
-            //  !path.to_string_lossy().to_string().contains("/.git/")
         })
-        // Filter out paths that start with "./.git"
-        // .filter(|entry| !entry.path().to_string_lossy().to_string().contains("/.git"))
         // Map each path to its file size
         .map(|entry| {
             // println!("parthread");

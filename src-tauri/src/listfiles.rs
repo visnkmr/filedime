@@ -97,9 +97,6 @@ pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: 
   //       );
   // Pathresolver::new()
   
-  // if(path=="./"){
-  //   path="/home/roger/Downloads/github/notes/".to_string();
-  // }
     lct(&windowname, &window.app_handle(), starttime.clone());
   let wname=windowname.clone();
   let testpath=PathBuf::from(path.clone());
@@ -140,22 +137,6 @@ pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: 
   state.filesetcollection.write().unwrap().clear();
   sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
-
-  // else{
-  //   match(testpath.read_dir()){
-  //     Ok(mut k)=>{
-  //       if(k.next().is_none()){
-  //         println!("path empty.");
-  //         showdialog(&windowname,&window.app_handle(),"path empty");
-  //         return Ok(());
-  //       }
-  //     },
-  //     Err(_)=>{
-
-  //     }
-  //   }
-  // } 
-  // state.addtab(oid, path.clone(), ff);
   newtab(&windowname,oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
  
   // convert the path to a PathBuf
@@ -198,34 +179,11 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
       let walker3 = 
         walker.clone() // Respect the .gitignore file
         .build();
-      // WalkDir::new(&path)
-      //   .contents_first(true)
-      //     .min_depth(1) // skip the root directory
-      //     // .max_depth(1) // only look at the immediate subdirectories
-      //     .into_iter()
-          
-      //     .filter_entry(
-      //       |e| 
-      //       !e.path_is_symlink() 
-      //       // &&
-      //       // !e
-      //       // .file_name()
-      //       // .to_str()
-      //       // .map(|s| s.starts_with("."))
-      //       // .unwrap_or(false)
-      //       &&
-      //       !is_hidden(e)
-      //       // &&
-      //       // e.file_type().is_file()
-      //         // e.file_type().is_dir()
-      //     );
 
         
         let par_walker2 = walker2.par_bridge(); // ignore errors
         let par_walker3 = walker3.par_bridge(); // ignore errors
         
-        // let k:HashSet<String>=
-        // let paths:Vec<String>=
         let fcount=par_walker2
         
         // .enumerate()
@@ -237,28 +195,7 @@ println!("parent------{:?}",parent.to_string_lossy().to_string());
           Result::ok
 })
         .count();
-  // match(fs::read_dir(&path)){
-  //   Ok(rv)=>{
-  //     fcount=rv.par_bridge()
-  //     .filter(|e|{
-  //       match(e){
-  //         Ok(rv)=>{
-  //           !rv.file_name().to_string_lossy().to_string().ends_with(".git")
-  //         },
-  //         Err(_)=>{
-  //           false
-  //         }
-  //       }
-  //     }) // create a parallel iterator from a sequential one
-  //     .count();
-  //   },
-  //   _=>{
-  //     println!("failed to read file");
-  //     stoptimer(&windowname, &window.app_handle())?;
-  //     return Err("Cannot open the file/folder".to_string())
-  //   }
-    
-  // }
+  
   println!("read dir done on path");
 
           ; // count the number of items in parallel
@@ -301,20 +238,6 @@ let handle=thread::spawn(move|| {
         // check if 200 milliseconds have passed since the last print
           let files = files_clone.lock().unwrap();
           let don = doneornot.lock().unwrap();
-          // println!("{}------{}----{}",nootimes,files.len(),fcount);
-            //           // push the file item to the vector
-            // totsize+=mem::size_of_val(&file);
-            // match(files.last()){
-            //   Some(file)=>{
-            //     println!("{} out of {} \t---{}",files.len(),fcount,file.name);
-
-            //   },
-            //   None=>{
-
-            //   }
-            // }
-            
-              // fileslist(&&windowname,&app_handle,&serde_json::to_string(&files.clone()).unwrap());
           
           folsize(&windowname.clone(),&app_handle,
           serde_json::to_string(&json!({
@@ -380,38 +303,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
     }
     return true;
     })
-    // .filter(|rv|{
-    //       !rv.file_name().to_string_lossy().to_string().ends_with(".git")
-
-    // })
-    // .filter(
-    //    |entry| {
-    //    let path = entry.path();
-    //    path.is_file() 
-    //    &&
-    //    !path.is_symlink() 
-    //    &&
-    //    !path.to_string_lossy().to_string().contains("/.git")
-    // })
     .for_each_with(Arc::clone(&state.whichthread),|(threadcontroller),e| {
-      // if let wThread::Listing= get_enum_value(&threadcontroller){
-            // window.emit("reloadlist",json!({
-            //     "message": "pariter1",
-            //     "status": "running",
-            // }));
-            
-          // }
-          // else{
-          //   return
-          // }
-
-          // println!("{}",e.file_name().to_string_lossy().to_string());
-        //  println!("{:?}",e);
-          // if(e.file_name().to_string_lossy().to_string().ends_with(".git"))
-          // {
-          //   println!(".git folder found. skipping it");
-          //   return Err("error"); // return an error to stop the iteration
-          // }
           if(!e.path().to_string_lossy().to_string().eq(&path)){
             // thread::sleep(Duration::from_millis(1000));
             // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());

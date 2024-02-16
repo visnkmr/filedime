@@ -36,28 +36,8 @@ pub struct tab{
 #[tauri::command]
 pub async fn closetab(windowname:&str,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.removetab(id,windowname.to_string());
-  let app_handle = window.app_handle();
-  // app_handle.emit_to(
-  //   windowname,
-  //   "list-tabs",
-  //   serde_json::to_string(&state.gettabs()).unwrap(),
-  // )
-  // .map_err(|e| e.to_string()).unwrap();
   Ok(())
 }
-// #[tauri::command]
-// pub async fn listtabs(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-//   let app_handle = window.app_handle();
-//   // println!("{:?}",state);
-//   app_handle.emit_to(
-//     windowname,
-//     "list-tabs",
-//     serde_json::to_string(&state.gettabs()).unwrap(),
-//   )
-//   .map_err(|e| e.to_string()).unwrap();
-// loadmarks(windowname,&app_handle,serde_json::to_string(&state.getmarks()).unwrap());
-// Ok(())
-// }
 #[tauri::command]
 pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
   state.addtab(oid.clone(), path.clone(), ff.clone(),windowname.to_string());

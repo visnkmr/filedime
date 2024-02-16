@@ -7,16 +7,15 @@ mod fileitem;
 mod filltrie;
 mod sendtofrontend;
 mod lastmodcalc;
-mod dq;
+mod navtimeline;
 mod drivelist;
 use chrono::{DateTime, Utc, Local};
-use dq::{BrowserHistory, Page};
+use navtimeline::{BrowserHistory, Page};
 // use filesize::PathExt;
 use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
-use rustc_hash::FxHashSet;
 use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
@@ -34,7 +33,7 @@ mod searchfiles;
 mod filechangewatcher;
 // mod loadjs;
 mod tabinfo;
-mod recentfiles;
+// mod recentfiles;
 mod bookmarks;
 mod openhtml;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -50,9 +49,8 @@ use crate::{
   listfiles::*,
   openhtml::*, 
   searchfiles::*, 
-  recentfiles::*, filltrie::populate_try, sendtofrontend::loadmarks
+   filltrie::populate_try, sendtofrontend::loadmarks
 };
-mod trie;
 // mod r  esync;
 
 
@@ -737,8 +735,8 @@ fn startup(window: &AppHandle) -> Result<(),()>{
   // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
   for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
     buttonnames.push(i.clone().replace("_", " "));
-    println!("name of file{:?}",i);//filename
-    println!("{:?}",j);//contents
+    // println!("name of file{:?}",i);//filename
+    // println!("{:?}",j);//contents
   }
   sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
   Ok(())
@@ -789,7 +787,7 @@ fn get_timestamp() -> String {
 }
 #[tauri::command]
 async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  println!("loading toggle rust---->1");
+  // println!("loading toggle rust---->1");
 
   match(togglewhat.as_str()){
     "size"=>{
@@ -832,40 +830,7 @@ async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<
 }
 //manually test using ramdisk
 //copies files from source to destination based on if there are any changes present
-#[tauri::command]
-async fn duplicatefile(source:String,dest:String,window: Window,state: State<'_, AppStateStore>)->Result<String,String>{
-  let source = std::path::Path::new(&source);
-  let destination = std::path::Path::new(&dest);
-  fs::copy(source, destination);
-  Ok("".to_string())
-}
-#[tauri::command]
-async fn copynpaste(source:Vec<String>,dest:String,window: Window,state: State<'_, AppStateStore>)->Result<String,String>{
-  // or any struct that implements the ProgressInfo trait
-  
-  let mut options = rusync::SyncOptions::default();
-  options.preserve_permissions=false;
-  for i in source{
-    let console_info = rusync::ConsoleProgressInfo::new();
-    println!("copying from {} to {}",i,dest);
-    
-  let source = std::path::Path::new(&i);
-  let destination = std::path::Path::new(&dest);
-  // println!("{:?}",source);
-  // println!("{:?}",destination);
-  let syncer = rusync::Syncer::new(&source, &destination, options, Box::new(console_info));
-  let stats = syncer.sync();
-  return match stats {
-      Err(err) => {
-          Err(format!("Error when syncing: {}", err))
-      }
-      Ok(stats) => {
-          Ok(format!("Transfered {} files", stats.copied))
-      }
-  }
-  }  
-  Ok("".to_string())
-}
+
 
 
 // #[tauri::command]
@@ -1222,7 +1187,6 @@ fn main() {
         closetab,
         new,
         disablenav,
-        copynpaste,
         searchload,
         defaulttoopen,
         foldersize,
@@ -1242,7 +1206,6 @@ fn main() {
         highlightfile,
         doespathexist,
         otb,
-        recent_files,
         removemark,
         // populate_try,
         search_try,

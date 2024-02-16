@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use std::sync::{RwLock, Mutex, Arc};
-use crate::dq::BrowserHistory;
+use crate::navtimeline::BrowserHistory;
 use crate::{tabinfo::*};
 use crate::bookmarks::*;
 #[derive(Clone,Debug)]
@@ -23,30 +23,6 @@ pub struct cachestore{
 
 
 #[derive(Debug)]
-// // A function that takes a path to a file or directory and returns its size in bytes
-// fn file_size(path: &str) -> u64 {
-//     // Create a GFile object from the path
-//     let file = gio::File::for_path(path);
-//     // Call g_file_query_info with the file and some attributes and flags
-//     let info = file.query_info(
-//         gio::FILE_ATTRIBUTE_STANDARD_SIZE,
-//         gio::FileQueryInfoFlags::NOFOLLOW_SYMLINKS,
-//         None::<&gio::Cancellable>,
-//     )
-//     .unwrap();
-//     // Get the size of the file from info
-//     info.size() as u64
-// }
-// // Another function that takes a path to a file and returns its size in bytes
-// fn file_size2(path: &str) -> u64 {
-//     // Open the file in read-only mode
-//     let file = File::open(path).unwrap();
-//     // Get an iterator over the bytes of the file
-//     let bytes = file.bytes();
-//     // Count the number of bytes and return it
-//     bytes.count() as u64
-// }
-// Define a struct that holds the cache and the expiration time
 pub struct AppStateStore {
     pub cstore:RwLock<FxHashMap<String,cachestore>>,
     pub includefolderinsearch:RwLock<bool>,
@@ -263,97 +239,6 @@ impl AppStateStore {
     pub fn getmarks(&self)->HashSet<marks>{
         self.bookmarks.read().unwrap().clone()
     }
-    // pub fn gettabs(&self)->Vec<tabinfo>{
-    //     let mut tvecs=Vec::new();
-    //     let binding = self.tabs.read().unwrap();
-    //     let mut hi=binding.iter();
-    //     while let Some(ei)=hi.next(){
-    //         tvecs.push(tabinfo{
-    //             id:ei.0.clone(),
-    //             path:ei.1.path.clone(),
-    //             ff:ei.1.focusfolder.clone(),
-    //             tabname:{
-    //                 if let Some(h)=PathBuf::from(ei.1.path.clone()).file_stem(){
-    //                     h.to_string_lossy().to_string()
-    //                 }
-    //                 else{
-    //                     "".to_string()
-    //                 }
-    //             },
-    //             history:ei.1.history.clone()
-    //         })
-    //     }
-    //     tvecs
-    //     // self.tabs.read().unwrap().clone()
-    // }
-    
-    // pub fn getlasthistory(&self,id:String,windowname:String)->Option<String>{
-    //     let gtab= self.tabs.read().unwrap();
-    //     let path=gtab.get(&(windowname.clone()+"."+&id)).unwrap().path.clone();
-    //     let ff=gtab.get(&(windowname.clone()+"."+&id)).unwrap().focusfolder.clone();
-    //     let mut tabhist=gtab.get(&(windowname.clone()+"."+&id)).unwrap().history.clone();
-    //     let mut windowname=gtab.get(&(windowname.clone()+"."+&id)).unwrap().windowname.clone();
-    //     let lastval=tabhist.pop();
-        
-    //     drop(gtab);
-        
-        
-        
-    //     let mut tabs= self.tabs.write().unwrap();
-    //     // let mut tabhist=tabs.get(&id).unwrap().history;
-    //     tabs.insert(
-    //         (windowname.clone()+"."+&id),
-    //         tab 
-    //         {
-    //             path: path, 
-    //             focusfolder: ff,
-    //             history: tabhist,
-    //             windowname:windowname
-    //         }
-    //     );
-    //     lastval
-
-    // }
-    // pub fn gettab(&self,id:&String,windowname:String)->(String,String,Vec<String>){
-    //     let tab= self.tabs.read().unwrap().clone();
-    //     // return (
-    //     //     tab.path,
-    //     //     tab.focusfolder,
-    //     //     tab.history
-    //     // )
-    // }
-    // pub fn gettabfromwinlabel(&self,winlabel:&String)->Option<(String,String)>{
-    //     let elements=self.tabs.read().unwrap().clone();
-    //     for (id,others) in elements{
-    //         if(others.windowname==winlabel.clone()){
-    //             return Some((others.path,id))
-    //         }
-    //     }
-    //     None
-    // }
-
-    // pub fn gettabsfromwinlabel(&self,winlabel:&String)->Vec<String>
-    // {
-    //     let elements=self.tabs.read().unwrap().clone();
-    //     let mut tabsofwindow=vec![];
-    //     for (id,others) in elements{
-    //         if(others.windowname==winlabel.clone()){
-    //             tabsofwindow.push(id);
-    //         // return Some((others.path,id))
-    //         }
-    //     }
-    //     tabsofwindow
-    // }
-    // pub fn getactivepath(&self,id:&str,windowname:String)->(String,String,Vec<String>){
-    //     let tab= self.tabs.read().unwrap().get(&(windowname+"."+id)).unwrap().clone();
-    //     return (
-    //         tab.path,
-    //         tab.focusfolder,
-    //         tab.history
-    //     )
-    // }
-    
-    
 // pub fn find_size(&self, path: &str) -> u64 {
 //     // return 0 as u64;
 //     let cstore=self.cstore.read().unwrap();
@@ -549,75 +434,5 @@ impl AppStateStore {
     // {
     //     println!("{:?}",*self.nosize.read().unwrap())
     // }
-  }
-//   pub fn togglelsl(&self){
-//     let tempstore;
-//     {
-
-//         tempstore=!*self.loadsearchlist.read().unwrap();
-//     }
-//     let mut setstore=self.loadsearchlist.write().unwrap();
-//     *setstore=tempstore;
-//     drop(setstore)
-//     // {
-//     //     println!("{:?}",*self.nosize.read().unwrap())
-//     // }
-//   }
-  pub fn foldercon(&self,path:&str)
-  ->i32
-//   ->(u64,u64) 
-  {
-    let cstore=self.cstore.write().unwrap();
-
-    // Use a single read lock guard to access the cache
-    let cache = cstore;
-
-    // Initialize a variable to store the total size
-    let mut total_size = 0;
-    // let mut total_key_size = 0;
-    // let mut total_value_size = 0;
-
-    // Initialize a mutable reference to the cache iterator
-    let mut cache_iter = cache.iter();
-
-    // let mut folsize=0;
-    // Loop until the iterator returns None
-    while let Some((key, _)) = cache_iter.next() {
-        if(key.starts_with(path))
-        {
-            total_size += 1;
-        }
-        // Add the size of the key and the value to the total
-        
-        // if(!key.contains("expiry")){
-        //     total_key_size+=mem::size_of_val(key);
-        // }
-        // total_size += mem::size_of_val(value);
-        // if !key.starts_with("expiry_"){
-        //     folsize+=value;
-
-        // }
-
-    }
-
-    // self.app_handle.emit_to(
-    //     "main",
-    //     "folder-size",
-    //     {
-    //       sizeunit::size(folsize,true)
-    //     },
-    //   )
-    //   .map_err(|e| e.to_string()).unwrap();
-
-    // println!("cache:{}----numfolders:{}---onlynamesize:{}",sizeunit::size(total_size as u64,true),cache.len() as u64,sizeunit::size(total_key_size as u64,true));
-    total_size
-    // Print the total size in bytes
-    // println!("The cache size is {} bytes", total_size);
-    // (total_size as u64,cache.len() as u64)
-  }
-  fn addthread(&self){
-    let count = self.process_count.clone();
-    *count.lock().unwrap() += 1; // increment the count every time the command is called
-    // let result = count.clone();
   }
 }
