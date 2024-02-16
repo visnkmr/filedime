@@ -865,13 +865,19 @@ async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStat
 }
 #[tauri::command]
 async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  // state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
-  let nwindow=opennewwindow(&window.app_handle(),&name,&winlabel);
-  println!("new winodw==============");
-  // whattoload(&absolute_date, id, nwindow, state).await;
-  // listtabs(windowname,window, state).await;
-  // list_files(absolute_date.to_string(),id,path,"".to_string(), window, state).await;
+  if(winlabel=="settings"){
 
+    tauri::WindowBuilder::new(
+      &window.app_handle(),
+      winlabel,
+      tauri::WindowUrl::App("settings.html".into())
+    )
+    // .initialization_script(&INIT_SCRIPT)
+    .title(name).build().unwrap();
+  }
+  else{
+    opennewwindow(&window.app_handle(),&name,&winlabel);
+  }
   Ok(())
 }
 

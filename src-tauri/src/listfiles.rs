@@ -222,6 +222,7 @@ let tfsize_clone=tfsize.clone();
 // let (tx, rx) = mpsc::channel();
 let window2=window.clone();
 let windowname2=windowname.clone();
+let windowname3=windowname.clone();
 let update:Vec<u64>=vec![1,2,5,7,10,20,40,65,90,120];
 // spawn a new thread to print the value of the files vector every 200 milliseconds
 let handle=thread::spawn(move|| {
@@ -245,8 +246,15 @@ let handle=thread::spawn(move|| {
             "size":sizeunit::size(*tfsize.lock().unwrap(),true)
           })).unwrap(),
           );
+          let wn=windowname3.clone();
+          progress(&wn,&window2.app_handle(),{
+            let pv=files.len() as f32/fcount as f32*100 as f32;
+            println!("{}",pv);
+            pv as i32});
+            processing(&windowname.clone(),&window2.app_handle(),{"loading files".to_string()});
           
           if *don || fcount==files.len() {
+            processing(&windowname.clone(),&window2.app_handle(),{"completed ".to_string()});
             // window2.emit("infiniteloader",
             //   json!({
             //       "message": "lfiles",
@@ -319,10 +327,7 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
                 "caller":starttime,
                 "files":&serde_json::to_string(&file.clone()).unwrap(),
               })).unwrap());
-              progress(&windowname2.clone(),&window.app_handle(),{
-                let pv=files.len() as f32/fcount as f32*100 as f32;
-                println!("{}",pv);
-                pv as i32});
+              
           }
           // }
 

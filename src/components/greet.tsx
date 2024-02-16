@@ -7,13 +7,13 @@ import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
-import { arch, platform, type, version } from '@tauri-apps/api/os';
+// import { arch, platform, type, version } from '@tauri-apps/api/os';
 
 import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
 import NewLeaf from "./new"
-import {appWindow as activewindow} from "@tauri-apps/api/window"
+// import {appWindow as activewindow} from "@tauri-apps/api/window"
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
 import { useMouseShortcut } from "./mouseshortcuts";
@@ -83,7 +83,7 @@ import { Progress } from "./ui/progress"
 
 export default function Greet() {
   const { theme, setTheme } = useTheme()
-  if(activewindow.label!=="settings"){
+  // if(activewindow.label!=="settings"){
     const { toast } = useToast()
     
     async function setupAppWindow() {
@@ -184,9 +184,9 @@ export default function Greet() {
     useEffect(() => {
       //check if react is in strict mode
       console.log(Math.random());
-      let wfp=async()=>{setp(await platform())
-      console.log(await platform())};
-      wfp();
+      // let wfp=async()=>{setp(await platform())
+      // console.log(await platform())};
+      // wfp();
       
     }, []);
     function initkeyboardshortcuts()
@@ -349,7 +349,19 @@ export default function Greet() {
         })
      };
       
-  
+     import("@tauri-apps/api").then
+     (
+      (tauri) =>
+      {
+      useEffect(() => {
+        //check if react is in strict mode
+        console.log(Math.random());
+        let wfp=async()=>{setp(await tauri.os.platform())
+        console.log(await tauri.os.platform())};
+        wfp();
+        
+      }, []);
+    })
    
    const [currentchoice,changechoiceto]=useState("")
   useEffect(()=>{
@@ -404,6 +416,7 @@ export default function Greet() {
   },[])
   let progresstotal=useRef()
   const [currentprogress,setcp]=useState(0)
+  const [visibleprogress,setvp]=useState(false)
   useEffect(()=>{
    
     const ul1=listen("progress",(data: { payload: number }) => {
@@ -411,6 +424,12 @@ export default function Greet() {
       console.log("progress----"+cp)
       console.log("progress----"+JSON.stringify(data))
       setcp((cp))
+    })
+    listen("processing",(p)=>{
+      if((p.payload as string).includes("completed")){
+      setvp(false)
+      }else
+      setvp(true)
     })
     return () => {
       ul1.then(f => f());
@@ -1039,7 +1058,7 @@ export default function Greet() {
           </div>
           <div className="w-[80%]">
 
-        <Progress className="m-5" value={currentprogress}/>
+        <Progress className={`${visibleprogress?"m-5":"hidden"} `} value={currentprogress}/>
           </div>
 
           <div className="px-4 p-2">
@@ -1323,53 +1342,55 @@ export default function Greet() {
               }
               </div>
               </>):(null)}
-              {driveslist && driveslist.length>0 ?(<>
-              <h1 className='pt-8 p-2'>Drives ({driveslist.length})</h1>
-              {
-                
-               driveslist.map((message, index) => (
-                <ContextMenu>
-                  <ContextMenuTrigger>
-                <button key={index}
-                  className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
-                  onClick={()=>
-                    { 
-                      reset(message.mount_point)
-                      updatetabs(message.mount_point)
-                      addToTabHistory(activetabid.toString(),message.mount_point)
-                      listfiles(activetabid,p=="linux"?message.name:message.mount_point);
-                        
-                    }
-                    }
-                >
-                   {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
-                   <div>
-
-                   <HardDriveIcon className="h-6 w-6" />
-                   </div>
-                    {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
-                
-                </button>
-                    
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                  <ContextMenuItem onSelect={(e)=>{
-                          invoke("newwindow",
-                          {
-                            path: p=="linux"?message.name:message.mount_point,
-                            ff:""
-                          });
-
-                        }}>Open in new window</ContextMenuItem>
-                  <ContextMenuItem onSelect={(e)=>{
-                          newtab(p=="linux"?message.name:message.mount_point)
-                        }}>Open in new tab</ContextMenuItem>
-                </ContextMenuContent>
-                </ContextMenu>
-                ))
-
-              }
-              </>):(null)}
+              
+              { driveslist && driveslist.length>0 ?(<>
+       <h1 className='pt-8 p-2'>Drives ({driveslist.length})</h1>
+       {
+         
+        driveslist.map((message, index) => (
+         <ContextMenu>
+           <ContextMenuTrigger>
+         <button key={index}
+           className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
+           onClick={()=>
+             { 
+               reset(message.mount_point)
+               updatetabs(message.mount_point)
+               addToTabHistory(activetabid.toString(),message.mount_point)
+               listfiles(activetabid,p=="linux"?message.name:message.mount_point);
+                 
+             }
+             }
+         >
+            {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
+            <div>
+ 
+            <HardDriveIcon className="h-6 w-6" />
+            </div>
+             {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
+         
+         </button>
+             
+           </ContextMenuTrigger>
+           <ContextMenuContent>
+           <ContextMenuItem onSelect={(e)=>{
+                   invoke("newwindow",
+                   {
+                     path: p=="linux"?message.name:message.mount_point,
+                     ff:""
+                   });
+ 
+                 }}>Open in new window</ContextMenuItem>
+           <ContextMenuItem onSelect={(e)=>{
+                   newtab(p=="linux"?message.name:message.mount_point)
+                 }}>Open in new tab</ContextMenuItem>
+         </ContextMenuContent>
+         </ContextMenu>
+         ))
+ 
+       }
+       </>):(null)
+ }
           </div>
           </div>
           {/* <div className=" w-full flex"> */}
@@ -1945,14 +1966,14 @@ export default function Greet() {
         </ResizablePanel>
       </ResizablePanelGroup>
     )
-  }
+  // }
   
-  else{
+  // else{
 
-  return (
-          <FiledimeSettings/>
-        )
-  }
+  // return (
+  //         <FiledimeSettings/>
+  //       )
+  // }
   
 }
 

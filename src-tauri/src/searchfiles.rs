@@ -133,6 +133,7 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
                   //   }
                   // }
                   slist(&windowname,&app_handle,&files.clone(),string2.clone());
+                  processing(&windowname.clone(),&window2.app_handle(),{format!("searching for {}",string2)});
                   
                   // folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
                   
@@ -140,7 +141,8 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
                   // || nootimes>10
                   // || fcount==files.len() 
                   {
-                  println!("total {} files found from {}",files.len(),filescount);
+                  opendialogwindow(&app_handle,"Search complete",&format!("total {} files found from {}",files.len(),filescount),"");
+                  processing(&windowname.clone(),&window2.app_handle(),{format!("completed search for {}",string2)});
                   // window2.emit("infiniteloader",
                   //   json!({
                   //       "message": "lfiles",

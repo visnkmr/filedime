@@ -213,6 +213,14 @@ ah.emit_to(
   )
   .map_err(|e| e.to_string()).unwrap();
 }
+pub fn processing(windowname:&str,ah:&AppHandle,data:String){
+ah.emit_to(
+    windowname,
+    "processing",
+    data,
+  )
+  .map_err(|e| e.to_string()).unwrap();
+}
 
 pub fn rflist(windowname:&str,ah:&AppHandle,wtr:&HashSet<FileItem>){
   ah.emit_to(
