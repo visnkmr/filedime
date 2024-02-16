@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -79,6 +79,7 @@ export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 import { useToast } from "./ui/use-toast"
 import { Toaster } from "./ui/toaster"
+import { Progress } from "./ui/progress"
 
 export default function Greet() {
   const { theme, setTheme } = useTheme()
@@ -401,11 +402,30 @@ export default function Greet() {
   //     unlisten?.()
   // }
   },[])
+  let progresstotal=useRef()
+  const [currentprogress,setcp]=useState(0)
+  useEffect(()=>{
+   
+    const ul1=listen("progress",(data: { payload: number }) => {
+      let cp=data.payload as number
+      console.log("progress----"+cp)
+      console.log("progress----"+JSON.stringify(data))
+      setcp((cp))
+    })
+    return () => {
+      ul1.then(f => f());
+  }
+  },[]);
+
     useEffect(() => {
+      listen("folder-count",(data: { payload: string }) => {
+        progresstotal.current=(data.payload)
+      })
       // listen('load', () => {
       //   console.log(`New page loaded --->${window.location.href}`);
         
       // });
+      
       listen('dialogshow', (pl) => {
         let recieved=JSON.parse(pl.payload);
         let content=(recieved.content)
@@ -992,11 +1012,13 @@ export default function Greet() {
         <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
         {/* {lastcalledtime.current} */}
         <div className="flex h-full flex-col gap-2">
-
           <div className="flex p-3  border-b">
             
             <div className="flex flex-row p-2 items-center">
+            <div className="pr-3">
 
+            <Loader2 className="h-4 w-4 animate-spin"/>
+            </div>
             <button className="flex items-center gap-2 font-semibold">
               <Folder className="h-6 w-6" />
               <span className="">Filedime</span>
@@ -1011,9 +1033,15 @@ export default function Greet() {
               })
             }}>Settings</Button>
             </div>
+            
             {/* <div className="grid items-start px-4 text-sm font-medium"> */}
               
           </div>
+          <div className="w-[80%]">
+
+        <Progress className="m-5" value={currentprogress}/>
+          </div>
+
           <div className="px-4 p-2">
 
             <button

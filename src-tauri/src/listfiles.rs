@@ -319,7 +319,10 @@ let stop_flag_local = Arc::new(AtomicBool::new(true));
                 "caller":starttime,
                 "files":&serde_json::to_string(&file.clone()).unwrap(),
               })).unwrap());
-              progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
+              progress(&windowname2.clone(),&window.app_handle(),{
+                let pv=files.len() as f32/fcount as f32*100 as f32;
+                println!("{}",pv);
+                pv as i32});
           }
           // }
 
