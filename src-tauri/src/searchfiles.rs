@@ -39,7 +39,7 @@ struct rstr{
 //   Ok(())
 // }
 #[tauri::command]
-pub async fn  search_try(windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
+pub async fn  search_try(starttime:String,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
 //  -> Vec<String> 
  {
   let mut exactmatch=false;
@@ -132,7 +132,7 @@ pub async fn  search_try(windowname:String,mut string: String,window: Window, st
       
                   //   }
                   // }
-                  slist(&windowname,&app_handle,&files.clone(),string2.clone());
+                  // slist(&windowname,&app_handle,&files.clone(),string2.clone());
                   processing(&windowname.clone(),&window2.app_handle(),{format!("searching for {}",string2)});
                   
                   // folsize(&windowname.clone(),&app_handle,sizeunit::size(*tfsize.lock().unwrap(),true));
@@ -483,7 +483,10 @@ let u:HashSet<String>=map.clone()
           files.push(file.clone()); // push a clone of the file to the vector
           // if files.len()<100
           // {
-            // fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&file.clone()).unwrap()).unwrap();
+            fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&json!({
+              "caller":starttime,
+              "files":&serde_json::to_string(&file.clone()).unwrap(),
+            })).unwrap()).unwrap();
             // progress(&windowname2.clone(),&window.app_handle(),files.len() as i32);
         // slist(&windowname,&app_handle, &populatefileitem(fname, path,&window, &state), string_clone.clone());
         

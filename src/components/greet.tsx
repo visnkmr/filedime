@@ -135,20 +135,24 @@ export default function Greet() {
     const [appWindow, setAppWindow] = useState()
     const [fileslist, setfileslist] = useState(filesobjinit);
     const [sftype,setsftype]=useState("all")
-  
+    const [filestoshow,setfts]=useState(filesobjinit)
     //reflect update per page item count in ui
     useMemo(()=>{
-      let filestocount=fileslist.filter(function (el) {
-        return (searchstring.trim().length>0?
-          el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
-          (el.ftype===sftype || sftype ==="all"):(true))))
-       }).length;
+      let filestocount=filestoshow.length;
       !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
       setpageno((old)=>{
         console.error(old+"---"+noofpages)
        return old>noofpages?(noofpages-1):(old)
       })
-    },[perpage,sftype])
+    },[perpage,sftype,filestoshow])
+    
+    useEffect(()=>{
+      setfts(fileslist.filter(function (el) {
+        return (searchstring.trim().length>0?
+          el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
+          (el.ftype===sftype || sftype ==="all"):(true))))
+       }))
+    },[perpage,sftype,fileslist])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
       if(p){
@@ -1627,8 +1631,13 @@ export default function Greet() {
 
             <Button variant={"ghost"}  onClick={
               ()=>{
+                reset()
+                let lct=new Date().getTime().toString();
+
+      lastcalledtime.current=lct
                     invoke(
                     "search_try", {
+                      starttime:lct,
                       windowname:appWindow?.label,
                       string: searchstring
                     }).catch((e)=>console.error(e))
@@ -1677,18 +1686,27 @@ export default function Greet() {
         <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
           {
           Object.entries(filesetcollectionlist)
+          .sort((a, b) => b[1] - a[1])
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
           .map(([key, value],index)  => (
-            <Button onClick={()=>setsftype((old)=>old===key?"all":key)} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key={index}><Badge variant={"outline"}>{key}({value})</Badge></Button>
+            <Button 
+            onClick={()=>setsftype((old)=>old===key?"all":key)} 
+            className="m-2 p-[-5px] whitespace-nowrap min-w-min" 
+            variant="ghost" 
+            key={index}>
+              <Badge variant={"outline"}>
+                {key}({value})
+                </Badge>
+              </Button>
           ))}
         </div>
         </div>
        
         <span className={`overflow-${scrollorauto} ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
         
-          <DataTable columns={columns} data={fileslist} searchstring={searchstring} filetype={sftype}/>
+          <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>
         
         <div className={`${isgrid?"flex flex-row":"hidden"}`}>
@@ -1710,7 +1728,7 @@ export default function Greet() {
           // onCheckedChange={(value:boolean) => {}}
           onClick={()=>{
             changechoiceto("Size")
-            fileslist.sort((b, a) => a.rawfs - b.rawfs);
+            filestoshow.sort((b, a) => a.rawfs - b.rawfs);
           }}
         >
           Size
@@ -1721,7 +1739,7 @@ export default function Greet() {
           // onCheckedChange={(value:boolean) => {}}
           onClick={()=>{
             changechoiceto("Name")
-            fileslist.sort((a, b) => {
+            filestoshow.sort((a, b) => {
               if (a.name < b.name) {
                   return -1;
               }
@@ -1740,7 +1758,7 @@ export default function Greet() {
           // onCheckedChange={(value:boolean) => {}}
           onClick={()=>{
             changechoiceto("Type")
-            fileslist.sort((a, b) => {
+            filestoshow.sort((a, b) => {
               if (a.ftype < b.ftype) {
                   return -1;
               }
@@ -1759,7 +1777,7 @@ export default function Greet() {
           // onCheckedChange={(value:boolean) => {}}
           onClick={()=>{
             changechoiceto("Date")
-            fileslist.sort((b, a) => a.timestamp - b.timestamp);
+            filestoshow.sort((b, a) => a.timestamp - b.timestamp);
           }}
         >
           Date
@@ -1778,7 +1796,7 @@ export default function Greet() {
                Show Thumbnails
               </HoverCardContent>
             </HoverCard>
-                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({fileslist.length})</p>
+                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({filestoshow.length})</p>
                 
                 <div className="ms-2 flex whitespace-nowrap overflow-hidden">
 
@@ -1796,11 +1814,8 @@ export default function Greet() {
         </div>
         <div className={`${isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`:"hidden"}`}>
 
-        {isgrid && fileslist.filter(function (el) {
-                     return (searchstring.trim().length>0?
-                       el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
-                       (el.ftype===sftype || sftype ==="all"):(true))))
-                    })
+        
+        {isgrid && filestoshow
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
