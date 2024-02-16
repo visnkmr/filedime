@@ -1,8 +1,6 @@
-import { Switch } from "../components/ui/switch"
+import { Switch } from "./ui/switch"
 import React from "react";
 
-
-//display system info using os api
 export default function EachSetting({name,callback,currentstatus=false}){
     const [isSelected, setIsSelected] = React.useState(currentstatus);
     console.log(isSelected)

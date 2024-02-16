@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter, AlertDialogTrigger } from "../components/ui/alertdialog";
-import { operationfileinfo, setcolorpertheme } from "./greet";
-import { Checkbox } from "../components/ui/checkbox";
+import React, { useState } from "react";
+import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter } from "./ui/alertdialog";
+import {  setcolorpertheme } from "./greet";
 import { invoke } from "@tauri-apps/api/tauri";
-import { Input } from "../components/ui/input";
+import { Input } from "./ui/input";
 export default function NewLeaf({dest,isdir,showad,setshowad}){
     
     const [name,setname]=useState("")

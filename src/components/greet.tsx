@@ -1,39 +1,29 @@
 'use client'
 
-import FRc from "../components/findsizecomp"
+import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus} from "lucide-react"
-import { Badge } from "../components/ui/badge"
-import {Checkbox} from "../components/ui/checkbox"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home} from "lucide-react"
+import { Badge } from "./ui/badge"
+import {Checkbox} from "./ui/checkbox"
 import { arch, platform, type, version } from '@tauri-apps/api/os';
 
 import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
 import NewLeaf from "./new"
-// import parse from 'html-react-parser';
 import {appWindow as activewindow} from "@tauri-apps/api/window"
-// import { platform } from '@tauri-apps/api/os'
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
 import { useMouseShortcut } from "./mouseshortcuts";
-
-// import { window as uio } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 import FiledimeSettings from "./filedimesettings"
-// import {columns} from "../src/components/columns"
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "../components/ui/popover"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../components/ui/resizeable"
+} from "./ui/resizeable"
 import {
   Sheet,
   SheetContent,
@@ -41,39 +31,28 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../components/ui/sheet"
+} from "./ui/sheet"
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "../components/ui/context-menu"
+} from "./ui/context-menu"
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "../components/ui/hover-card"
-export interface  operationfileinfo{
-  sourcepath:String,
-  destpath:String,
-  existingfilesize:String,
-  existingdate:String,
-  srcfilesize:String,
-  srcfiledate:String,
-  replace:boolean
-}
-interface existingfileinfo{
-  sourcepath:String,
-  destpath:String,
-  existingfilesize:String,
-  existingdate:String,
-  srcfilesize:String,
-  srcfiledate:String
-}
+} from "./ui/hover-card"
+import {
+  tabinfo,
+  mark,
+  parentprops,
+  existingfileinfo,
+  operationfileinfo,
+  pathsplit
+} from "../shared/tstypes"
 // import Link from "next/link"
-import { CardContent, Card, CardDescription } from "../components/ui/card"
-import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "../components/ui/table"
-import { Button } from "../components/ui/button"
+import { Button } from "./ui/button"
 import { FileItem,DriveItem } from "../shared/types"
 import { DataTable, focuscolor, hovercolor } from '../src/components/data-table';
 export function converttstodt(ts){
@@ -83,24 +62,7 @@ export function converttstodt(ts){
   const utcTime = utcDateTime.toFormat('dd MMM yy'); 
   return utcTime
  }
-type tabinfo = {
-  id: number,
-  path: string,
-  ff: string,
-  tabname: string,
-  history:string[]
-};
-type mark = {
-  path:string,
-  name:string,
-  is_dir:string,
-  id:string
-};
-interface wininfo{
-  winname:string,
-  tablist:tabinfo[],
-  tabidsalloted:number
-}
+
 
 import {  ColumnDef } from '@tanstack/react-table';
 import {  ArrowUpDown } from 'lucide-react';
@@ -108,34 +70,15 @@ import {  ArrowUpDown } from 'lucide-react';
 import { DateTime } from 'luxon';
 // import LetterClamp from '../../src/components/letterclamp';
 import '../styles/committablestyle.css'
-import { table } from "console";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "../components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "./ui/dropdown-menu";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import { Input } from "../components/ui/input";
-import { escape } from "lodash";
+import { Input } from "./ui/input";
 import { useTheme } from "next-themes";
 
-
-// const columns: ColumnDef<eCommit>[] = metadata.map((attribute) => {
-// 	return columnHelper.accessor(attribute.id, {
-// 		header: attribute.label,
-// 		cell: (info) => {
-// 			const value = info.getValue();
-
-// 			if (value instanceof Date) {
-// 				return value.toUTCString();
-// 			}
-
-// 			return value;
-// 		},
-// 		footer: attribute.label,
-// 	});
-// });
 export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
-import { useToast } from "../components/ui/use-toast"
-import { Toaster } from "../components/ui/toaster"
-import { Switch } from "../components/ui/switch";
+import { useToast } from "./ui/use-toast"
+import { Toaster } from "./ui/toaster"
 
 export default function Greet() {
   const { theme, setTheme } = useTheme()
@@ -151,9 +94,6 @@ export default function Greet() {
   
     useEffect(() => {
       setupAppWindow()
-      
-      // console.log("windowname---------->"+winInfo.winname)
-      // openTab("drives://")
     }, []) 
     const filesobjinit:FileItem[]=[]
     const objinit:string[]=[]
@@ -182,29 +122,17 @@ export default function Greet() {
     const [searchstring,setss] = useState("");
     const [fileopsrc,setfos] = useState(objinit);
     let srclist=JSON.stringify(fileopsrc);
-    // useEffect(()=>{
-    //  srclist= JSON.stringify(fileopsrc)
-    // },[fileopsrc])
     const [fileopdest,setfod] = useState("");
     const [parentsize,setps] = useState("");
     const [sampletext,sst]=useState("")
     const [filesetcollectionlist,setfscl]=useState(objinit)
     const [custombuttonlist,setcbl]=useState(objinit)
-    // const [pathinput,spi]=useState("")
     const [pathsuggestlist,setpsl]=useState(objinit)
     const [appWindow, setAppWindow] = useState()
-    // let wininfo: wininfo = {
-    //   winname: appWindow?.label,
-    //   winname: appWindow?.label,
-    //   tablist: [],
-    //   tabidsalloted: 0
-    //  };
-    //  const [winInfo,setwi]= useState(wininfo)
-    // const [history,sethistory]=useState(objinit)
     const [fileslist, setfileslist] = useState(filesobjinit);
     const [sftype,setsftype]=useState("all")
   
-    
+    //reflect update per page item count in ui
     useMemo(()=>{
       let filestocount=fileslist.filter(function (el) {
         return (searchstring.trim().length>0?
@@ -212,76 +140,27 @@ export default function Greet() {
           (el.ftype===sftype || sftype ==="all"):(true))))
        }).length;
       !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
-      // !!fileslist && setfileslist((old)=>{
-      //   return [...old]
-      // })
       setpageno((old)=>{
         console.error(old+"---"+noofpages)
        return old>noofpages?(noofpages-1):(old)
       })
     },[perpage,sftype])
     const [isSheetOpen, setiso] = useState(false);
-    // const [backpressed,setbackpressed]=useState(false)
-    
-  
-    // function openTab(tabPath: string): void {
-    //   let temptab=winInfo.tabidsalloted++;
-    //   let newTab: tabinfo = {
-    //     tabid: temptab,
-    //     tabpath: tabPath,
-    //     history: []
-    //   };
-    //   winInfo.tablist.push(newTab);
-    //   invoke('list_files', { 
-    //     windowname:winInfo.winname,
-    //     oid: temptab.toString(),
-    //     path: tabPath,
-    //     ff: "" 
-    // })
-    //  }
-    //  function navigateToNewPath(tabid: number, newPath: string,oldpath:string): void {
-    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-    //   if (tabIndex !== -1 && !backpressed) {
-    //     winInfo.tablist[tabIndex].tabpath = newPath;
-    //     winInfo.tablist[tabIndex].history.push(oldpath);
-    //   }
-    //   setbackpressed(false)
-    //  }
-    //  function closeTab(tabid: number): void {
-    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-    //   if (tabIndex !== -1) {
-    //    winInfo.tablist.splice(tabIndex, 1);
-    //   }
-    //  } 
     function reset(p?:string){
       if(p){
         setpath(p);
         setpsplitl(splitpath(p))
-        // sst(p)
       }
       setsftype("all")
         setfileslist([])
-        // setdriveslist([])
         setfc(0)
         setss("")
         console.log("reset done")
     }
     function listfiles(oid,path){
       let lct=new Date().getTime().toString();
-      // console.log(lct)
-    // console.log("update issuedfor-----"+lct)
 
       lastcalledtime.current=lct
-      // console.error(lct)
-      // console.error("----------asdasdsd-------"+lastcalledtime)
-      // invoke(
-      //   "load_tab",
-      //   {
-      //     windowname:appWindow?.label,
-      //     oid: tab.id.toString()
-      //   }
-      // );
-      // console.log(appWindow?.label)
       invoke('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
@@ -295,48 +174,22 @@ export default function Greet() {
     }
      function activateTab(tab: tabinfo){
       console.log("activating"+JSON.stringify(tab))
-      // console.log("activate tab "+tabid)
-      // let activeTab = tablist.find(tab => tab.id === tabid );
-      // if (activeTab) {
-        // setpath(tab.path)s
         
         setactivetabid(tab.id)
         reset(tab.path)
         listfiles(tab.id,tab.path)
-      // }
-    //  }
-    //   let tabIndex = winInfo.tablist.findIndex(tab => tab.tabid === tabid);
-    //   if (tabIndex !== -1) {
-    //     sethistory(winInfo.tablist[tabIndex].history)
-    //     setactivetabid(tabid)
-    //     invoke('list_files', { 
-    //       windowname:winInfo.winname,
-    //       oid: tabid.toString(),
-    //       path: winInfo.tablist[tabIndex].tabpath,
-    //       ff: "" 
-    //   })
-    //    // Activate the tab...
-    //   }
      }
-  
-    //  function goBack(): void {
-    //   let activeTab = winInfo.tablist.find(tab => tab.tabid === activetabid );
-    //   if (activeTab && activeTab.history.length > 1) {
-    //     setbackpressed(true)
-    //     navigateToNewPath(activetabid, activeTab.history[activeTab.history.length - 1],path);
-    //     activeTab.history.pop();
-    //   }
-    //  }
-    // Import appWindow and save it inside the state for later usage
     const [p,setp]=useState("")
     useEffect(() => {
+      //check if react is in strict mode
       console.log(Math.random());
       let wfp=async()=>{setp(await platform())
       console.log(await platform())};
       wfp();
       
     }, []);
-    useKeyboardShortcut(()=>{
+    function initkeyboardshortcuts()
+    {useKeyboardShortcut(()=>{
       newtab("drives://");
     }, {
       ctrlKey: true,
@@ -469,16 +322,10 @@ export default function Greet() {
       // reloadlist()
     },{
       
-    })
+    })}
+    initkeyboardshortcuts()
   
-    type wtd={
-      functionname:string,
-      arguments:string[]
-    } 
-     type parentprops={
-      path:string,
-      tabid:string
-    }
+    
     let [hideback,sethb]=useState(true)
     let [hidefwd,sethf]=useState(true)
     useEffect(()=>{
@@ -494,20 +341,11 @@ export default function Greet() {
       }).then(()=>sethf(false)
       ).catch(()=>sethf(true))
     },[path])
-    // if(mdc){
-    //   reset()
-    // }
-    const [tabHistories, setTabHistories] = useState({});
-    const [tabForward, setTabf] = useState({});
       const addToTabHistory = (tabId, item=path) => {
         invoke("addtotabhistory",{
           tabid:tabId,
           path:item
         })
-        // setTabHistories((prevHistories) => ({
-        //   ...prevHistories,
-        //   [tabId]: [...(prevHistories[tabId] || []), item],
-        // }));
      };
       
   
@@ -516,18 +354,18 @@ export default function Greet() {
   useEffect(()=>{
     // console.log("update listen-----"+lastcalledtime)
     reset() 
-    let printtxt=Math.random();
-    // const unl=listen("folder-size", (event) => {
-    //   let returned=JSON.parse(event.payload);
-    //   if(returned.caller===lastcalledtime.current){
-    //     console.log("foldersize")
-    //     setps(returned.size)
-    //   }
+    // let printtxt=Math.random(); //to check if listen is being called only once
+    const unlisten=listen("folder-size", (event) => {
+      let returned=JSON.parse(event.payload);
+      if(returned.caller===lastcalledtime.current){
+        console.log("foldersize")
+        setps(returned.size)
+      }
     
-    //   // console.log(data.payload.toString())
-    // });
-    let unlisten: (() => void) | undefined = undefined
-    listen('list-files', (event) => {
+      // console.log(data.payload.toString())
+    });
+    // let unlisten: (() => void) | undefined = undefined
+    const unlisten1=listen('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
       let returned=JSON.parse(event.payload);
       // console.log(returned.caller)
@@ -540,11 +378,7 @@ export default function Greet() {
             setfc((old) => {
               // console.log(old+"------------"+lastcalledtime.current )
               const newFileCount = old + 1;
-              // if (newFileCount < 11)
                {
-                
-                // setpsplitl(splitpath(path))
-      
                 setfileslist((plog) => {
                   // console.log(plog)
                   return [...plog, tocompute]
@@ -559,21 +393,19 @@ export default function Greet() {
           }
         // console.log("loading files---->"+event.payload);
     })
-    // .then(result => {
-    //         // console.log(uio.getCurrent().label)
-    //         console.log(result)
-            
-    //     })
-    // .catch(console.error);
     return () => {
-      unlisten?.()
-  }
+        unlisten.then(f => f());
+        unlisten1.then(f => f());
+    }
+  //   return () => {
+  //     unlisten?.()
+  // }
   },[])
     useEffect(() => {
-      listen('load', () => {
-        console.log(`New page loaded --->${window.location.href}`);
+      // listen('load', () => {
+      //   console.log(`New page loaded --->${window.location.href}`);
         
-      });
+      // });
       listen('dialogshow', (pl) => {
         let recieved=JSON.parse(pl.payload);
         let content=(recieved.content)
@@ -583,56 +415,12 @@ export default function Greet() {
           title: title,
           description: content,
         })
-        // console.log(`New page loaded --->${window.location.href}`);
       });
-      // listen("load-markdown", (data: { payload: string }) => {
-      //   let markdowninfo=JSON.parse(data.payload);
-      //     console.log("loadmarkdown")
-      //     sst(markdowninfo.filename)
-      //     openmarkdown(markdowninfo.htmlfmd)
-      //   });
-        // listen("send-log", (data: { payload: string }) => {
-        //   // console.log("grandloc")
-        //   let status=data.payload;
-        //   switch(status){
-        //       case "stopped":
-        //           console.log("file watching stopped")
-        //           break;
-        //       case "changed":
-        //           invoke(
-        //               "list_files",
-        //               {
-        //                 windowname:appWindow?.label,
-        //                 oid: activetabid.toString(),
-        //                 path: path,
-        //                 ff: ""
-        //               });
-        //           break;
-        //   }
-        //   // lastfolder = data.payload.toString();
-        //   // console.log(data.payload.toString())
-        // });
-      //   listen("load-html", (data: { payload: string }) => {
-      //     setmdc(data.payload)
-  
-      //     // lastfolder = data.payload.toString();
-      //     // console.log(data.payload.toString())
-      //   }
-      // );
-      // listen("mirror", (data: { payload: string }) => {
-      //   let whattodo:wtd=JSON.parse(data.payload)
-      //   switch(whattodo.functionname){
-      //     case "loadinglist":{
-      //       console.log("reload called from "+appWindow2?.label)
-            
-      //     }
-      //   }
-        
-      // })
       listen("fopprogress", (data: { payload: string }) => {
         let progressinfo = JSON.parse(data.payload);
         console.log(JSON.stringify(progressinfo))
-      });listen("parent-loc", (data: { payload: string }) => {
+      });
+      listen("parent-loc", (data: { payload: string }) => {
         let whattodo:parentprops=JSON.parse(data.payload)
         setpath(whattodo.path)
         setpsplitl(splitpath(whattodo.path))
@@ -658,126 +446,33 @@ export default function Greet() {
         }
         //  reloadlist();
         });
-      // listen("list-tabs", (data: { payload: string }) => {
-      //   console.log("listtabs ")
       
-        
-      //   let tabs: tabinfo[] = JSON.parse(data.payload) as tabinfo[];
-      //   settbl(tabs)
-      //   // // console.log("files")
-      //   // clear the file list
-      //   // tablist.innerHTML = "";
-      //   // // console.log(data.payload)
-      //   // loop through the files array
-      //   // for (let tb of tabs) {
-      //   //   // create a table row element for each file
-      //   //   // let border=document.createElement("span");
-      //   //   // border.className="border-bx"
-      //   //   // globals.tablist.appendChild(border);
-      //   //   // let tbt=document.createElement("span");
-      //   //   // tbt.className="tbt"
-    
-      //   //   let b = document.createElement("div");
-      //   //   b.className = "tab-button";
-      //   //   if(tb.path===globalThis.activetab){
-      //   //     b.classList.add("active");
-      //   //     b.classList.remove("inactive");
-      //   //   }
-      //   //   else{
-      //   //     b.classList.add("inactive");
-      //   //     b.classList.remove("active");
-      //   //   }
-      //   //  invoke(
-      //   //     "getuniquewindowlabel",
-      //   //     {
-              
-      //   //     }
-      //   //     ).then((returned:string)=>{
-      //   //       b.dataset.ul=returned;
-      //   //     })
-    
-      //   //   let sn = document.createElement("span");
-      //   //   sn.className = "tab-name"
-          
-      //   //   let sc = document.createElement("span");
-      //   //   sc.className = "tab-close"
-      //   //   sn.textContent = tb.tabname;
-      //   //   sc.textContent = "x";
-      //   //   b.appendChild(sn);
-      //   //   b.appendChild(sc);
-      //   //   b.id = tb.id.toString();
-      //   //   b.dataset.path = tb.path;
-      //   //   b.dataset.ff = tb.ff;
-      //   //   // b.appendChild(tbt)
-      //   //   globals.tablist.appendChild(b);
-      //   // }
-      // });
       listen("button-names", (data: { payload: string }) => {
         setcbl(JSON.parse(data.payload) as string[]);
         console.log("winnames: "+data.payload.toString())
       });
       
       listen("fsc", (data: { payload: string }) => {
-        // console.log("-------------__>"+((data.payload)))
         // console.log("fscl----->"+JSON.parse(data.payload));
         setfscl(JSON.parse(data.payload));
       });
       listen("load-sresults", (data: { payload: string }) => {
         let fl: FileItem[] = JSON.parse(data.payload) as FileItem[];
         sst("Search Results")
-        console.log("Found----->"+fl.length)
-        // fl=fl.splice(0,500);
+        // console.log("Found----->"+fl.length)
         setfileslist(fl)
         setfc(fl.length)
-        // // if(globalThis.lastpopfilelist.length>10)
-        // // return
-        // if (fileList.length>100){
-        //   fileList=fileList.slice(0,100)
-        // }
-        // fileList.forEach(function(ef){
-        //   eachfile(ef)
-        // });
       });
-      // const unlisten=
       listen('list-drives', (event) => {
-        // sst("")
-        // spi("drives://")
-        // setcbl([])
-        // setfscl([])
-          console.log("loading drives---->"+event.payload);
+          // console.log("loading drives---->"+event.payload);
           setdriveslist(JSON.parse(event.payload));
-      })
-      .then(result => {
-              // console.log(uio.getCurrent().label)
-              console.log(result)
-          })
-      .catch(console.error);
-      
-      // const unlisten1=
+      });
       
       listen("load-marks", (data: { payload:string }) => {
-        console.log("listmarks ")
+        // console.log("listmarks ")
         setbms(JSON.parse(data.payload) as mark[])
       });
-      // lfiles();
       
-      // openTab("drives://")
-      // invoke('list_files', { 
-      //     windowname:winInfo.winname,
-      //     oid: activetabid,
-      //     path: "drives://",
-      //     ff: "" 
-      // })
-      // .then(result => {
-      //     // console.log(uio.getCurrent().label)
-      //     console.log(result)
-          
-      // })
-      // .catch(console.error)
-      // return () => {
-      //   unlisten.then(f => f());
-      //   unlisten1.then(f => f());
-      // }
     },[])
     useEffect(()=>{
       if(!appWindow)
@@ -785,10 +480,7 @@ export default function Greet() {
         if(!startstopfilewatch){
           invoke('senddriveslist', { 
             windowname:appWindow?.label,
-            
-        }).then(
-  
-        );
+        })
         reloadsize("loadmarks")
         invoke("listtabs",{})
         .then((e)=>{
@@ -799,34 +491,12 @@ export default function Greet() {
             setpath(ei)
             newtab(ei,index.toString());
           }
-          
-        })
-                    
-                    // populatesearchlist("drives://");
-                // })
-                //   .catch(console.error)
-          
+        })          
         }
     },[appWindow])
     const [showthumbnail,setst]=useState(false)
-  //   useEffect(() => {
-  //     invoke<string>('greet', { 
-  //         name: "test"
-  //     })
-  //       .then(result => {
-  //         console.log(uio.getCurrent().label)
-  //         console.log(result)
-  //         addone(result)
-  //     })
-  //       .catch(console.error)
-  //   }, [count])
   
   const columns: ColumnDef<FileItem>[] = [
-     
-    // {
-    //   accessorKey: 'reponame',
-    //   header: 'Reponame',
-    // },
     {
       id: "select",
       header: ({ table }) => (
@@ -908,7 +578,7 @@ export default function Greet() {
                     
                   <div>
   
-                    {is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
+                    {is_dir?<Folder className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />}
                   </div>
                     {/* <span className="font-medium text-lg"> */}
                     {/* <div className="w-full"> */}
@@ -1089,33 +759,6 @@ export default function Greet() {
       },
       
     }
-    // ,{
-    //   accessorKey: 'additions',
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         // variant='ghost'
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    //       >
-    //         Additions
-    //         <ArrowUpDown className='ml-2 h-4 w-4' />
-    //       </Button>
-    //     );
-    //   },
-    // },{
-    //   accessorKey: 'deletions',
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         // variant='ghost'
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    //       >
-    //         Deletions
-    //         <ArrowUpDown className='ml-2 h-4 w-4' />
-    //       </Button>
-    //     );
-    //   },
-    // }
     ,{
       accessorKey: 'ftype',
       header: ({ column }) => {
@@ -1193,76 +836,8 @@ export default function Greet() {
         )
       },
     },
-    
-    // {
-    //   accessorKey: 'deletions',
-    //   header: () => <div className='text-right'>Deletions</div>,
-    //   cell: ({ row }) => {
-    //     const amount = parseFloat(row.getValue('amount'));
-    //     const formatted = new Intl.NumberFormat('en-US', {
-    //       style: 'currency',
-    //       currency: 'USD',
-    //     }).format(amount);
-  
-    //     return <div className='text-right font-medium'>{formatted}</div>;
-    //   },
-    // },
-    // {
-    //   id: 'actions',
-    //   cell: ({ row }) => {
-    //     const payment = row.original;
-  
-    //     return (
-    //       <DropdownMenu>
-    //         <DropdownMenuTrigger asChild>
-    //           <Button 
-    //           // variant='ghost' 
-    //           className='h-8 w-4 p-0'>
-    //             <span className='sr-only'>Open menu</span>
-    //             {/* <MoreHorizontal className='h-4 w-4' /> */}
-    //           </Button>
-    //         </DropdownMenuTrigger>
-    //         <DropdownMenuContent align='end'>
-    //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-    //           <DropdownMenuItem
-    //             onClick={() => navigator.clipboard.writeText(payment.id)}
-    //           >
-    //             Copy payment ID
-    //           </DropdownMenuItem>
-    //           <DropdownMenuSeparator />
-    //           <DropdownMenuItem>View customer</DropdownMenuItem>
-    //           <DropdownMenuItem>View payment details</DropdownMenuItem>
-    //         </DropdownMenuContent>
-    //       </DropdownMenu>
-    //     );
-    //   },
-    // },
-    // ...
   ];
-  // const useActiveElement = () => {
-  //   const [active, setActive] = useState(document.activeElement);
-     
-  //   const handleFocusIn = (e) => {
-  //      setActive(document.activeElement);
-  //   }
-     
-  //   useEffect(() => {
-  //      document.addEventListener('focusin', handleFocusIn)
-  //      return () => {
-  //        document.removeEventListener('focusin', handleFocusIn)
-  //   };
-  //   }, [])
-     
-  //   return active;
-  //  }
-  //  const focusedElement = useActiveElement();
-    
-  //  useEffect(() => {
-  //      if (focusedElement) {
-  //        focusedElement.value && console.log(focusedElement.value);
-  //      }
-  //     console.log(focusedElement);
-  //  }, [focusedElement])
+  
     
    
    function reloadlist(){
@@ -1288,14 +863,6 @@ export default function Greet() {
       "recent_files", {
         windowname:appWindow?.label,
         string: "",
-    })
-  }
-  function loadsearchdb(tospath){
-      invoke(
-      "loadsearchlist", {
-        windowname:appWindow?.label,
-        id: activetabid.toString(),
-        path: tospath
     })
   }
    
@@ -1393,58 +960,24 @@ export default function Greet() {
   
                           addToTabHistory(newtabid.toString(),gotopath)
                           setactivetabid(newtabid)
-                          // setpath(message.path)
-                          // setpsplitl(splitpath(message.path))
-                          // sst(message.name)
-                          // invoke(
-                          //   "load_tab",
-                          //   {
-                          //     windowname:appWindow?.label,
-                          //     oid: newtabid.toString()
-                          //   }
-                          // );
-                          // addToTabHistory(newtabid.toString(),gotopath)
-                          // addTofwdHistory(newtabid.toString(),path)
                           listfiles(newtabid,gotopath);
                         });
     }
     function reloadsize(togglewhat="size"){
       reset(path)
-      console.log("loading size js---->1");
       if(appWindow){
         const thensobj={
         windowname: appWindow?.label,
         togglewhat:togglewhat
       };
-      console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
+      // console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
       invoke(
         "nosize",
         thensobj);
-      console.log("loading size js----->2")
       }
       listfiles(activetabid,path)
     }
   const [isvalid,setvalid]=useState(true);
-    
-  const [width, setWidth] = useState(200);
-   const [isDragging, setIsDragging] = useState(false);
-  
-   const handleMouseDown = (event) => {
-      setIsDragging(true);
-      event.stopPropagation();
-   };
-  
-   const handleMouseMove = (event) => {
-      if (!isDragging) return;
-      setWidth(window.innerWidth - event.clientX);
-   };
-  
-   const handleMouseUp = () => {
-      setIsDragging(false);
-   };
-    
-    
-    
     const[dupes,setdupes]=useState([] as operationfileinfo[])
     const[showalertdialog,setsal]=useState(false)
     const[shownewleafdialog,setsnld]=useState(false)
@@ -1465,14 +998,12 @@ export default function Greet() {
             <div className="flex flex-row p-2 items-center">
 
             <button className="flex items-center gap-2 font-semibold">
-              <FolderIcon className="h-6 w-6" />
+              <Folder className="h-6 w-6" />
               <span className="">Filedime</span>
             </button>
-            <LogInIcon className="w-4 h-4" onClick={()=>{
+            {/* <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
-              console.log(JSON.stringify(tabHistories))
-              console.log(JSON.stringify(tabForward))
-            }}/>
+            }}/> */}
             <Button className="ml-2" variant={"outline"} onClick={()=>{
               invoke("newspecwindow",{
                 winlabel:"settings",
@@ -1517,7 +1048,7 @@ export default function Greet() {
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
               <HoverCardTrigger>
-              <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+              <Button variant={"outline"} onClick={
                   ()=>{
                     // fileopsrc.map((eachsource)=>{
 
@@ -1547,35 +1078,16 @@ export default function Greet() {
                       return 
                     }
                   })
-                  // invoke('fileop_with_progress', { 
-                  //     windowname:appWindow?.label,
-                  //     src:JSON.stringify(fileopsrc),
-                  //     dst:path,
-                  //     removefile:false
-                  // }).catch((e)=>console.error(e))
-                    // })
-                    
-                  // .then(()=>{
                     console.log("done");
                     setfos([])
                     setfod("")
-                    // reset(path)
-                    // sst(path)
-                  //   invoke('list_files', { 
-                  //     windowname:appWindow?.label,
-                  //     oid: activetabid.toString(),
-                  //     path: path,
-                  //     ff: "" 
-                  // // })
-                    
-                  // })
                   }
               }>
-              <CardDescription className="flex items-center space-x-2 p-2">
+              {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
               Paste ({fileopsrc.length})
                 
-              </CardDescription>
-            </Card>
+              {/* </CardDescription> */}
+            </Button>
               </HoverCardTrigger>
               <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
                {fileopsrc.map((eachsource)=>{
@@ -1596,10 +1108,7 @@ export default function Greet() {
                 { 
                   addToTabHistory(activetabid.toString(),"drives://")
                     reset("drives://")
-                    // sst("drives://")
                     updatetabs("drives://")
-                    // setpath()
-                    // console.log(message);
                     listfiles(activetabid,"drives://");
                 }
                 }
@@ -1608,7 +1117,7 @@ export default function Greet() {
               >
                <div>
 
-                <HomeIcon className="h-4 w-4" />
+                <Home className="h-4 w-4" />
                </div>
                 Home
               </button>
@@ -1616,10 +1125,7 @@ export default function Greet() {
                 { 
                   addToTabHistory(activetabid.toString(),"downloads://")
                     reset("downloads://")
-                    // sst("drives://")
                     updatetabs("downloads://")
-                    // setpath()
-                    // console.log(message);
                     listfiles(activetabid,"downloads://");
                 }
                 }
@@ -1636,10 +1142,7 @@ export default function Greet() {
                 { 
                   addToTabHistory(activetabid.toString(),"documents://")
                     reset("documents://")
-                    // sst("drives://")
                     updatetabs("documents://")
-                    // setpath()
-                    // console.log(message);
                     listfiles(activetabid,"documents://");
                 }
                 }
@@ -1652,29 +1155,10 @@ export default function Greet() {
                 </div>
                 Documents
               </button>
-              {/* <Link
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-900  transition-all hover:text-gray-900  dark:text-gray-50 dark:hover:text-gray-50"
-                href="#"
-              ><FolderIcon className="h-4 w-4" />{sampletext}</Link> */}
-              {/* <button
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
-                
-              >
-                <TrashIcon className="h-4 w-4" />
-                Trash
-              </button> */}
               <button
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor}`}
                 onClick={()=>
                   { 
-                      // setfileslist([])
-                      // setdriveslist([])
-                      // sst("drives://")
-                      // setpath("drives://")
-                      // setss("")
-                      // console.log(message);
-                      
-                      // openTab("drives://");
                       
                       newtab("drives://");
                   }
@@ -1686,8 +1170,6 @@ export default function Greet() {
                 </div>
                 New Tab
               </button>
-              
-              
             </nav>
           </div>
           <div className="justify-start px-4 text-sm font-medium">
@@ -1709,16 +1191,6 @@ export default function Greet() {
                         updatetabs(mark.path)
                       }
                      listfiles(activetabid,mark.path)
-                      // console.error(mark.path)
-                      // newtab(mark.path)
-                        // setfileslist([])
-                        // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
-                        // setss("")
-                        // console.log(message);
-                        
-                        // activateTab(tab)
                     }
                     }
                 >
@@ -1773,14 +1245,7 @@ export default function Greet() {
                 <button 
                 className={`w-full flex items-center rounded-lg px-3 py-2 text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} ${activetabid === tab.id ? setcolorpertheme : ''}`}
                   onClick={()=>
-                    { 
-                        // setfileslist([])
-                        // setdriveslist([])
-                        // sst("drives://")
-                        // setpath("drives://")
-                        // setss("")
-                        // console.log(message);
-                        
+                    {                         
                         activateTab(tab)
                     }
                     }
@@ -1788,7 +1253,7 @@ export default function Greet() {
                   {/* <div className="flex flex-row  items-center justify-between"> */}
 
                   <div>
-                    <FolderIcon className="h-4 w-4" />
+                    <Folder className="h-4 w-4" />
                     </div>
                     {/* <div className="ps-2  overflow-hidden"> */}
                   <div className="ps-2 w-full text-start">
@@ -1844,10 +1309,6 @@ export default function Greet() {
                       reset(message.mount_point)
                       updatetabs(message.mount_point)
                       addToTabHistory(activetabid.toString(),message.mount_point)
-                      // spi(message.mount_point)
-                      // setpath()
-                      // sst(message.mount_point)
-                      // console.log(message);
                       listfiles(activetabid,p=="linux"?message.name:message.mount_point);
                         
                     }
@@ -1864,8 +1325,17 @@ export default function Greet() {
                     
                   </ContextMenuTrigger>
                   <ContextMenuContent>
-                  <ContextMenuItem>Open in new tab</ContextMenuItem>
-                  <ContextMenuItem>Open in new window</ContextMenuItem>
+                  <ContextMenuItem onSelect={(e)=>{
+                          invoke("newwindow",
+                          {
+                            path: p=="linux"?message.name:message.mount_point,
+                            ff:""
+                          });
+
+                        }}>Open in new window</ContextMenuItem>
+                  <ContextMenuItem onSelect={(e)=>{
+                          newtab(p=="linux"?message.name:message.mount_point)
+                        }}>Open in new tab</ContextMenuItem>
                 </ContextMenuContent>
                 </ContextMenu>
                 ))
@@ -1896,10 +1366,8 @@ export default function Greet() {
                   setig((old)=>{return !old})
                 }
             }>
-            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             {isgrid?<LayoutGrid className="h-4 w-4"/>:<LayoutList className="h-4 w-4"/>}
               
-            {/* </CardDescription> */}
           </Button>
           </HoverCardTrigger>
               <HoverCardContent className={`${setcolorpertheme}`} >
@@ -1918,10 +1386,7 @@ export default function Greet() {
                   reloadlist()
                 }
             }>
-            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             <RefreshCcwIcon className="h-4 w-4"/>
-              
-            {/* </CardDescription> */}
           </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
@@ -1941,17 +1406,15 @@ export default function Greet() {
                   setsnld(true);
                 }
             }>
-            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             <FolderPlus className="h-4 w-4"/>
-              
-            {/* </CardDescription> */}
           </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                New Folder
               </HoverCardContent>
             </HoverCard>
-  </div><div>
+  </div>
+  <div>
 
 
             <HoverCard>
@@ -1963,10 +1426,8 @@ export default function Greet() {
                   setsnld(true);
                 }
             }>
-            {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
             <FilePlus className="h-4 w-4"/>
               
-            {/* </CardDescription> */}
           </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
@@ -1975,163 +1436,6 @@ export default function Greet() {
             </HoverCard>
   </div>
   <NewLeaf dest={dest} isdir={isldir} showad={shownewleafdialog} setshowad={setsnld}/>
-  {/* <div>
-
-
-            <HoverCard>
-              <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
-                ()=>{
-                  reloadsize()
-                }
-            }>
-            <RulerIcon className="h-4 w-4"/>
-              
-          </ Button>
-          </HoverCardTrigger>
-              <HoverCardContent  className={`${setcolorpertheme}`}>
-               Show size of folder
-              </HoverCardContent>
-            </HoverCard>
-  </div>
-  <div>
-
-
-            <HoverCard>
-              <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
-                ()=>{
-                  reloadsize("excludehidden")
-                }
-            }>
-            <EyeOffIcon className="h-4 w-4"/>
-              
-          </ Button>
-          </HoverCardTrigger>
-              <HoverCardContent  className={`${setcolorpertheme}`}>
-               Exclude hidden files
-              </HoverCardContent>
-            </HoverCard>
-  </div> */}
-            <div  className={`${watchbuttonvisibility ? '' : 'hidden'}`}>
-
-            {/* <HoverCard>
-              <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
-                ()=>{
-                  setstartstopfilewatch((old)=>{let newv= !old;
-                    if(newv){
-
-                      // console.log("startserve");
-                      invoke(
-                        "startserver",
-                        {
-                          windowname:appWindow?.label,
-                          pathstr:path
-                        }
-                        );
-                    }
-                    // }
-                    // else if (target==globals.stopserve){
-                    // console.log("stopserve");
-                    else{
-                    invoke(
-                      "stopserver",
-                      {
-                        windowname:appWindow?.label,
-                        path:""
-                      }
-                    );
-                  }
-                  return newv});
-          
-                }
-            }>
-            <CardDescription className="flex items-center space-x-2 p-2">
-            <EyeIcon className="h-4 w-4"/>
-              
-            </CardDescription>
-          </Card>
-          </HoverCardTrigger>
-              <HoverCardContent >
-               Hot reload (Monitor changes and reload as necessary)
-              </HoverCardContent>
-            </HoverCard> */}
-            </div>
-            {/* <HoverCard>
-              <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
-                ()=>{
-                  reloadsize()
-                }
-            }>
-            <CardDescription className="flex items-center space-x-2 p-2">
-            <RulerIcon className="h-4 w-4"/>
-              
-            </CardDescription>
-          </Card>
-          </HoverCardTrigger>
-              <HoverCardContent >
-               Show size of folder
-              </HoverCardContent>
-            </HoverCard> */}
-            {/* <div>
-
-
-            <HoverCard>
-              <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
-                ()=>{
-                  populateimmediatechildcount()
-                }
-            }>
-            <FolderTreeIcon className="h-4 w-4"/>
-              
-          </Button>
-          </HoverCardTrigger>
-              <HoverCardContent   className={`${setcolorpertheme}`}>
-               Count immediate children of folders
-              </HoverCardContent>
-            </HoverCard>
-            </div>
-            <div>
-              
-
-            <HoverCard>
-              <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
-                ()=>{
-                  recentfiles()
-                }
-            }>
-            <FolderClockIcon className="h-4 w-4"/>
-              
-          </Button>
-          </HoverCardTrigger>
-              <HoverCardContent  className={`${setcolorpertheme}`}>
-               Recent Files
-              </HoverCardContent>
-            </HoverCard>
-            </div>
-            <div>
-
-
-            <HoverCard>
-              <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm 'onClick={
-                ()=>{
-                  loadsearchdb(path)
-                }
-            }>
-            <ScanSearchIcon className="h-4 w-4"/>
-              
-          </Button>
-          </HoverCardTrigger>
-              <HoverCardContent  className={`${setcolorpertheme}`}>
-               load Search from this directory
-              </HoverCardContent>
-            </HoverCard>
-            </div> */}
         {custombuttonlist.map((bn, index) => (
           <div key={index} className="">
 
@@ -2167,18 +1471,12 @@ export default function Greet() {
                   tabid:activetabid.toString(),
                   dir:true
                 }).then((ei)=>{
-                  console.log(ei)
-                  // addTofwdHistory(activetabid.toString(),path)
-                  // addTofwdHistory(activetabid.toString())
+                  // console.log(ei)
                   let pathtogoto=ei
                   if(pathtogoto){
                     
                     reset(pathtogoto)
                     updatetabs(pathtogoto)
-                    // setpath()
-                    // setpsplitl(splitpath(pathtogoto))
-                    // sst("")
-                    // useEffect(() => {
                       listfiles(activetabid,pathtogoto);
                   }
                 }).catch((e)=>console.error(e))
@@ -2192,26 +1490,16 @@ export default function Greet() {
                   path
                 }).then((ei)=>{
                   console.log(ei)
-                  // addTofwdHistory(activetabid.toString(),path)
-                  // addTofwdHistory(activetabid.toString())
                   let pathtogoto=ei
                   if(pathtogoto){
                     reset(pathtogoto)
                     updatetabs(pathtogoto)
-                    // setpath()
-                    // setpsplitl(splitpath(pathtogoto))
-                    // sst("")
-                    // useEffect(() => {
                       listfiles(activetabid,pathtogoto);
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowUp className="h-4 w-4"
               /></Button>
             </div>
-          {/* <div className="flex items-center gap-2"> */}
-            {/* <Button size="sm" variant="ghost"> */}
-              
-            {/* </Button> */}
             <div>
 
             <Button className={`${hidefwd?"hidden":""} `} variant="ghost"  onClick={()=>{
@@ -2225,10 +1513,6 @@ export default function Greet() {
 
                   reset(pathtogoto)
                   updatetabs(pathtogoto)
-                  // setpath()
-                  // setpsplitl(splitpath(pathtogoto))
-                  // sst("")
-                  // useEffect(() => {
                     listfiles(activetabid,pathtogoto);
                 }
               }).catch((e)=>console.error(e))
@@ -2237,8 +1521,6 @@ export default function Greet() {
              />
             </Button>
             </div>
-          {/* </div> */}
-            {/* <div className="flex-grow"> */}
             <datalist id="path-list">
             {pathsuggestlist.map((message, index) => (
               <option key={index} value={message}/>
@@ -2268,32 +1550,11 @@ export default function Greet() {
                       })
                       .then((options:string[]) => {
                         // console.log(options)
-                        // Clear the datalist options
                         if (options !== null) {
                           setpsl(options)
-                    
-                          // Loop through the options returned by Rust
-                          // for (const option of options) {
-                          //   const optionElement = document.createElement("option");
-                          //   // // console.log("here#1")
-                          //   optionElement.value = option;
-                    
-                          //   // Append the option element to the datalist element
-                          //   datalist.appendChild(optionElement);
-                          // }
-                          // for (const option of globalThis.lastpopfilelist) {
-                          //   // Create a new option element with the option value
-                          //   const optionElement = document.createElement("option");
-                          //   // // console.log("here#1")
-                          //   optionElement.value = option.path;
-                    
-                          //   // Append the option element to the datalist element
-                          //   datalist.appendChild(optionElement);
-                          // }
                         }
                       })
                       .catch((error:string) => {
-                        // Handle any errors from Rust
                         console.error(error);
                       });
                   }
@@ -2328,36 +1589,22 @@ export default function Greet() {
 
             <Button variant={"ghost"}  onClick={
               ()=>{
-                // if(searchstring.trim().length>0){
-                  // invoke(
-                  //   "populate_try", {
-                  //     path:path
-                  // })
-                  // .then(()=>{
                     invoke(
                     "search_try", {
                       windowname:appWindow?.label,
-                      // path: pathInput.value,
                       string: searchstring
                     }).catch((e)=>console.error(e))
-                  // })
-                  // .catch((e)=>console.error(e))
                   
                 }
-              // }
             }>
 
             <SearchIcon className="h-4 w-4"/>
             </Button>
             </div>
-            {/* <div className="flex items-center gap-2"> */}
               <div className="flex items-center">
 
               <span className=" whitespace-nowrap">{parentsize}</span>
               </div>
-              {/* <Button variant="ghost">Tab 2</Button>
-              <Button variant="ghost">Tab 3</Button> */}
-            {/* </div> */}
           </div>
         </div>
         <div>
@@ -2376,10 +1623,6 @@ export default function Greet() {
                   addToTabHistory(activetabid.toString(),eachif.pathtofol)
                   reset(eachif.pathtofol)
                   updatetabs(eachif.pathtofol)
-                  // spi(message.mount_point)
-                  // setpath()
-                  // sst(eachif.pathtofol)
-                  // console.log(message);
                   listfiles(activetabid,eachif.pathtofol);
               }
             }>
@@ -2404,16 +1647,6 @@ export default function Greet() {
           ))}
         </div>
         </div>
-        {/* <span className="flex flex-row space-x-4"> */}
-
-        {/* <h1 className="font-semibold text-lg md:text-2xl">
-          {fileslist.length>0||watchbuttonvisibility?sampletext:"Drives"} 
-          Contains: {fileslist.length>0?filecount:driveslist.length} Items</h1> */}
-        {/* <Button className={`border border-b-2  p-2 border-gray-900 ${fileslist.length<500?"hidden":""}`} onClick={()=>{
-              setll((old)=>{return !old});
-            }}>Show all</Button> */}
-        {/* </span> */}
-        {/* <p>{searchstring.trim().length>0?"":path}</p> */}
        
         <span className={`overflow-${scrollorauto} ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
         
@@ -2497,13 +1730,14 @@ export default function Greet() {
 </DropdownMenuContent>
 </DropdownMenu>
 {/* </div> */}
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> 
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
                 <Button variant={"outline"} className={`${isgrid?"":"hidden"}`} onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
                 </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
-               Reload
+               Show Thumbnails
               </HoverCardContent>
             </HoverCard>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({fileslist.length})</p>
@@ -2538,12 +1772,6 @@ export default function Greet() {
                       <ContextMenuTrigger className="h-full w-full overflow-hidden">
                         <HoverCard >
                           <HoverCardTrigger className="h-full w-full">
-                            
-
-                           
-
-                            {/* <Card  key={index} > */}
-                              {/* <CardContent className=" overflow-hidden"> */}
                               <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
                               ()=>
                               { 
@@ -2552,14 +1780,7 @@ export default function Greet() {
                                   reset(message.path)
                                   updatetabs(message.path)
                                 }
-                                // console.log("gridlayout clicked");
-                                
-                                // setpath()
-                                // setpsplitl(splitpath(message.path))
-                                // sst(message.name)
-                                // useEffect(() => {
                                   listfiles(activetabid,message.path);
-                                // },[])
                                 }
                               }>
                                 <div className="w-full">
@@ -2583,7 +1804,7 @@ export default function Greet() {
 
                               <div className="overflow-visible">
 
-                              {message.is_dir?<FolderIcon className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
+                              {message.is_dir?<Folder className="h-6 w-6" />:<FileIcon className="h-6 w-6" />}
                               </div>
                               <div className="w-full flex justify-between overflow-hidden">
 
@@ -2593,9 +1814,6 @@ export default function Greet() {
                              </div>
                               </div>
                             </span>
-                              {/* </CardContent> */}
-                            {/* </Card> */}
-                            {/* </div> */}
                             
                           </HoverCardTrigger>
                           <HoverCardContent className={`${setcolorpertheme} flex flex-col text-center`} >
@@ -2617,26 +1835,13 @@ export default function Greet() {
                         <ContextMenuItem onSelect={(e)=>{
                           invoke("newwindow",
                           {
-                            // id: (winInfo.tabidsalloted++).toString(),
                             path: message.path,
                             ff:""
                           });
 
                         }}>Open in new window</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
-                          // reset(message.path)
                           newtab(message.path)
-                          // sst("drives://")
-                          // updatetabs(message.path)
-                        //   // setpath()
-                        //   // console.log(message);
-                        //   addToTabHistory(activetabid.toString(),"drives://")
-                        //   invoke('list_files', { 
-                        //     windowname:appWindow?.label,
-                        //     oid: activetabid.toString(),
-                        //     path: message.path,
-                        //     ff: "" 
-                        // })
                         }}>Open in new tab</ContextMenuItem>
                         <ContextMenuItem onSelect={()=>{
                           invoke(
@@ -2685,34 +1890,17 @@ export default function Greet() {
                               </HoverCard>
                               </SheetTrigger>
                               <SheetContent 
-                                // style={{ width: `${width}px` }}
-                                // onMouseDown={handleMouseDown}
-                                // onMouseMove={handleMouseMove}
-                                // onMouseUp={handleMouseUp}
-                                // onMouseLeave={handleMouseUp}
                                 className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                                  {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                                  <ResizablePanel/>
-                                  <ResizableHandle />
-                                  <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                                   
-                          
                                   <ReadFileComp message={message}/>
-                                  {/* </ResizablePanel>
-                                </ResizablePanelGroup> */}
-                                  
-                            
-                                  {/* <SheetDescription></SheetDescription> */}
-                                
                               </SheetContent>
                             </Sheet>):(
                             <div className="">
                               <HoverCard>
 
                               <HoverCardTrigger>
-                              <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+                              <Button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
                     populatesearchlist(message.path)
-                  }}><ScanSearchIcon className="h-4 w-4"/></button>
+                  }}><ScanSearchIcon className="h-4 w-4"/></Button>
                   </HoverCardTrigger>
                     <HoverCardContent  className={`${setcolorpertheme}`}>
                     Load folder contents to search
@@ -2724,13 +1912,7 @@ export default function Greet() {
                         </Button>
                         </div>
         
-        // <li key={index}><span className='text-gray-500 pr-3'>{index+1}</span>{JSON.stringify(message)}</li>
         ))}
-         
-        {/* <span>
-
-          {mdc}
-        </span> */}
         </div>
         </ResizablePanel>
       </ResizablePanelGroup>
@@ -2740,137 +1922,13 @@ export default function Greet() {
   else{
 
   return (
-    // <div className="overflow-hidden">
-    
-      
-        // <div>
           <FiledimeSettings/>
-          
-        // </div>  
         )
   }
   
-      
-      
-     
-    // </div>
-  
-}
-
-function FolderIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-    </svg>
-  )
 }
 
 
-function HomeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  )
-}
-
-
-function PencilIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-      <path d="m15 5 4 4" />
-    </svg>
-  )
-}
-
-
-function TrashIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 6h18" />
-      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-    </svg>
-  )
-}
-
-
-export function Other() {
-    
-  const [count, addone] = useState(0);
-
-  // Necessary because we will have to use Greet as a component later.
-  return (
-  <div>
-    <h1>Greet</h1>
-      <button type="button" onClick={() => {
-        // invoke<string>('list_files', { 
-        //     // windowname:appWindow?.label,
-        //     oid: "0",
-        //     path: "drives://",
-        //     ff: "" 
-        // })
-        // let addo=count+1
-        addone((oldone)=>oldone+1);
-      }
-    }>Add One</button>
-    <p>
-    {count}
-    {/* {driveslist} */}
-    </p>
-  </div>
-  );
-}
-interface pathsplit{
-  interfolpath:string,
-  pathtofol:string
-}
 function splitpath(pathInput:string):pathsplit[] {
   let splitat=  /[\\/]/;
   var arr = pathInput.split(splitat); // arr is ["a", "b", "c", "d"]

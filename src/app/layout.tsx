@@ -7,7 +7,7 @@ import Footer from "../src/components/footer"
 import Topthread from "../src/components/topthread"
 // import { useLocalStorage } from "../src/components/useLocalStorage"
 import '../styles/globals.css'
-import DarkButton from "./but"
+import DarkButton from "../components/but"
 import {Metadata} from 'next'
 
 export const metadata:Metadata = {

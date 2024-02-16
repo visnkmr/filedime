@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 // import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
-import FRc from "../components/findsizecomp"
+import FRc from "./findsizecomp"
 import Panzoom from "@panzoom/panzoom"
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "../components/ui/hover-card"
-// import hljs from 'highlight.js';
+} from "./ui/hover-card"
 import { FileItem,DriveItem } from "../shared/types"
 
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
@@ -18,12 +17,12 @@ export const VIDEO_TYPES = ['mp4', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', '
 export const PLAIN_TEXT = ['txt'];
 export const HTML_TYPE = ['html', 'htm', 'xhtml', 'html_vm', 'asp'];
 export const AUDIO_TYPES = ['mp3', 'ogg', 'ogm', 'wav', '.m4a', 'webm'];
-import { CardContent, Card, CardDescription } from "../components/ui/card"
 import { EyeIcon } from "lucide-react";
 import { converttstodt, scrollorauto, setcolorpertheme } from "./greet";
-import { SheetHeader, SheetTitle } from "../components/ui/sheet";
+import { SheetHeader, SheetTitle } from "./ui/sheet";
 import { VideoComponent } from "./videoplaycomp";
 import { useTheme } from "next-themes";
+import { Button } from "./ui/button";
 interface rfcprops {
   message:FileItem
 }
@@ -51,15 +50,6 @@ export default function ReadFileComp({message}:rfcprops){
     setmdc(news);
   }
   useEffect(()=>{
-    // const fetchData = async () => {
-    //   const response = await fs.readTextFile(message.path);
-    //   console.log(response)
-      
-    //   setData(response);
-    // }
-    // listen("load-markdown", (data: { payload: string }) => {
-    //     openmarkdown(data.payload)
-    //   });
       listen("send-log", (data: { payload: string }) => {
         // console.log("grandloc")
         let status=data.payload;
@@ -101,12 +91,6 @@ export default function ReadFileComp({message}:rfcprops){
   const [failed,setfailed]=useState(false)
         useEffect(() => {
           
-          //  const fetchData = async () => {
-          //    const response = await fs.readTextFile(message.path);
-          //    console.log(response)
-             
-          //    setData(response);
-          //  }
            if(!MARKDOWN_TYPES.some(type => message.path.includes(type))){
 
             invoke('highlightfile', { 
@@ -135,94 +119,45 @@ export default function ReadFileComp({message}:rfcprops){
                     .catch(console.error)
            }
         }, [message.path]);
-        // useEffect(() => {
-        //   hljs.initHighlighting();
-        //  }, []);
-        const imgRef = useRef(null);
- const containerRef = useRef(null);
- const [scale, setScale] = useState(1);
- const [position, setPosition] = useState({ x: 0, y: 0 });
- const [isDragging, setIsDragging] = useState(false);
- const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
-
- const handleScroll = (event) => {
-    event.preventDefault();
-    const delta = event.deltaY || event.detail || event.wheelDelta;
-    setScale((prevScale) => prevScale + delta * -0.001);
-    // Clamp the scale value to prevent scaling too far in or out
-    setScale((prevScale) => Math.min(Math.max(1, prevScale), 5));
- };
-
- const handleMouseDown = (event) => {
-    setIsDragging(true);
-    setLastMousePos({ x: event.clientX, y: event.clientY });
- };
-
- const handleMouseMove = (event) => {
-  if (!isDragging) return;
-    const dx = event.clientX - lastMousePos.x;
-    const dy = event.clientY - lastMousePos.y;
-
-    // Calculate the maximum allowed values for the x and y positions
-    const maxX = (containerRef.current.offsetWidth - imgRef.current.offsetWidth / scale) / 2;
-    const maxY = (containerRef.current.offsetHeight - imgRef.current.offsetHeight / scale) / 2;
-
-    // Clamp the new position within the limits
-    const newX = Math.min(Math.max(-maxX, position.x + dx), maxX);
-    const newY = Math.min(Math.max(-maxY, position.y + dy), maxY);
-
-    setPosition({ x: newX, y: newY });
-    setLastMousePos({ x: event.clientX, y: event.clientY });
- };
-
- const handleMouseUp = () => {
-    setIsDragging(false);
- };
  useEffect(()=>{
 
    const elem = document.getElementById('panzoom-element')
-   const panzoom = Panzoom(elem, {
-    cursor: "default",
-    maxScale: 7,
-    minScale: 1,
-    canvas:true,
-    // panOnlyWhenZoomed: true,
-    step: 0.1,
-    contain:"outside"
-   })
-  //  panzoom.pan(10, 10)
-  //  panzoom.zoom(2, { animate: true })
-  
-   elem.parentElement.addEventListener('wheel', 
-   function (event: any) {
-    if (!event.ctrlKey) return
-    const pan = panzoom.getPan()
-    panzoom.zoomWithWheel
-    (event);
-    panzoom.pan(pan.x, pan.y);
-  }
-  )
- })
- 
- // Panning and pinch zooming are bound automatically (unless disablePan is true).
- // There are several available methods for zooming
- // that can be bound on button clicks or mousewheel.
-//  button.addEventListener('click', panzoom.zoomIn)
-//  elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel)
-       
+   if(elem){
+
+     const panzoom = Panzoom(elem, {
+      cursor: "default",
+      maxScale: 7,
+      minScale: 1,
+      canvas:true,
+      // panOnlyWhenZoomed: true,
+      step: 0.1,
+      contain:"outside"
+     })
+    
+     elem.parentElement.addEventListener('wheel', 
+     function (event: any) {
+      if (!event.ctrlKey) return
+      const pan = panzoom.getPan()
+      panzoom.zoomWithWheel
+      (event);
+      panzoom.pan(pan.x, pan.y);
+    }
+    )
+   }
+ })       
     return (
         <>
         
 
         <div className={`flex flex-row whitespace-nowrap overflow-${scrollorauto}`}>
         <SheetHeader className="pr-2">
-                                    <SheetTitle>{message.name}</SheetTitle>
-                                  </SheetHeader>
+          <SheetTitle>{message.name}</SheetTitle>
+        </SheetHeader>
         <div className="flex h-full justify-center">
 
         <HoverCard >
               <HoverCardTrigger>
-          <Card className='rounded-lg border bg-card text-card-foreground shadow-sm mr-4'onClick={
+          <Button variant={"outline"} onClick={
                 ()=>{
                   setstartstopfilewatch((old)=>{let newv= !old;
                     if(newv){
@@ -252,11 +187,9 @@ export default function ReadFileComp({message}:rfcprops){
           
                 }
             }>
-            <CardDescription className="flex items-center space-x-2 p-2">
             Monitor for changes
               
-            </CardDescription>
-          </Card>
+          </Button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Hot reload (Monitor changes and reload as necessary)
@@ -292,13 +225,7 @@ export default function ReadFileComp({message}:rfcprops){
                           {converttstodt(message.timestamp)}
                         <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
             </>)}
-
-            
-            {/* ):""} */}
             </div>
-        
-        
-        
         </>
     )
 }

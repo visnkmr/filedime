@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter, AlertDialogTrigger } from "../components/ui/alertdialog";
-import { operationfileinfo, setcolorpertheme } from "./greet";
-import { Checkbox } from "../components/ui/checkbox";
+import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter, AlertDialogTrigger } from "./ui/alertdialog";
+import { setcolorpertheme } from "./greet";
+
+import { Checkbox } from "./ui/checkbox";
 import { invoke } from "@tauri-apps/api/tauri";
+import { operationfileinfo } from "../shared/tstypes";
 export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
     let [dlastore,setdlastore]=useState([] as operationfileinfo[])
     useEffect(() => {

@@ -6,19 +6,14 @@
 //load search list
 //showchildfoldercount
 //config folder location
+//display system info using os api
 import React, { useEffect, useState } from "react";
 import EachSetting from "./switchsettingseach"
 import { invoke } from "@tauri-apps/api/tauri";
 import { FolderIcon } from "lucide-react";
-interface stateinfo{
-    excludehidden:boolean,
-    sessionstore:boolean,
-    includefolder:boolean,
-    childcount:boolean,
-    folsize:boolean,
-    cfpath:string,
-    cfpathsize:string,
-}
+import { stateinfo } from "../shared/tstypes";
+import Link from "next/link";
+
 function reloadsize(togglewhat="size"){
     console.log("loading size js---->1");
       const thensobj={
@@ -31,7 +26,7 @@ function reloadsize(togglewhat="size"){
     console.log("loading size js----->2")
   }
 
-//display system info using os api
+
 export default function FiledimeSettings(){
     // const { theme, setTheme } = useTheme()
     const [datafromstngs,setdfs]=useState<React.JSX.Element>()
@@ -59,11 +54,8 @@ export default function FiledimeSettings(){
               <span className="">Filedime</span>
         </div>
         {datafromstngs}
-        <div className="font-bold">
-            Source Code <a target="_blank" href="https://github.com/visnkmr/filedime" className="text-blue-600"> Filedime</a>
-        </div>
-        <div className="font-bold">
-            Made by <a target="_blank" href="https://visnkmr.github.io" className="text-blue-600"> Vishnu N K</a>
+        <div className="font-bold text-center">
+            Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
         </div>
     </div>
     </>

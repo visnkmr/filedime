@@ -4,7 +4,7 @@ import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
 
 import { cn } from "./lib/utils"
-import { setcolorpertheme } from "../../app/greet"
+import { setcolorpertheme } from "../greet"
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,

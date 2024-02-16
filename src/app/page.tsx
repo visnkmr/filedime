@@ -1,6 +1,6 @@
 // ...
 import React from 'react'
-import Greet from './greet'
+import Greet from '../components/greet'
 
 export default function Home() {
   
