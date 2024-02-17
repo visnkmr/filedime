@@ -9,6 +9,7 @@ mod sendtofrontend;
 mod lastmodcalc;
 mod navtimeline;
 mod drivelist;
+use base64::encode;
 use chrono::{DateTime, Utc, Local};
 use navtimeline::{BrowserHistory, Page};
 // use filesize::PathExt;
@@ -74,6 +75,19 @@ const CACHE_EXPIRY:u64=60;
 
 use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
+#[tauri::command]
+async fn get_image_blob(path: String) -> Result<String, String> {
+  let path = Path::new(&path);
+  let mut file = File::open(path).map_err(|e| e.to_string())?;
+  println!("{}",file.metadata().unwrap().len());
+  let mut buffer = Vec::new();
+  file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
+  println!("{:?}",buffer.len());
+  // Encode the file data to a base64 string.
+  let base64_string = encode(&buffer);
+  println!("{base64_string}");
+  Ok(base64_string)
+}
 #[tauri::command]
 async fn disablenav(tabid:String,dir:bool, state: State<'_, AppStateStore>) -> Result<(),()>{ 
   let writetohistory=state.history.read().unwrap();
@@ -1208,6 +1222,7 @@ fn main() {
         newtab,
         newwindow,
         nosize,
+        get_image_blob,
         openpath,
         highlightfile,
         doespathexist,

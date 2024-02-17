@@ -144,7 +144,23 @@ export default function ReadFileComp({message}:rfcprops){
     }
     )
    }
- })       
+ })
+ const [imgblob,setimgblob] =useState()
+ async function getImageBlob(imagePath) {
+  try {
+    const buffer = await invoke('get_image_blob', { path: imagePath });
+    console.log(buffer)
+    // const blob = new Blob([new Uint8Array(JSON.parse(buffer))], { type: 'image/jpeg' });
+    setimgblob(buffer);
+    console.log(`${convertFileSrc(message.path)}`)
+  } catch (error) {
+    console.error('Failed to get image blob:', error);
+  }
+}       
+useEffect(()=>{
+
+  IMAGE_TYPES.some(type => message.name.includes(type))?getImageBlob(message.path):(null)
+},[message.path])
     return (
         <>
         
@@ -204,7 +220,7 @@ export default function ReadFileComp({message}:rfcprops){
             id="panzoom-element"
          >
         <img
-        src={`${convertFileSrc(message.path)}`}/></div>
+        src={`data:image/png;base64,${imgblob}`}/></div>
         
         ):""}
           {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}

@@ -868,8 +868,9 @@ dependencies = [
 
 [[package]]
 name = "filedime"
-version = "0.8.7"
+version = "0.8.71"
 dependencies = [
+ "base64 0.21.7",
  "chrono",
  "comrak",
  "dirs",
