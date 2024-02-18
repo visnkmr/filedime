@@ -49,7 +49,7 @@
       "targets": "all"
     },
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; media-src 'self' asset: https://asset.localhost; connect-src 'self' asset: *; style-src 'unsafe-inline' 'self'"
+      "csp": "default-src 'self' stream: https://stream.localhost; connect-src * stream: https://stream.localhost; img-src * data: stream: https://stream.localhost; media-src * data: stream: https://stream.localhost;"
     },
     "updater": {
       "active": false

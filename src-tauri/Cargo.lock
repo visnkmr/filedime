@@ -868,8 +868,9 @@ dependencies = [
 
 [[package]]
 name = "filedime"
-version = "0.8.7"
+version = "0.8.71"
 dependencies = [
+ "base64 0.21.7",
  "chrono",
  "comrak",
  "dirs",
@@ -881,7 +882,9 @@ dependencies = [
  "libc",
  "num_cpus",
  "opener",
+ "percent-encoding",
  "prefstore",
+ "rand 0.8.5",
  "rayon",
  "regex",
  "rustc-hash",
@@ -891,6 +894,8 @@ dependencies = [
  "sysinfo",
  "tauri",
  "tauri-build",
+ "tokio",
+ "url",
 ]
 
 [[package]]
