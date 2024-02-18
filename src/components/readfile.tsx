@@ -144,7 +144,39 @@ export default function ReadFileComp({message}:rfcprops){
     }
     )
    }
- })       
+ })   
+//  useEffect(()=>{
+//   const video = document.querySelector("video");
+
+// video.addEventListener("seeking", async (event) => {
+//   const range = `bytes=${Math.floor(video.currentTime *  1024)}-${Math.floor(video.currentTime *  1024) +  1024}`;
+//   try {
+//     const base64VideoChunk = await invoke('serve_video', {
+//             path:message.path,
+//             range:range
+//           });
+//     video.src = base64VideoChunk;
+//   } catch (error) {
+//     console.error('Error loading video chunk:', error);
+//   }
+// });
+//  })
+ 
+ async function loadVideoChunk(path,range) {
+  try {
+    const base64VideoChunk = await invoke('serve_video',{
+      path:path,
+      range:range
+    });
+    // Assuming you have a video element with id 'videoPlayer'
+    const videoElement = document.getElementById('videoPlayer');
+    videoElement.src = base64VideoChunk;
+  } catch (error) {
+    console.error('Error loading video chunk:', error);
+  }
+}
+ loadVideoChunk(message.path,'bytes=0-1023');
+    
     return (
         <>
         
@@ -208,7 +240,7 @@ export default function ReadFileComp({message}:rfcprops){
         
         ):""}
           {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
-          {VIDEO_TYPES.some(type => message.name.includes(type))?(<VideoComponent path={message.path} hoverplay={false}/>):""}
+          {VIDEO_TYPES.some(type => message.name.includes(type))?(<video id="videoPlayer" width="650" controls muted="muted" autoplay></video>):""}
           {HTML_TYPE.some(type => message.name.includes(type))?(<iframe src={message.path} title={message.path}></iframe>):""}
           {AUDIO_TYPES.some(type => message.name.includes(type))?(<audio controls={true} controlsList="nodownload" src={`${convertFileSrc(message.path)}`}></audio>):""}
           {MARKDOWN_TYPES.some(type => message.name.includes(type))?(<div className="grid grid-cols-1" dangerouslySetInnerHTML={{__html: mdc}}></div>):""}

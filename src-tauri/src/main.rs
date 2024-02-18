@@ -9,6 +9,8 @@ mod sendtofrontend;
 mod lastmodcalc;
 mod navtimeline;
 mod drivelist;
+mod protocol;
+use base64::encode;
 use chrono::{DateTime, Utc, Local};
 use navtimeline::{BrowserHistory, Page};
 // use filesize::PathExt;
@@ -89,6 +91,54 @@ async fn disablenav(tabid:String,dir:bool, state: State<'_, AppStateStore>) -> R
       }
     Ok(())
 }
+#[tauri::command]
+ fn open_devtools(window: Window) {
+    window.open_devtools();
+}
+#[tauri::command]
+fn serve_video(path:String,range: String) -> Result<String, String> {
+    // Ensure there is a range given for the video
+    println!("{}",path.replace("\\", "/"));
+    if range.is_empty() {
+        return Err("Requires Range header".into());
+    }
+
+    // Get video stats (about  61MB)
+    let video_path = Path::new(&path);
+    let video_size = video_path.metadata().map_err(|e| e.to_string())?.len();
+
+    // Parse Range
+    // Example: "bytes=32324-"
+    let chunk_size =  10u64.pow(7); //  10MB
+    let start = range.split('=').nth(1).unwrap_or("0").parse::<u64>().unwrap_or(0);
+    println!("{}",start);
+    let end = std::cmp::min(start + chunk_size, video_size -  1);
+
+    // Create headers
+    let content_length = (end - start +  1) as usize;
+    let headers = format!(
+        "Content-Range: bytes {start}-{end}/{video_size}\n\
+        Accept-Ranges: bytes\n\
+        Content-Length: {content_length}\n\
+        Content-Type: video/mp4\n",
+        start = start,
+        end = end,
+        video_size = video_size,
+        content_length = content_length
+    );
+
+    // Read the video chunk
+    let mut video_file = File::open(video_path).map_err(|e| e.to_string())?;
+    video_file.seek(SeekFrom::Start(start)).map_err(|e| e.to_string())?;
+    let mut video_chunk = vec![0; content_length];
+    video_file.read_exact(&mut video_chunk).map_err(|e| e.to_string())?;
+
+    // Return the video chunk as a Base64 string
+    let base64_video_chunk = encode(&video_chunk);
+    Ok(format!("data:video/mp4;base64,{}", base64_video_chunk))
+}
+
+
   #[tauri::command]
 async fn addtotabhistory(tabid:String,path:String, state: State<'_, AppStateStore>) -> Result<(),String>{ 
   println!("added to{}-------{}",tabid,path);
@@ -1181,6 +1231,7 @@ fn main() {
       tauri::generate_handler![
         // getpathfromid,
         configfolpath,
+        serve_video,
         listtabs,
         closealltabs,
         getparentpath,
@@ -1225,6 +1276,7 @@ fn main() {
         // get_window_label
         ]
       )
+      .register_uri_scheme_protocol("stream", protocol::stream_protocol_handler)
     .build(tauri::generate_context!())
     .expect("Failed to start app");
   
