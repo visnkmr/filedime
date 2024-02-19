@@ -16,6 +16,7 @@ use fs_extra::{dir::{self, TransitState}, TransitProcess};
 use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
+use reqwest::Error;
 use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
@@ -74,6 +75,7 @@ const CACHE_EXPIRY:u64=60;
 
 use std::fs::File;
 use std::io::{self,  Write, Seek, SeekFrom};
+
 #[tauri::command]
 async fn disablenav(tabid:String,dir:bool, state: State<'_, AppStateStore>) -> Result<(),()>{ 
   let writetohistory=state.history.read().unwrap();
@@ -951,6 +953,29 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 
 //   params
 // }
+#[tauri::command]
+async fn checker()-> Result<String, String>{
+  let url = "https://cdn.jsdelivr.net/gh/vishnunkmr/quickupdates/filedimeversion.txt";
+    match(reqwest::get(url).await){
+        Ok(response) => {
+          
+          // Ensure the response is successful
+          if response.status().is_success() {
+              // Read the response body as text
+              let body = response.text().await.unwrap_or_default();
+              println!("Response data: {}", body);
+              return Ok(body)
+          } else {
+              println!("Failed to fetch data. Status: {}", response.status());
+              Err("Could not check for updates".to_string())
+          }
+        },
+        Err(_) => {
+              Err("Could not check for updates".to_string())
+        },
+    }
+
+}
 fn main() {
   
   // init();
@@ -1218,6 +1243,7 @@ fn main() {
         startserver,
         stopserver,
         tabname,
+        checker,
         navbrowsetimeline,
         newspecwindow,
         addtotabhistory

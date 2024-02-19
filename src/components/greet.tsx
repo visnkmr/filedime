@@ -80,6 +80,8 @@ export let setcolorpertheme="bg-white dark:bg-gray-800"
 import { useToast } from "./ui/use-toast"
 import { Toaster } from "./ui/toaster"
 import { Progress } from "./ui/progress"
+import { ToastAction } from "./ui/toast";
+import Link from "next/link";
 
 export default function Greet() {
   const { theme, setTheme } = useTheme()
@@ -94,6 +96,22 @@ export default function Greet() {
       const pl = await(await import('@tauri-apps/api/os')).platform()
       console.log("windowname top---------->"+appWindow.label)
       setp(pl)
+      const cv = await(await import('@tauri-apps/api/app')).getVersion()
+      console.log(cv)
+      invoke("checker",{}).then((r)=>{
+        console.log(r);
+        if( r!==cv){
+          toast({
+            variant:"destructive",
+            title: "Update available",
+            description: `v${r} is available fordownload`,
+            action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
+          })
+
+        }
+      })
+      
+      // console.log("windowname top---------->"+appWindow.label)
     }
   
     useEffect(() => {
@@ -1035,6 +1053,7 @@ export default function Greet() {
               <Folder className="h-6 w-6" />
               <span className="">Filedime</span>
             </button>
+            
             {/* <LogInIcon className="w-4 h-4" onClick={()=>{
               console.log(JSON.stringify(tablist))
             }}/> */}

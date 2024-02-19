@@ -13,6 +13,9 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { FolderIcon } from "lucide-react";
 import { stateinfo } from "../shared/tstypes";
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
+import { Toaster } from "./ui/toaster";
 
 function reloadsize(togglewhat="size"){
     console.log("loading size js---->1");
@@ -45,9 +48,11 @@ export default function FiledimeSettings(){
         })
         
     },[])
+    const { toast } = useToast()
     return (
     <>
     <div className="w-full h-full flex flex-col items-center overflow-scroll p-4 gap-2">
+    <Toaster />
         <div className="flex flex-row font-semibold items-center gap-2">
 
     <FolderIcon className="h-6 w-6" />
@@ -56,6 +61,30 @@ export default function FiledimeSettings(){
         {datafromstngs}
         <div className="font-bold text-center">
             Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
+        </div>
+        <div>
+        <Button variant={"outline"} onClick={()=>{
+                invoke("checker",{}).then((r)=>{
+                    console.log(r);
+                    // useEffect(()=>{
+                        let fname=async ()=>{
+
+                            const cv = await(await import('@tauri-apps/api/app')).getVersion()
+                            
+                            if( r!==cv){
+                              toast({
+                                variant:"destructive",
+                                title: "Update available",
+                                description: `v${r} is available fordownload`,
+                                action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
+                              })
+                    
+                            }
+                        }
+                        fname();
+                    // },[])
+                  })
+            }}>Check for update</Button>
         </div>
     </div>
     </>
