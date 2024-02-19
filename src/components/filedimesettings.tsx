@@ -31,6 +31,7 @@ function reloadsize(togglewhat="size"){
 
 
 export default function FiledimeSettings(){
+    
     // const { theme, setTheme } = useTheme()
     const [datafromstngs,setdfs]=useState<React.JSX.Element>()
     useEffect(()=>{
@@ -48,9 +49,17 @@ export default function FiledimeSettings(){
         })
         
     },[])
+     useEffect(()=>{
+        let fname=async ()=>{
+            const cv = await(await import('@tauri-apps/api/app')).getVersion()
+            setcv(cv)
+        }
+        fname();
+    },[])
     const { toast } = useToast()
     const [releaseavailable,setra]=useState(false)
     const [updatebuttontext,setubt]=useState("Check for update")
+    const [currentversion,setcv]=useState("")
     return (
     <>
     <div className="w-full h-full flex flex-col items-center overflow-scroll p-4 gap-2">
@@ -70,13 +79,14 @@ export default function FiledimeSettings(){
                 invoke("checker",{}).then((r)=>{
                     console.log(r);
                     // useEffect(()=>{
-                        let fname=async ()=>{
+                        let currentversionasync=async ()=>{
 
                             const cv = await(await import('@tauri-apps/api/app')).getVersion()
                             
                             if( r!==cv){
                                 setra(true)
                               toast({
+                                // duration:2000,
                                 variant:"destructive",
                                 title: "Update available",
                                 description: `v${r} is available fordownload`,
@@ -86,10 +96,14 @@ export default function FiledimeSettings(){
                             }
                             else{setubt("no updates available")}
                         }
-                        fname();
+                        currentversionasync();
                     // },[])
                   })
             }}>{updatebuttontext}</Button>
+
+        </div>
+        <div className="font-bold text-center">
+           Filedime v{currentversion}
         </div>
     </div>
     </>
