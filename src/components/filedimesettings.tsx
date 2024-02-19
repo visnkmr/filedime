@@ -49,6 +49,8 @@ export default function FiledimeSettings(){
         
     },[])
     const { toast } = useToast()
+    const [releaseavailable,setra]=useState(false)
+    const [updatebuttontext,setubt]=useState("Check for update")
     return (
     <>
     <div className="w-full h-full flex flex-col items-center overflow-scroll p-4 gap-2">
@@ -63,7 +65,8 @@ export default function FiledimeSettings(){
             Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
         </div>
         <div>
-        <Button variant={"outline"} onClick={()=>{
+        <Button className={`${releaseavailable?"":"hidden"}`} variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>
+        <Button className={`${releaseavailable?"hidden":""}`} variant={"outline"} onClick={()=>{
                 invoke("checker",{}).then((r)=>{
                     console.log(r);
                     // useEffect(()=>{
@@ -72,6 +75,7 @@ export default function FiledimeSettings(){
                             const cv = await(await import('@tauri-apps/api/app')).getVersion()
                             
                             if( r!==cv){
+                                setra(true)
                               toast({
                                 variant:"destructive",
                                 title: "Update available",
@@ -80,11 +84,12 @@ export default function FiledimeSettings(){
                               })
                     
                             }
+                            else{setubt("no updates available")}
                         }
                         fname();
                     // },[])
                   })
-            }}>Check for update</Button>
+            }}>{updatebuttontext}</Button>
         </div>
     </div>
     </>
