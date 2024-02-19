@@ -1,6 +1,7 @@
-use std::process::Command;
+use std::{process::Command, path::{PathBuf, Path}};
 use chrono::format::format;
 use regex::Regex;
+use serde::Deserialize;
 use sysinfo::{DiskExt, System, SystemExt, RefreshKind};
 
 use crate::sizeunit;
@@ -155,4 +156,133 @@ fn listallntfs() {
     // Check if the mount operation was successful
     assert!(mount_cmd.success());
  }
- 
+//  #[test]
+//  fn drllt(){
+//     let dl  =rs_drivelist::drive_list().unwrap();
+//     for ed in dl{
+//         println!("{:?}",ed);
+
+//         // println!("{:?}",ed.description);
+//     }
+//  }
+fn get_lsblk_output() -> Result<Vec<u8>,()> {
+    let mut command = Command::new("/bin/lsblk");
+    command.args([
+        "-f",
+        // Format output as JSON
+        "--json",
+        // Print full device paths
+        "--paths",
+        // Exclude some devices by major number. See
+        // https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
+        // for a list of major numbers.
+        //
+        // - Exclude floppy drives (2), as they are slow.
+        // - Exclude scsi cdrom drives (11), as they are slow.
+        // - Exclude zram (253), not a valid install target.
+        "--exclude",
+        "2,11,253",
+    ]);
+    
+    // let output = String::from_utf8(get_command_output(command).unwrap()).unwrap();
+    // Ok(output)
+    get_command_output(command)
+}
+fn get_command_output(mut command: Command) -> Result<Vec<u8>,()> {
+    // info!("running command: {:?}", command);
+    let output = match command.output() {
+        Ok(output) => output,
+        Err(err) => {
+            return Err(())
+            // bail!("Failed to execute command: {err}");
+        }
+    };
+
+    if !output.status.success() {
+        // bail!("Failed to execute command");
+    }
+    Ok(output.stdout)
+}
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+struct LsBlkDeviceWithChildren {
+    #[serde(flatten)]
+    details: LsBlkDevice,
+
+
+    /// Child devices.
+    #[serde(default)]
+    children: Vec<LsBlkDeviceWithChildren>,
+}
+#[derive(Debug, Deserialize, PartialEq)]
+struct LsBlkOutput {
+    #[serde(rename = "blockdevices")]
+    block_devices: Vec<LsBlkDeviceWithChildren>,
+}
+fn parse(input: &[u8]) -> Result<LsBlkOutput,()> {
+    Ok(serde_json::from_slice(input).unwrap())
+}
+/// Struct for deserializing the JSON output of `lsblk`.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+pub struct LsBlkDevice {
+    name: Option<String>,
+    fstype: Option<String>,
+    fsver: Option<String>,
+    label: Option<String>,
+    uuid: Option<String>,
+    fsavail: Option<String>,
+    #[serde(rename = "fsuse%")]
+    fsuse: Option<String>,
+    mountpoints:Vec<Option<String>>,
+}
+fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
+    let mut output = Vec::new();
+    let mut stack = parsed.block_devices;
+    while let Some(device) = stack.pop() {
+        output.push(device.details);
+        stack.extend(device.children);
+    }
+    output
+}
+ #[test]
+ fn drllt(){
+    // let output = get_lsblk_output().unwrap();
+    // println!("{}",String::from_utf8(output.clone()).unwrap());
+    // let parsed = parse(&output).unwrap();
+    // println!("{:?}",flattened(parsed));
+    println!("{:?}",get_disks())
+    // let output  =get_lsblk_output();
+    // println!("{}",output.unwrap())
+    // for ed in dl{
+    //     println!("{:?}",ed);
+
+    //     // println!("{:?}",ed.description);
+    // }
+ }
+ pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
+    let output = get_lsblk_output()?;
+    let parsed =parse(&output)?;
+    Ok(flattened(parsed))
+}
+ /// Get information about all disk devices.
+ /// 
+fn get_disks() -> Result<Vec<String>,()> {
+// fn get_disks() -> Result<Vec<PathBuf>,()> {
+    let devices = get_lsblk_devices().expect("Unable to get block devices");
+
+    let mut disks = Vec::new();
+    for device in devices {
+        match(device.uuid){
+            Some(a) => {
+                
+            },
+            None => {
+                continue;
+            },
+        }
+        let ps=device.label.unwrap_or("".to_string());
+        // let ps=device.mountpoints.get(0).unwrap().clone().unwrap();
+        disks.push(ps);
+        // disks.push(Path::new(&ps).into());
+    }
+    Ok(disks)
+}

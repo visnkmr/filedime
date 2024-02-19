@@ -1653,7 +1653,8 @@ export default function Greet() {
                 reset()
                 let lct=new Date().getTime().toString();
 
-      lastcalledtime.current=lct
+                lastcalledtime.current=lct
+                
                     invoke(
                     "search_try", {
                       starttime:lct,
