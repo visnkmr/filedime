@@ -168,7 +168,11 @@ fn listallntfs() {
 fn get_lsblk_output() -> Result<Vec<u8>,()> {
     let mut command = Command::new("/bin/lsblk");
     command.args([
-        "-f",
+        // Print size in bytes
+        "--bytes",
+        // Select the fields to output
+        "--output",
+        "NAME,FSTYPE,FSVER,LABEL,UUID,FSAVAIL,FSUSED,MOUNTPOINT,HOTPLUG,SIZE,VENDOR,RM,STATE,TYPE,KNAME",
         // Format output as JSON
         "--json",
         // Print full device paths
@@ -229,10 +233,18 @@ pub struct LsBlkDevice {
     fsver: Option<String>,
     label: Option<String>,
     uuid: Option<String>,
-    fsavail: Option<String>,
-    #[serde(rename = "fsuse%")]
-    fsuse: Option<String>,
-    mountpoints:Vec<Option<String>>,
+    fsavail: Option<i64>,
+    fsused: Option<i64>,
+    mountpoint:Option<String>,
+    hotplug: bool,
+    size: i64,
+    vendor: Option<String>,
+    model: Option<String>,
+    rm: bool,
+    state: Option<String>,
+    #[serde(rename = "type")]
+    device_type: String,
+    kname: Option<String>,
 }
 fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     let mut output = Vec::new();
