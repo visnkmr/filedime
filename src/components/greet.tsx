@@ -1422,40 +1422,41 @@ export default function Greet() {
            <ContextMenuItem onSelect={(e)=>{
                    newtab(message.mount_point)
                  }}>Open in new tab</ContextMenuItem> 
-            <ContextMenuItem onSelect={(e)=>{
-              // if(path===message.mount_point){
-              //   closetab(activetabid)
-              // }
-                   invoke("unmountdrive",{
-                    windowname:appWindow?.label,
-                    uuid:message.uuid,
-                    mountpoint:message.mount_point
-                  })
-                  .then((e)=>{
-                    // console.log(e+"-----"+message.uuid)
-                    if(path===e){
-                      closetab(activetabid)
-                      invoke("listtabs",{})
+                 {(message.mount_point.trim().length<1)?((<></>)):((<ContextMenuItem onSelect={(e)=>{
+                  // if(path===message.mount_point){
+                  //   closetab(activetabid)
+                  // }
+                       invoke("unmountdrive",{
+                        windowname:appWindow?.label,
+                        uuid:message.uuid,
+                        mountpoint:message.mount_point
+                      })
                       .then((e)=>{
-                        console.log("onopen---->"+e)
-                        let tabslist=JSON.parse(e) as string[];
-                        for (const [index,ei] of tabslist.entries()){
-                          reset(ei)
-                          setpath(ei)
-                          newtab(ei,index.toString());
+                        // console.log(e+"-----"+message.uuid)
+                        if(path===e){
+                          closetab(activetabid)
+                          invoke("listtabs",{})
+                          .then((e)=>{
+                            console.log("onopen---->"+e)
+                            let tabslist=JSON.parse(e) as string[];
+                            for (const [index,ei] of tabslist.entries()){
+                              reset(ei)
+                              setpath(ei)
+                              newtab(ei,index.toString());
+                            }
+                          }) 
                         }
-                      }) 
-                    }
-                  })
-                  .catch((e)=>{
-                    toast({
-                      variant:"destructive",
-                      title: "Failed",
-                      description: `Drive cannot be unmounted`,
-                      // action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
-                    })
-                  })
-                 }}>Unmount device</ContextMenuItem>
+                      })
+                      .catch((e)=>{
+                        toast({
+                          variant:"destructive",
+                          title: "Failed",
+                          description: `Drive cannot be unmounted`,
+                          // action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
+                        })
+                      })
+                     }}>Unmount device</ContextMenuItem>))}
+            
          </ContextMenuContent>
          </ContextMenu>
          ))
