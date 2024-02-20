@@ -78,7 +78,7 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         free:sizeunit::size(ed.fsavail.unwrap_or(0),true),
         is_removable:ed.is_removable.clone(),
         disk_type:ed.device_type.clone(),
-        file_system:ed.fstype.clone().unwrap_or("unkown".to_string()).clone(),
+        file_system:format!("{} {}",ed.fstype.clone().unwrap_or("unknown".to_string()).clone(),ed.fsver.clone().unwrap_or("unknown".to_string()).clone()),
         uuid:ed.name.clone().unwrap_or("".to_string())
     }
     }).collect::<Vec<DriveItem>>();

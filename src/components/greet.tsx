@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -1360,8 +1360,11 @@ export default function Greet() {
        {
          
         driveslist.map((message, index) => (
+          
          <ContextMenu>
            <ContextMenuTrigger>
+           <HoverCard >
+            <HoverCardTrigger>
          <button key={index}
            className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
            onClick={()=>
@@ -1403,12 +1406,24 @@ export default function Greet() {
             {/* {mark.is_dir?<FolderIcon className="h-6 w-6 mr-3" />:<FileIcon className="h-6 w-6 mr-3" />} */}
             <div>
  
-            <HardDriveIcon className="h-6 w-6" />
+            {message.is_removable?(<Plug className="h-6 w-6"/>):(<HardDriveIcon className="h-6 w-6"/>)}
             </div>
              {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
              
          </button>
-             
+         </HoverCardTrigger>
+        <HoverCardContent className={`${setcolorpertheme} flex flex-col text-center`} >
+        {message.mount_point}
+        <br/>  
+        {message.disk_type}
+        <br/>  
+        {message.file_system}
+        <br/>
+        Free: {message.free}
+        <br/>
+        Total size: {message.total}
+        </HoverCardContent>
+      </HoverCard>
            </ContextMenuTrigger>
            <ContextMenuContent>
            <ContextMenuItem onSelect={(e)=>{

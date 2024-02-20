@@ -18,5 +18,5 @@ interface DriveItem {
     is_removable: boolean;
     disk_type: string;
     file_system: string;
-    uuid:string
+    uuid:string;
   }
