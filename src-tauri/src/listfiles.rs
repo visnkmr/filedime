@@ -43,7 +43,7 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
             ed.mountpoint.clone().unwrap()
           }
           else{
-            ed.name.clone().unwrap_or("".to_string()).clone()
+            format!("{} Volume",sizeunit::size(ed.size ,true).to_string())
           }
         },
         mount_point:ed.mountpoint.clone().unwrap_or("".to_string()).clone(),

@@ -1369,7 +1369,7 @@ export default function Greet() {
                reset(message.mount_point)
                updatetabs(message.mount_point)
                addToTabHistory(activetabid.toString(),message.mount_point)
-               listfiles(activetabid,p=="linux"?message.name:message.mount_point);
+               listfiles(activetabid,message.mount_point);
                  
              }
              }
@@ -1380,7 +1380,7 @@ export default function Greet() {
             <HardDriveIcon className="h-6 w-6" />
             </div>
              {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
-         
+             {message.mount_point.trim().length<1?"Not mounted":"mounted"}
          </button>
              
            </ContextMenuTrigger>
@@ -1388,13 +1388,13 @@ export default function Greet() {
            <ContextMenuItem onSelect={(e)=>{
                    invoke("newwindow",
                    {
-                     path: p=="linux"?message.name:message.mount_point,
+                     path: message.mount_point,
                      ff:""
                    });
  
                  }}>Open in new window</ContextMenuItem>
            <ContextMenuItem onSelect={(e)=>{
-                   newtab(p=="linux"?message.name:message.mount_point)
+                   newtab(message.mount_point)
                  }}>Open in new tab</ContextMenuItem>
          </ContextMenuContent>
          </ContextMenu>
