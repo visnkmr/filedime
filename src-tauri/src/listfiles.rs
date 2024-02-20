@@ -81,7 +81,7 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         disk_type:ed.device_type.clone(),
         file_system:format!("{} {}",ed.fstype.clone().unwrap_or("".to_string()).clone(),ed.fsver.clone().unwrap_or("".to_string()).clone()),
         uuid:ed.name.clone().unwrap_or("".to_string()),
-        vendormodel:ed.vendor.clone().unwrap_or("".to_string())
+        vendormodel:format!("{} {}",ed.vendor.clone().unwrap_or("".to_string()),ed.model.clone().unwrap_or("".to_string()))
     }
     }).collect::<Vec<DriveItem>>();
   }

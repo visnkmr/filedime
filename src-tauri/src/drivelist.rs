@@ -31,7 +31,7 @@ fn get_lsblk_output() -> Result<Vec<u8>,()> {
         "--bytes",
         // Select the fields to output
         "--output",
-        "NAME,FSTYPE,FSVER,LABEL,UUID,FSAVAIL,FSUSED,MOUNTPOINT,HOTPLUG,SIZE,VENDOR,RM,STATE,TYPE,KNAME",
+        "NAME,FSTYPE,FSVER,LABEL,UUID,FSAVAIL,FSUSED,MOUNTPOINT,HOTPLUG,SIZE,VENDOR,MODEL,RM,STATE,TYPE,KNAME",
         // Format output as JSON
         "--json",
         // Print full device paths
@@ -76,7 +76,7 @@ struct LsBlkDeviceWithChildren {
     #[serde(default)]
     children: Vec<LsBlkDeviceWithChildren>,
 }
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq,Clone)]
 struct LsBlkOutput {
     #[serde(rename = "blockdevices")]
     block_devices: Vec<LsBlkDeviceWithChildren>,
@@ -116,16 +116,18 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
         for mut child in device.children.clone() {
             child.details.vendor=device.details.vendor.clone();
             child.details.model=device.details.model.clone();
-            output.push(child.details);
+            stack.push(child);
 
         }
     }
+    // println!("output------{:?}",output);
     output
 }
 
  pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
     let output = get_lsblk_output()?;
     let parsed =parse(&output)?;
+    println!("{:?}",parsed.clone());
     Ok(flattened(parsed))
 }
  /// Get information about all disk devices.
