@@ -295,6 +295,22 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
     driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
 
   }
+  #[tauri::command]
+  async fn mountdrive(windowname:String,uuid:String,mountpoint:String,window:Window)->Result<String,String>{  
+    let mut returnid="".to_string();
+    println!("trying to mount drive {}",mountpoint);
+   if(drivelist::mountdrive( uuid.clone(), mountpoint)){
+    println!("mounted drive");
+    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    for ed in populatedrivelist().clone().unwrap(){
+      if(ed.uuid==uuid){
+        returnid=ed.mount_point
+      } 
+    }
+    return Ok(returnid)
+   }
+   Err("failed to mount drive".to_string())
+  }
     
   #[tauri::command]
   fn new(dest:String,isdir:bool,name:String,window:Window)->Result<(),String>{
@@ -1246,7 +1262,8 @@ fn main() {
         checker,
         navbrowsetimeline,
         newspecwindow,
-        addtotabhistory
+        addtotabhistory,
+        mountdrive
         // whattoload,
         // get_window_label
         ]

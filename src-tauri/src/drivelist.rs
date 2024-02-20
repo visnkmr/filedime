@@ -134,27 +134,34 @@ fn listallntfs() {
     }
     // println!("{:?}",dlist)
  }
- fn mountdrive(uuid:String,mount_point:String) {
+ 
+ pub fn mountdrive(uuid:String,mount_point:String) ->bool{
+    let mount_cmd=Command::new("udisksctl")
+                .arg("mount")
+                .arg("--block-device")
+                .arg(&mount_point)
+                .status()
+                .expect(&format!("failed to run udisksctl"));
     // Create the directory
-    let mkdir_cmd = Command::new("mkdir")
-        .arg(format!("/run/media/{}",uuid))
-        .status()
-        .expect("Failed to execute command");
+    // let mkdir_cmd = Command::new("mkdir")
+    //     .arg(format!("/run/media/{}",uuid))
+    //     .status()
+    //     .expect("Failed to execute command");
  
-    // Check if the directory creation was successful
-    assert!(mkdir_cmd.success());
+    // // Check if the directory creation was successful
+    // assert!(mkdir_cmd.success());
  
-    // Mount the NTFS partition
-    let mount_cmd = Command::new("mount")
-        .arg("-t")
-        .arg("ntfs-3g")
-        .arg(format!("{}",mount_point))
-        .arg(format!("/run/media/{}",uuid))
-        .status()
-        .expect("Failed to execute command");
+    // // Mount the NTFS partition
+    // let mount_cmd = Command::new("mount")
+    //     .arg("-t")
+    //     .arg("ntfs-3g")
+    //     .arg(format!("{}",mount_point))
+    //     .arg(format!("/run/media/{}",uuid))
+    //     .status()
+    //     .expect("Failed to execute command");
  
     // Check if the mount operation was successful
-    assert!(mount_cmd.success());
+    (mount_cmd.success())
  }
 //  #[test]
 //  fn drllt(){
@@ -262,21 +269,30 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     // println!("{}",String::from_utf8(output.clone()).unwrap());
     // let parsed = parse(&output).unwrap();
     // println!("{:?}",flattened(parsed));
+
     // println!("{:?}",get_disks());
-    let dv=get_disks().unwrap().0;
-    // println!("{:?}",serde_json::to_value(dv.clone()));
-    // println!("{:?}",dv);
-    for ed in dv{
-        println!("{:?}",ed);
-    }
-    println!("-----------------------");
-    println!("-----------------------");
-    println!("-----------------------");
-    println!("-----------------------");
-    let dv=get_disks().unwrap().1;
-    for ed in dv{
-        println!("{:?}",ed);
-    }
+
+    mountdrive("96A6-580C".to_string(), "/dev/nvme0n1p5".to_string());
+
+
+
+    // let dv=get_disks().unwrap().0;
+    // // println!("{:?}",serde_json::to_value(dv.clone()));
+    // // println!("{:?}",dv);
+    // for ed in dv{
+    //     println!("{:?}",ed);
+    // }
+    // println!("-----------------------");
+    // println!("-----------------------");
+    // println!("-----------------------");
+    // println!("-----------------------");
+    // let dv=get_disks().unwrap().1;
+    // for ed in dv{
+    //     println!("{:?}",ed);
+    // }
+
+
+
     // println!("{:?}",get_disks())
     // let output  =get_lsblk_output();
     // println!("{}",output.unwrap())

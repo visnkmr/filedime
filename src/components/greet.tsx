@@ -1365,11 +1365,37 @@ export default function Greet() {
          <button key={index}
            className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
            onClick={()=>
-             { 
-               reset(message.mount_point)
-               updatetabs(message.mount_point)
-               addToTabHistory(activetabid.toString(),message.mount_point)
-               listfiles(activetabid,message.mount_point);
+             { if(message.mount_point.trim().length<1)
+              {
+                invoke("mountdrive",{
+                  windowname:appWindow?.label,
+                  uuid:message.uuid,
+                  mountpoint:message.uuid
+                })
+                .then((e)=>{
+                  reset(e)
+                  updatetabs(e)
+                  // setpath()
+                  // setpsplitl(splitpath(pathtogoto))
+                  // sst("")
+                  // useEffect(() => {
+                    listfiles(activetabid,e);
+                })
+                .catch((e)=>{
+                  toast({
+                    variant:"destructive",
+                    title: "Failed",
+                    description: `Drive cannot be mounted`,
+                    // action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
+                  })
+                })
+              }else{
+
+                reset(message.mount_point)
+                updatetabs(message.mount_point)
+                addToTabHistory(activetabid.toString(),message.mount_point)
+                listfiles(activetabid,message.mount_point);
+              }
                  
              }
              }
@@ -1380,7 +1406,7 @@ export default function Greet() {
             <HardDriveIcon className="h-6 w-6" />
             </div>
              {message.name ? message.name + " (" + message.mount_point.replace("\\","").replace("/","") + ")" : message.mount_point.replace("\\","").replace("/","")}
-             {message.mount_point.trim().length<1?"Not mounted":"mounted"}
+             
          </button>
              
            </ContextMenuTrigger>

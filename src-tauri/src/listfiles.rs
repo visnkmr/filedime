@@ -28,9 +28,30 @@ pub struct DriveItem{
   pub is_removable: bool,
   pub disk_type: String,
   pub file_system: String,
+  pub uuid:String
 }
 pub fn populatedrivelist()->Option<Vec<DriveItem>>{
   let mut rt;
+  let standard_locations = vec![
+    "/",                      // Root directory
+    "/bin",                   // User commands
+    "/boot",                  // Static files of the boot loader
+    "/dev",                   // Device files
+    "/etc",                   // Host-specific system configuration
+    "/home",                  // User home directories
+    "/lib",                   // Shared libraries
+    "/lib64",                 //  64-bit shared libraries
+    "/mnt",                   // Mount point for temporary filesystems
+    "/opt",                   // Add-on application software packages
+    "/proc",                  // Process information
+    "/root",                  // Home directory of the root user
+    "/sbin",                  // System binaries
+    "/srv",                   // Site-specific data served by the system
+    "/sys",                   // Kernel and system information
+    "/tmp",                   // Temporary files
+    "/usr",                   // Secondary hierarchy for read-only user data
+    "/var",                   // Variable data
+];
   if(get_disks().is_ok()){
 
     rt=get_disks().unwrap().0.iter().map(|ed|{
@@ -40,7 +61,13 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
           if(ed.label.is_some()){
             ed.label.clone().unwrap()
           }else if(ed.mountpoint.is_some()){
-            ed.mountpoint.clone().unwrap()
+            if(standard_locations.contains(&ed.mountpoint.clone().unwrap().as_str()))
+            {
+              ed.mountpoint.clone().unwrap()
+            }
+            else{
+              format!("{} Volume",sizeunit::size(ed.size ,true).to_string())
+            }
           }
           else{
             format!("{} Volume",sizeunit::size(ed.size ,true).to_string())
@@ -52,6 +79,7 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         is_removable:ed.is_removable.clone(),
         disk_type:ed.device_type.clone(),
         file_system:ed.fstype.clone().unwrap_or("unkown".to_string()).clone(),
+        uuid:ed.name.clone().unwrap_or("".to_string())
     }
     }).collect::<Vec<DriveItem>>();
   }
@@ -67,6 +95,7 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         is_removable:ed.is_removable.clone(),
         disk_type:ed.disk_type.clone(),
         file_system:ed.file_system.clone(),
+        uuid:"".to_string()
     }
     }).collect::<Vec<DriveItem>>();
   }

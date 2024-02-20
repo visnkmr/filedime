@@ -1,1 +1,3 @@
 https://github.com/johnnylozano/music-player
+udrivectl
+lsblk
