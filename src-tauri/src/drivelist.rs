@@ -142,25 +142,15 @@ fn listallntfs() {
                 .arg(&mount_point)
                 .status()
                 .expect(&format!("failed to run udisksctl"));
-    // Create the directory
-    // let mkdir_cmd = Command::new("mkdir")
-    //     .arg(format!("/run/media/{}",uuid))
-    //     .status()
-    //     .expect("Failed to execute command");
- 
-    // // Check if the directory creation was successful
-    // assert!(mkdir_cmd.success());
- 
-    // // Mount the NTFS partition
-    // let mount_cmd = Command::new("mount")
-    //     .arg("-t")
-    //     .arg("ntfs-3g")
-    //     .arg(format!("{}",mount_point))
-    //     .arg(format!("/run/media/{}",uuid))
-    //     .status()
-    //     .expect("Failed to execute command");
- 
-    // Check if the mount operation was successful
+    (mount_cmd.success())
+ } 
+ pub fn unmountdrive(uuid:String,mount_point:String) ->bool{
+    let mount_cmd=Command::new("udisksctl")
+                .arg("unmount")
+                .arg("--block-device")
+                .arg(&mount_point)
+                .status()
+                .expect(&format!("failed to run udisksctl"));
     (mount_cmd.success())
  }
 //  #[test]

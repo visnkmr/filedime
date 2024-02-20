@@ -311,6 +311,16 @@ fn checkindir(path: &String,dst: &String,ltpt:&String,shouldadd:&mut Vec<existin
    }
    Err("failed to mount drive".to_string())
   }
+  #[tauri::command]
+  async fn unmountdrive(windowname:String,uuid:String,mountpoint:String,window:Window)->Result<String,String>{  
+    println!("trying to unmount drive {}",uuid);
+   if(drivelist::unmountdrive( uuid.clone(), uuid.clone())){
+    println!("unmounted drive");
+    driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
+    return Ok(mountpoint)
+   }
+   Err("failed to mount drive".to_string())
+  }
     
   #[tauri::command]
   fn new(dest:String,isdir:bool,name:String,window:Window)->Result<(),String>{
@@ -1263,7 +1273,8 @@ fn main() {
         navbrowsetimeline,
         newspecwindow,
         addtotabhistory,
-        mountdrive
+        mountdrive,
+        unmountdrive,
         // whattoload,
         // get_window_label
         ]
