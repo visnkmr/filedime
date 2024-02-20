@@ -1,7 +1,7 @@
 use std::{process::Command, path::{PathBuf, Path}};
 use chrono::format::format;
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize, de};
 use sysinfo::{DiskExt, System, SystemExt, RefreshKind};
 
 use crate::sizeunit;
@@ -222,7 +222,7 @@ fn parse(input: &[u8]) -> Result<LsBlkOutput,()> {
     Ok(serde_json::from_slice(input).unwrap())
 }
 /// Struct for deserializing the JSON output of `lsblk`.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq,Serialize)]
 pub struct LsBlkDevice {
     name: Option<String>,
     fstype: Option<String>,
@@ -249,7 +249,22 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     // println!("{}",String::from_utf8(output.clone()).unwrap());
     // let parsed = parse(&output).unwrap();
     // println!("{:?}",flattened(parsed));
-    println!("{:?}",get_disks())
+    // println!("{:?}",get_disks());
+    let dv=get_disks().unwrap().0;
+    // println!("{:?}",serde_json::to_value(dv.clone()));
+    // println!("{:?}",dv);
+    for ed in dv{
+        println!("{:?}",ed);
+    }
+    println!("-----------------------");
+    println!("-----------------------");
+    println!("-----------------------");
+    println!("-----------------------");
+    let dv=get_disks().unwrap().1;
+    for ed in dv{
+        println!("{:?}",ed);
+    }
+    // println!("{:?}",get_disks())
     // let output  =get_lsblk_output();
     // println!("{}",output.unwrap())
     // for ed in dl{
@@ -265,24 +280,29 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
 }
  /// Get information about all disk devices.
  /// 
-fn get_disks() -> Result<Vec<String>,()> {
+ struct diskinfo{
+    name:String,
+ }
+fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
 // fn get_disks() -> Result<Vec<PathBuf>,()> {
     let devices = get_lsblk_devices().expect("Unable to get block devices");
 
     let mut disks = Vec::new();
+    let mut uddisks = Vec::new();
     for device in devices {
-        match(device.uuid){
-            Some(a) => {
-                
-            },
-            None => {
-                continue;
-            },
+        if(device.uuid.is_some() && device.label.is_some()){
+            disks.push(device.clone());
         }
-        let ps=device.label.unwrap_or("".to_string());
+        else if device.fsver.is_some(){
+            disks.push(device.clone());
+        }
+        else{
+
+            uddisks.push(device.clone());
+        }
         // let ps=device.mountpoints.get(0).unwrap().clone().unwrap();
-        disks.push(ps);
+        // disks.push(ps);
         // disks.push(Path::new(&ps).into());
     }
-    Ok(disks)
+    Ok((disks,uddisks))
 }
