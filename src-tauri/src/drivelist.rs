@@ -127,7 +127,7 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
  pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
     let output = get_lsblk_output()?;
     let parsed =parse(&output)?;
-    println!("{:?}",parsed.clone());
+    // println!("{:?}",parsed.clone());
     Ok(flattened(parsed))
 }
  /// Get information about all disk devices.
@@ -144,7 +144,7 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
         if(device.uuid.is_some() && device.label.is_some()){
             disks.push(device.clone());
         }
-        else if device.fsver.is_some(){
+        else if device.fstype.is_some(){
             disks.push(device.clone());
         }
         else{
@@ -165,9 +165,9 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
     // let parsed = parse(&output).unwrap();
     // println!("{:?}",flattened(parsed));
 
-    // println!("{:?}",get_disks());
+    println!("{:?}",get_disks().unwrap().1);
 
-    mountdrive("96A6-580C".to_string(), "/dev/nvme0n1p5".to_string());
+    // mountdrive("96A6-580C".to_string(), "/dev/nvme0n1p5".to_string());
 
 
 
