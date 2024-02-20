@@ -53,7 +53,8 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
     "/usr",                   // Secondary hierarchy for read-only user data
     "/var",                   // Variable data
 ];
-  if(get_disks().is_ok()){
+if(get_disks().is_ok())
+  {
 
     rt=get_disks().unwrap().0.iter().map(|ed|{
       
@@ -85,7 +86,9 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
     }
     }).collect::<Vec<DriveItem>>();
   }
-  else{
+  
+  else
+  {
 
     rt=get_drives().unwrap().array_of_drives.iter().map(|ed|{
       

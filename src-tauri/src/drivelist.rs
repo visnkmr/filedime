@@ -137,6 +137,9 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
  }
 pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
 // fn get_disks() -> Result<Vec<PathBuf>,()> {
+    if( get_lsblk_devices().is_err()) 
+    {return Err(())
+    }
     let devices = get_lsblk_devices().expect("Unable to get block devices");
     let mut disks = Vec::new();
     let mut uddisks = Vec::new();
