@@ -21,147 +21,9 @@ pub struct DriveInformation {
 pub struct Drives {
     pub array_of_drives: Vec<DriveInformation>,
 }
-#[test]
-fn test_result(){
-//   println!("{:?}",get_drives().unwrap().array_of_drives);
 
-let dn:Vec<String>=get_drives().unwrap().array_of_drives.iter().map(|ed|{
-    ed.mount_point.clone()
-  }).collect();
-  println!("{:?}",dn);
-}
-#[tauri::command]
-pub fn get_drives() -> Result<Drives, String> {
-    let mut sys= System::new();
-    sys.refresh_disks_list();
-    let array_of_drives =sys
-        .disks()
-        .iter()
-        .map(|disk| {
-            let mut total = sizeunit::size(disk.total_space(),true);
-            let free = sizeunit::size(disk.available_space(),true);
-            let mount_point = disk.mount_point().to_str().unwrap_or("/").to_string();
-            let name = disk.name().to_str().unwrap_or("Disk").to_string();
-            let is_removable = disk.is_removable();
-           
-            let file_system = String::from_utf8(disk.file_system().to_vec())
-                .unwrap_or_else(|_| "Unknown File System".to_string());
-            let disk_type = 
-            match disk.kind() {
-                sysinfo::DiskKind::SSD => "SSD".to_string(),
-                sysinfo::DiskKind::HDD => "HDD".to_string(),
-                _ => "Removable Disk".to_string(),
-            };
+// #[tauri::command]
 
-            DriveInformation {
-                name:if !cfg!(unix) {
-                    name.clone()
-                }
-                else{
-                    mount_point.clone()
-                },
-                mount_point:if !cfg!(unix) {
-                    mount_point
-                }
-                else{
-                    name
-                },
-                total,
-                free,
-                is_removable,
-                disk_type,
-                file_system,
-            }
-        })
-        .collect();
-
-    Ok(Drives { array_of_drives })
-}
-#[derive(Debug)]
-struct ditem{
-    name:Option<String>,
-    fstype:Option<String>,
-    label:Option<String>,
-    uuid:Option<String>,
-    mountpoint:Option<String>,
-
-}
-fn parse_drive_info(line: &str){
-    let fields: Vec<&str> = line.split_whitespace().collect();
-    println!("{:?}",ditem{
-        name: fields.get(0).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
-        fstype: fields.get(1).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
-        label: fields.get(2).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
-        uuid: fields.get(3).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
-        mountpoint: fields.get(4).and_then(|s| if s.is_empty() { None } else { Some(s.to_string()) }),
-    });
- }
-
-#[test]
-fn listallntfs() {
-    let output = Command::new("lsblk")
-        .arg("-f")
-        .output()
-        .expect("Failed to execute command");
- 
-    let output = String::from_utf8(output.stdout).unwrap();
-    let lines: Vec<&str> = output.split('\n').collect();
-    // let mut dlist:Vec<DriveInformation>=Vec::new();
-    
-    for line in lines {
-        parse_drive_info(&line)
-    //     if line.contains("ntfs") {
-    //         let words: Vec<&str> = line.split_whitespace().collect();
-    //         let re = Regex::new(r"\w+").unwrap();
-    //         let result = re.find(words[0]).unwrap().as_str();
-    //         // if(words.len()>3){
-    //             // println!("/dev/{}-------{}", result, words[2]);
-    //             dlist.push(DriveInformation{
-    //                 name:words[2].to_string(),
-    //                 mount_point: format!("/dev/{}", result),
-    //                 total:String::new(),
-    //                 free: String::new(),
-    //                 is_removable: false,
-    //                 disk_type: String::new(),
-    //                 file_system: "NTFS".to_string(),
-    //             });
-    //         // }
-    //         // else{
-
-    //         // }
-    //         // println!("{}", line);
-    //     }
-    }
-    // println!("{:?}",dlist)
- }
- 
- pub fn mountdrive(uuid:String,mount_point:String) ->bool{
-    let mount_cmd=Command::new("udisksctl")
-                .arg("mount")
-                .arg("--block-device")
-                .arg(&mount_point)
-                .status()
-                .expect(&format!("failed to run udisksctl"));
-    (mount_cmd.success())
- } 
- pub fn unmountdrive(uuid:String,mount_point:String) ->bool{
-    let mount_cmd=Command::new("udisksctl")
-                .arg("unmount")
-                .arg("--block-device")
-                .arg(&mount_point)
-                .status()
-                .expect(&format!("failed to run udisksctl"));
-    (mount_cmd.success())
- }
-//  #[test]
-//  fn drllt(){
-//     let dl  =rs_drivelist::drive_list().unwrap();
-//     for ed in dl{
-//         println!("{:?}",ed);
-
-//         // println!("{:?}",ed.description);
-//     }
-//  }
 fn get_lsblk_output() -> Result<Vec<u8>,()> {
     let mut command = Command::new("/bin/lsblk");
     command.args([
@@ -242,17 +104,58 @@ pub struct LsBlkDevice {
     pub state: Option<String>,
     #[serde(rename = "type")]
     pub device_type: String,
-    pub kname: Option<String>,
+    pub kname: Option<String>
 }
 fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     let mut output = Vec::new();
     let mut stack = parsed.block_devices;
     while let Some(device) = stack.pop() {
-        output.push(device.details);
-        stack.extend(device.children);
+        // output.push(device.details);
+        // stack.extend(device.children);
+        output.push(device.details.clone());
+        for mut child in device.children.clone() {
+            child.details.vendor=device.details.vendor.clone();
+            child.details.model=device.details.model.clone();
+            output.push(child.details);
+
+        }
     }
     output
 }
+
+ pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
+    let output = get_lsblk_output()?;
+    let parsed =parse(&output)?;
+    Ok(flattened(parsed))
+}
+ /// Get information about all disk devices.
+ /// 
+ struct diskinfo{
+    name:String,
+ }
+pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
+// fn get_disks() -> Result<Vec<PathBuf>,()> {
+    let devices = get_lsblk_devices().expect("Unable to get block devices");
+    let mut disks = Vec::new();
+    let mut uddisks = Vec::new();
+    for device in devices {
+        if(device.uuid.is_some() && device.label.is_some()){
+            disks.push(device.clone());
+        }
+        else if device.fsver.is_some(){
+            disks.push(device.clone());
+        }
+        else{
+
+            uddisks.push(device.clone());
+        }
+        // let ps=device.mountpoints.get(0).unwrap().clone().unwrap();
+        // disks.push(ps);
+        // disks.push(Path::new(&ps).into());
+    }
+    Ok((disks,uddisks))
+}
+
  #[test]
  fn drllt(){
     // let output = get_lsblk_output().unwrap();
@@ -292,36 +195,82 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     //     // println!("{:?}",ed.description);
     // }
  }
- pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
-    let output = get_lsblk_output()?;
-    let parsed =parse(&output)?;
-    Ok(flattened(parsed))
+
+
+
+
+
+ pub fn get_drives() -> Result<Drives, String> {
+    let mut sys= System::new();
+    sys.refresh_disks_list();
+    let array_of_drives =sys
+        .disks()
+        .iter()
+        .map(|disk| {
+            let mut total = sizeunit::size(disk.total_space(),true);
+            let free = sizeunit::size(disk.available_space(),true);
+            let mount_point = disk.mount_point().to_str().unwrap_or("/").to_string();
+            let name = disk.name().to_str().unwrap_or("Disk").to_string();
+            let is_removable = disk.is_removable();
+           
+            let file_system = String::from_utf8(disk.file_system().to_vec())
+                .unwrap_or_else(|_| "Unknown File System".to_string());
+            let disk_type = 
+            match disk.kind() {
+                sysinfo::DiskKind::SSD => "SSD".to_string(),
+                sysinfo::DiskKind::HDD => "HDD".to_string(),
+                _ => "Removable Disk".to_string(),
+            };
+
+            DriveInformation {
+                name:if !cfg!(unix) {
+                    name.clone()
+                }
+                else{
+                    mount_point.clone()
+                },
+                mount_point:if !cfg!(unix) {
+                    mount_point
+                }
+                else{
+                    name
+                },
+                total,
+                free,
+                is_removable,
+                disk_type,
+                file_system,
+            }
+        })
+        .collect();
+
+    Ok(Drives { array_of_drives })
 }
- /// Get information about all disk devices.
- /// 
- struct diskinfo{
-    name:String,
+
+ pub fn mountdrive(uuid:String,mount_point:String) ->bool{
+    let mount_cmd=Command::new("udisksctl")
+                .arg("mount")
+                .arg("--block-device")
+                .arg(&mount_point)
+                .status()
+                .expect(&format!("failed to run udisksctl"));
+    (mount_cmd.success())
+ } 
+ pub fn unmountdrive(uuid:String,mount_point:String) ->bool{
+    let mount_cmd=Command::new("udisksctl")
+                .arg("unmount")
+                .arg("--block-device")
+                .arg(&mount_point)
+                .status()
+                .expect(&format!("failed to run udisksctl"));
+    (mount_cmd.success())
  }
-pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
-// fn get_disks() -> Result<Vec<PathBuf>,()> {
-    let devices = get_lsblk_devices().expect("Unable to get block devices");
+#[test]
+fn test_result(){
+//   println!("{:?}",get_drives().unwrap().array_of_drives);
 
-    let mut disks = Vec::new();
-    let mut uddisks = Vec::new();
-    for device in devices {
-        if(device.uuid.is_some() && device.label.is_some()){
-            disks.push(device.clone());
-        }
-        else if device.fsver.is_some(){
-            disks.push(device.clone());
-        }
-        else{
-
-            uddisks.push(device.clone());
-        }
-        // let ps=device.mountpoints.get(0).unwrap().clone().unwrap();
-        // disks.push(ps);
-        // disks.push(Path::new(&ps).into());
-    }
-    Ok((disks,uddisks))
+let dn:Vec<String>=get_drives().unwrap().array_of_drives.iter().map(|ed|{
+    ed.mount_point.clone()
+  }).collect();
+  println!("{:?}",dn);
 }

@@ -1422,6 +1422,8 @@ export default function Greet() {
         Free: {message.free}
         <br/>
         Total size: {message.total}
+        <br/>  
+        {message.vendormodel}
         </HoverCardContent>
       </HoverCard>
            </ContextMenuTrigger>

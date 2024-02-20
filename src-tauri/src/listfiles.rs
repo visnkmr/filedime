@@ -28,7 +28,8 @@ pub struct DriveItem{
   pub is_removable: bool,
   pub disk_type: String,
   pub file_system: String,
-  pub uuid:String
+  pub uuid:String,
+  pub vendormodel:String
 }
 pub fn populatedrivelist()->Option<Vec<DriveItem>>{
   let mut rt;
@@ -78,8 +79,9 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         free:sizeunit::size(ed.fsavail.unwrap_or(0),true),
         is_removable:ed.is_removable.clone(),
         disk_type:ed.device_type.clone(),
-        file_system:format!("{} {}",ed.fstype.clone().unwrap_or("unknown".to_string()).clone(),ed.fsver.clone().unwrap_or("unknown".to_string()).clone()),
-        uuid:ed.name.clone().unwrap_or("".to_string())
+        file_system:format!("{} {}",ed.fstype.clone().unwrap_or("".to_string()).clone(),ed.fsver.clone().unwrap_or("".to_string()).clone()),
+        uuid:ed.name.clone().unwrap_or("".to_string()),
+        vendormodel:ed.vendor.clone().unwrap_or("".to_string())
     }
     }).collect::<Vec<DriveItem>>();
   }
@@ -95,7 +97,8 @@ pub fn populatedrivelist()->Option<Vec<DriveItem>>{
         is_removable:ed.is_removable.clone(),
         disk_type:ed.disk_type.clone(),
         file_system:ed.file_system.clone(),
-        uuid:"".to_string()
+        uuid:"".to_string(),
+        vendormodel:("".to_string())
     }
     }).collect::<Vec<DriveItem>>();
   }

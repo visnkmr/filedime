@@ -19,4 +19,5 @@ interface DriveItem {
     disk_type: string;
     file_system: string;
     uuid:string;
+    vendormodel:string;
   }
