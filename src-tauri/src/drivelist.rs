@@ -228,23 +228,24 @@ fn parse(input: &[u8]) -> Result<LsBlkOutput,()> {
 /// Struct for deserializing the JSON output of `lsblk`.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq,Serialize)]
 pub struct LsBlkDevice {
-    name: Option<String>,
-    fstype: Option<String>,
-    fsver: Option<String>,
-    label: Option<String>,
-    uuid: Option<String>,
-    fsavail: Option<i64>,
-    fsused: Option<i64>,
-    mountpoint:Option<String>,
-    hotplug: bool,
-    size: i64,
-    vendor: Option<String>,
-    model: Option<String>,
-    rm: bool,
-    state: Option<String>,
+    pub name: Option<String>,
+    pub fstype: Option<String>,
+    pub fsver: Option<String>,
+    pub label: Option<String>,
+    pub uuid: Option<String>,
+    pub fsavail: Option<u64>,
+    pub fsused: Option<u64>,
+    pub mountpoint:Option<String>,
+    pub hotplug: bool,
+    pub size: u64,
+    pub vendor: Option<String>,
+    pub model: Option<String>,
+    #[serde(rename = "rm")]
+    pub is_removable: bool,
+    pub state: Option<String>,
     #[serde(rename = "type")]
-    device_type: String,
-    kname: Option<String>,
+    pub device_type: String,
+    pub kname: Option<String>,
 }
 fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     let mut output = Vec::new();
@@ -295,7 +296,7 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
  struct diskinfo{
     name:String,
  }
-fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
+pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
 // fn get_disks() -> Result<Vec<PathBuf>,()> {
     let devices = get_lsblk_devices().expect("Unable to get block devices");
 

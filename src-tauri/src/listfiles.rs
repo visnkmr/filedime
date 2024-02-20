@@ -16,7 +16,7 @@ use crate::{markdown::loadmarkdown,
   openhtml::loadfromhtml, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, drivelist::get_drives, 
+  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, drivelist::{get_drives, get_disks}, 
   // loadjs::loadjs
 };
 #[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
@@ -29,19 +29,49 @@ pub struct DriveItem{
   pub disk_type: String,
   pub file_system: String,
 }
-pub fn populatedrivelist()->Vec<DriveItem>{
-  get_drives().unwrap().array_of_drives.iter().map(|ed|{
-    
-    return DriveItem { 
-      name:ed.name.clone(),
-      mount_point:ed.mount_point.clone(),
-      total:ed.total.clone(),
-      free:ed.free.clone(),
-      is_removable:ed.is_removable.clone(),
-      disk_type:ed.disk_type.clone(),
-      file_system:ed.file_system.clone(),
+pub fn populatedrivelist()->Option<Vec<DriveItem>>{
+  let mut rt;
+  if(get_disks().is_ok()){
+
+    rt=get_disks().unwrap().0.iter().map(|ed|{
+      
+      return DriveItem { 
+        name:{
+          if(ed.label.is_some()){
+            ed.label.clone().unwrap()
+          }else if(ed.mountpoint.is_some()){
+            ed.mountpoint.clone().unwrap()
+          }
+          else{
+            ed.name.clone().unwrap_or("".to_string()).clone()
+          }
+        },
+        mount_point:ed.mountpoint.clone().unwrap_or("".to_string()).clone(),
+        total:sizeunit::size(ed.size ,true),
+        free:sizeunit::size(ed.fsavail.unwrap_or(0),true),
+        is_removable:ed.is_removable.clone(),
+        disk_type:ed.device_type.clone(),
+        file_system:ed.fstype.clone().unwrap_or("unkown".to_string()).clone(),
+    }
+    }).collect::<Vec<DriveItem>>();
   }
-  }).collect::<Vec<DriveItem>>()
+  else{
+
+    rt=get_drives().unwrap().array_of_drives.iter().map(|ed|{
+      
+      return DriveItem { 
+        name:ed.name.clone(),
+        mount_point:ed.mount_point.clone(),
+        total:ed.total.clone(),
+        free:ed.free.clone(),
+        is_removable:ed.is_removable.clone(),
+        disk_type:ed.disk_type.clone(),
+        file_system:ed.file_system.clone(),
+    }
+    }).collect::<Vec<DriveItem>>();
+  }
+
+  Some(rt)
 }
 #[tauri::command]
 pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
