@@ -94,6 +94,7 @@ export default function Greet() {
   
       setAppWindow(appWindow)
       const pl = await(await import('@tauri-apps/api/os')).platform()
+      console.log(pl)
       console.log("windowname top---------->"+appWindow.label)
       setp(pl)
       const cv = await(await import('@tauri-apps/api/app')).getVersion()
@@ -1039,7 +1040,7 @@ export default function Greet() {
     });
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
-        <ResizablePanel defaultSize={size.a} className="bg-gray-100/40 dark:bg-gray-800/40">
+        <ResizablePanel defaultSize={size.a}>
         {/* {lastcalledtime.current} */}
         <div className="flex h-full flex-col gap-2">
           <div className="flex p-3  border-b">
@@ -1368,7 +1369,8 @@ export default function Greet() {
          <button key={index}
            className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 whitespace-nowrap text-gray-500 transition-all dark:text-gray-400 ${hovercolor} ${focuscolor} line-clamp-1`}
            onClick={()=>
-             { if(message.mount_point.trim().length<1)
+             { 
+              if(p==="linux" && message.mount_point.trim().length<1)
               {
                 invoke("mountdrive",{
                   windowname:appWindow?.label,
@@ -1393,11 +1395,17 @@ export default function Greet() {
                   })
                 })
               }else{
-
-                reset(message.mount_point)
-                updatetabs(message.mount_point)
-                addToTabHistory(activetabid.toString(),message.mount_point)
-                listfiles(activetabid,message.mount_point);
+                let gowhere=""
+                if(p==="darwin"){
+                  gowhere=message.name
+                }
+                else{
+                  gowhere=message.mount_point
+                }
+                reset(gowhere)
+                updatetabs(gowhere)
+                addToTabHistory(activetabid.toString(),gowhere)
+                listfiles(activetabid,gowhere);
               }
                  
              }
