@@ -118,6 +118,7 @@ async fn navbrowsetimeline(tabid:String,dir:bool, state: State<'_, AppStateStore
   }
 #[tauri::command]
 async fn searchload(path:String,window: Window, state: State<'_, AppStateStore>) -> Result<(),String>{ 
+  
   populate_try(path.clone(), &window, &state).await;
   Ok(())
 }

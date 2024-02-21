@@ -1325,8 +1325,10 @@ export default function Greet() {
                   {/* } */}
                   <HoverCard>
                     <HoverCardTrigger>
-                      <Button size={"default"} onClick={()=>{
+                      <Button size={"default"} onClick={(e)=>{
+                        console.log(tab.path)
                         populatesearchlist(tab.path)
+                        e.stopPropagation()
                       }}>
 
                       <ScanSearchIcon className="h-4 w-4"/>
@@ -1447,7 +1449,7 @@ export default function Greet() {
            <ContextMenuItem onSelect={(e)=>{
                    newtab(message.mount_point)
                  }}>Open in new tab</ContextMenuItem> 
-                 {(message.mount_point.trim().length<1)?((<></>)):((<ContextMenuItem onSelect={(e)=>{
+                 {(p && p==="linux" && message.mount_point.trim().length<1)?((<></>)):((<ContextMenuItem onSelect={(e)=>{
                   // if(path===message.mount_point){
                   //   closetab(activetabid)
                   // }
@@ -1480,7 +1482,8 @@ export default function Greet() {
                           // action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
                         })
                       })
-                     }}>Unmount device</ContextMenuItem>))}
+                     }}>Unmount device</ContextMenuItem>
+                     ))}
             
          </ContextMenuContent>
          </ContextMenu>
@@ -1735,7 +1738,7 @@ export default function Greet() {
             <div>
 
             <Button variant={"ghost"}  onClick={
-              ()=>{
+              (event)=>{
                 reset()
                 let lct=new Date().getTime().toString();
 
@@ -2058,6 +2061,7 @@ export default function Greet() {
 
                               <HoverCardTrigger>
                               <Button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+
                     populatesearchlist(message.path)
                   }}><ScanSearchIcon className="h-4 w-4"/></Button>
                   </HoverCardTrigger>

@@ -42,6 +42,10 @@ struct rstr{
 pub async fn  search_try(starttime:String,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
 //  -> Vec<String> 
  {
+
+  
+
+
   let mut exactmatch=false;
   if string.starts_with("\"") && string.ends_with("\"") {
     exactmatch=true;

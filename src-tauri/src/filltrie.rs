@@ -31,7 +31,31 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
     None => {
       return Err("home not found".to_string())
     },
+}; 
+if(path=="downloads://"){
+  // list_files(windowname, oid, path, ff, window, state);
+match(dirs::download_dir()){
+  Some(spath) => {
+    path=spath.to_string_lossy().to_string();
+  },
+  None => {
+    return Err("home not found".to_string())
+  },
 };
+  // return Ok(())
+} 
+if(path=="documents://"){
+  // list_files(windowname, oid, path, ff, window, state);
+match(dirs::document_dir()){
+  Some(spath) => {
+    path=spath.to_string_lossy().to_string();
+  },
+  None => {
+    return Err("home not found".to_string())
+  },
+};
+  // return Ok(())
+} 
     // return Ok(())
   } 
   // populate_trie(oid, path, ff, window, state).await;
