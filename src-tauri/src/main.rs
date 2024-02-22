@@ -57,8 +57,6 @@ use crate::{
 // mod r  esync;
 mod navops;
 use crate::navops::*;
-mod tabops;
-use crate::tabops::*;
 // define a struct to represent a file or directory
 #[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
 pub struct FileItem {

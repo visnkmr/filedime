@@ -1,3 +1,4 @@
+use prefstore::clearall;
 use serde::Serialize;
 use tauri::{Window, State, Manager};
 

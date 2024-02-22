@@ -1,5 +1,6 @@
-use std::fs;
+use std::{fs, thread, time};
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::{TryRecvError, self};
 use fs_extra::dir;
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
@@ -45,7 +46,7 @@ struct infodest{
   //     "/home/roger/Documents".to_string(),
   //     "/home/roger/seat_items.txt".to_string()
   //     ],
-  //      "/tmp/new".to_string()).unwrap()
+  //      "/tmp/new/est".to_string()).unwrap()
   // }
   // fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
     #[tauri::command]
@@ -311,7 +312,7 @@ fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: b
 }
 #[test]
 fn tryut(){
-  // println!("{:?}",fileop(vec!["/run/media/roger/S/inst".to_string()], "/tmp/new".to_string(),false));
+  // println!("{:?}",fileop(vec!["/run/media/roger/S/inst".to_string()], "/tmp/new/est".to_string(),false));
 }
   
 #[derive(Deserialize,Serialize,Debug)]
@@ -322,8 +323,8 @@ struct dlads{
 }
 
 #[tauri::command]
-pub async 
-fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String> {
+pub 
+async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String> {
   match serde_json::from_str(&srclist){
     Ok(list) => {
       let src:Vec<String>=list;
@@ -361,8 +362,13 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
     // let mut lastfolder= "".to_string();
     // let mut lastfile= "".to_string();
     // let mut lastfilesize=0;
-    let handle = |process_info: TransitProcess| {
-      println!("{:?}",process_info);
+    let (tx, rx) = mpsc::channel();
+    thread::spawn({
+      
+      move || {
+    let handle = |process_info: TransitProcess| 
+    {
+      
      // println!("{}", process_info.total_bytes);
     //  if (
     //    last_print.elapsed() >= Duration::from_millis(1000) ||
@@ -398,6 +404,7 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
     match serde_json::from_str(&dlastore){
     Ok(a) => {
       let dlas:Vec<dlads>=a;
+      
       if(process_info.state==TransitState::Exists){
 
 
@@ -423,10 +430,14 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
       }
       else {
         println!("Unknown2 {}",process_info.file_name);
+        tx.send(process_info).unwrap();
+            thread::sleep(time::Duration::from_millis(500));
+      
 
         return fs_extra::dir::TransitProcessResult::ContinueOrAbort
           
       }
+    
     },
     Err(i) => {
       println!("Error {} @ {}",i,process_info.file_name);
@@ -434,6 +445,7 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
       fs_extra::dir::TransitProcessResult::Abort
     },
 }
+
      
   };
  
@@ -477,15 +489,23 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
    // }
    // else
    {
-     match(fs_extra::copy_items_with_progress(&src, dst,&options,handle)){
-       Ok(_) => {
-         return Ok(true)
-       },
-       Err(e) => {
-         return Err(e.to_string())
-       },
+     fs_extra::copy_items_with_progress(&src, dst,&options,handle);
    }
-   }
+  }
+  });
+  loop {
+    match rx.try_recv() {
+        Ok(process_info) => {
+          println!("--->status{:?}",process_info);
+        }
+        Err(TryRecvError::Disconnected) => {
+            println!("finished");
+            break;
+        }
+        Err(TryRecvError::Empty) => {}
+    }
+}
+  Ok(true)
     },
     Err(e) => { return Err(format!("{}",e))
 
@@ -496,17 +516,18 @@ fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String>
 
 // wite tests with below code to test functions
 
-[#test]
+#[test]
 fn createfilestotest(){
-// Create directories
-fs::create_dir_all("R:/a").expect("Failed to create directory 'a'");
-fs::create_dir_all("R:/c").expect("Failed to create directory 'c'");
+  // Create directories
+  fs::create_dir_all("/tmp/new/est/a").expect("Failed to create directory 'a'");
+  fs::create_dir_all("/tmp/new/est/c").expect("Failed to create directory 'c'");
+  fs::create_dir_all("/tmp/new/est/c/d").expect("Failed to create directory 'c'");
 
-// // Create files
-fs::write("R:/a/b.txt", "").expect("Failed to create file 'b.txt'");
-fs::write("R:/c/d.txt", "").expect("Failed to create file 'd.txt'");
-fs::write("R:/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
-fs::write("R:/f.txt", "").expect("Failed to create file 'f.txt'");
-
-
+  // // Create files
+  fs::write("/tmp/new/est/a/b.txt", "").expect("Failed to create file 'b.txt'");
+  fs::write("/tmp/new/est/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
+  fs::write("/tmp/new/est/f.txt", "").expect("Failed to create file 'f.txt'");
+//removed async from calling functions
+  println!("{:?}",checkforconflicts(serde_json::to_string(&vec!["/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(), "/tmp/new/est/dest".to_string()));
+  println!("{:?}",fileop(serde_json::to_string(&vec!["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/c/d","/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(),"/tmp/new/est/dest".to_string(),serde_json::to_string(&vec![""]).unwrap()));
 }
