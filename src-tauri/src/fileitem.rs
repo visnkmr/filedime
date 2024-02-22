@@ -17,7 +17,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit::{self, find_size}, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, openhtml::loadfromhtml, 
+  appstate::AppStateStore, 
   // loadjs::loadjs
 };
 

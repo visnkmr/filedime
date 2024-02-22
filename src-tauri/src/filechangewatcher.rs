@@ -44,15 +44,15 @@ pub async fn sendlog(windowname:&str,window: Window,state: State<'_, AppStateSto
 }
 
 #[tauri::command]
-pub fn stopserver(path:String,state: State<'_, AppStateStore>){
+pub async fn stopserver(path:String,state: State<'_, AppStateStore>)->Result<(),()>{
     println!("stop server command send");
     let aborted = state.aborted.clone();
     *aborted.lock().unwrap() = true;
-    
+    Ok(())
 }
 
 #[tauri::command]
-pub fn startserver(windowname:String,pathstr:String,window: Window,state: State<'_, AppStateStore>){
+pub async fn startserver(windowname:String,pathstr:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
     println!("start server command recieved");
     let aborted = state.aborted.clone();
     *aborted.lock().unwrap() = false;
@@ -93,4 +93,5 @@ pub fn startserver(windowname:String,pathstr:String,window: Window,state: State<
         }
     }
 });
+Ok(())
 }

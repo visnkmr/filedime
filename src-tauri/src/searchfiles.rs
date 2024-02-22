@@ -462,7 +462,8 @@ let u:HashSet<String>=map.clone()
     // }
     // return true;
     // })
-    .try_for_each(|(c,ei)|{
+    .try_for_each(| (c,ei)|{
+      
     //   window.emit("reloadlist",json!({
     //     "message": "pariter3",
     //     "status": "running",
@@ -550,6 +551,9 @@ stoptimer(&wname,&window.app_handle());
   
   // println!("{:?}",options);
   // options
+}
+async fn rs()->String{
+  "".to_string()
 }
 // Define a function that takes a vector of strings and a string as parameters
 // fn parallel_search(k: HashSet<String>, h: String) -> Vec<String> {

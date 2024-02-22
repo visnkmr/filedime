@@ -7,7 +7,7 @@ use tauri::{Window, State, Manager};
 use crate::{appstate::AppStateStore, sizeunit::{self, find_size}, sendtofrontend::{folsize, sendparentloc}};
 
 #[tauri::command]
-pub fn loadmarkdown(path: String) -> Result<String,String> {
+pub async fn loadmarkdown(path: String) -> Result<String,String> {
   let mut content=String::new();
   // let app_handle = window.app_handle();
   let path=PathBuf::from(path.clone());

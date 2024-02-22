@@ -47,3 +47,11 @@ pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Win
   // listtabs(windowname,window, state).await;
   Ok(())
 }
+#[tauri::command]
+pub async fn closealltabs(state: State<'_, AppStateStore>) -> Result<(),String>{
+  clearall("filedime","tabinfo");
+  Ok(())
+}#[tauri::command]
+pub async fn listtabs(state: State<'_, AppStateStore>) -> Result<String,String>{
+  Ok(serde_json::to_string(&state.listtabs()).unwrap())
+}

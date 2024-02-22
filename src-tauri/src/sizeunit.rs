@@ -34,8 +34,7 @@ pub fn size(B: u64, isbytes: bool) -> String {
         "".to_string()
     }
 }
-#[tauri::command]
-pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> u64 {
+pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) ->u64{
     // return 0 as u64;
     let cstore=state.cstore.read().unwrap();
 
@@ -55,7 +54,7 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> 
         // Use the same lock guard to get the expiry time
         // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
             if nowtime < expirytime {
-                return size;
+                return (size);
             } else {
                 println!("expired")
             }
@@ -69,16 +68,16 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> 
         // println!("{:?}",entry_path);
        match(entry_path.metadata()){
             Ok(md)=>{
-                return entry_path.size_on_disk_fast(&md).unwrap_or(0)
+                return (entry_path.size_on_disk_fast(&md).unwrap_or(0))
             },
             Err(e)=>{
                 println!("{:?}",entry_path);
-                return 0
+                return (0)
             }
         };
     }
     if !entry_path.is_dir(){
-        return 0;
+        return (0);
     }
     let nosize=state.nosize.read().unwrap();
     if(*nosize){
@@ -90,7 +89,7 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> 
         //     }
         // // )
         // );
-        return 0
+        return (0)
     }
     let mut size = {
             // 0 as u64
@@ -129,5 +128,5 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) -> 
     // self.size += mem::size_of_val(&"expiry_".to_string());
     // self.size += mem::size_of_val(&expirytime);
 
-    size
+    (size)
 }
