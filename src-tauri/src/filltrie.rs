@@ -13,7 +13,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml,  sendtofrontend::slist, searchfiles::memoisedfm, 
+  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml,  sendtofrontend::slist,
   // loadjs::loadjs
 };
 #[tauri::command]
