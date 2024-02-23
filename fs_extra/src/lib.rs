@@ -324,6 +324,7 @@ where
 
     let mut options = options.clone();
     for item in list_paths {
+        println!("processing {:?}",item);
         if item.is_dir() {
             if let Some(dir_name) = item.components().last() {
                 if let Ok(dir_name) = dir_name.as_os_str().to_os_string().into_string() {
@@ -377,6 +378,9 @@ where
 
             let copied_bytes = result;
             let file_name = to.as_ref().join(info_process.file_name.clone());
+            info_process.file_name=file_name.to_string_lossy().to_string();
+            println!("reached {:?}",file_name);
+
             let mut work = true;
 
             let mut result_copy: Result<u64>;
@@ -400,8 +404,11 @@ where
                             let mut info_process = info_process.clone();
                             info_process.state = dir::TransitState::Exists;
                             let user_decide = progress_handler(info_process);
+                            println!("decided {:?} for file {:?}",user_decide,file_name);
+
                             match user_decide {
                                 dir::TransitProcessResult::Overwrite => {
+                                    
                                     file_options.overwrite = true;
                                 }
                                 dir::TransitProcessResult::OverwriteAll => {

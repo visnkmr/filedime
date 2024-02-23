@@ -140,7 +140,7 @@ pub enum TransitState {
     /// path.
     NoAccess,
 }
-
+#[derive(Hash, Eq, PartialEq, Clone,Debug)]
 /// Available returns codes for user decide
 pub enum TransitProcessResult {
     /// Rewrite exist file or directory.

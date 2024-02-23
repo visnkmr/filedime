@@ -5,7 +5,7 @@ import { setcolorpertheme } from "./greet";
 import { Checkbox } from "./ui/checkbox";
 import { invoke } from "@tauri-apps/api/tauri";
 import { operationfileinfo } from "../shared/tstypes";
-export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
+export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,reloadlist}){
     console.log("srclist-----"+srclist)
     console.log("dst-----"+dst)
     let [dlastore,setdlastore]=useState([] as operationfileinfo[])
@@ -20,9 +20,9 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-            {dlastore.map((a)=>{
+            {dlastore.map((a,index)=>{
               return <>
-              <table>
+              <table key={index}>
                 <tr>
                     <th className="p-4">Path</th>
                     <th className="p-4">file size</th>
@@ -58,24 +58,21 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
                         </p>
                     </td>
                     <td className="p-4">
-                    <Checkbox
-                        checked={a.replace}
-                        onCheckedChange={(value:boolean) => {
-                            // Find the index of the current item in dlastore
-                            const index = dlastore.findIndex((item) => item.path === a.path);
-                            if (index !== -1) {
-                            // Create a copy of dlastore
-                            const updatedDlastore = [...dlastore];
-                            // Update the 'replace' property of the found item
-                            updatedDlastore[index] = { ...updatedDlastore[index], replace: value };
-                            console.log(updatedDlastore)
-                            // Update the state with the new array
-                            setdlastore(updatedDlastore);
-                            }
-                        }}
-                        className="translate-y-[2px]"
-                        />
-                    </td>
+            <Checkbox
+              checked={a.replace}
+              onCheckedChange={(value:boolean) => {
+                // Correctly find the index of the current item in dlastore
+                // Since we're already mapping over dlastore, we can use the index provided by map
+                const updatedDlastore = [...dlastore];
+                // Update the 'replace' property of the found item
+                updatedDlastore[index] = { ...updatedDlastore[index], replace: value };
+                console.log(updatedDlastore);
+                // Assuming setdlastore is the function to update the state
+                setdlastore(updatedDlastore);
+              }}
+              className="translate-y-[2px]"
+            />
+          </td>
                 </tr>
               </table>
               <br/>
@@ -109,6 +106,7 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
                     dlastore:JSON.stringify(newArray)
                 }).then((a)=>{
                     setfos([])
+                    reloadlist();
                 
                 })
             }}>Continue</AlertDialogAction>

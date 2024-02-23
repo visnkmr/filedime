@@ -1103,7 +1103,7 @@ export default function Greet() {
           
               {/* </div> */}
          
-              <Dupelist dst={dest} srclist={JSON.stringify(fileopsrc)} dupes={dupes} showad={showalertdialog} setshowad={setsal} setfos={setfos}/>
+              <Dupelist dst={dest} srclist={JSON.stringify(fileopsrc)} dupes={dupes} showad={showalertdialog} setshowad={setsal} setfos={setfos} reloadlist={reloadlist}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>

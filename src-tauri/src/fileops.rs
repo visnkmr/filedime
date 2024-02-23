@@ -415,11 +415,11 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
         match exists{
             Some(a) => {
               if(a){
-                println!("Overwrite {}",process_info.file_name);
+                println!("Overwrite {:?}",process_info);
                 return fs_extra::dir::TransitProcessResult::Overwrite
               }
               else{
-                println!("Skip {}",process_info.dir_name);
+                println!("Skip {:?}",process_info);
 
                 return fs_extra::dir::TransitProcessResult::Skip
               }
