@@ -1,6 +1,8 @@
+use std::time::Duration;
 use std::{fs, thread, time};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{TryRecvError, self};
+use chrono::format::format;
 use fs_extra::dir;
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
@@ -363,10 +365,10 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
     // let mut lastfolder= "".to_string();
     // let mut lastfile= "".to_string();
     // let mut lastfilesize=0;
-    let (tx, rx) = mpsc::channel();
-    thread::spawn({
+    // let (tx, rx) = mpsc::channel();
+    // thread::spawn({
       
-      move || {
+    //   move || {
     let handle = |process_info: TransitProcess| 
     {
       
@@ -417,13 +419,13 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
                 return fs_extra::dir::TransitProcessResult::Overwrite
               }
               else{
-                println!("Skip {}",process_info.file_name);
+                println!("Skip {}",process_info.dir_name);
 
                 return fs_extra::dir::TransitProcessResult::Skip
               }
             },
             None => {
-              println!("Unknown {}",process_info.file_name);
+              println!("Unknown {:?}",process_info);
 
               return fs_extra::dir::TransitProcessResult::ContinueOrAbort
             },
@@ -431,7 +433,7 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
       }
       else {
         println!("Unknown2 {}",process_info.file_name);
-        tx.send(process_info).unwrap();
+        // tx.send(process_info).unwrap();
             thread::sleep(time::Duration::from_millis(500));
       
 
@@ -490,22 +492,31 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
    // }
    // else
    {
-     fs_extra::copy_items_with_progress(&src, dst,&options,handle);
-   }
+    match(fs_extra::copy_items_with_progress(&src, dst,&options,handle)){
+      Ok(_) => {
+        println!("executed successfully");
+        return Ok(true)
+      },
+      Err(e) => {
+        println!("error {}",e.to_string());
+        return Err(e.to_string())
+      },
   }
-  });
-  loop {
-    match rx.try_recv() {
-        Ok(process_info) => {
-          println!("--->status{:?}",process_info);
-        }
-        Err(TryRecvError::Disconnected) => {
-            println!("finished");
-            break;
-        }
-        Err(TryRecvError::Empty) => {}
-    }
-}
+   }
+  // }
+//   });
+//   loop {
+//     match rx.try_recv() {
+//         Ok(process_info) => {
+//           println!("--->status{:?}",process_info);
+//         }
+//         Err(TryRecvError::Disconnected) => {
+//             println!("finished");
+//             break;
+//         }
+//         Err(TryRecvError::Empty) => {}
+//     }
+// }
   Ok(true)
     },
     Err(e) => { 
@@ -519,18 +530,25 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
 
 // wite tests with below code to test functions
 
-#[test]
-fn createfilestotest(){
+#[tokio::test]
+async fn createfilestotest(){
   // Create directories
-  fs::create_dir_all("/tmp/new/est/a").expect("Failed to create directory 'a'");
-  fs::create_dir_all("/tmp/new/est/c").expect("Failed to create directory 'c'");
-  fs::create_dir_all("/tmp/new/est/c/d").expect("Failed to create directory 'c'");
-  // ["/tmp/new/est/a","/tmp/new/est/d","/tmp/new/est/f.txt"]
+  // fs::create_dir_all("/tmp/new/est/a").expect("Failed to create directory 'a'");
+  // fs::create_dir_all("/tmp/new/est/c").expect("Failed to create directory 'c'");
+  // fs::create_dir_all("/tmp/new/est/c/d").expect("Failed to create directory 'c'");
+  // // ["/tmp/new/est/a","/tmp/new/est/d","/tmp/new/est/f.txt"]
 
-  // // Create files
-  fs::write("/tmp/new/est/a/b.txt", "").expect("Failed to create file 'b.txt'");
-  fs::write("/tmp/new/est/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
-  fs::write("/tmp/new/est/f.txt", "").expect("Failed to create file 'f.txt'");
+  // // // Create files
+  // fs::write("/tmp/new/est/a/b.txt", "").expect("Failed to create file 'b.txt'");
+  // fs::write("/tmp/new/est/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
+  // fs::write("/tmp/new/est/f.txt", "").expect("Failed to create file 'f.txt'");
+  fileop(serde_json::to_string(&["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/f.txt"]).unwrap(), "/tmp/new/est/dest/".to_string(),r#"[{"sourcepath":"/tmp/new/est/a/b.txt","destpath":"/tmp/new/est/dest/a/b.txt","replace":false},{"sourcepath":"/tmp/new/est/f.txt","destpath":"/tmp/new/est/dest/f.txt","replace":false}]"#.to_string()).await;
+  // let mut options = dir::CopyOptions::new().buffer_size(1).skip_exist(true); 
+  // let handler=|process_info|{
+  //   println!("{:?}",process_info);
+  //   fs_extra::dir::TransitProcessResult::ContinueOrAbort
+  // };
+  // fs_extra::copy_items_with_progress(&["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/f.txt"], "/tmp/new/est/dest/", &options, handler).unwrap();
 //removed async from calling functions
   // println!("{:?}",checkforconflicts(serde_json::to_string(&vec!["/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(), "/tmp/new/est/dest".to_string()));
   // println!("{:?}",fileop(serde_json::to_string(&vec!["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/c/d","/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(),"/tmp/new/est/dest".to_string(),serde_json::to_string(&vec![""]).unwrap()));

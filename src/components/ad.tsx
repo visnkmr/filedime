@@ -86,11 +86,21 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={()=>{
-                let newArray = dlastore.map(item => ({
-                    sourcePath: item.sourcepath,
-                    destPath: item.destpath,
-                    replace: item.replace
-                   }));
+                let newArray=[];
+                for (const [index,item] of dlastore.entries()){
+                    console.log(item)
+                    newArray.push({
+                            sourcepath: item.sourcepath,
+                            destpath: item.destpath,
+                            replace: item.replace
+                           });
+                }
+                // let newArray = [...dlastore,
+                //     dlastore.map(item => ({
+                //     sourcePath: item.sourcepath,
+                //     destPath: item.destpath,
+                //     replace: item.replace
+                //    }))];
                    console.log(srclist)
                    console.log(typeof srclist)
                 invoke('fileop', { 

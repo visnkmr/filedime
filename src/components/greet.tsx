@@ -143,7 +143,7 @@ export default function Greet() {
     const [path, setpath] = useState("drives://");
     const [pathitype, setpit] = useState("drives://");
     const [searchstring,setss] = useState("");
-    const [fileopsrc,setfos] = useState(["/tmp/new/est/a","/tmp/new/est/d","/tmp/new/est/f.txt"]);
+    const [fileopsrc,setfos] = useState(["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/f.txt"]);
     let srclist=JSON.stringify(fileopsrc);
     const [fileopdest,setfod] = useState("");
     const [parentsize,setps] = useState("");
