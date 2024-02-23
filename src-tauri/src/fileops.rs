@@ -325,6 +325,7 @@ struct dlads{
 #[tauri::command]
 pub 
 async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,String> {
+  println!("{}--{}--{}",srclist,dst,dlastore);
   match serde_json::from_str(&srclist){
     Ok(list) => {
       let src:Vec<String>=list;
@@ -507,7 +508,9 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
 }
   Ok(true)
     },
-    Err(e) => { return Err(format!("{}",e))
+    Err(e) => { 
+      println!("cannot parse data");
+      return Err(format!("{}",e))
 
     },
 }
@@ -522,12 +525,13 @@ fn createfilestotest(){
   fs::create_dir_all("/tmp/new/est/a").expect("Failed to create directory 'a'");
   fs::create_dir_all("/tmp/new/est/c").expect("Failed to create directory 'c'");
   fs::create_dir_all("/tmp/new/est/c/d").expect("Failed to create directory 'c'");
+  // ["/tmp/new/est/a","/tmp/new/est/d","/tmp/new/est/f.txt"]
 
   // // Create files
   fs::write("/tmp/new/est/a/b.txt", "").expect("Failed to create file 'b.txt'");
   fs::write("/tmp/new/est/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
   fs::write("/tmp/new/est/f.txt", "").expect("Failed to create file 'f.txt'");
 //removed async from calling functions
-  println!("{:?}",checkforconflicts(serde_json::to_string(&vec!["/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(), "/tmp/new/est/dest".to_string()));
-  println!("{:?}",fileop(serde_json::to_string(&vec!["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/c/d","/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(),"/tmp/new/est/dest".to_string(),serde_json::to_string(&vec![""]).unwrap()));
+  // println!("{:?}",checkforconflicts(serde_json::to_string(&vec!["/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(), "/tmp/new/est/dest".to_string()));
+  // println!("{:?}",fileop(serde_json::to_string(&vec!["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/c/d","/tmp/new/est/a/b.txt","/tmp/new/est/c/d/e.txt"]).unwrap(),"/tmp/new/est/dest".to_string(),serde_json::to_string(&vec![""]).unwrap()));
 }

@@ -5,7 +5,9 @@ import { setcolorpertheme } from "./greet";
 import { Checkbox } from "./ui/checkbox";
 import { invoke } from "@tauri-apps/api/tauri";
 import { operationfileinfo } from "../shared/tstypes";
-export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
+export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos}){
+    console.log("srclist-----"+srclist)
+    console.log("dst-----"+dst)
     let [dlastore,setdlastore]=useState([] as operationfileinfo[])
     useEffect(() => {
         setdlastore(dupes);
@@ -96,7 +98,7 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad}){
                     dst:dst,
                     dlastore:JSON.stringify(newArray)
                 }).then((a)=>{
-                    
+                    setfos([])
                 
                 })
             }}>Continue</AlertDialogAction>

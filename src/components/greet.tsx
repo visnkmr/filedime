@@ -143,7 +143,7 @@ export default function Greet() {
     const [path, setpath] = useState("drives://");
     const [pathitype, setpit] = useState("drives://");
     const [searchstring,setss] = useState("");
-    const [fileopsrc,setfos] = useState(objinit);
+    const [fileopsrc,setfos] = useState(["/tmp/new/est/a","/tmp/new/est/d","/tmp/new/est/f.txt"]);
     let srclist=JSON.stringify(fileopsrc);
     const [fileopdest,setfod] = useState("");
     const [parentsize,setps] = useState("");
@@ -1103,7 +1103,7 @@ export default function Greet() {
           
               {/* </div> */}
          
-              <Dupelist dst={dest} srclist={srclist} dupes={dupes} showad={showalertdialog} setshowad={setsal}/>
+              <Dupelist dst={dest} srclist={JSON.stringify(fileopsrc)} dupes={dupes} showad={showalertdialog} setshowad={setsal} setfos={setfos}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
@@ -1130,6 +1130,9 @@ export default function Greet() {
                         dst:path,
                         dlastore:JSON.stringify([])
                     })
+                    console.log("done");
+                    setfos([])
+                    setfod("")
                     }
                     else{
                       setdest(path)
@@ -1137,10 +1140,13 @@ export default function Greet() {
                       setsal(true);
                       return 
                     }
-                  })
+                  }).catch((e)=>{
+                    console.log("error")
                     console.log("done");
                     setfos([])
                     setfod("")
+                  })
+                    
                   }
               }>
               {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
