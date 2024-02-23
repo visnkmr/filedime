@@ -2,7 +2,7 @@ use std::{path::PathBuf, io::Read};
 
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, sizeunit::{self, find_size}, sendtofrontend::{folsize, sendgparentloc, sendparentloc}};
+use crate::{appstate::AppStateStore, sizeunit::{self, find_size}, sendtofrontend::{folsize, sendparentloc}};
 
 #[tauri::command]
 pub fn loadfromhtml(windowname:&str,name: String, window: Window,g:State<AppStateStore>)
@@ -20,7 +20,7 @@ pub fn loadfromhtml(windowname:&str,name: String, window: Window,g:State<AppStat
         // sizeunit::size(find_size(&path.to_string_lossy(),&window,&g),true)
       // });
   
-  sendgparentloc(windowname, &app_handle,parent.parent().unwrap().to_string_lossy().to_string());
+  // sendgparentloc(windowname, &app_handle,parent.parent().unwrap().to_string_lossy().to_string());
 sendparentloc(windowname, &app_handle, parent.to_string_lossy().to_string(),&("").to_string());
   
   file.read_to_string(&mut content).unwrap();

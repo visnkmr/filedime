@@ -222,26 +222,14 @@ fn startup(window: &AppHandle) -> Result<(),()>{
 }
 #[tauri::command]
 async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(),()> {
-  let folder_path=&path;
   // state.getactivepath(path);
   println!("{}",path);
-
-//  #[cfg(target_os = "windows")]
-//   Command::new("cmd /C %d && cd %f && start cmd")
-
-//   #[cfg(target_os = "linux")]
-//   Command::new("sh -c gnome-terminal --working-directory=%f")
-
-  // #[cfg(not(any(target_os = "windows", target_os = "linux")))]
-  // Command::new("sh -c open -a Terminal %f")
 
   if(!Path::new(&path).is_dir()){
     return Err(())
   }
-  // let mut script1=getcustom("filedime", "custom_scripts/terminal_open.fds", "");
   let mut args = state.buttonnames.get(&bname.replace(" ","_")).unwrap().clone();
   args=args.replace("%f",&path);
-  // format!("exo-open --working-directory {} --launch TerminalEmulator",path);
   let args: Vec<_> = args.split(" ").collect();
   println!("{:?}",args);
 
@@ -302,43 +290,20 @@ async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<
       }
 
   }
-  // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
-  // println!("loading toggle rust---->2");
 
   Ok(())
 }
-//manually test using ramdisk
-//copies files from source to destination based on if there are any changes present
 
-
-
-// #[tauri::command]
-// fn getpathfromid(id:String,state: State<'_, AppStateStore>)->String{
-//   state.gettab(&id).0
-// }
-// #[tauri::command]
-// async fn whattoload(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
-//   // state.togglefolcount();
-//   // state.addtab(id.clone(),"./".to_string(), "newtab".to_string(),windowname.to_string());//move to where you open new window
-//   let whichpath=state.gettabfromwinlabel(&windowname.to_string()).unwrap();
-//   println!("{}",whichpath.0);
-//   list_files(windowname.to_string(),whichpath.1,whichpath.0.clone(),"".to_string(), window, state).await.unwrap();
-//   Ok(whichpath.0)
-// }
 #[tauri::command]
 async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
    let absolute_date=getuniquewindowlabel();
-  // state.addtab(id.clone(), path.clone(), "newtab".to_string(),absolute_date.clone());
   let filename=PathBuf::from(path.clone());
   let mut wname="";
   if let Some(fname)=filename.file_name(){
     wname=fname.to_str().unwrap();
   }
-  let nwindow=opennewwindow(&window.app_handle(),&wname,&absolute_date);
+  opennewwindow(&window.app_handle(),&wname,&absolute_date);
   println!("new winodw==============");
-  // whattoload(&absolute_date, id, nwindow, state).await;
-  // listtabs(windowname,window, state).await;
-  // list_files(absolute_date.to_string(),id,path,"".to_string(), window, state).await;
 
   Ok(())
 }
@@ -351,7 +316,6 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
       winlabel,
       tauri::WindowUrl::App("settings.html".into())
     )
-    // .initialization_script(&INIT_SCRIPT)
     .title(name).build().unwrap();
   }
   else{
@@ -382,7 +346,6 @@ async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'
         &window,
         &state,
     ),true)),
-    // "arguments":arguments
   })).unwrap()
   
 }
@@ -393,10 +356,10 @@ fn tabname(path:String)->String{
   if let Some(h)=PathBuf::from(&path).file_stem(){
     let tabname=h.to_string_lossy().to_string();
     if(tabname==""){path}else{tabname}
-}
-else{
-    path
-};
+  }
+  else{
+      path
+  };
 println!(" found tabname of ------> {} as {}",p,result);
 
 result
@@ -454,230 +417,23 @@ async fn checker()-> Result<String, String>{
 
 }
 fn main() {
-  
-  // init();
-  // let open_terminal = CustomMenuItem::new("otb", "Open terminal here".to_string());
-  // let reload = CustomMenuItem::new("reload", "Reload".to_string());
-  // let hide_size = CustomMenuItem::new("nosize", "Hide size".to_string());
-  // // let toggle_search = CustomMenuItem::new("tsearch", "Toggle search".to_string());
-  // let hide_child_count = CustomMenuItem::new("folcount", "Hide child count".to_string());
-  // // let back = CustomMenuItem::new("back-button", "Back".to_string());
-  // // let forward = CustomMenuItem::new("forward-button", "Forward".to_string());
-  // let recent = CustomMenuItem::new("recent", "Recent".to_string());
-  
-  // let menu = Menu::new()
-  // .add_submenu(Submenu::new("File", Menu::new()
-  //     // .add_item(open_terminal)
-  //     .add_item(hide_size)
-  //     .add_item(reload)
-  //     // .add_item(toggle_search)
-  //     .add_item(hide_child_count)
-      
-  // ))
-  
-  // .add_submenu(Submenu::new("Window", Menu::new()
-  // .add_item(CustomMenuItem::new("close", "Close"))
- 
-      
-  // ))
-
-  // .add_item(CustomMenuItem::new("Learn More", "Learn More"))
-  // .add_item(CustomMenuItem::new("quit", "Quit"))
-   
-  //   // .add_item(back)
-  //   // .add_item(forward)
-  //   .add_item(recent)
-  //   ;
   let mut g=AppStateStore::new(CACHE_EXPIRY);
-
-  // let mut g=Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
-
   let app=tauri::Builder::default()
     .setup(|app| {
       
-      // let main_window=app.get_window("main").unwrap();
-      // main_window
-      // .on_menu_event(|event| {
-      //   match event.menu_item_id() {
-      //     "reload" => {
-      //       std::process::exit(0);
-      //     }
-      //     "close" => {
-      //       // main_window.close();
-      //       // event.window().close().unwrap();
-      //     }
-      //     "otb"=>{
-      //       // otb(event.window().label(),g);
-  
-      //     }
-      //     "Learn More" => {
-      //         let url = "https://github.com/visnkmr/iomer";
-      //         // shell::open(&event.shell_scope(), url.to_string(), None).unwrap();
-      //       }
-      //     _ => {}
-      //   }
-      // });
-      // println!("{:?}",app);
-      
-      // let handle = app.handle();
-    // std::thread::spawn(move || {
-    //   let window = tauri::WindowBuilder::new(
-    //     &handle,
-    //     "label",
-    //     tauri::WindowUrl::App("index.html".into())
-    //   ).build().unwrap();
-    // });
-    // let window = tauri::WindowBuilder::new(app, "label", tauri::WindowUrl::App("index.html".into()))
-    // .build()
-    // .unwrap();
     let app_handle = app.handle();
-    // let uwl=&getuniquewindowlabel();
-    // tauri::WindowBuilder::new(
-    //                   &app_handle,
-    //                   uwl,
-    //                   tauri::WindowUrl::App("dialog.html".into())
-    //                 )
-                    
-    //                 .inner_size(320.0, 320.0)
-    //                 // .initialization_script(&INIT_SCRIPT)
-    //                 .title("error")
-    //                 .build()
-    //                 .unwrap();
-    // // let uwl=getuniquewindowlabel();
-    // opendialogwindow(&app_handle, "Error #404: File not found","File not found",&uwl);
     
-    // opendialogwindow(&app_handle, "dialog","",&getuniquewindowlabel() );
     let ss=startup(&app_handle).is_ok();
     if ss {
       println!("loaded buttons successfully.")
     }else{
       println!("loading buttons failed")
     }
-    // let tray_id = "my-tray";
-    // SystemTray::new()
-    //   .with_id(tray_id)
-    //   .with_menu(
-    //     SystemTrayMenu::new()
-    //       .add_item(CustomMenuItem::new("quit", "Quit"))
-    //       .add_item(CustomMenuItem::new("open", "Open"))
-    //   )
-    //   .on_event({
-        
-    //     move |event| {
-    //     match event{
-    //         tauri::SystemTrayEvent::MenuItemClick { tray_id, id,.. } => {
-    //         let mut gk=AppStateStore::new(CACHE_EXPIRY);
-              
-    //           if(id=="quit"){
-                
-
-    //             std::process::exit(0);
-    //           }
-    //           else{
-    //             // newwindow(id, path, ff, window, state);
-    //             // println!("{:?}",gk);
-    //             let absolute_date=getuniquewindowlabel();
-    //             opennewwindow(&app_handle,"uio",&absolute_date);
-
-    //             // tauri::Builder::new()
-    //             // // .manage(gk)
-    //             // .invoke_handler(
-    //             //   tauri::generate_handler![
-    //             //     list_files,
-    //             //     ]
-    //             //   )
-    //             // .run(tauri::generate_context!())
-    //             // .expect("error while running tauri application");
-    //           }  
-    //         },
-    //         _ =>{
-    //           //on right click on tray icon on windows this is triggered.
-    //         },
-    //     }
-    //     // let tray_handle = app_handle.tray_handle_by_id(tray_id).unwrap();
-        
-    //   }
-    // })
-      // .build(app)?;
-    
-      // get an instance of AppHandle
-      // let app_handle = app.handle().get_window("main").unwrap();
-      // let g=app.state::<FileSizeFinder>();
-    //   // spawn a thread to list the files in the current directory on startup
-    // //   std::thread::spawn(move || {
-    // //     list_files(".".to_string(), app_handle.get_window("main").unwrap());
-    // //   });
-    //   // set the window flags to remove WS_MAXIMIZEBOX
-    //   app_handle.set_window_flags(|flags| flags & !WS_MAXIMIZEBOX)?;
-    
       Ok(())
     })
-    // .menu(menu)
-    // .on_menu_event(|event| {
-    //   match event.menu_item_id() {
-    //     "quit" => {
-    //       std::process::exit(0);
-    //     }
-    //     "close" => {
-    //       event.window().close().unwrap();
-    //     }
-    //     "reload"=>{
-    //       event.window().emit("reloadlist","reload").unwrap();
-    //       // otb(event.window().label(),g);
-    //     }
-    //     "nosize"=>{
-    //       event.window().emit("reloadlist","nosize").unwrap();
-    //       // otb(event.window().label(),g);
-    //     }
-    //     "folcount"=>{
-    //       event.window().emit("reloadlist","folcount").unwrap();
-    //     }
-    //     "recent"=>{
-    //       event.window().emit("reloadlist","recent").unwrap();
-    //     }
-    //     // "tsearch"=>{
-    //     //   event.window().emit("reloadlist","tsearch").unwrap();
-    //     // }
-    //     "Learn More" => {
-    //         let url = "https://github.com/visnkmr/iomer";
-    //         shell::open(&event.window().shell_scope(), url.to_string(), None).unwrap();
-    //       }
-    //     _ => {}
-    //   }
-    // })
+    
     .on_window_event(on_window_event)
-  //   .register_uri_scheme_protocol("image", move |app, request| {
-  //     let res_not_img = ResponseBuilder::new()
-  //       .status(404)
-  //       .body(Vec::new());
   
-  //     if request.method() != "GET" { return res_not_img; }
-  
-  //     let uri = request.uri();
-  
-  //     // Parse the URI to get the image file path, width, height, and quality
-  //     // This depends on the exact format of your URIs
-  //     let params = parse_uri(uri);
-  //     let ag1="/home/roger/Downloads/scrsht.png".to_string();
-  //     let img_path = params.get("path").unwrap_or(&ag1);
-  //     let width = params.get("width").unwrap_or(&"100".to_string()).parse::<u32>().unwrap_or(100);
-  //     let height = params.get("height").unwrap_or(&"100".to_string()).parse::<u32>().unwrap_or(100);
-  //     let quality = params.get("quality").unwrap_or(&"40".to_string()).parse::<u8>().unwrap_or(40);
-  
-  //     // Open the image file
-  //     let img = image::open(img_path).unwrap();
-  
-  //     // Resize and adjust the quality
-  //     let img = img.resize(width, height, image::imageops::FilterType::Nearest);
-  //     let mut buffer = Cursor::new(Vec::new());
-  //     img.write_to(&mut buffer, image::ImageOutputFormat::Jpeg(quality)).unwrap();
-  
-  //     // Create the HTTP response
-  //     ResponseBuilder::new()
-  //      .mimetype("image/png")
-  //      .body(buffer.into_inner())
-  //     //  .unwrap();
-  //  })
     .manage(g)
     .invoke_handler(
       tauri::generate_handler![
@@ -807,31 +563,11 @@ async fn get_path_options(mut path: String, window: Window, state: State<'_, App
           }
         }
   }
-  // let searchthrough=state.stl.lock().unwrap();
-  // let map=searchthrough.clone();
-  // let filescount=map.len();
-  // drop(searchthrough);
-
-  // for i in map{
-  //   for j in i.1{
-
-  //     options.push(j)
-  //   }
-  // }
-  
-  // println!("{:?}",k.find_all(&path));
-  // println!("{:?}",options);
   Ok(options)
 }
-          // Use substring instead of path
-     // In Rust, define a function that takes a path as an argument and returns a list of possible paths
+
 pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
   println!("{:?}",getwindowlist(app_handle));
-
-  // let INIT_SCRIPT= [r#"
-  //             console.log("poiu");
-  //              let kpg="#,pathtt,r#"
-  //                 "#].concat();
                 tauri::WindowBuilder::new(
                   app_handle,
                   label,
@@ -842,27 +578,7 @@ pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
 }
 
 pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str){
-  // println!("{:?}",getwindowlist(app_handle));
-  // let menu = Menu::new();
-
-  // // let INIT_SCRIPT= [r#"
-  // //             console.log("poiu");
-  // //              let kpg="#,pathtt,r#"
-  // //                 "#].concat();
-  // println!("create window ======>{}",label);
-  //               tauri::WindowBuilder::new(
-  //                 app_handle,
-  //                 label,
-  //                 tauri::WindowUrl::App("dialog.html".into())
-  //               )
-                
-  //               .inner_size(320.0, 320.0)
-  //               .menu(menu)
-  //               // .initialization_script(&INIT_SCRIPT)
-  //               .title(title)
-  //               .build()
-  //               .unwrap();
-  //             println!("dialog opened ======>{}",label);
+  
               app_handle.emit_all(
                 // label,
                 "dialogshow",
@@ -874,21 +590,6 @@ pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str
               ).unwrap();
               
 }
-// pub fn opennewtab(app_handle:&AppHandle,title:&str,pathtt:&str){
-//                 let now = SystemTime::now();
-                
-
-//                 let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
-//                 let absolute_date = now_date.format("%d%m%H%M%S").to_string();
-//                 println!("{absolute_date}");
-//                 tauri::WindowBuilder::new(
-//                   app_handle,
-//                   absolute_date,
-//                   tauri::WindowUrl::App("index.html".into())
-//                 )
-//                 .title(title).build().unwrap();
-// }
-
 pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
   match(app_handle.get_window("main")){
     Some(iop) => {
