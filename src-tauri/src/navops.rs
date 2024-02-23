@@ -15,7 +15,6 @@ pub async fn disablenav(tabid:String,dir:bool, state: State<'_, AppStateStore>) 
         if(history_entry.current_page==history_entry.browser_timeline.len()-1) {return Err(())}
        return Ok(())
       }
-    Ok(())
 }
   #[tauri::command]
 pub async fn addtotabhistory(tabid:String,path:String, state: State<'_, AppStateStore>) -> Result<(),String>{ 
