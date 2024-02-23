@@ -461,6 +461,12 @@ export default function Greet() {
     useEffect(() => {
       listen("folder-count",(data: { payload: string }) => {
         progresstotal.current=(data.payload)
+      }) 
+      listen("start-timer",() => {
+        setlv(true)
+      })
+      listen("stop-timer",() => {
+        setlv(false)
       })
       // listen('load', () => {
       //   console.log(`New page loaded --->${window.location.href}`);
@@ -1053,6 +1059,7 @@ export default function Greet() {
       a: 20,
       b: 90,
     });
+    const [loadervisible,setlv]=useState(false)
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a}>
@@ -1063,7 +1070,7 @@ export default function Greet() {
             <div className="flex flex-row p-2 items-center">
             <div className="pr-3">
 
-            <Loader2 className="h-4 w-4 animate-spin"/>
+            <Loader2 className={`${loadervisible?"h-4 w-4 animate-spin":"hidden"}`}/>
             </div>
             <button className="flex items-center gap-2 font-semibold">
               <Folder className="h-6 w-6" />

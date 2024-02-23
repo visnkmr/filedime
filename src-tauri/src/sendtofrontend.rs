@@ -61,15 +61,6 @@ pub fn notifychange(windowname:&str,ah:&AppHandle){
   .map_err(|e| e.to_string()).unwrap();
 
 }
-pub fn sendgparentloc(windowname:&str,ah:&AppHandle,gparent:String)->Result<(),String>{
-    ah.emit_to(
-        windowname,
-        "grandparent-loc",
-        gparent,
-      )
-      .map_err(|e| e.to_string())?;
-    Ok(())
-}
 pub fn starttimer(windowname:&str,ah:&AppHandle)->Result<(),String>{
   ah.emit_to(
     windowname,
