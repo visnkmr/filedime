@@ -174,19 +174,24 @@ export default function Greet() {
     },[perpage,sftype,fileslist])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
-      if(p){
-        setpath(p);
-        setpsplitl(splitpath(p))
-      }
-      setsftype("all")
-        setfileslist([])
-        setfc(0)
-        setss("")
-        console.log("reset done")
+      invoke("checkiffile",{
+        path:p
+      }).catch((e)=>{
+
+        if(p){
+          setpath(p);
+          setpsplitl(splitpath(p))
+        }
+        setsftype("all")
+          setfileslist([])
+          setfc(0)
+          setss("")
+          console.log("reset done")
+      })
     }
     function listfiles(oid,path){
       let lct=new Date().getTime().toString();
-
+      
       lastcalledtime.current=lct
       invoke('list_files', { 
         starttime:lct,
@@ -195,7 +200,7 @@ export default function Greet() {
         path: path,
         ff: "" 
     }).catch((e)=>console.error(e))
-    reset(path)
+    reset(path) 
 
 
     }
@@ -369,10 +374,15 @@ export default function Greet() {
       ).catch(()=>sethf(true))
     },[path])
       const addToTabHistory = (tabId, item=path) => {
-        invoke("addtotabhistory",{
-          tabid:tabId,
-          path:item
-        })
+        invoke("checkiffile",{
+          path:p
+        }).catch((e)=>{
+          invoke("addtotabhistory",{
+            tabid:tabId,
+            path:item
+          })
+        })  
+        
      };
    
    const [currentchoice,changechoiceto]=useState("")
@@ -918,7 +928,10 @@ export default function Greet() {
   }
    
   function updatetabs(tabpath){
-    console.log("update tabs called")
+    invoke("checkiffile",{
+      path:p
+    }).catch((e)=>{
+      console.log("update tabs called")
     invoke(
       "tabname",
       {
@@ -943,6 +956,8 @@ export default function Greet() {
     .catch((e)=>{
       console.error(e)
     })
+    })
+    
   }
   function closetab(closeid){
     invoke("closetab",{

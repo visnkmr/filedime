@@ -18,11 +18,9 @@ use crate::{markdown::loadmarkdown,
 };
 #[tauri::command]
 pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, AppStateStore>)->Result<(),String>{
-  let orig = *state.process_count.lock().unwrap();
+
   let ignorehiddenfiles=*state.excludehidden.read().unwrap();
   if(path=="drives://"){
-    // driveslist(&windowname.clone(),&window.app_handle(),&serde_json::to_string(&populatedrivelist().clone()).unwrap()).unwrap();
-    // list_files(windowname, oid, path, ff, window, state);
     match(dirs::home_dir()){
     Some(spath) => {
       path=spath.to_string_lossy().to_string();
@@ -32,41 +30,31 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
       return Err("home not found".to_string())
     },
 }; 
-if(path=="downloads://"){
-  // list_files(windowname, oid, path, ff, window, state);
-match(dirs::download_dir()){
-  Some(spath) => {
-    path=spath.to_string_lossy().to_string();
-  },
-  None => {
-    return Err("home not found".to_string())
-  },
-};
-  // return Ok(())
-} 
-if(path=="documents://"){
-  // list_files(windowname, oid, path, ff, window, state);
-match(dirs::document_dir()){
-  Some(spath) => {
-    path=spath.to_string_lossy().to_string();
-  },
-  None => {
-    return Err("home not found".to_string())
-  },
-};
-  // return Ok(())
-} 
+
     // return Ok(())
   } 
-  // populate_trie(oid, path, ff, window, state).await;
-  // return ;
-  
-
-  // thread::spawn(
-    // {
-      // let st=state.searchtry.clone();
-    
-    // move||{
+  else if(path=="downloads://"){
+  match(dirs::download_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+    },
+    None => {
+      return Err("downloads not found".to_string())
+    },
+  };
+    // return Ok(())
+  } 
+  else if(path=="documents://"){
+  match(dirs::document_dir()){
+    Some(spath) => {
+      path=spath.to_string_lossy().to_string();
+    },
+    None => {
+      return Err("documents not found".to_string())
+    },
+  };
+    // return Ok(())
+  } 
       let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
 
       WalkBuilder::new(&path)
@@ -79,11 +67,7 @@ match(dirs::document_dir()){
       // .git_ignore(true) // Respect the .gitignore file
       .build_parallel()
       .run(|| {
-            // println!("Populating");
-
-          // let total_bytes = total_bytes.clone();
-          // let database = database.clone();
-          // let root = root.as_ref().to_owned();
+            // println!("Populating the search index into state");
           Box::new(move |entry| {
             match(entry){
               Ok(e)=>{
@@ -94,9 +78,7 @@ match(dirs::document_dir()){
                   }
                   if(searchfor)
                   {
-                    
                     // println!("{:?}",e.path());
-                  // }
                   let i = e.path().to_string_lossy().to_string();
                   let name=e.file_name().to_string_lossy().to_string().to_lowercase();
                   let map=state.stl.clone();

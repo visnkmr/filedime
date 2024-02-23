@@ -40,16 +40,6 @@ struct infodest{
     size:u64,
     date:String
   }
-  // #[test]
-  // fn test2(){
-  //   checkforconflicts(vec![
-  //     "/home/roger/Downloads/aps/old".to_string(),
-  //     "/home/roger/Downloads/aps/old/2022-10-12_134922.pdf".to_string(),
-  //     "/home/roger/Documents".to_string(),
-  //     "/home/roger/seat_items.txt".to_string()
-  //     ],
-  //      "/tmp/new/est".to_string()).unwrap()
-  // }
     #[tauri::command]
    pub async fn doespathexist(mut path: String) -> Result<bool,()> {
       let pathasbuf=PathBuf::from(path.clone());
@@ -74,10 +64,12 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(b
   
     // Append the filename to the destination path
     let destpath=if(fromdir){
-      format!("{}{}",dst,path)
+      PathBuf::from(&dst).join(path).to_string_lossy().to_string()
+      // format!("{}{}",dst,path)
     }
     else{
-      format!("{}/{}",dst,src_filename)
+      PathBuf::from(&dst).join(src_filename).to_string_lossy().to_string()
+      // format!("{}/{}",dst,src_filename)
     };
     let mut dst_path = 
       Path::new(&destpath);
@@ -193,10 +185,6 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(b
     })?;
       "File" 
     };
-    
-    
-    
-   
     let title=&format!("{} created",whatwascreated);
     let desc=&format!("{} was created @ {}",name,dest);
     opendialogwindow(&window.app_handle(), title,desc,"");

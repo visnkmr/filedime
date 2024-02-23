@@ -4,6 +4,97 @@ use regex::Regex;
 use serde::{Deserialize, Serialize, de};
 use sysinfo::{DiskExt, System, SystemExt, RefreshKind};
 
+#[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
+pub struct DriveItem{
+  pub name: String,
+  pub mount_point: String,
+  pub total: String,
+  pub free: String,
+  pub is_removable: bool,
+  pub disk_type: String,
+  pub file_system: String,
+  pub uuid:String,
+  pub vendormodel:String
+}
+pub fn populatedrivelist()->Option<Vec<DriveItem>>{
+  let mut rt;
+  let standard_locations = vec![
+    "/",                      // Root directory
+    "/bin",                   // User commands
+    "/boot",                  // Static files of the boot loader
+    "/dev",                   // Device files
+    "/etc",                   // Host-specific system configuration
+    "/home",                  // User home directories
+    "/lib",                   // Shared libraries
+    "/lib64",                 //  64-bit shared libraries
+    "/mnt",                   // Mount point for temporary filesystems
+    "/opt",                   // Add-on application software packages
+    "/proc",                  // Process information
+    "/root",                  // Home directory of the root user
+    "/sbin",                  // System binaries
+    "/srv",                   // Site-specific data served by the system
+    "/sys",                   // Kernel and system information
+    "/tmp",                   // Temporary files
+    "/usr",                   // Secondary hierarchy for read-only user data
+    "/var",                   // Variable data
+];
+if(get_disks().is_ok())
+  {
+
+    rt=get_disks().unwrap().0.iter().map(|ed|{
+      
+      return DriveItem { 
+        name:{
+          if(ed.label.is_some()){
+            ed.label.clone().unwrap()
+          }else if(ed.mountpoint.is_some()){
+            if(standard_locations.contains(&ed.mountpoint.clone().unwrap().as_str()))
+            {
+              ed.mountpoint.clone().unwrap()
+            }
+            else{
+              format!("{} Volume",sizeunit::size(ed.size ,true).to_string())
+            }
+          }
+          else{
+            format!("{} Volume",sizeunit::size(ed.size ,true).to_string())
+          }
+        },
+        mount_point:ed.mountpoint.clone().unwrap_or("".to_string()).clone(),
+        total:sizeunit::size(ed.size ,true),
+        free:sizeunit::size(ed.fsavail.unwrap_or(0),true),
+        is_removable:ed.is_removable.clone(),
+        disk_type:ed.device_type.clone(),
+        file_system:format!("{} {}",ed.fstype.clone().unwrap_or("".to_string()).clone(),ed.fsver.clone().unwrap_or("".to_string()).clone()),
+        uuid:ed.name.clone().unwrap_or("".to_string()),
+        vendormodel:format!("{} {}",ed.vendor.clone().unwrap_or("".to_string()),ed.model.clone().unwrap_or("".to_string()))
+    }
+    }).collect::<Vec<DriveItem>>();
+  }
+  
+  else
+  {
+
+    rt=get_drives().unwrap().array_of_drives.iter().map(|ed|{
+      
+      return DriveItem { 
+        name:ed.name.clone(),
+        mount_point:ed.mount_point.clone(),
+        total:ed.total.clone(),
+        free:ed.free.clone(),
+        is_removable:ed.is_removable.clone(),
+        disk_type:ed.disk_type.clone(),
+        file_system:ed.file_system.clone(),
+        uuid:"".to_string(),
+        vendormodel:("".to_string())
+    }
+    }).collect::<Vec<DriveItem>>();
+  }
+
+  Some(rt)
+}
+
+
 use crate::sizeunit;
 
 #[derive(serde::Serialize, Debug)]

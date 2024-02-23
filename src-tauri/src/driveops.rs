@@ -1,6 +1,6 @@
 use tauri::{Manager, Window};
 
-use crate::{drivelist, populatedrivelist, sendtofrontend::driveslist};
+use crate::{drivelist::{self, populatedrivelist}, sendtofrontend::driveslist};
 
 #[tauri::command]
   pub async fn senddriveslist(windowname:String,window:Window){  

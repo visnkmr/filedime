@@ -689,6 +689,7 @@ fn main() {
         mirror,
         addmark,
         fileop,
+        checkiffile,
         checkforconflicts,
         // backbutton,
         closetab,
