@@ -275,7 +275,7 @@ fn test_result(){
 //   println!("{:?}",get_drives().unwrap().array_of_drives);
 
 let dn:Vec<String>=get_drives().unwrap().array_of_drives.iter().map(|ed|{
-    ed.mount_point.clone()
+    format!("{:?}",ed)
   }).collect();
   println!("{:?}",dn);
 }

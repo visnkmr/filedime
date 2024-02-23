@@ -50,7 +50,6 @@ struct infodest{
   //     ],
   //      "/tmp/new/est".to_string()).unwrap()
   // }
-  // fn checkforconflicts(srclist:Vec<String>,dst:String)->Result<(),String>{
     #[tauri::command]
    pub async fn doespathexist(mut path: String) -> Result<bool,()> {
       let pathasbuf=PathBuf::from(path.clone());
@@ -154,10 +153,6 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(b
                       return Err(format!("{}",e))
                     },
                 }
-                // let entry = entry.expect("Failed to read directory entry");
-                // if entry.file_type().unwrap().is_file() {
-                //     println!("{}", entry.path().display());
-                // }
             }
             Ok(())
   }
@@ -267,55 +262,6 @@ fn checkiffileexists(path: &String,dst: &String,len:u64,fromdir:bool)->Result<(b
 }
 
 // "[\"/home/roger/seat_items.txt\",\"/home/roger/Downloads\"]"
-
-  #[tauri::command]
-pub async 
-fn fileop_with_progress(windowname:String,src: String, dst: String,removefile: bool,window: Window)->Result<String,String>{
-  println!("copying function recieved rust from {}",windowname);
-  // let mut allthatexist=vec![];
-  // println!("{:?}",src);
-  
-//   match checkforconflicts(src,dst){
-//     Ok(a) => {
-//       allthatexist=a.clone();
-//       let result:Result<(), tauri::Error> =window.eval(&format!("conflictsat({})",serde_json::to_string(&a).unwrap()));
-//       match(result){
-//     Ok(value) => {
-//         println!("-------->{:?}",value);
-//     },
-//     Err(_) => {
-      
-//     },
-// }
-//       println!("{:?}",a)
-//     },
-//     Err(b) => {
-//       print!("{}",b)
-//     },
-// }
-  // let src_path = Path::new(&src);
-  // let src_filename = src_path.file_name().unwrap().to_str().unwrap();
-  // let mut dst_path = Path::new(&dst).join(src_filename);
-  // if(dst_path.exists()){
-  //   //give user choice on what to do for the path
-  // }
-  Ok(src)
-
-//   match(fileop(windowname, src, dst, removefile,&window.app_handle())){
-//     Ok(_) => {
-//     Ok(())
-      
-//     },
-//     Err(e) => {
-//    Err(format!("copying failed {}",e))
-      
-//     },
-// }
-}
-#[test]
-fn tryut(){
-  // println!("{:?}",fileop(vec!["/run/media/roger/S/inst".to_string()], "/tmp/new/est".to_string(),false));
-}
   
 #[derive(Deserialize,Serialize,Debug)]
 struct dlads{
@@ -331,33 +277,10 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
   match serde_json::from_str(&srclist){
     Ok(list) => {
       let src:Vec<String>=list;
-      // fn fileop(windowname:String,src: String, dst: String,removefile: bool,ah: &AppHandle) -> Result<(),String> {
-   // Open the source file
-  //  let mut src_file = File::open(src.clone())?;
-
-   // Get the size of the source file
-  //  let src_size = src_file.metadata().unwrap().len();
-//    let src_path = Path::new(&src);
-//    let src_filename = src_path.file_name().unwrap().to_str().unwrap();
-
-//    // Append the filename to the destination path
-//    let mut dst_path = Path::new(&dst).join(src_filename);
-// if(dst_path.exists()){
-//     //give user choice on what to do for the path
-//    }
-//    // Open the destination file
-//   //  let mut dst_file = File::create(dst_path.clone())?;
-//    println!("copy from  {:?} to {:?}",src,dst_path);
-   
-   // Open the destination file
-  //  let mut dst_file = File::create(dst)?;
-
-   // Buffer to hold the read data
-  //  let mut buffer = [0; 1024];
-  //  let mut written = 0;
    println!("copying started");
    //  let mut last_print = Instant::now();
-    let mut options = dir::CopyOptions::new(); //Initialize default values for CopyOptions
+    let mut options = dir::CopyOptions::new(); 
+    //Initialize default values for CopyOptions
    //  options.buffer_size = 1;
     // let mut last_print = Instant::now();
     // let mut last_copied=0;
@@ -365,45 +288,8 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
     // let mut lastfolder= "".to_string();
     // let mut lastfile= "".to_string();
     // let mut lastfilesize=0;
-    // let (tx, rx) = mpsc::channel();
-    // thread::spawn({
-      
-    //   move || {
     let handle = |process_info: TransitProcess| 
     {
-      
-     // println!("{}", process_info.total_bytes);
-    //  if (
-    //    last_print.elapsed() >= Duration::from_millis(1000) ||
-    //    process_info.copied_bytes==process_info.total_bytes as u64 ||
-    //    // process_info.state==dir::TransitState::Exists ||
-    //    process_info.state!=laststate ||
-    //    process_info.file_name != lastfile||
-    //    process_info.dir_name != lastfolder ||
-    //    process_info.file_total_bytes!=lastfilesize )
-    //    { 
-    //    //    sendprogress(&windowname, ah, (json!({
-    //    //     "progress": process_info.copied_bytes,
-    //    //     "size":process_info.total_bytes,
-    //    //  })).to_string());
-    //    println!("{}",format!("{}/{} done......{}",process_info.copied_bytes,process_info.total_bytes,process_info.copied_bytes-last_copied));
-    //    println!("{}",lastfile);
-    //    println!("{}",lastfolder);
-    //    last_copied=process_info.copied_bytes;
-    //    last_print = Instant::now(); 
-    //    lastfile=process_info.file_name;
-    //    lastfolder=process_info.dir_name;
-    //    lastfilesize=process_info.file_total_bytes;
- 
-    //  }
-    //  if(process_info.state!=laststate){
-    //    println!("{}",match(process_info.state){
-    //      dir::TransitState::Normal => "Status Normal",
-    //      dir::TransitState::Exists => "Status Exists",
-    //      dir::TransitState::NoAccess => "Status FS perm issue",
-    //  });
-    //  laststate=process_info.state
-    //  }
     match serde_json::from_str(&dlastore){
     Ok(a) => {
       let dlas:Vec<dlads>=a;
@@ -451,46 +337,6 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
 
      
   };
- 
-    
-    
-    // Read from the source file and write to the destination file
-   //  loop {
-   //      match src_file.read(&mut buffer) {
-   //          Ok(0) => break,
-   //          Ok(n) => {
-   //              dst_file.write_all(&buffer[..n])?;
-   //              written+=n;
-   //              if (last_print.elapsed() >= Duration::from_millis(20) || src_size==written as u64){ 
-   //              sendprogress(&windowname, ah, (json!({
-   //               "progress": written,
-   //               "size":src_size,
-   //            })).to_string());
-   //            last_print = Instant::now(); 
-   //           }
-             
-             
-   //             //  pb.inc(n as u64);
-   //          },
-   //          Err(err) => return Err(err),
-   //      }
-   //  }
-   //  println!("copying done");
- 
-   // //  pb.finish_with_message("done");
-   // // Remove the source file
-   // if(removefile){
-   //   // fs::remove_file(src)?;
-   //   match(fs_extra::move_items_with_progress(&src, dst,&options,handle)){
-   //     Ok(_) => {
-   //       Ok(true)
-   //     },
-   //     Err(e) => {
-   //       Err(e.to_string())
-   //     },
-   // }
-   // }
-   // else
    {
     match(fs_extra::copy_items_with_progress(&src, dst,&options,handle)){
       Ok(_) => {
@@ -503,21 +349,6 @@ async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool,S
       },
   }
    }
-  // }
-//   });
-//   loop {
-//     match rx.try_recv() {
-//         Ok(process_info) => {
-//           println!("--->status{:?}",process_info);
-//         }
-//         Err(TryRecvError::Disconnected) => {
-//             println!("finished");
-//             break;
-//         }
-//         Err(TryRecvError::Empty) => {}
-//     }
-// }
-  Ok(true)
     },
     Err(e) => { 
       println!("cannot parse data");
