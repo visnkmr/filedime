@@ -130,11 +130,6 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
     // println!("{:?}",parsed.clone());
     Ok(flattened(parsed))
 }
- /// Get information about all disk devices.
- /// 
- struct diskinfo{
-    name:String,
- }
 pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
 // fn get_disks() -> Result<Vec<PathBuf>,()> {
     if( get_lsblk_devices().is_err()) 
@@ -154,56 +149,9 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
 
             uddisks.push(device.clone());
         }
-        // let ps=device.mountpoints.get(0).unwrap().clone().unwrap();
-        // disks.push(ps);
-        // disks.push(Path::new(&ps).into());
     }
     Ok((disks,uddisks))
 }
-
- #[test]
- fn drllt(){
-    // let output = get_lsblk_output().unwrap();
-    // println!("{}",String::from_utf8(output.clone()).unwrap());
-    // let parsed = parse(&output).unwrap();
-    // println!("{:?}",flattened(parsed));
-
-    println!("{:?}",get_disks().unwrap().1);
-
-    // mountdrive("96A6-580C".to_string(), "/dev/nvme0n1p5".to_string());
-
-
-
-    // let dv=get_disks().unwrap().0;
-    // // println!("{:?}",serde_json::to_value(dv.clone()));
-    // // println!("{:?}",dv);
-    // for ed in dv{
-    //     println!("{:?}",ed);
-    // }
-    // println!("-----------------------");
-    // println!("-----------------------");
-    // println!("-----------------------");
-    // println!("-----------------------");
-    // let dv=get_disks().unwrap().1;
-    // for ed in dv{
-    //     println!("{:?}",ed);
-    // }
-
-
-
-    // println!("{:?}",get_disks())
-    // let output  =get_lsblk_output();
-    // println!("{}",output.unwrap())
-    // for ed in dl{
-    //     println!("{:?}",ed);
-
-    //     // println!("{:?}",ed.description);
-    // }
- }
-
-
-
-
 
  pub fn get_drives() -> Result<Drives, String> {
     let mut sys= System::new();

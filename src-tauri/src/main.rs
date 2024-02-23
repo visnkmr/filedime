@@ -687,7 +687,6 @@ fn main() {
         closealltabs,
         getparentpath,
         mirror,
-        fileop_with_progress,
         addmark,
         fileop,
         checkforconflicts,

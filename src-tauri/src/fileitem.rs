@@ -71,15 +71,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
 
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
-    let is_hidden = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
-    // let path = path.to_string_lossy().into_owned(); // get their path
-    // fs::metadata(e.path()).map(|m|{
-    //   if(!m.is_dir()){
-        
-    //   }
-    // }).unwrap_or(0); .
     let mut folderloc=0;
-    let mut filedime="".to_string();
     let mut filetype="Folder".to_string();
     // let mut filesetcollection=HashSet::new();
     let issymlink=path.is_relative() ||path.is_symlink();
@@ -181,35 +173,9 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
           *hm.entry(filetype.clone()).or_insert(0)+=1;
     let tr;
     let (lmdate,timestamp)=lastmodified(&pathtf);
-  //   let samplestring="".to_string();
-  // let samplebool=false;
-  // let sampleu64=0 as u64;
-  // let samplei64=0 as i64;
-  // let samplei32=0;
-  // FileItem { 
-    // name:samplestring.clone(),
-        // path: samplestring.clone(),
-        // is_dir: samplebool,
-        // size: samplestring.clone(),
-        // rawfs: sampleu64,
-        // lmdate: samplestring.clone(),
-        // timestamp: samplei64,
-        // foldercon: samplei32,
-        // ftype: samplestring, 
-      // }
     FileItem { 
       name:
-      // if(folderloc>0){
-      //   name.clone() + " (" + &folderloc.to_string() + ")" 
-      // }
-      // else if !filedime.is_empty() {
-      //   name.clone() + " (" + &filedime + ")" 
-        
-      // }
-      // else
-      // {
         name.clone()
-      // }
       ,
       path:pathtf.clone(),
       is_dir,
@@ -235,15 +201,3 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
       ,
   }
   }
-
-  // pub fn is_hidden(entry: &DirEntry) -> bool {
-  //   let g=entry.file_name()
-  //     .to_str()
-  //     .map(|s| s.starts_with("."))
-  //     .unwrap_or(false);
-  //         // if(entry.file_name().to_string_lossy().to_string().contains("apps")){
-  //   // if(!g){
-  //   //   println!("-----------{:?}==={}",entry.path(),g);
-  //   // }
-  //   g
-  // }

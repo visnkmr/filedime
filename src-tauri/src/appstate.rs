@@ -163,12 +163,6 @@ impl AppStateStore {
               }
               buttonnames
             }
-            // tx:Mutex::new(Some(tx)),
-            // rx:Mutex::new(Some(rx))
-            // tx:RwLock::new(Some(tx)),
-            // rx:RwLock::new(Some(rx))
-            // app_handle: apphandle
-            // size:0
         }
     }
     pub fn addmark(&self,path:String,id:String){
@@ -190,37 +184,9 @@ impl AppStateStore {
     pub fn addtab(&self,id:String,path:String,mut ff:String,windowname:String){
         savecustom("filedime", format!("tabs/{}.tabinfo",id), path.clone());
         println!("{}---{}---{}",id,path,ff);
-        // let id=format!("{}",(id.parse::<i32>().unwrap()+1));
-        // let mut tabhist=Vec::new();
-        // match(self.tabs.read().unwrap().get(&(windowname.clone()+"."+&id))){
-        //     Some(tabi)=>{
-        //         tabhist=tabi.history.clone();
-        //         if(
-        //             ff!="back" 
-        //             && 
-        //             ff!="newtab"
-        //         ){
-        //             let tabprevurl=tabi.path.clone();
-        //             tabhist.push(tabprevurl);
-        //         }
-        //         else{
-        //             ff="".to_string();
-        //         }
-        //     },
-        //     None=>{
-
-        //     }
-        // }
 
         let mut tabs=self.tabs.write().unwrap();
         tabs.insert(path);
-        // tabs.insert((windowname.clone()+"."+&id),tab {
-        //         path: path, 
-        //         focusfolder: ff,
-        //         history: tabhist,
-        //         windowname:windowname
-        //     }
-        // );
     }
     pub fn removetab(&self,id:String,windowname:String){
         clearcustom("filedime", format!("tabs/{}.tabinfo",id));

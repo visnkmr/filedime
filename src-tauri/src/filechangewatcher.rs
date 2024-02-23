@@ -35,13 +35,13 @@ pub fn initinfo(lopentime:&mut FileTime,path: &PathBuf){
     *lopentime = FileTime::from_last_modification_time(&metadata);
                 
 }
-#[tauri::command]
-pub async fn sendlog(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-//   state.removetab(id);
-  let app_handle = window.app_handle();
-  notifychange(windowname, &app_handle);
-  Ok(())
-}
+// #[tauri::command]
+// pub async fn sendlog(windowname:&str,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
+// //   state.removetab(id);
+//   let app_handle = window.app_handle();
+//   notifychange(windowname, &app_handle);
+//   Ok(())
+// }
 
 #[tauri::command]
 pub async fn stopserver(path:String,state: State<'_, AppStateStore>)->Result<(),()>{
