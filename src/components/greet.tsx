@@ -1390,7 +1390,18 @@ export default function Greet() {
        <h1 className='pt-8 p-2'>Drives ({driveslist.length})</h1>
        {
          
-        driveslist.map((message, index) => (
+        driveslist.sort((a, b) => {
+          const nameA = a.vendormodel.toUpperCase(); // Convert to uppercase to ignore case sensitivity
+          const nameB = b.vendormodel.toUpperCase(); // Convert to uppercase to ignore case sensitivity
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return  1;
+          }
+          // names must be equal
+          return  0;
+        }).map((message, index) => (
           
          <ContextMenu>
            <ContextMenuTrigger>
