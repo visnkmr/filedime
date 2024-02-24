@@ -22,6 +22,7 @@ const nextConfig =
 // withPWA(
   // withBundleAnalyzer(
     {
+      reactStrictMode: false,
   // withPWA,
   // withOptimizedImages,
   experimental: {
