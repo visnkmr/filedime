@@ -36,6 +36,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuTrigger,
 } from "./ui/context-menu"
 import {
@@ -89,6 +90,7 @@ export default function Greet() {
     const { toast } = useToast()
     
     async function setupAppWindow() {
+      console.log(Math.random());
       const appWindow = (await import('@tauri-apps/api/window')).appWindow
       console.log("windowname top---------->"+appWindow.label)
   
@@ -212,14 +214,14 @@ export default function Greet() {
         listfiles(tab.id,tab.path)
      }
     const [p,setp]=useState("")
-    useEffect(() => {
-      //check if react is in strict mode
-      console.log(Math.random());
-      // let wfp=async()=>{setp(await platform())
-      // console.log(await platform())};
-      // wfp();
+    // useEffect(() => {
+    //   //check if react is in strict mode
+    //   console.log(Math.random());
+    //   // let wfp=async()=>{setp(await platform())
+    //   // console.log(await platform())};
+    //   // wfp();
       
-    }, []);
+    // }, []);
     function initkeyboardshortcuts()
     {useKeyboardShortcut(()=>{
       newtab("drives://");
@@ -673,7 +675,7 @@ export default function Greet() {
               
             </ContextMenuTrigger>
             <ContextMenuContent className=''>
-              <p className='text-sm'>{path}</p>
+              <ContextMenuLabel className='text-sm'>{path}</ContextMenuLabel>
               <ContextMenuItem onSelect={(e)=>{
                 invoke("newwindow",
                 {
