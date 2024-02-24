@@ -27,8 +27,9 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
 //  -> Vec<String> 
  { 
   if(string.len()<3){
-      return Ok(());
-    }
+    opendialogwindow(&window.app_handle(), "search aborted", "enter at least 3 characters to search",&getuniquewindowlabel());
+    return Ok(());
+  }
  
   let searchthrough=state.stl.lock().unwrap();
   let map=searchthrough.clone();
@@ -36,7 +37,7 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
  
   drop(searchthrough);
  if(filescount<1){
-    // opendialogwindow(&window.app_handle(), "Error #400: Populate search list first", "unknown file type",&getuniquewindowlabel());
+    opendialogwindow(&window.app_handle(), "Populate search list first", "No files to search through",&getuniquewindowlabel());
     return Err("No files to search through".to_string());
   }
 
@@ -211,7 +212,6 @@ let u:HashSet<String>=map.clone()
     });
     v.reverse();
     let sts = &state.starttime;
-    let currentcoutnervalue=sts.load(Ordering::SeqCst);
     state.starttime.store(starttime, Ordering::SeqCst);
     // v.split_off(100);
     // for (c,ei) in 
