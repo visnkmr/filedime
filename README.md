@@ -4,24 +4,30 @@ Features implemented:
 
 - [x] multi window, open in new window open in right click context menu
 - [x] tabs, open in new tab option in context menu
-- [] hot reload/ monitor for changes: markdown, html files using the watch button that shows up on opening the file.
+- [x] hot reload/ monitor for changes: markdown, html files using the watch button that shows up on previewing the file.
 - [x] search with speed and responsiveness parity with fzf
 - [x] folder size compute with speed and responsiveness parity with baobab(Disk Usage Analyzer).
-- [] preview html, markdown files.
-- [x] LOC for ts, rs, js, java, md ,css, html, toml, etc more can be implemented as required.
 - [x] bookmark files or folders.
 - [x] details screen for list sort by date, size.
-- [x] path autocomplete as you type.
-- [] recent files list that ignores node_modules, and hidden folders and files etc.
-- [x] no of each file type in present location.
 - [x] optionally show immediate sub folder count of a folder.
-- [x] show image dimension along with file type.
-- [x] System Tray icons for opening new window and access recent files.
+- [ ] recent files list.
+- [ ] show image dimension along with file type. (cannot use image crate as it cannot be used on nixos in default preference)
 - [ ] rsync based copy, cut, move, etc.
+- [ ] move files
+- [ ] undo last operation
+- [ ] show ramdisk among files (for the time being can bookmark ramdisk)
+
 
 Subtle features
+- [x] path autocomplete as you type.
+- [x] no of each file type in present location.
 - [x] show name of right click file above context menu
 - [x] show file location on hover
+- [x] show device vendor name on hover
+- [x] LOC for ts, rs, js, java, md ,css, html, toml, etc more can be implemented as required.
+
+Will be added based on demand
+- [ ] System Tray icons for opening new window and access recent files.
 
 Thanks Tauri, Typescript, Webpack->RSPack, NextJS, ShadCN
 
