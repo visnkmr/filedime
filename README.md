@@ -12,7 +12,6 @@ Features implemented:
 - [x] optionally show immediate sub folder count of a folder.
 - [ ] recent files list.
 - [ ] show image dimension along with file type. (cannot use image crate as it cannot be used on nixos in default preference)
-- [ ] rsync based copy, cut, move, etc.
 - [ ] move files
 - [ ] undo last operation
 - [ ] show ramdisk among files (for the time being can bookmark ramdisk)
