@@ -13,7 +13,7 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit, 
   lastmodcalc::lastmodified, 
-  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml,  sendtofrontend::slist,
+  appstate::{AppStateStore, set_enum_value, wThread, get_enum_value}, openhtml::loadfromhtml,  sendtofrontend::slist, opendialogwindow,
   // loadjs::loadjs
 };
 #[tauri::command]
@@ -55,6 +55,12 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
   };
     // return Ok(())
   } 
+  window.app_handle().emit_all(
+    "start-timer",
+    "",
+  )
+  .map_err(|e| e.to_string())?; 
+opendialogwindow(&window.app_handle(), "Loading search", &format!("{} is being indexed to be searched",path), "");
       let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
 
       WalkBuilder::new(&path)
@@ -103,6 +109,13 @@ pub async fn populate_try(mut path: String, window:&Window,state: &State<'_, App
               WalkState::Continue
           })
       });
+      window.app_handle().emit_all(
+        "stop-timer",
+        "",
+      )
+      .map_err(|e| e.to_string())?; 
+    opendialogwindow(&window.app_handle(),"Loaded",&format!("total {} file names can be searched",state.stl.lock().unwrap().len()),"");
+    opendialogwindow(&window.app_handle(), "Ready to search", &format!("{} is ready to be searched.",path), "");
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();
         let endtime = duration.as_secs();

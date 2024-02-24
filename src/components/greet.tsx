@@ -1768,7 +1768,7 @@ export default function Greet() {
             <Button variant={"ghost"}  onClick={
               (event)=>{
                 reset()
-                let lct=new Date().getTime().toString();
+                let lct=new Date().getTime();
 
                 lastcalledtime.current=lct
                 

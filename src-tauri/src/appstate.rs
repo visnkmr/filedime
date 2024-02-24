@@ -5,7 +5,7 @@ use std::collections::{HashSet, HashMap};
 use std::fs;
 use std::mem::{self};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicI8, Ordering, AtomicI16};
+use std::sync::atomic::{AtomicI8, Ordering, AtomicI16, AtomicI64};
 // use std::sync::mpsc::{Sender, Receiver};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -36,6 +36,7 @@ pub struct AppStateStore {
     pub expiration:Duration,
     pub whichthread:Arc<AtomicI8>,
     pub searchcounter:Arc<AtomicI16>,
+    pub starttime:Arc<AtomicI64>,
     bookmarks:RwLock<HashSet<marks>>,
     messagetothread:RwLock<String>,
     recents:Vec<String>,
@@ -97,6 +98,7 @@ impl AppStateStore {
             }}),
             whichthread:Arc::new(AtomicI8::new(0)),
             searchcounter:Arc::new(AtomicI16::new(0)),
+            starttime:Arc::new(AtomicI64::new(0)),
             nosize:RwLock::new(true),
             excludehidden:RwLock::new({
                 let truechecker=getcustom("filedime", "storevals/excludehidden.set", "false");

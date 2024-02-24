@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering, AtomicI16}}, thread, io::{BufReader, BufRead}, collections::HashSet};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, Ordering, AtomicI16}, mpsc::{self, TryRecvError}}, thread, io::{BufReader, BufRead}, collections::HashSet};
 
 use ignore::WalkBuilder;
 use rayon::prelude::*;
@@ -23,7 +23,7 @@ struct rstr{
   files:HashSet<FileItem>
 }
 #[tauri::command]
-pub async fn  search_try(starttime:String,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
+pub async fn search_try(starttime:i64,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
 //  -> Vec<String> 
  { 
   if(string.len()<3){
@@ -144,6 +144,7 @@ pub async fn  search_try(starttime:String,windowname:String,mut string: String,w
   let app_handle = window.app_handle();
 
 starttimer(&windowname2,&app_handle);
+opendialogwindow(&window.app_handle(), "Search in progress", &format!("Searching for {} ",string), "");
 set_enum_value(&state.whichthread, wThread::Searching);
 let stop_flag_local = Arc::new(AtomicBool::new(true));
 
@@ -209,14 +210,23 @@ let u:HashSet<String>=map.clone()
       score // Return the score as the key
     });
     v.reverse();
-
+    let sts = &state.starttime;
+    let currentcoutnervalue=sts.load(Ordering::SeqCst);
+    state.starttime.store(starttime, Ordering::SeqCst);
     // v.split_off(100);
     // for (c,ei) in 
+    // let (tx,rx)=mpsc::channel::<String>();
     v
     .par_iter()
     .enumerate()
-    .try_for_each(| (c,ei)|{
+    // .panic_fuse()
+    .for_each(| (c,ei)|{
       
+      if(sts.load(Ordering::SeqCst)!=starttime){
+        println!("closing search started @ {} ",starttime);
+        panic!("")
+      }
+      // thread::sleep(Duration::from_millis(3000));
     //   window.emit("reloadlist",json!({
     //     "message": "pariter3",
     //     "status": "running",
@@ -232,9 +242,20 @@ let u:HashSet<String>=map.clone()
               "files":&serde_json::to_string(&file.clone()).unwrap(),
             })).unwrap()).unwrap();
             
-      Some(())
+      
     });
-   
+  //  loop{
+  //   match rx.try_recv() {
+  //       Ok(status) => {
+  //           println!("{}",status);
+  //       }
+  //       Err(TryRecvError::Disconnected) => {
+  //           println!("finished");
+  //           break;
+  //       }
+  //       Err(TryRecvError::Empty) => {}
+  //   }
+  //  }
   }
   *doneornot_clone.lock().unwrap()=true;
   sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
@@ -254,4 +275,22 @@ stoptimer(&wname,&window.app_handle());
   
   // println!("{:?}",options);
   // options
+}
+
+#[test]
+fn ptest(){
+  let mut last_print = Instant::now(); 
+  println!("started @ {:?}",last_print);
+  (0..1_000_000)
+    .into_par_iter()
+    .panic_fuse()
+    .for_each(|i| {
+        // simulate some work
+        // thread::sleep(Duration::from_secs(1));
+        if(i <  1){// oops! This will cause a panic
+          println!("ended @ {:?}",last_print.elapsed());
+          panic!("")
+        }
+    });
+    println!("ended @ {:?}",last_print.elapsed());
 }
