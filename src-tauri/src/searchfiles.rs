@@ -23,7 +23,7 @@ struct rstr{
   files:HashSet<FileItem>
 }
 #[tauri::command]
-pub async fn search_try(starttime:i64,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
+pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,window: Window, state: State<'_, AppStateStore>)->Result<(),String>
 //  -> Vec<String> 
  { 
   if(string.len()<3){
@@ -219,11 +219,20 @@ let u:HashSet<String>=map.clone()
     v
     .par_iter()
     .enumerate()
-    // .panic_fuse()
+    .panic_fuse()
     .for_each(| (c,ei)|{
-      
       if(sts.load(Ordering::SeqCst)!=starttime){
         println!("closing search started @ {} ",starttime);
+        *doneornot_clone.lock().unwrap()=true;
+          sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
+
+          opendialogwindow(&app_handle,"Search halted",&format!("Halted search for {}",string),"");
+        stoptimer(&wname,&window.app_handle());
+          
+            let now = SystemTime::now();
+            let duration = now.duration_since(UNIX_EPOCH).unwrap();
+            let endtime = duration.as_secs();
+            println!("endtime----{}",endtime-startime);
         panic!("")
       }
       // thread::sleep(Duration::from_millis(3000));
