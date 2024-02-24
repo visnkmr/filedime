@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 // import { fs } from '@tauri-apps/api'
 import { listen } from '@tauri-apps/api/event';
 import FRc from "./findsizecomp"
-import Panzoom from "@panzoom/panzoom"
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+
 import {
   HoverCard,
   HoverCardContent,
@@ -119,32 +120,7 @@ export default function ReadFileComp({message}:rfcprops){
                     .catch(console.error)
            }
         }, [message.path]);
- useEffect(()=>{
-
-   const elem = document.getElementById('panzoom-element')
-   if(elem){
-
-     const panzoom = Panzoom(elem, {
-      cursor: "default",
-      maxScale: 7,
-      minScale: 1,
-      canvas:true,
-      // panOnlyWhenZoomed: true,
-      step: 0.1,
-      contain:"outside"
-     })
-    
-     elem.parentElement.addEventListener('wheel', 
-     function (event: any) {
-      if (!event.ctrlKey) return
-      const pan = panzoom.getPan()
-      panzoom.zoomWithWheel
-      (event);
-      panzoom.pan(pan.x, pan.y);
-    }
-    )
-   }
- })       
+       
     return (
         <>
         
@@ -200,11 +176,12 @@ export default function ReadFileComp({message}:rfcprops){
             <div className={`h-[90%] overflow-${scrollorauto}`}>
 
         {IMAGE_TYPES.some(type => message.name.includes(type))?(
-           <div 
-            id="panzoom-element"
-         >
-        <img
-        src={`${convertFileSrc(message.path)}`}/></div>
+          <TransformWrapper
+          wheel={{ step: 2, smoothStep: 0.01, wheelDisabled: true }}>
+          <TransformComponent>
+            <img src={`${convertFileSrc(message.path)}`}  className={`w-full h-auto object-cover`}/>
+          </TransformComponent>
+        </TransformWrapper>
         
         ):""}
           {message.name.includes(".pdf")?(<embed className={"w-full h-full"} src={`${convertFileSrc(message.path)}#toolbar=0&navpanes=1`} type="application/pdf"/>):""}
