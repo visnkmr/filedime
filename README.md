@@ -1,5 +1,7 @@
 Filedime, an open source almost feature complete file explorer written in Rust (for all filesystem interaction,backend), Tauri(for frontend, front-backend intercom).
 
+![](https://cdn.jsdelivr.net/gh/visnkmr/filedime@nextrelease/quickintro.png) 
+
 Features implemented:
 
 - [x] multi window, open in new window open in right click context menu
