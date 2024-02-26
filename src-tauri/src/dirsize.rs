@@ -4,19 +4,20 @@ use tauri::{Window, State};
 use std::{fs, path::{PathBuf, Path}};
 use ignore::WalkBuilder;
 
-use crate::{appstate::AppStateStore, sizeunit::find_size};
+use crate::{appstate::AppStateStore, sizeunit::find_size, SHARED_STATE};
 
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
-    find_size(&path.to_string_lossy(),w,g)
+fn file_size(path: &std::path::Path,w:&Window) -> u64 {
+    find_size(&path.to_string_lossy(),w)
     // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
     // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
+pub fn dir_size(path: &String,w:&Window) -> u64 {
+    let state=SHARED_STATE.lock().unwrap();
     // Create a walkdir iterator over the directory
-    let ignorehiddenfiles=*g.excludehidden.read().unwrap();
+    let ignorehiddenfiles=*state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(path)
     .threads(threads)
@@ -55,7 +56,7 @@ pub fn dir_size(path: &String,w:&Window,g:&State<'_, AppStateStore>) -> u64 {
             //     // "status": entry.path(),
             //     "status": "running",
             // }));
-            file_size(entry.path(),w,g)
+            file_size(entry.path(),w)
         })
         // Sum up all file sizes
         .sum::<u64>();

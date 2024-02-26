@@ -16,7 +16,7 @@ use crate::{markdown::loadmarkdown,
   openhtml::loadfromhtml, 
   fileitem::populatefileitem, 
   filltrie::populate_try, 
-  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, drivelist::{get_drives, get_disks}, 
+  sendtofrontend::*, startup, opendialogwindow, getuniquewindowlabel, drivelist::{get_drives, get_disks}, SHARED_STATE, 
   // loadjs::loadjs
 };
 
@@ -33,15 +33,19 @@ pub async fn checkiffile(path: String,window: Window) {
   window.app_handle().emit_to(window.label(), "checkiffileresult", check_if_file(vec![path]));
  
 }
-  #[tauri::command]
-pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {
-  startup(&window.app_handle());
+fn list_file(arguments:Vec<String>){
+  let starttime =arguments.get(0).unwrap();
+  let windowname =arguments.get(1).unwrap();
+  let oid =arguments.get(2).unwrap();
+  let path =arguments.get(3).unwrap();
+  let state=SHARED_STATE.lock().unwrap();
+  
   println!("lfiles");
   let ignorehiddenfiles=*state.excludehidden.read().unwrap();
   if(path=="drives://"){
     match(dirs::home_dir()){
     Some(spath) => {
-      path=spath.to_string_lossy().to_string();
+      path=&spath.to_string_lossy().to_string();
       sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
 
     },
@@ -123,7 +127,7 @@ pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: 
   sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
   //create new tab
-  newtab(&windowname,oid.clone(), path.clone(), ff.clone(), window.clone(), state.clone()).await;
+  newtab(&windowname,oid.clone(), path.clone()).await;
  
 let parent=testpath.clone();
 
@@ -249,7 +253,7 @@ let handle=thread::spawn(move|| {
           if(!e.path().to_string_lossy().to_string().eq(&path)){
             // thread::sleep(Duration::from_millis(1000));
             // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
-            let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window,&state);
+            let file = populatefileitem(e.file_name().to_string_lossy().to_string(),e.path(),&window);
             let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
             // println!("{:?}",file);
             // println!("added--->{:?}",e);
@@ -300,6 +304,16 @@ sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetc
     let endtime = duration.as_secs();
     println!("endtime----{}",endtime-startime);
     
+}
+  #[tauri::command]
+pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window) -> Result<(), String> {
+  startup(&window.app_handle());
+  let mut arguments=vec![];
+  arguments.push(starttime);
+  arguments.push(windowname);
+  arguments.push(oid);
+  arguments.push(path);
+  list_file(arguments);
   
     
   Ok(())  

@@ -2,7 +2,7 @@ use prefstore::clearall;
 use serde::Serialize;
 use tauri::{Window, State, Manager};
 
-use crate::{appstate::AppStateStore, list_files, sendtofrontend::loadmarks};
+use crate::{appstate::AppStateStore, list_files, sendtofrontend::loadmarks, SHARED_STATE};
 
 
 #[derive(Clone,Debug,Serialize)]
@@ -26,12 +26,23 @@ pub async fn closetab(windowname:&str,id:String,window: Window,state: State<'_, 
   state.removetab(id,windowname.to_string());
   Ok(())
 }
-#[tauri::command]
-pub async fn newtab(windowname:&str,oid:String,path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.addtab(oid.clone(), path.clone(), ff.clone(),windowname.to_string());
+fn add_tab(arguments:Vec<String>){
+ let oid=arguments.get(0).unwrap();
+ let path=arguments.get(1).unwrap();
+ let windowname=arguments.get(2).unwrap();
+ let state=SHARED_STATE.lock().unwrap();
+ state.addtab(oid.clone(), path.clone(), "".to_string(),windowname.clone());
 
-  println!("added tab {} to window {} for path {}",oid,windowname,path);
   
+}
+#[tauri::command]
+pub async fn newtab(windowname:&str,oid:String,path:String)->Result<(),()>{
+  let mut arguments=vec![];
+  arguments.push(oid.clone());
+  arguments.push(path.clone());
+  arguments.push(windowname.to_string());
+  add_tab(arguments);
+  println!("added tab {} to window {} for path {}",oid,windowname,path);
   // listtabs(windowname,window, state).await;
   Ok(())
 }

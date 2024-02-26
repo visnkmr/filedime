@@ -17,13 +17,14 @@ use crate::{markdown::loadmarkdown,
   tabinfo::newtab, 
   FileItem, sizeunit::{self, find_size}, 
   lastmodcalc::lastmodified, 
-  appstate::AppStateStore, 
+  appstate::AppStateStore, SHARED_STATE, 
   // loadjs::loadjs
 };
 
-pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, AppStateStore>)->FileItem{
+pub fn populatefileitem(name:String,path:&Path,window:&Window)->FileItem{
   // println!("path=-------->{:?}",path);
     // println!("{}",name);
+    let state=SHARED_STATE.lock().unwrap();
     let pathtf=path.to_string_lossy().into_owned();
     let ignorehiddenfiles=*state.excludehidden.read().unwrap();
     // println!("-----------{}",path.clone());
@@ -31,7 +32,7 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window,state: &State<'_, 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size=
     if(!path.is_symlink()){
-      find_size(&pathtf,window,state)
+      find_size(&pathtf,window)
     }
     else{
       0

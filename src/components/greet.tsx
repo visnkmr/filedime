@@ -460,12 +460,44 @@ export default function Greet() {
   }
   },[]);
 
+
     useEffect(() => {
       listen("folder-count",(data: { payload: string }) => {
         progresstotal.current=(data.payload)
       }) 
+      listen("tabnamereturn",(data)=>{
+        let returned=(data.payload)
+      })
       listen("checkiffileresult",(data: { payload: string }) => {
-        progresstotal.current=(data.payload)
+        let returned=JSON.parse(data.payload)
+        if(returned.truth==="false"){
+          console.log("update tabs called")
+          invoke(
+            "tabname",
+            {
+              path:tabpath,
+            }
+          )
+          // .then((returned:string)=>{
+            sst(returned)
+            console.log("preupdate tablist--->"+JSON.stringify(tablist))
+             if(tablist && tablist.length>0){
+        
+            let tempstoreoldtablist=tablist;
+            let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
+            if(objIndex !== -1){
+        
+              tempstoreoldtablist![objIndex!].path = tabpath;
+              tempstoreoldtablist![objIndex!].tabname = returned;
+              settbl(tempstoreoldtablist!);
+            }
+            console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
+          }
+          // })
+          // .catch((e)=>{
+          //   console.error(e)
+          // })
+        }
       }) 
       listen("start-timer",() => {
         setlv(true)
@@ -948,38 +980,14 @@ export default function Greet() {
         string: "",
     })
   }
-   
+   let [checkiffile,setiff]=useState(false)
   function updatetabs(tabpath){
     invoke("checkiffile",{
       path:p
     })
-    .catch((e)=>{
-      console.log("update tabs called")
-    invoke(
-      "tabname",
-      {
-        path:tabpath,
-      }
-    ).then((returned:string)=>{
-      sst(returned)
-      console.log("preupdate tablist--->"+JSON.stringify(tablist))
-       if(tablist && tablist.length>0){
-  
-      let tempstoreoldtablist=tablist;
-      let objIndex = tempstoreoldtablist!.findIndex((obj => obj.id === activetabid));
-      if(objIndex !== -1){
-  
-        tempstoreoldtablist![objIndex!].path = tabpath;
-        tempstoreoldtablist![objIndex!].tabname = returned;
-        settbl(tempstoreoldtablist!);
-      }
-      console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
-    }
-    })
-    .catch((e)=>{
-      console.error(e)
-    })
-    })
+    // .catch((e)=>{
+      
+    // })
     
   }
   function closetab(closeid){
@@ -1010,12 +1018,12 @@ export default function Greet() {
       // console.error(gotopath)
       let newtabid=`${new Date().getTime()}${salt}`;
   
-                        invoke(
-                          "tabname",
-                          {
-                            path:gotopath,
-                          }
-                        ).then((returned:string)=>{
+                        // invoke(
+                        //   "tabname",
+                        //   {
+                        //     path:gotopath,
+                        //   }
+                        // ).then((returned:string)=>{
                           console.log("what was returned....."+returned)
                           invoke(
                             "newtab",
@@ -1047,10 +1055,10 @@ export default function Greet() {
                           })
         // console.log("opened tab now tablist is "+JSON.stringify(tablist))
   
-                          addToTabHistory(newtabid.toString(),gotopath)
-                          setactivetabid(newtabid)
+                          // addToTabHistory(newtabid.toString(),gotopath)
+                          // setactivetabid(newtabid)
                           listfiles(newtabid,gotopath);
-                        });
+                        // });
     }
     function reloadsize(togglewhat="size"){
       reset(path)

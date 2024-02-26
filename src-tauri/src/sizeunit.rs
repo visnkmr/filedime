@@ -4,7 +4,7 @@ use filesize::PathExt;
 use serde_json::json;
 use tauri::{State, Window};
 
-use crate::{appstate::{AppStateStore, cachestore}, dirsize};
+use crate::{appstate::{AppStateStore, cachestore}, dirsize, SHARED_STATE};
 
 // Define constants for kilobyte, megabyte, gigabyte and terabyte
 const KB: u64 = 1024;
@@ -34,8 +34,9 @@ pub fn size(B: u64, isbytes: bool) -> String {
         "".to_string()
     }
 }
-pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) ->u64{
+pub fn find_size(path: &str,window:&Window) ->u64{
     // return 0 as u64;
+    let state=SHARED_STATE.lock().unwrap();
     let cstore=state.cstore.read().unwrap();
 
     // let k=0;
@@ -96,7 +97,6 @@ pub fn find_size(path: &str,window:&Window,state: &State<'_, AppStateStore>) ->u
             dirsize::dir_size(
                 &entry_path.as_os_str().to_os_string().to_string_lossy().to_string(),
                 window,
-                &state,
             )
 
         };
