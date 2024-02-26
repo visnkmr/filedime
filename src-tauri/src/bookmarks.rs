@@ -31,13 +31,23 @@ pub fn remove_mark(arguments:Vec<String>)->String{
   serde_json::to_string(&state.getmarks()).unwrap()
 }
 
+pub fn add_mark(arguments:Vec<String>)->String{
+  let path=arguments.get(0).unwrap().clone();
+  let id=arguments.get(1).unwrap().clone();
+  let state=SHARED_STATE.lock().unwrap();
+  state.addmark(path,id);
+  serde_json::to_string(&state.getmarks()).unwrap()
+}
+
 
 #[tauri::command]
-pub async fn addmark(windowname:&str,path:String,id:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  state.addmark(path,id);
+pub async fn addmark(windowname:&str,path:String,id:String,window: Window)->Result<(),()>{
+  let mut arguments=Vec::new();
+  // arguments.push(windowname);
+  arguments.push(path);
+  arguments.push(id);
   let app_handle = window.app_handle();
-  // println!("{:?}",state);
-  loadmarks(windowname, &app_handle, serde_json::to_string(&state.getmarks()).unwrap());
-  
+  // let (tx, rx) = mpsc::channel();
+  loadmarks(windowname, &app_handle, add_mark(arguments));
   Ok(())
 }
