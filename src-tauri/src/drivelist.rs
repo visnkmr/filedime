@@ -291,7 +291,9 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {
     Ok(Drives { array_of_drives })
 }
 
- pub fn mountdrive(uuid:String,mount_point:String) ->bool{
+ pub fn mountdrive(arguments:Vec<String>) ->bool{
+    let uuid=arguments.get(0).unwrap().clone();
+    let mount_point=arguments.get(1).unwrap().clone();
     let mount_cmd=Command::new("udisksctl")
                 .arg("mount")
                 .arg("--block-device")

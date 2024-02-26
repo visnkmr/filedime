@@ -20,16 +20,18 @@ use crate::{markdown::loadmarkdown,
   // loadjs::loadjs
 };
 
-
+pub fn check_if_file(arguments:Vec<String>)->String{
+  if(PathBuf::from(&arguments.get(0).unwrap()).is_file()){
+    "true".to_string()
+   }
+   else{
+    "false".to_string()
+   }
+}
 #[tauri::command]
-pub async fn checkiffile(path: String) -> Result<(),()> {
-  
-  if(PathBuf::from(&path).is_file()){
-    return Ok(())
-  }
-  else{
-    return Err(())
-  }
+pub async fn checkiffile(path: String,window: Window) {
+  window.app_handle().emit_to(window.label(), "checkiffileresult", check_if_file(vec![path]));
+ 
 }
   #[tauri::command]
 pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window, state: State<'_, AppStateStore>) -> Result<(), String> {

@@ -176,9 +176,9 @@ export default function Greet() {
     },[perpage,sftype,fileslist])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
-      invoke("checkiffile",{
-        path:p
-      }).catch((e)=>{
+      // invoke("checkiffile",{
+      //   path:p
+      // }).catch((e)=>{
 
         if(p){
           setpath(p);
@@ -189,7 +189,7 @@ export default function Greet() {
           setfc(0)
           setss("")
           console.log("reset done")
-      })
+      // })
     }
     function listfiles(oid,path){
       let lct=new Date().getTime().toString();
@@ -464,6 +464,9 @@ export default function Greet() {
       listen("folder-count",(data: { payload: string }) => {
         progresstotal.current=(data.payload)
       }) 
+      listen("checkiffileresult",(data: { payload: string }) => {
+        progresstotal.current=(data.payload)
+      }) 
       listen("start-timer",() => {
         setlv(true)
       })
@@ -543,26 +546,37 @@ export default function Greet() {
       });
       
     },[])
+    //--------------
+    //--------------
+    //--------------STARTING FUNCTION--------------------
+    //--------------
+    //--------------
     useEffect(()=>{
-      if(!appWindow)
-        return
-        if(!startstopfilewatch){
+      // if(!appWindow)
+      //   return
+      //   if(!startstopfilewatch){
           invoke('senddriveslist', { 
             windowname:appWindow?.label,
         })
         reloadsize("loadmarks")
-        invoke("listtabs",{})
-        .then((e)=>{
-          console.log("onopen---->"+e)
-          let tabslist=JSON.parse(e) as string[];
-          for (const [index,ei] of tabslist.entries()){
-            reset(ei)
-            setpath(ei)
-            newtab(ei,index.toString());
-          }
-        })          
-        }
+        // listfiles
+        // invoke("listtabs",{})
+        // .then((e)=>{
+        //   console.log("onopen---->"+e)
+        //   let tabslist=JSON.parse(e) as string[];
+        //   for (const [index,ei] of tabslist.entries()){
+        //     reset(ei)
+            setpath("drives://")
+            newtab("drives://");
+        //   }
+        // })          
+        // }
     },[appWindow])
+        //--------------
+    //--------------
+    //--------------STARTING FUNCTION--------------------
+    //--------------
+    //--------------
     const [showthumbnail,setst]=useState(false)
   
   const columns: ColumnDef<FileItem>[] = [
@@ -938,7 +952,8 @@ export default function Greet() {
   function updatetabs(tabpath){
     invoke("checkiffile",{
       path:p
-    }).catch((e)=>{
+    })
+    .catch((e)=>{
       console.log("update tabs called")
     invoke(
       "tabname",

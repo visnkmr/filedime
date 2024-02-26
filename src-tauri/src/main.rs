@@ -283,7 +283,8 @@ async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<
       });
     },
     "loadmarks"=>{
-      loadmarks(&windowname, &window.app_handle(), serde_json::to_string(&state.getmarks()).unwrap());
+      let marks=serde_json::to_string(&state.getmarks()).unwrap();
+      loadmarks(&windowname, &window.app_handle(), marks);
     },
     _=>{
 
@@ -444,14 +445,33 @@ fn main() {
           println!("Server got message '{}'. ", msg);
           if(msg.is_text()){
             let (functionname,arguments)=parserecieved(msg);
-              match(functionname.as_str()){
+            retvec=match(functionname.as_str()){
                   "removemark"=>{
-                    retvec=remove_mark(arguments)
+                    remove_mark(arguments)
+                  }
+                  "addmark"=>{
+                    add_mark(arguments)
+                  }
+                  "senddriveslist"=>{
+                    get_drives_list()
+                  }
+                  "mountdrive"=>{
+                    if(drivelist::mountdrive(arguments)){
+
+                    }
+                    get_drives_list()
+                  }
+                  "togglesize"=>{
+                    let state=SHARED_STATE.lock().unwrap();
+                    serde_json::to_string(&state.getmarks()).unwrap()
+                  }
+                  "checkiffile"=>{
+                    
                   }
                   _=>{
-
+                    "Error".to_string()
                   }
-              }
+              };
               println!("{}",retvec)
               
           }
