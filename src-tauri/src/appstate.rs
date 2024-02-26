@@ -197,7 +197,7 @@ impl AppStateStore {
         let mut tabs=self.tabs.write().unwrap();
         tabs.remove(&(windowname+"."+&id));
     }
-    pub fn removemark(&self,path:String,id:String){
+    pub fn removemark(&self,path:&str,id:&str){
         clearcustom("filedime", format!("bookmarks/{}.mark",id));
         // println!("{}---{}---{}",id,path,ff);
         

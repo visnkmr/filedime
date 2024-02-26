@@ -416,8 +416,56 @@ async fn checker()-> Result<String, String>{
     }
 
 }
+use ws::{listen, Message};
+use lazy_static::*;
+// Use lazy_static to initialize your shared state
+lazy_static! {
+  static ref SHARED_STATE: Arc<Mutex<AppStateStore>> = Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
+}
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+struct comdes{
+    functionname:String,
+    arguments:String
+}
+fn parserecieved(msg:Message)->(String,Vec<String>){
+    
+  let descomm:comdes=serde_json::from_str(&msg.as_text().unwrap()).unwrap();
+  let arguments:Vec<String>=serde_json::from_str(&descomm.arguments).unwrap();
+  (descomm.functionname,arguments)
+}
 fn main() {
-  let mut g=AppStateStore::new(CACHE_EXPIRY);
+  thread::spawn(move||{
+    if let Err(error) = listen("localhost:8080", |out| {
+      // The handler needs to take ownership of out, so we use move
+      move |msg:Message| {
+        
+          let mut retvec=String::new();
+          // Handle messages received on this connection
+          println!("Server got message '{}'. ", msg);
+          if(msg.is_text()){
+            let (functionname,arguments)=parserecieved(msg);
+              match(functionname.as_str()){
+                  "removemark"=>{
+                    retvec=remove_mark(arguments)
+                  }
+                  _=>{
+
+                  }
+              }
+              println!("{}",retvec)
+              
+          }
+              out.send(retvec)
+
+          // Use the out channel to send messages back
+          
+      }
+  }) {
+      // Inform the user of failure
+      println!("Failed to create WebSocket due to {:?}", error);
+  }
+  });
+  // let mut g=AppStateStore::new(CACHE_EXPIRY);
   let app=tauri::Builder::default()
     .setup(|app| {
       
@@ -434,7 +482,7 @@ fn main() {
     
     .on_window_event(on_window_event)
   
-    .manage(g)
+    .manage(SHARED_STATE.clone())
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
