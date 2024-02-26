@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
+use std::{path::{PathBuf, Path}, time::{SystemTime, UNIX_EPOCH, Instant, Duration}, fs::{self, File}, sync::{Arc, Mutex, RwLock, atomic::{Ordering, AtomicBool}, mpsc}, thread, io::{BufReader, BufRead}, collections::{HashSet, HashMap}};
 
 use ignore::WalkBuilder;
 use rayon::prelude::*;
@@ -33,11 +33,11 @@ pub async fn checkiffile(path: String,window: Window) {
   window.app_handle().emit_to(window.label(), "checkiffileresult", check_if_file(vec![path]));
  
 }
-fn list_file(arguments:Vec<String>){
+fn list_file(tx:mpsc::Sender<String>,arguments:Vec<String>){
   let starttime =arguments.get(0).unwrap();
   let windowname =arguments.get(1).unwrap();
   let oid =arguments.get(2).unwrap();
-  let path =arguments.get(3).unwrap();
+  let mut path =arguments.get(3).unwrap().clone();
   let state=SHARED_STATE.lock().unwrap();
   
   println!("lfiles");
@@ -45,7 +45,7 @@ fn list_file(arguments:Vec<String>){
   if(path=="drives://"){
     match(dirs::home_dir()){
     Some(spath) => {
-      path=&spath.to_string_lossy().to_string();
+      path=spath.to_string_lossy().to_string();
       sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
 
     },
@@ -125,7 +125,6 @@ fn list_file(arguments:Vec<String>){
   state.filesetcollection.write().unwrap().clear();
   //empty existing filesetcollection
   sendfilesetcollection(&wname,&window.app_handle(),&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
-
   //create new tab
   newtab(&windowname,oid.clone(), path.clone()).await;
  
@@ -139,7 +138,7 @@ let parent=testpath.clone();
   let duration = now.duration_since(UNIX_EPOCH).unwrap();
   let startime = duration.as_secs();
   println!("{:?}----{}",parent,startime);
-
+  tx.send("starttimer".to_string());
   starttimer(&windowname,&app_handle)?;
   println!("start timer");
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -308,13 +307,32 @@ sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetc
   #[tauri::command]
 pub async fn list_files(starttime:String,windowname:String,oid:String,mut path: String,ff:String, window: Window) -> Result<(), String> {
   startup(&window.app_handle());
+  
   let mut arguments=vec![];
   arguments.push(starttime);
   arguments.push(windowname);
   arguments.push(oid);
   arguments.push(path);
-  list_file(arguments);
+   let (tx, rx) = mpsc::channel::<String>();
+  list_file(tx.clone(),arguments);
+  thread::spawn(move||{
+    loop{
+      match(rx.recv()){
+    Ok(_) => {
+      
+    },
+    Err(_) => {
+      
+    },
+}
+    }
+  });
+  // let starttime =arguments.get(0).unwrap();
+  // let windowname =arguments.get(1).unwrap();
+  // let oid =arguments.get(2).unwrap();
+  // let mut path =arguments.get(3).unwrap().clone();
   
+
     
   Ok(())  
 }
