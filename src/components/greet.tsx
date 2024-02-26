@@ -20,7 +20,7 @@ export default function Greet() {
       invoke('list_files', { 
         starttime:"123",
           windowname:"appWindow?.label",
-          oid: "oid.toString()",
+          oid: message,
           path: "/home",
           ff: "" 
     })

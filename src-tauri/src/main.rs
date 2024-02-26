@@ -38,7 +38,12 @@ fn main() {
           println!("Server got message '{}'. ", msg);
           if(msg.is_text()){
             let (functionname,arguments)=parserecieved(msg);
-            retvec=format!("{}{:?}",functionname,arguments);
+            let state=SHARED_STATE.lock().unwrap();
+            let prev=state.cstore.read().unwrap().clone();
+            retvec=format!("{}",prev);
+            // retvec=format!("{}{:?}",functionname,arguments);
+            *state.cstore.write().unwrap()=format!("{}-----{}",prev,arguments.get(2).unwrap().clone());
+            drop(state);
             // match(functionname.as_str()){
                  
             //       _=>{

@@ -21,7 +21,7 @@ pub struct cachestore{
 
 #[derive(Debug)]
 pub struct AppStateStore {
-    pub cstore:RwLock<FxHashMap<String,cachestore>>,
+    pub cstore:RwLock<String>,
     
 }
 #[derive(Debug)]
@@ -59,7 +59,7 @@ impl AppStateStore {
 
         Self {
             // Wrap the cache in a RwLock
-            cstore:RwLock::new(FxHashMap::default()),
+            cstore:RwLock::new(String::new()),
             
         }
     }
