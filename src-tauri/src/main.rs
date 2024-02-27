@@ -6,15 +6,30 @@ const CACHE_EXPIRY:u64=60;
 
 mod appstate;
 use appstate::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tauri::{GlobalWindowEvent, WindowEvent};
-use std::{sync::{Mutex, Arc}, thread, net::{TcpListener, TcpStream}, fs, io::*, path::Path};
+use std::{sync::{Mutex, Arc, mpsc}, thread, net::{TcpListener, TcpStream}, fs, io::*, path::Path};
 
 use ws::{listen, Message};
 use lazy_static::*;
+
+use crate::listfiles::list_file;
 // Use lazy_static to initialize your shared state
 lazy_static! {
   static ref SHARED_STATE: Arc<Mutex<AppStateStore>> = Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
+}
+#[derive(Serialize, Clone, Debug, PartialEq, Hash, Eq)]
+pub struct FileItem {
+  name: String,
+  path: String,
+  is_dir: bool,
+  size: String,
+  rawfs: u64,
+  lmdate: String,
+  timestamp: i64,
+  foldercon: i32,
+  ftype: String, // grandparent:String,
+                 // parent:String
 }
 #[derive(Clone, Debug, Deserialize, PartialEq)]
 struct comdes{
@@ -83,19 +98,48 @@ fn main() {
     const PORT: &str = "8488";
     let end_point: String = format!("{}:{}", HOST, PORT);
     if let Err(error) = listen(end_point, |out| {
+      let outc=(out.clone());
       // The handler needs to take ownership of out, so we use move
       move |msg:Message| {
-        
+          let (tx, rx) = mpsc::channel::<String>();
           let mut retvec=String::new();
           // Handle messages received on this connection
           println!("Server got message '{}'. ", msg);
           if(msg.is_text()){
             let (functionname,arguments)=parserecieved(msg);
+            if functionname=="listfiles"{
+              list_file(tx.clone(),arguments);
+            }
             let state=SHARED_STATE.lock().unwrap();
-            let prev=state.cstore.read().unwrap().clone();
-            retvec=format!("{}",prev);
-            // retvec=format!("{}{:?}",functionname,arguments);
-            *state.cstore.write().unwrap()=format!("{}-----{}",prev,arguments.get(2).unwrap().clone());
+            thread::spawn(move||{
+              loop{
+                match(rx.recv()){
+              Ok(recieved) => {
+                let whatrecieved:Vec<String>=serde_json::from_str(&recieved).unwrap();
+                let whichone=whatrecieved.get(0).unwrap();
+                match(whichone.as_str()){
+                  "sendparent"=>{
+          
+                    // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid);
+                  }
+                  "sendbacktofileslist"=>{
+                    outc.send("msg");
+                  }
+                  _=>{
+          
+                  }
+                }
+              },
+              Err(_) => {
+                
+              },
+          }
+              }
+            });
+            // let prev=state.cstore.read().unwrap().clone();
+            // retvec=format!("{}",prev);
+            // // retvec=format!("{}{:?}",functionname,arguments);
+            // *state.cstore.write().unwrap()=format!("{}-----{}",prev,arguments.get(2).unwrap().clone());
             drop(state);
             // match(functionname.as_str()){
                  
@@ -115,7 +159,8 @@ fn main() {
       // Inform the user of failure
       println!("Failed to create WebSocket due to {:?}", error);
   }
-  });
+  }
+);
   // loop{
 
   // }
@@ -131,6 +176,7 @@ fn main() {
     .invoke_handler(
       tauri::generate_handler![
         // getpathfromid,
+        listfiles::list_files
        
         ]
       )
@@ -156,6 +202,13 @@ fn main() {
     _ => {}
   });
 }
+mod listfiles;
+mod sendtofrontend;
+mod fileitem;
+mod lastmodcalc;
+mod dirsize;
+
+mod sizeunit;
 fn on_window_event(event: GlobalWindowEvent) {
   if let WindowEvent::CloseRequested {
       #[cfg(not(target_os = "linux"))]

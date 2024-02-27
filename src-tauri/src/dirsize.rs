@@ -7,14 +7,14 @@ use ignore::WalkBuilder;
 use crate::{appstate::AppStateStore, sizeunit::find_size, SHARED_STATE};
 
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path,w:&Window) -> u64 {
-    find_size(&path.to_string_lossy(),w)
+fn file_size(path: &std::path::Path) -> u64 {
+    find_size(&path.to_string_lossy())
     // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
     // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-pub fn dir_size(path: &String,w:&Window) -> u64 {
+pub fn dir_size(path: &String) -> u64 {
     let state=SHARED_STATE.lock().unwrap();
     // Create a walkdir iterator over the directory
     let ignorehiddenfiles=*state.excludehidden.read().unwrap();
@@ -56,16 +56,16 @@ pub fn dir_size(path: &String,w:&Window) -> u64 {
             //     // "status": entry.path(),
             //     "status": "running",
             // }));
-            file_size(entry.path(),w)
+            file_size(entry.path())
         })
         // Sum up all file sizes
         .sum::<u64>();
-    w.emit("infiniteloader",
-      json!({
-          "message": "lfiles",
-          "status": "stop",
-          })
-      );
+    // w.emit("infiniteloader",
+    //   json!({
+    //       "message": "lfiles",
+    //       "status": "stop",
+    //       })
+    //   );
 
     total_size
 }

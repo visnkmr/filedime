@@ -12,27 +12,28 @@ use serde_json::json;
 use tauri::{Window, State, Manager};
 // use walkdir::{WalkDir, DirEntry};
 
-use crate::{markdown::loadmarkdown, 
-  openpath, 
-  tabinfo::newtab, 
+use crate::{
+  // markdown::loadmarkdown, 
+  // openpath, 
+  // tabinfo::newtab, 
   FileItem, sizeunit::{self, find_size}, 
   lastmodcalc::lastmodified, 
   appstate::AppStateStore, SHARED_STATE, 
   // loadjs::loadjs
 };
 
-pub fn populatefileitem(name:String,path:&Path,window:&Window)->FileItem{
+pub fn populatefileitem(name:String,path:&Path)->FileItem{
   // println!("path=-------->{:?}",path);
     // println!("{}",name);
     let state=SHARED_STATE.lock().unwrap();
     let pathtf=path.to_string_lossy().into_owned();
-    let ignorehiddenfiles=*state.excludehidden.read().unwrap();
+    // let ignorehiddenfiles=*state.excludehidden.read().unwrap();
     // println!("-----------{}",path.clone());
   
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size=
     if(!path.is_symlink()){
-      find_size(&pathtf,window)
+      find_size(&pathtf)
     }
     else{
       0
@@ -40,33 +41,33 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window)->FileItem{
     // let size=0;
     let mut foldercon=0;
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
-    if(*state.showfolderchildcount.read().unwrap()){
-      if(path.is_dir()){
-        let count = WalkBuilder::new(&path)
-        .max_depth(Some(1))
-        .threads(threads)
-        .hidden(ignorehiddenfiles) // Include hidden files and directories
-        .follow_links(false)
-        .parents(true)
+    // if(*state.showfolderchildcount.read().unwrap()){
+    //   if(path.is_dir()){
+    //     let count = WalkBuilder::new(&path)
+    //     .max_depth(Some(1))
+    //     .threads(threads)
+    //     .hidden(ignorehiddenfiles) // Include hidden files and directories
+    //     .follow_links(false)
+    //     .parents(true)
         
-        .git_exclude(true)
-        .ignore(false) // Disable the default ignore rules
-        .git_ignore(true).build()
-        .into_iter()
-        .filter_map(|entry| entry.ok())
-        .par_bridge()
-        .filter(|entry| {
-        //   window.emit("reloadlist",json!({
-        //     "message": "immediatechildcount",
-        //     "status": "running",
-        // }));
-          // entry.file_type().is_file()
-          true
-        })
-        .count();
-      foldercon=count as i32;
-      }
-    }
+    //     .git_exclude(true)
+    //     .ignore(false) // Disable the default ignore rules
+    //     .git_ignore(true).build()
+    //     .into_iter()
+    //     .filter_map(|entry| entry.ok())
+    //     .par_bridge()
+    //     .filter(|entry| {
+    //     //   window.emit("reloadlist",json!({
+    //     //     "message": "immediatechildcount",
+    //     //     "status": "running",
+    //     // }));
+    //       // entry.file_type().is_file()
+    //       true
+    //     })
+    //     .count();
+    //   foldercon=count as i32;
+    //   }
+    // }
 
 
 
@@ -170,8 +171,8 @@ pub fn populatefileitem(name:String,path:&Path,window:&Window)->FileItem{
         }
       }
     }
-    let mut hm=state.filesetcollection.write().unwrap();
-          *hm.entry(filetype.clone()).or_insert(0)+=1;
+    // let mut hm=state.filesetcollection.write().unwrap();
+    //       *hm.entry(filetype.clone()).or_insert(0)+=1;
     let tr;
     let (lmdate,timestamp)=lastmodified(&pathtf);
     FileItem { 
