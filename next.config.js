@@ -39,7 +39,7 @@ const nextConfig =
   // eslint: {
   //   ignoreDuringBuilds: true
   // },
-  assetPrefix: 'http://localhost:3000/',
+  // assetPrefix: 'http://localhost:3000/',
   
   // basePath: '/tmp/webpage/out',
   // basePath: '/home/roger/Downloads/github/webpage/out',
@@ -76,7 +76,7 @@ const nextConfig =
         tls: false
       };
       config.optimization = {
-        minimize: true,
+        minimize: false,
         minimizer: [
           new TerserPlugin({
             // minify: TerserPlugin.swcMinify,
@@ -147,7 +147,7 @@ const nextConfig =
     // };
 
     // Merge chunks instead of creating new ones
-    config.optimization.minimize = true;
+    config.optimization.minimize = false;
 //     if (typeof nextRuntime === "undefined") {
 //       config.resolve.fallback = {
 //                 ...config.resolve.fallback,

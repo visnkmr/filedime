@@ -5,15 +5,21 @@ import { FileItem } from "../shared/types"
 
 
 export default function Greet() {
-  const socket = new WebSocket('ws://localhost:8080');
-
-    socket.onopen = () => {
-      console.log('Connected to WebSocket server');
-    };
-
-    socket.onmessage = (event) => {
-      document.getElementById('output').textContent = event.data;
-    };
+  let socket;
+   useEffect(() => {
+    if (typeof window !== undefined) {
+      // execute your logic here
+    }
+    socket = new WebSocket('ws://localhost:8080');
+  
+      socket.onopen = () => {
+        console.log('Connected to WebSocket server');
+      };
+  
+      socket.onmessage = (event) => {
+        document.getElementById('output').textContent = event.data;
+      };
+  }, []);
 
     function sendMessage() {
       const message = document.getElementById('message').value;
@@ -28,12 +34,15 @@ export default function Greet() {
       
     }
     function invoke(functionname,args){
-      let argus=Object.values(args);
-      let jsonobj={
-         "functionname": functionname, 
-         "arguments":JSON.stringify(argus)
+      if(socket){
+
+        let argus=Object.values(args);
+        let jsonobj={
+           "functionname": functionname, 
+           "arguments":JSON.stringify(argus)
+        }
+        socket.send(JSON.stringify(jsonobj));
       }
-      socket.send(JSON.stringify(jsonobj));
     }
   const filesobjinit:FileItem[]=[]
   const [fileslist,setfl] =useState(filesobjinit)

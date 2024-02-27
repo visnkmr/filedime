@@ -8,7 +8,7 @@ mod appstate;
 use appstate::*;
 use serde::Deserialize;
 use tauri::{GlobalWindowEvent, WindowEvent};
-use std::{sync::{Mutex, Arc}, thread};
+use std::{sync::{Mutex, Arc}, thread, net::{TcpListener, TcpStream}, fs, io::*, path::Path};
 
 use ws::{listen, Message};
 use lazy_static::*;
@@ -27,7 +27,50 @@ fn parserecieved(msg:Message)->(String,Vec<String>){
   let arguments:Vec<String>=serde_json::from_str(&descomm.arguments).unwrap();
   (descomm.functionname,arguments)
 }
+fn handle_connection(mut stream: TcpStream) {
+  let mut buffer = [0;  1024];
+  stream.read(&mut buffer).unwrap();
+  let request = String::from_utf8_lossy(&buffer[..]);
+  println!("Request: {}", request);
+
+  // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
+  let filename = request.split_whitespace().nth(1).unwrap_or("/");
+  let filename = filename.trim_start_matches('/');
+
+  // Construct the full path to the file in the 'out' directory
+  let path = Path::new("../out").join(filename);
+
+  // Check if the file exists and is readable
+  if path.is_file() {
+      let contents = fs::read_to_string(path).unwrap();
+      let response = format!(
+          "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+          contents.len(),
+          contents
+      );
+      stream.write(response.as_bytes()).unwrap();
+      stream.flush().unwrap();
+  } else {
+      let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+      stream.write(response.as_bytes()).unwrap();
+      stream.flush().unwrap();
+  }
+}
 fn main() {
+  
+  thread::spawn(move||{
+    const HOST: &str = "127.0.0.1";
+    const PORT: &str = "8477";
+    let end_point: String = format!("{}:{}", HOST, PORT);
+    let listener = TcpListener::bind(end_point).unwrap();
+    println!("Web server is listening at port {}", PORT);
+
+  for stream in listener.incoming() {
+      let _stream = stream.unwrap();
+      handle_connection(_stream);
+      
+  }
+});
   thread::spawn(move||{
     if let Err(error) = listen("localhost:8080", |out| {
       // The handler needs to take ownership of out, so we use move
@@ -63,7 +106,10 @@ fn main() {
       println!("Failed to create WebSocket due to {:?}", error);
   }
   });
-  // let mut g=AppStateStore::new(CACHE_EXPIRY);
+  // loop{
+
+  // }
+  let mut g=AppStateStore::new(CACHE_EXPIRY);
   let app=tauri::Builder::default()
     .setup(|app| {
       Ok(())
