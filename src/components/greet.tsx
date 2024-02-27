@@ -10,7 +10,7 @@ export default function Greet() {
     if (typeof window !== undefined) {
       // execute your logic here
     }
-    socket = new WebSocket('ws://localhost:8080');
+    socket = new WebSocket('ws://localhost:8488');
   
       socket.onopen = () => {
         console.log('Connected to WebSocket server');

@@ -79,7 +79,10 @@ fn main() {
   }
 });
   thread::spawn(move||{
-    if let Err(error) = listen("localhost:8080", |out| {
+    const HOST: &str = "127.0.0.1";
+    const PORT: &str = "8488";
+    let end_point: String = format!("{}:{}", HOST, PORT);
+    if let Err(error) = listen(end_point, |out| {
       // The handler needs to take ownership of out, so we use move
       move |msg:Message| {
         
