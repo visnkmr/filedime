@@ -74,6 +74,7 @@ if(get_disks().is_ok())
   
   else
   {
+    println!("no disks found using lsblk method");
 
     rt=get_drives().unwrap().array_of_drives.iter().map(|ed|{
       
@@ -116,7 +117,7 @@ pub struct Drives {
 // #[tauri::command]
 
 fn get_lsblk_output() -> Result<Vec<u8>,()> {
-    let mut command = Command::new("/bin/lsblk");
+    let mut command = Command::new("lsblk");
     command.args([
         // Print size in bytes
         "--bytes",
@@ -137,10 +138,12 @@ fn get_lsblk_output() -> Result<Vec<u8>,()> {
         "--exclude",
         "2,11,253",
     ]);
+    let g= get_command_output(command);
     
-    // let output = String::from_utf8(get_command_output(command).unwrap()).unwrap();
+    // let output = String::from_utf8(g.clone().unwrap()).unwrap();
+    // println!("{}",output);
     // Ok(output)
-    get_command_output(command)
+    g
 }
 fn get_command_output(mut command: Command) -> Result<Vec<u8>,()> {
     // info!("running command: {:?}", command);
@@ -218,7 +221,7 @@ fn flattened(parsed:LsBlkOutput) -> Vec<LsBlkDevice> {
  pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>,()> {
     let output = get_lsblk_output()?;
     let parsed =parse(&output)?;
-    // println!("{:?}",parsed.clone());
+    println!("{:?}",parsed.clone());
     Ok(flattened(parsed))
 }
 pub fn get_disks() -> Result<(Vec<LsBlkDevice>,Vec<LsBlkDevice>),()> {

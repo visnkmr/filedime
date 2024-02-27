@@ -21,7 +21,13 @@ pkgs.mkShell {
     pkg-config
     cmake
     webkitgtk
+    rustup
     gnome.libsoup
+    cargo-tauri
+    openssl
+    bun
+    vscode-extensions.rust-lang.rust-analyzer
+  rust-analyzer
   ];
 
 #   shellHook = ''
