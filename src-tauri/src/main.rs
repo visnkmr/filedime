@@ -42,14 +42,21 @@ fn handle_connection(mut stream: TcpStream) {
 
   // Check if the file exists and is readable
   if path.is_file() {
-      let contents = fs::read_to_string(path).unwrap();
-      let response = format!(
-          "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
-          contents.len(),
-          contents
-      );
-      stream.write(response.as_bytes()).unwrap();
-      stream.flush().unwrap();
+      if let Ok(contents) = fs::read_to_string(path){
+
+        let response = format!(
+            "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+            contents.len(),
+            contents
+        );
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+      }
+      else{
+        let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+      }
   } else {
       let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
       stream.write(response.as_bytes()).unwrap();
