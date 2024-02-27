@@ -1,114 +1,127 @@
 #![warn(clippy::disallowed_types)]
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{io::{Read, Cursor}, thread, time::{Duration, SystemTime, UNIX_EPOCH, self, Instant}, path::{Path, self}, mem, sync::{Arc, Mutex, RwLock}, process::Command, collections::{HashSet, HashMap}, fmt::format};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::format,
+    io::{Cursor, Read},
+    mem,
+    path::{self, Path},
+    process::Command,
+    sync::{Arc, Mutex, RwLock},
+    thread,
+    time::{self, Duration, Instant, SystemTime, UNIX_EPOCH},
+};
 mod dirsize;
+mod drivelist;
 mod fileitem;
 mod filltrie;
-mod sendtofrontend;
 mod lastmodcalc;
 mod navtimeline;
-mod drivelist;
-use chrono::{DateTime, Utc, Local};
+mod sendtofrontend;
+use chrono::{DateTime, Local, Utc};
 use navtimeline::{BrowserHistory, Page};
 // use filesize::PathExt;
 
-use ignore::WalkBuilder;
 use crate::driveops::*;
 use crate::fileops::*;
+use ignore::WalkBuilder;
 use prefstore::*;
 use rayon::prelude::*;
 use reqwest::Error;
 use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
-use syntect::{parsing::SyntaxSet, highlighting::ThemeSet};
-use tauri::{Manager, api::{file::read_string, shell}, State, Runtime, CustomMenuItem, Menu, Submenu, MenuItem, window, GlobalWindowEvent, WindowEvent, http::ResponseBuilder};
+use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
+use tauri::{
+    api::{file::read_string, shell},
+    http::ResponseBuilder,
+    window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, Runtime, State, Submenu,
+    WindowEvent,
+};
 
 // use walkdir::WalkDir;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use serde::{Serialize, Deserialize};
-use tauri::{AppHandle,  Window};
+use tauri::{AppHandle, Window};
 mod appstate;
 use appstate::*;
-mod sizeunit;
-mod searchfiles;
 mod filechangewatcher;
+mod searchfiles;
+mod sizeunit;
 // mod loadjs;
 mod tabinfo;
 // mod recentfiles;
 mod bookmarks;
 mod openhtml;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-mod markdown;
 mod listfiles;
+mod markdown;
 // mod partialratio;
-use lastmodcalc::lastmodified;
 use crate::{
-  markdown::*, 
-  filechangewatcher::*,
-  tabinfo::*,
-  bookmarks::*,
-  listfiles::*,
-  openhtml::*, 
-  searchfiles::*, 
-   filltrie::populate_try, sendtofrontend::loadmarks
+    bookmarks::*, filechangewatcher::*, filltrie::populate_try, listfiles::*, markdown::*,
+    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*,
 };
+use lastmodcalc::lastmodified;
 // mod r  esync;
 mod navops;
 use crate::navops::*;
 // define a struct to represent a file or directory
-#[derive(Serialize,Clone,Debug,PartialEq,Hash,Eq)]
+#[derive(Serialize, Clone, Debug, PartialEq, Hash, Eq)]
 pub struct FileItem {
-  name: String,
-  path: String,
-  is_dir: bool,
-  size:String,
-  rawfs:u64,
-  lmdate:String,
-  timestamp:i64,
-  foldercon:i32,
-  ftype:String
-  // grandparent:String,
-  // parent:String
+    name: String,
+    path: String,
+    is_dir: bool,
+    size: String,
+    rawfs: u64,
+    lmdate: String,
+    timestamp: i64,
+    foldercon: i32,
+    ftype: String, // grandparent:String,
+                   // parent:String
 }
-const CACHE_EXPIRY:u64=60;
+const CACHE_EXPIRY: u64 = 60;
 
 use std::fs::File;
-use std::io::{self,  Write, Seek, SeekFrom};
+use std::io::{self, Seek, SeekFrom, Write};
 
 #[tauri::command]
-async fn searchload(path:String,window: Window, state: State<'_, AppStateStore>) -> Result<(),String>{ 
-  
-  populate_try(path.clone(), &window, &state).await;
-  Ok(())
+async fn searchload(
+    path: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<(), String> {
+    populate_try(path.clone(), &window, &state).await;
+    Ok(())
 }
-   #[tauri::command]
-async fn mirror(functionname:String,arguments: Vec<String>,window: Window){
-  window.get_focused_window().unwrap().emit("mirror", serde_json::to_string(&json!({
-    "functionname":functionname,
-    "arguments":arguments
-  })).unwrap());
+#[tauri::command]
+async fn mirror(functionname: String, arguments: Vec<String>, window: Window) {
+    window.get_focused_window().unwrap().emit(
+        "mirror",
+        serde_json::to_string(&json!({
+          "functionname":functionname,
+          "arguments":arguments
+        }))
+        .unwrap(),
+    );
 }
 
- #[derive(Serialize)]
-  struct existingfileinfo{
-    sourcepath:String,
-    destpath:String,
-    existingfilesize:String,
-    existingdate:String,
-    srcfilesize:String,
-    srcfiledate:String
-  }
-  
-  mod driveops;
-  mod fileops;
-    
+#[derive(Serialize)]
+struct existingfileinfo {
+    sourcepath: String,
+    destpath: String,
+    existingfilesize: String,
+    existingdate: String,
+    srcfilesize: String,
+    srcfiledate: String,
+}
 
+mod driveops;
+mod fileops;
 
 // #[tauri::command]
-// async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) -> 
-//   Result<String, String> 
+// async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) ->
+//   Result<String, String>
 //   {
 //     match(dirs::home_dir()){
 //       Some(val)=>{
@@ -118,128 +131,136 @@ async fn mirror(functionname:String,arguments: Vec<String>,window: Window){
 //         return Err("home not found".to_string());
 //       }
 //     }
-    
+
 //   }
 
-  #[tauri::command]
-async fn highlightfile(path:String,theme:String)->Result<String,String>{
-  let syntax_set = SyntaxSet::load_defaults_newlines();
+#[tauri::command]
+async fn highlightfile(path: String, theme: String) -> Result<String, String> {
+    let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
     // let dark="dark".to_string();
     // let theme = "dark"; // or "light"
 
-    let th = 
-      if(theme=="dark".to_string()){
+    let th = if (theme == "dark".to_string()) {
         &theme_set.themes["base16-ocean.dark"]
-      }
-      else{
+    } else {
         &theme_set.themes["base16-ocean.light"]
-      };
-      // &theme_set.themes["base16-ocean.light"];
-  match(syntect::html::highlighted_html_for_file(&path, &syntax_set, th)){
-    Ok(src) => {
-      Ok(src)
-    },
-    Err(e) => {
-      Err(e.to_string())
-    },
-}
- 
+    };
+    // &theme_set.themes["base16-ocean.light"];
+    match (syntect::html::highlighted_html_for_file(&path, &syntax_set, th)) {
+        Ok(src) => Ok(src),
+        Err(e) => Err(e.to_string()),
+    }
 }
 #[tauri::command]
 async fn openpath(path: String) -> Result<(), String> {
-  println!("{}",path);
-  if(is_appimage(path.clone())){
-    let output = Command::new(path)
-        .output()
-        .expect("Failed to execute command");
+    println!("{}", path);
+    if (is_appimage(path.clone())) {
+        let output = Command::new(path)
+            .output()
+            .expect("Failed to execute command");
 
-    if !output.status.success() {
-        eprintln!("Command executed with error: {}", String::from_utf8_lossy(&output.stderr));
-    } else {
-        println!("Command executed successfully: {}", String::from_utf8_lossy(&output.stdout));
-    }
-  }
-  else
-  {match(opener::open(path)){
-    Ok(g)=>{
-      println!("opening")
-      
-    },Err(e)=>{
-      
-      println!("error opening file")
-    }
-  };}
-  Ok(())
-}
-fn is_appimage(path: String) -> bool {
-  #[cfg(target_os = "linux")]
-  {
-    let path=Path::new(&path);
-    let metadata = fs::metadata(&path).unwrap();
-    let bval=if metadata.is_file() {
-        if let Some(ext) = path.extension() {
-            ext == "AppImage"
+        if !output.status.success() {
+            eprintln!(
+                "Command executed with error: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
         } else {
-            false
+            println!(
+                "Command executed successfully: {}",
+                String::from_utf8_lossy(&output.stdout)
+            );
         }
     } else {
-        false
-    };
-    return bval
-  }
-  false
+        match (opener::open(path)) {
+            Ok(g) => {
+                println!("opening")
+            }
+            Err(e) => {
+                println!("error opening file")
+            }
+        };
+    }
+    Ok(())
+}
+fn is_appimage(path: String) -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        let path = Path::new(&path);
+        let metadata = fs::metadata(&path).unwrap();
+        let bval = if metadata.is_file() {
+            if let Some(ext) = path.extension() {
+                ext == "AppImage"
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+        return bval;
+    }
+    false
 }
 #[cfg(target_os = "windows")]
 #[tauri::command]
-async fn check_if_installed(appname:&str) -> Result<bool, String> {
-  let output = Command::new("cmd")
-      .args(["/C", appname])
-      .output()
-      .expect("cmd Not found");
+async fn check_if_installed(appname: &str) -> Result<bool, String> {
+    let output = Command::new("cmd")
+        .args(["/C", appname])
+        .output()
+        .expect("cmd Not found");
 
-  Ok(output.status.success())
+    Ok(output.status.success())
 }
-fn startup(window: &AppHandle) -> Result<(),()>{
-  //define format for adding custom button as extensions to ui
-  if cfg!(target_os = "linux"){
+fn startup(window: &AppHandle) -> Result<(), ()> {
+    //define format for adding custom button as extensions to ui
+    if cfg!(target_os = "linux") {
+        getcustom(
+            "filedime",
+            "custom_scripts/terminal_open.fds",
+            "exo-open --working-directory %f --launch TerminalEmulator",
+        );
+    } else if cfg!(target_os = "windows") {
+        getcustom(
+            "filedime",
+            "custom_scripts/terminal_open.fds",
+            "cmd /k cd %f",
+        );
+    }
 
-    getcustom("filedime", "custom_scripts/terminal_open.fds", "exo-open --working-directory %f --launch TerminalEmulator");
-  }
-  else if cfg!(target_os = "windows"){
-    getcustom("filedime", "custom_scripts/terminal_open.fds", "cmd /k cd %f");
-  }
-  
-  let mut buttonnames=Vec::new();
-  // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
-  for (i,j) in getallcustomwithin("filedime", "custom_scripts","fds"){
-    buttonnames.push(i.clone().replace("_", " "));
-    // println!("name of file{:?}",i);//filename
-    // println!("{:?}",j);//contents
-  }
-  sendbuttonnames(&window.app_handle(),&buttonnames).unwrap();
-  Ok(())
+    let mut buttonnames = Vec::new();
+    // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
+    for (i, j) in getallcustomwithin("filedime", "custom_scripts", "fds") {
+        buttonnames.push(i.clone().replace("_", " "));
+        // println!("name of file{:?}",i);//filename
+        // println!("{:?}",j);//contents
+    }
+    sendbuttonnames(&window.app_handle(), &buttonnames).unwrap();
+    Ok(())
 }
 #[tauri::command]
-async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(),()> {
-  // state.getactivepath(path);
-  println!("{}",path);
+async fn otb(bname: String, path: String, state: State<'_, AppStateStore>) -> Result<(), ()> {
+    // state.getactivepath(path);
+    println!("{}", path);
 
-  if(!Path::new(&path).is_dir()){
-    return Err(())
-  }
-  let mut args = state.buttonnames.get(&bname.replace(" ","_")).unwrap().clone();
-  args=args.replace("%f",&path);
-  let args: Vec<_> = args.split(" ").collect();
-  println!("{:?}",args);
+    if (!Path::new(&path).is_dir()) {
+        return Err(());
+    }
+    let mut args = state
+        .buttonnames
+        .get(&bname.replace(" ", "_"))
+        .unwrap()
+        .clone();
+    args = args.replace("%f", &path);
+    let args: Vec<_> = args.split(" ").collect();
+    println!("{:?}", args);
 
-  let output = Command::new(args[0])
-          .args(&args[1..])
-          // .stdout(Stdio::piped())
-          .spawn()
-          .unwrap();
-        println!("{:?}",output);
-        Ok(())
+    let output = Command::new(args[0])
+        .args(&args[1..])
+        // .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    println!("{:?}", output);
+    Ok(())
 }
 // #[tauri::command]
 // fn get_window_label() -> String {
@@ -249,137 +270,155 @@ async fn otb(bname:String,path:String,state: State<'_, AppStateStore>)->Result<(
 #[tauri::command]
 async fn get_timestamp() -> String {
     let timestamp = format!("{}", chrono::Utc::now().timestamp_millis());
-    // println!("{}",timestamp); 
+    // println!("{}",timestamp);
     timestamp
 }
 #[tauri::command]
-async fn nosize(windowname:String,togglewhat:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  // println!("loading toggle rust---->1");
+async fn nosize(
+    windowname: String,
+    togglewhat: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<(), ()> {
+    // println!("loading toggle rust---->1");
 
-  match(togglewhat.as_str()){
-    "size"=>{
-      state.togglenosize()
-    },
-    "excludehidden"=>{
-      println!("togglehidden");
-      state.togglehidden()
-    },
-    "includefolder"=>{
-      state.toggleif();
-    },
-    "folcount"=>{
-      state.togglefolcount();
-    },
-    "sessionsave"=>{
-      savecustom("filedime", "storevals/savetabs.set", 
-      {
-        let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
-        match(truechecker.as_str()){
-        "true"=>{
-            false
-        },
-        _=>true
+    match (togglewhat.as_str()) {
+        "size" => state.togglenosize(),
+        "excludehidden" => {
+            println!("togglehidden");
+            state.togglehidden()
         }
-      });
-    },
-    "loadmarks"=>{
-      loadmarks(&windowname, &window.app_handle(), serde_json::to_string(&state.getmarks()).unwrap());
-    },
-    _=>{
-
-      }
-
-  }
-
-  Ok(())
-}
-
-#[tauri::command]
-async fn newwindow(path:String,ff:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-   let absolute_date=getuniquewindowlabel();
-  let filename=PathBuf::from(path.clone());
-  let mut wname="";
-  if let Some(fname)=filename.file_name(){
-    wname=fname.to_str().unwrap();
-  }
-  opennewwindow(&window.app_handle(),&wname,&absolute_date);
-  println!("new winodw==============");
-
-  Ok(())
-}
-#[tauri::command]
-async fn newspecwindow(winlabel:String,name:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  if(winlabel=="settings"){
-
-    tauri::WindowBuilder::new(
-      &window.app_handle(),
-      winlabel,
-      tauri::WindowUrl::App("settings.html".into())
-    )
-    .title(name).build().unwrap();
-  }
-  else{
-    opennewwindow(&window.app_handle(),&name,&winlabel);
-  }
-  Ok(())
-}
-
-#[tauri::command]
- fn configfolpath(window:Window,state: State<'_, AppStateStore>)->String{
-  serde_json::to_string(&json!({
-    "excludehidden":state.excludehidden.read().unwrap().clone(),
-    "sessionstore":({
-        let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
-        match(truechecker.as_str()){
-        "true"=>{
-            true
-        },
-        _=>false
+        "includefolder" => {
+            state.toggleif();
         }
-      }),
-    "includefolder":state.includefolderinsearch.read().unwrap().clone(),
-    "childcount":state.showfolderchildcount.read().unwrap().clone(),
-    "folsize":state.nosize.read().unwrap().clone(),
-    "cfpath":config_folder_path("filedime").as_path().to_string_lossy().to_string(),
-    "cfpathsize":(sizeunit::size(dirsize::dir_size(
-        &config_folder_path("filedime").as_path().to_string_lossy().to_string(),
-        &window,
-        &state,
-    ),true)),
-  })).unwrap()
-  
-}
-  #[tauri::command]
-fn tabname(path:String)->String{
-  let p=path.clone();
-  let result=
-  if let Some(h)=PathBuf::from(&path).file_stem(){
-    let tabname=h.to_string_lossy().to_string();
-    if(tabname==""){path}else{tabname}
-  }
-  else{
-      path
-  };
-println!(" found tabname of ------> {} as {}",p,result);
+        "folcount" => {
+            state.togglefolcount();
+        }
+        "sessionsave" => {
+            savecustom("filedime", "storevals/savetabs.set", {
+                let truechecker = getcustom("filedime", "storevals/savetabs.set", "false");
+                match (truechecker.as_str()) {
+                    "true" => false,
+                    _ => true,
+                }
+            });
+        }
+        "loadmarks" => {
+            loadmarks(
+                &windowname,
+                &window.app_handle(),
+                serde_json::to_string(&state.getmarks()).unwrap(),
+            );
+        }
+        _ => {}
+    }
 
-result
+    Ok(())
+}
+
+#[tauri::command]
+async fn newwindow(
+    path: String,
+    ff: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<(), ()> {
+    let absolute_date = getuniquewindowlabel();
+    let filename = PathBuf::from(path.clone());
+    let mut wname = "";
+    if let Some(fname) = filename.file_name() {
+        wname = fname.to_str().unwrap();
+    }
+    opennewwindow(&window.app_handle(), &wname, &absolute_date);
+    println!("new winodw==============");
+
+    Ok(())
 }
 #[tauri::command]
-async fn foldersize(path:String,window: Window,state: State<'_, AppStateStore>)->Result<String,()>{
-  let sizetosend=
-  dirsize::dir_size(
-      &path.to_string(),
-      &window,
-      &state,
-  );
-  Ok(sizeunit::size(sizetosend,true))
+async fn newspecwindow(
+    winlabel: String,
+    name: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<(), ()> {
+    if (winlabel == "settings") {
+        tauri::WindowBuilder::new(
+            &window.app_handle(),
+            winlabel,
+            tauri::WindowUrl::App("settings.html".into()),
+        )
+        .title(name)
+        .build()
+        .unwrap();
+    } else {
+        opennewwindow(&window.app_handle(), &name, &winlabel);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn configfolpath(window: Window, state: State<'_, AppStateStore>) -> String {
+    serde_json::to_string(&json!({
+      "excludehidden":state.excludehidden.read().unwrap().clone(),
+      "sessionstore":({
+          let truechecker=getcustom("filedime", "storevals/savetabs.set", "false");
+          match(truechecker.as_str()){
+          "true"=>{
+              true
+          },
+          _=>false
+          }
+        }),
+      "includefolder":state.includefolderinsearch.read().unwrap().clone(),
+      "childcount":state.showfolderchildcount.read().unwrap().clone(),
+      "folsize":state.nosize.read().unwrap().clone(),
+      "cfpath":config_folder_path("filedime").as_path().to_string_lossy().to_string(),
+      "cfpathsize":(sizeunit::size(dirsize::dir_size(
+          &config_folder_path("filedime").as_path().to_string_lossy().to_string(),
+          &window,
+          &state,
+      ),true)),
+    }))
+    .unwrap()
 }
 #[tauri::command]
-async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
-  // state.togglelsl();
-  populate_try(path, &window,&state);
-  // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
-  Ok(())
+fn tabname(path: String) -> String {
+    let p = path.clone();
+    let result = if let Some(h) = PathBuf::from(&path).file_stem() {
+        let tabname = h.to_string_lossy().to_string();
+        if (tabname == "") {
+            path
+        } else {
+            tabname
+        }
+    } else {
+        path
+    };
+    println!(" found tabname of ------> {} as {}", p, result);
+
+    result
+}
+#[tauri::command]
+async fn foldersize(
+    path: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<String, ()> {
+    let sizetosend = dirsize::dir_size(&path.to_string(), &window, &state);
+    Ok(sizeunit::size(sizetosend, true))
+}
+#[tauri::command]
+async fn loadsearchlist(
+    windowname: &str,
+    id: String,
+    path: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<(), ()> {
+    // state.togglelsl();
+    populate_try(path, &window, &state);
+    // list_files(windowname.to_string(),id,path,"newtab".to_string(), window, state).await;
+    Ok(())
 }
 // use url::Url;
 
@@ -394,134 +433,122 @@ async fn loadsearchlist(windowname:&str,id:String,path:String,window: Window,sta
 //   params
 // }
 #[tauri::command]
-async fn checker()-> Result<String, String>{
-  let url = "https://cdn.jsdelivr.net/gh/vishnunkmr/quickupdates/filedimeversion.txt";
-    match(reqwest::get(url).await){
+async fn checker() -> Result<String, String> {
+    let url = "https://cdn.jsdelivr.net/gh/vishnunkmr/quickupdates/filedimeversion.txt";
+    match (reqwest::get(url).await) {
         Ok(response) => {
-          
-          // Ensure the response is successful
-          if response.status().is_success() {
-              // Read the response body as text
-              let body = response.text().await.unwrap_or_default();
-              println!("Response data: {}", body);
-              return Ok(body)
-          } else {
-              println!("Failed to fetch data. Status: {}", response.status());
-              Err("Could not check for updates".to_string())
-          }
-        },
-        Err(_) => {
-              Err("Could not check for updates".to_string())
-        },
+            // Ensure the response is successful
+            if response.status().is_success() {
+                // Read the response body as text
+                let body = response.text().await.unwrap_or_default();
+                println!("Response data: {}", body);
+                return Ok(body);
+            } else {
+                println!("Failed to fetch data. Status: {}", response.status());
+                Err("Could not check for updates".to_string())
+            }
+        }
+        Err(_) => Err("Could not check for updates".to_string()),
     }
-
 }
 fn main() {
-  let mut g=AppStateStore::new(CACHE_EXPIRY);
-  let app=tauri::Builder::default()
-    .setup(|app| {
-      
-    let app_handle = app.handle();
-    
-    let ss=startup(&app_handle).is_ok();
-    if ss {
-      println!("loaded buttons successfully.")
-    }else{
-      println!("loading buttons failed")
-    }
-      Ok(())
-    })
-    
-    .on_window_event(on_window_event)
-  
-    .manage(g)
-    .invoke_handler(
-      tauri::generate_handler![
-        // getpathfromid,
-        configfolpath,
-        listtabs,
-        closealltabs,
-        getparentpath,
-        mirror,
-        addmark,
-        fileop,
-        checkiffile,
-        checkforconflicts,
-        // backbutton,
-        closetab,
-        new,
-        disablenav,
-        searchload,
-        // defaulttoopen,
-        foldersize,
-        get_path_options,
-        get_timestamp,
-        // getuniquewindowlabel,
-        list_files,
-        // load_tab,
-        senddriveslist,
-        loadfromhtml,
-        loadmarkdown,
-        loadsearchlist,
-        newtab,
-        newwindow,
-        nosize,
-        openpath,
-        highlightfile,
-        doespathexist,
-        otb,
-        removemark,
-        // populate_try,
-        search_try,
-        startserver,
-        stopserver,
-        tabname,
-        checker,
-        navbrowsetimeline,
-        newspecwindow,
-        addtotabhistory,
-        mountdrive,
-        unmountdrive,
-        // whattoload,
-        // get_window_label
-        ]
-      )
-    .build(tauri::generate_context!())
-    .expect("Failed to start app");
-  
-  app.run(|app_handle, e| match e {
-    
-    tauri::RunEvent::ExitRequested { api, .. } => {
-      // api.prevent_exit();
-      
-    }
-    tauri::RunEvent::WindowEvent { event, .. } => match event {
+    let mut g = AppStateStore::new(CACHE_EXPIRY);
+    let app = tauri::Builder::default()
+        .setup(|app| {
+            let app_handle = app.handle();
 
-      //when closed with knowledge
-      tauri::WindowEvent::CloseRequested { api, .. } => {
-      
-      //   // api.prevent_close();
-      //   // hide(app_handle.app_handle());
-      }
-      _ => {}
-    },
-    _ => {}
-  });
+            let ss = startup(&app_handle).is_ok();
+            if ss {
+                println!("loaded buttons successfully.")
+            } else {
+                println!("loading buttons failed")
+            }
+            Ok(())
+        })
+        .on_window_event(on_window_event)
+        .manage(g)
+        .invoke_handler(tauri::generate_handler![
+            // getpathfromid,
+            configfolpath,
+            listtabs,
+            closealltabs,
+            getparentpath,
+            mirror,
+            addmark,
+            fileop,
+            checkiffile,
+            checkforconflicts,
+            // backbutton,
+            closetab,
+            new,
+            disablenav,
+            searchload,
+            // defaulttoopen,
+            foldersize,
+            get_path_options,
+            get_timestamp,
+            // getuniquewindowlabel,
+            list_files,
+            // load_tab,
+            senddriveslist,
+            loadfromhtml,
+            loadmarkdown,
+            loadsearchlist,
+            newtab,
+            newwindow,
+            nosize,
+            openpath,
+            highlightfile,
+            doespathexist,
+            otb,
+            removemark,
+            // populate_try,
+            search_try,
+            startserver,
+            stopserver,
+            tabname,
+            checker,
+            navbrowsetimeline,
+            newspecwindow,
+            addtotabhistory,
+            mountdrive,
+            unmountdrive,
+            // whattoload,
+            // get_window_label
+        ])
+        .build(tauri::generate_context!())
+        .expect("Failed to start app");
+
+    app.run(|app_handle, e| match e {
+        tauri::RunEvent::ExitRequested { api, .. } => {
+            // api.prevent_exit();
+        }
+        tauri::RunEvent::WindowEvent { event, .. } => match event {
+            //when closed with knowledge
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+
+                //   // api.prevent_close();
+                //   // hide(app_handle.app_handle());
+            }
+            _ => {}
+        },
+        _ => {}
+    });
 }
 fn on_window_event(event: GlobalWindowEvent) {
-  if let WindowEvent::CloseRequested {
-      #[cfg(not(target_os = "linux"))]
-      api,
-      ..
-  } = event.event()
-  {
+    if let WindowEvent::CloseRequested {
+        #[cfg(not(target_os = "linux"))]
+        api,
+        ..
+    } = event.event()
+    {
 
-      // #[cfg(target_os = "macos")]
-      // {
-      //     app.hide().unwrap();
-      //     api.prevent_close();
-      // }
-  }
+        // #[cfg(target_os = "macos")]
+        // {
+        //     app.hide().unwrap();
+        //     api.prevent_close();
+        // }
+    }
 }
 //for testing to prevent the window from autoclosing
 // fn hide(app: AppHandle) {
@@ -536,83 +563,93 @@ fn on_window_event(event: GlobalWindowEvent) {
 // }
 // In Rust, define a function that takes a path as an argument and returns a list of possible paths
 #[tauri::command]
-async fn getparentpath(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<String,()> {
-  match(PathBuf::from(&path).parent()){
-    Some(k) => return Ok(k.to_string_lossy().to_string()),
-    None => return Err(()),
-}
-  
-}
-  #[tauri::command]
-async fn get_path_options(mut path: String, window: Window, state: State<'_, AppStateStore>) -> Result<Vec<String>,()> {
-  let mut options = Vec::new();
-  let pathasbuf=PathBuf::from(path.clone());
-  if(!pathasbuf.exists()){
-    if let Some(parent) = pathasbuf.parent() {
-      // Convert parent to OsStr
-      path = parent.as_os_str().to_string_lossy().to_string();
+async fn getparentpath(
+    mut path: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<String, ()> {
+    match (PathBuf::from(&path).parent()) {
+        Some(k) => return Ok(k.to_string_lossy().to_string()),
+        None => return Err(()),
     }
-  }
-          // Use substring instead of path
-      if let Ok(entries) = std::fs::read_dir(path.clone()) {
-        for entry in entries {
-          if let Ok(entry) = entry {
-            {
-                options.push(entry.path().to_string_lossy().to_string());
-            }
-          }
+}
+#[tauri::command]
+async fn get_path_options(
+    mut path: String,
+    window: Window,
+    state: State<'_, AppStateStore>,
+) -> Result<Vec<String>, ()> {
+    let mut options = Vec::new();
+    let pathasbuf = PathBuf::from(path.clone());
+    if (!pathasbuf.exists()) {
+        if let Some(parent) = pathasbuf.parent() {
+            // Convert parent to OsStr
+            path = parent.as_os_str().to_string_lossy().to_string();
         }
-  }
-  Ok(options)
+    }
+    // Use substring instead of path
+    if let Ok(entries) = std::fs::read_dir(path.clone()) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                {
+                    options.push(entry.path().to_string_lossy().to_string());
+                }
+            }
+        }
+    }
+    Ok(options)
 }
 
-pub fn opennewwindow(app_handle:&AppHandle,title:&str,label:&str)->Window{
-  println!("{:?}",getwindowlist(app_handle));
-                tauri::WindowBuilder::new(
-                  app_handle,
-                  label,
-                  tauri::WindowUrl::App("index.html".into())
-                )
-                // .initialization_script(&INIT_SCRIPT)
-                .title(title).build().unwrap()
+pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> Window {
+    println!("{:?}", getwindowlist(app_handle));
+    tauri::WindowBuilder::new(
+        app_handle,
+        label,
+        tauri::WindowUrl::App("index.html".into()),
+    )
+    // .initialization_script(&INIT_SCRIPT)
+    .title(title)
+    .build()
+    .unwrap()
 }
 
-pub fn opendialogwindow(app_handle:&AppHandle,title:&str,content:&str,label:&str){
-  
-              app_handle.emit_all(
-                // label,
-                "dialogshow",
-                serde_json::to_string(&json!({
-                  "title":title,
-                  "content":content,
-                  // "arguments":arguments
-                })).unwrap(),
-              ).unwrap();
-              
+pub fn opendialogwindow(app_handle: &AppHandle, title: &str, content: &str, label: &str) {
+    app_handle
+        .emit_all(
+            // label,
+            "dialogshow",
+            serde_json::to_string(&json!({
+              "title":title,
+              "content":content,
+              // "arguments":arguments
+            }))
+            .unwrap(),
+        )
+        .unwrap();
 }
-pub fn getwindowlist(app_handle:&AppHandle)->Vec<String>{
-  match(app_handle.get_window("main")){
-    Some(iop) => {
-      iop.windows().iter().map(|e|{
-        // println!("{}--",e.0);
-        // println!("{}--{:?}",i.0,i.1);
-        e.0.clone()
-      }).collect::<Vec<String>>()
-      
-    },
-    None => {
-      vec![]
-    },
-}
-  
+pub fn getwindowlist(app_handle: &AppHandle) -> Vec<String> {
+    match (app_handle.get_window("main")) {
+        Some(iop) => {
+            iop.windows()
+                .iter()
+                .map(|e| {
+                    // println!("{}--",e.0);
+                    // println!("{}--{:?}",i.0,i.1);
+                    e.0.clone()
+                })
+                .collect::<Vec<String>>()
+        }
+        None => {
+            vec![]
+        }
+    }
 }
 // #[tauri::command]
-fn getuniquewindowlabel()->String{
-  let now = SystemTime::now();
+fn getuniquewindowlabel() -> String {
+    let now = SystemTime::now();
 
-                let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
-                let absolute_date = now_date.format("%d%m%H%M%S").to_string();
-                // println!("{absolute_date}");
-                absolute_date
+    let now_date = DateTime::<Utc>::from(now).with_timezone(&Local);
+    let absolute_date = now_date.format("%d%m%H%M%S").to_string();
+    // println!("{absolute_date}");
+    absolute_date
 }
-
