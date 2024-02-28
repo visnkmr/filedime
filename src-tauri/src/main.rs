@@ -83,6 +83,8 @@ fn handle_connection(mut stream: TcpStream) {
     }
 }
 fn main() {
+    
+
     thread::spawn(move || {
         const HOST: &str = "127.0.0.1";
         const PORT: &str = "8477";
@@ -95,50 +97,33 @@ fn main() {
             handle_connection(_stream);
         }
     });
+    let (tx, rx) = mpsc::channel::<Vec<String>>();
+    let out_shared = Arc::new(Mutex::new(None));
+
+    let out_shared_clone = Arc::clone(&out_shared);
     thread::spawn(move || {
         const HOST: &str = "127.0.0.1";
         const PORT: &str = "8488";
         let end_point: String = format!("{}:{}", HOST, PORT);
         if let Err(error) = listen(end_point, |out| {
+            let mut out_lock = out_shared_clone.lock().unwrap();
+            *out_lock = Some(out.clone());
+            let tx_clone=tx.clone();
             // let outc=(out.clone());
             // The handler needs to take ownership of out, so we use move
             move |msg: Message| { 
-                let (tx, rx) = mpsc::channel::<Vec<String>>();
+               
                 let mut retvec = String::new();
                 // Handle messages received on this connection
                 println!("Server got message '{}'. ", msg);
                 if (msg.is_text()) {
                     let (functionname, arguments) = parserecieved(msg);
                     if functionname == "list_files" {
-                        list_file(tx.clone(), arguments).unwrap();
+                        list_file(tx_clone.clone(), arguments).unwrap();
                     }
                     // let state = SHARED_STATE.try_lock().unwrap();
-                    let outc = out.clone();
-                    thread::spawn(move || {
-                        loop {
-                            match (rx.recv()) {
-                                Ok(whatrecieved) => {
-                                  println!("{:?}",whatrecieved);
-                                    // let whatrecieved: Vec<String> =
-                                        // serde_json::from_str(&recieved).unwrap();
-                                    let whichone = whatrecieved.get(0).unwrap();
-                                    match (whichone.as_str()) {
-                                        "sendparent" => {
-
-                                            // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid);
-                                        }
-                                        "sendbacktofileslist" => {
-                                            println!("sending");
-                                            println!("{:?}",whatrecieved);
-                                            outc.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
-                                        }
-                                        _ => {}
-                                    }
-                                }
-                                Err(_) => {}
-                            }
-                        }
-                    });
+                    // let outc = out.clone();
+                    
                     // let prev=state.cstore.read().unwrap().clone();
                     // retvec=format!("{}",prev);
                     // // retvec=format!("{}{:?}",functionname,arguments);
@@ -159,6 +144,37 @@ fn main() {
         }) {
             // Inform the user of failure
             println!("Failed to create WebSocket due to {:?}", error);
+        }
+    });
+    thread::spawn(move || {
+        loop {
+            match (rx.recv()) {
+                Ok(whatrecieved) => {
+                    let out_lock = out_shared.lock().unwrap();
+                    if let Some(ref sender) = *out_lock {
+                        println!("{:?}",whatrecieved);
+                    // let whatrecieved: Vec<String> =
+                        // serde_json::from_str(&recieved).unwrap();
+                    let whichone = whatrecieved.get(0).unwrap();
+                    match (whichone.as_str()) {
+                        "sendparent" => {
+
+                            // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid);
+                        }
+                        "sendbacktofileslist" => {
+                            println!("sending");
+                            println!("{:?}",whatrecieved);
+                            sender.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
+                        }
+                        _ => {}
+                    }
+                    } else {
+                        println!("WebSocket connection not established yet.");
+                    }
+                  
+                }
+                Err(_) => {}
+            }
         }
     });
     // loop{

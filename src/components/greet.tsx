@@ -69,7 +69,7 @@ export default function Greet() {
 
     function sendMessage() {
       const message = document.getElementById('message').value;
-      listfiles("/home/")
+      listfiles("drives://")
     // socket.send(message);
       
     }
