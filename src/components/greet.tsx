@@ -25,6 +25,9 @@ export let setcolorpertheme="bg-white dark:bg-gray-800"
 
 export default function Greet() {
   const lastcalledtime=useRef()
+  const filesobjinit:FileItem[]=[]
+  const [fileslist,setfl] =useState(filesobjinit)
+  const [recievedlist,setrl] =useState("")
   const [socket,setsocket]=useState()
   useEffect(() => {
     if (typeof window !== undefined) {
@@ -38,6 +41,7 @@ export default function Greet() {
       };
   
       socket.onmessage = (event:MessageEvent) => {
+        setrl((old)=>old+"\n"+event.data);
         console.log(event.data)
         let recieved=JSON.parse(event.data);
         if(recieved[0]==="sendbacktofileslist"){
@@ -62,14 +66,14 @@ export default function Greet() {
             console.log("obsolete results recieved.")
           }
         }
-        document.getElementById('output').textContent = event.data;
+        // document.getElementById('output').textContent = recievedlist;
       };
       setsocket(socket);
   }, []);
 
     function sendMessage() {
       const message = document.getElementById('message').value;
-      listfiles("drives://")
+      listfiles(message)
     // socket.send(message);
       
     }
@@ -99,8 +103,7 @@ export default function Greet() {
         socket.send(JSON.stringify(jsonobj));
       }
     }
-  const filesobjinit:FileItem[]=[]
-  const [fileslist,setfl] =useState(filesobjinit)
+
   // useEffect(()=>{
   //   // let unlisten: (() => void) | undefined = undefined
   //   const unlisten1=listen('list-files', (event) => {
@@ -142,10 +145,10 @@ export default function Greet() {
  let showthumbnail=false;
   return(<>
   <div>
-  <input type="text" id="message" placeholder="Type a message..."/>
+  <input type="text" id="message" placeholder="Type a message..." />
   <button onClick={()=>sendMessage()}>Send</button>
 
-  <div id="output"></div>
+  <div id="output">{recievedlist}</div>
   {
   // isgrid &&
   fileslist

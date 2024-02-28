@@ -113,7 +113,7 @@ fn main() {
             // The handler needs to take ownership of out, so we use move
             move |msg: Message| { 
                
-                let mut retvec = String::new();
+                // let mut retvec = String::new();
                 // Handle messages received on this connection
                 println!("Server got message '{}'. ", msg);
                 if (msg.is_text()) {
@@ -135,10 +135,10 @@ fn main() {
                     //         "Error".to_string()
                     //       }
                     //   };
-                    println!("{}", retvec)
+                    // println!("{}", retvec)
                 }
-                out.send(retvec)
-
+                // out.send(retvec)
+               Ok(())
                 // Use the out channel to send messages back
             }
         }) {
@@ -152,22 +152,8 @@ fn main() {
                 Ok(whatrecieved) => {
                     let out_lock = out_shared.lock().unwrap();
                     if let Some(ref sender) = *out_lock {
-                        println!("{:?}",whatrecieved);
-                    // let whatrecieved: Vec<String> =
-                        // serde_json::from_str(&recieved).unwrap();
-                    let whichone = whatrecieved.get(0).unwrap();
-                    match (whichone.as_str()) {
-                        "sendparent" => {
-
-                            // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid);
-                        }
-                        "sendbacktofileslist" => {
-                            println!("sending");
-                            println!("{:?}",whatrecieved);
-                            sender.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
-                        }
-                        _ => {}
-                    }
+                        sender.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
+                    
                     } else {
                         println!("WebSocket connection not established yet.");
                     }
