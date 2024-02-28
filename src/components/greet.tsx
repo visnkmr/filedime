@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { FileItem } from "../shared/types"
 // import { convertFileSrc } from "@tauri-apps/api/tauri";
 // import { appWindow } from "@tauri-apps/api/window";
@@ -25,13 +25,13 @@ export let setcolorpertheme="bg-white dark:bg-gray-800"
 
 export default function Greet() {
   const lastcalledtime=useRef()
-  let socket;
+  const [socket,setsocket]=useState()
   useEffect(() => {
     if (typeof window !== undefined) {
       // execute your logic here
     }
     
-    socket = new WebSocket('ws://localhost:8488');
+    let socket = new WebSocket('ws://localhost:8488');
   
       socket.onopen = () => {
         console.log('Connected to WebSocket server');
@@ -64,6 +64,7 @@ export default function Greet() {
         }
         document.getElementById('output').textContent = event.data;
       };
+      setsocket(socket);
   }, []);
 
     function sendMessage() {

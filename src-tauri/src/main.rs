@@ -7,13 +7,12 @@ const CACHE_EXPIRY: u64 = 60;
 mod appstate;
 use appstate::*;
 use serde::{Deserialize, Serialize};
+use tokio::sync::{};
 use std::{
     fs,
     io::*,
     net::{TcpListener, TcpStream},
-    path::Path,
-    sync::{mpsc, Arc, Mutex},
-    thread,
+    path::Path, sync::{Arc, mpsc, Mutex}, thread,
 };
 use tauri::{GlobalWindowEvent, WindowEvent};
 
@@ -103,7 +102,7 @@ fn main() {
         if let Err(error) = listen(end_point, |out| {
             // let outc=(out.clone());
             // The handler needs to take ownership of out, so we use move
-            move |msg: Message| {
+            move |msg: Message| { 
                 let (tx, rx) = mpsc::channel::<Vec<String>>();
                 let mut retvec = String::new();
                 // Handle messages received on this connection
@@ -111,9 +110,9 @@ fn main() {
                 if (msg.is_text()) {
                     let (functionname, arguments) = parserecieved(msg);
                     if functionname == "list_files" {
-                        list_file(tx.clone(), arguments);
+                        list_file(tx.clone(), arguments).unwrap();
                     }
-                    let state = SHARED_STATE.try_lock().unwrap();
+                    // let state = SHARED_STATE.try_lock().unwrap();
                     let outc = out.clone();
                     thread::spawn(move || {
                         loop {
@@ -129,7 +128,8 @@ fn main() {
                                             // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid);
                                         }
                                         "sendbacktofileslist" => {
-                                          
+                                            println!("sending");
+                                            println!("{:?}",whatrecieved);
                                             outc.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
                                         }
                                         _ => {}
@@ -143,7 +143,7 @@ fn main() {
                     // retvec=format!("{}",prev);
                     // // retvec=format!("{}{:?}",functionname,arguments);
                     // *state.cstore.write().unwrap()=format!("{}-----{}",prev,arguments.get(2).unwrap().clone());
-                    drop(state);
+                    // drop(state);
                     // match(functionname.as_str()){
 
                     //       _=>{

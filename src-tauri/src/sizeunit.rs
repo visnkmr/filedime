@@ -44,35 +44,35 @@ pub fn size(B: u64, isbytes: bool) -> String {
 pub fn find_size(path: &str) -> u64 {
     // return 0 as u64;
     // if 
-    let (state) = SHARED_STATE.try_lock().unwrap();
+    // let (state) = SHARED_STATE.lock().unwrap();
     // {
-        let cstore = state.cstore.read().unwrap();
+        // let cstore = state.cstore.read().unwrap();
 
     // let k=0;
     // if(k==0){
     //     return 0;
     // }
     // Use a single read lock guard to access the cache
-    let cache = cstore;
+    // let cache = cstore;
 
-    if let Some(cstore) = cache.get(path) {
-        let size = cstore.size;
-        let expirytime = cstore.expirytime;
-        let now = SystemTime::now();
-        let duration = now.duration_since(UNIX_EPOCH).unwrap();
-        let nowtime = duration.as_secs();
-        // Use the same lock guard to get the expiry time
-        // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
-        if nowtime < expirytime {
-            return (size);
-        } else {
-            println!("expired")
-        }
-        // }
-    }
+    // if let Some(cstore) = cache.get(path) {
+    //     let size = cstore.size;
+    //     let expirytime = cstore.expirytime;
+    //     let now = SystemTime::now();
+    //     let duration = now.duration_since(UNIX_EPOCH).unwrap();
+    //     let nowtime = duration.as_secs();
+    //     // Use the same lock guard to get the expiry time
+    //     // if let Some(expirytime) = cache.get(&("expiry_".to_string() + &path.to_string())) {
+    //     if nowtime < expirytime {
+    //         return (size);
+    //     } else {
+    //         println!("expired")
+    //     }
+    //     // }
+    // }
 
-    // Drop the read lock guard before acquiring a write lock guard
-    drop(cache);
+    // // Drop the read lock guard before acquiring a write lock guard
+    // drop(cache);
     let entry_path = Path::new(path);
     if (entry_path.is_file()) {
         // println!("{:?}",entry_path);
@@ -87,7 +87,7 @@ pub fn find_size(path: &str) -> u64 {
     if !entry_path.is_dir() {
         return (0);
     }
-    let nosize = state.nosize.read().unwrap();
+    // let nosize = state.nosize.read().unwrap();
     // if (*nosize)
      {
         // window.emit("infiniteloader",
@@ -111,28 +111,28 @@ pub fn find_size(path: &str) -> u64 {
         )
     };
 
-    if (size != 0) {
-        // Use a single write lock guard to update the cache
-        let cstore = state.cstore.write().unwrap();
+    // if (size != 0) {
+    //     // Use a single write lock guard to update the cache
+    //     let cstore = state.cstore.write().unwrap();
 
-        let mut cache = cstore;
+    //     let mut cache = cstore;
 
-        let now = SystemTime::now();
+    //     let now = SystemTime::now();
 
-        let later = now + (state.expiration);
+    //     let later = now + (state.expiration);
 
-        let duration = later.duration_since(UNIX_EPOCH).unwrap();
+    //     let duration = later.duration_since(UNIX_EPOCH).unwrap();
 
-        let expirytime = duration.as_secs();
-        // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
-        cache.insert(
-            path.to_string(),
-            cachestore {
-                size: size,
-                expirytime: expirytime,
-            },
-        );
-    }
+    //     let expirytime = duration.as_secs();
+    //     // cache.insert("expiry_".to_string() + &path.to_string(), expirytime);
+    //     cache.insert(
+    //         path.to_string(),
+    //         cachestore {
+    //             size: size,
+    //             expirytime: expirytime,
+    //         },
+    //     );
+    // }
 
     // Add the size of the key and the value to the total
     // self.size += mem::size_of_val(&path.to_string());
