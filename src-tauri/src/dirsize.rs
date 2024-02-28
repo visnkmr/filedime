@@ -1,8 +1,11 @@
+use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde_json::json;
-use tauri::{Window, State};
-use std::{fs, path::{PathBuf, Path}};
-use ignore::WalkBuilder;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
+use tauri::{State, Window};
 
 use crate::{appstate::AppStateStore, sizeunit::find_size, SHARED_STATE};
 
@@ -15,24 +18,23 @@ fn file_size(path: &std::path::Path) -> u64 {
 
 // A function to calculate the total size of a directory and its subdirectories
 pub fn dir_size(path: &String) -> u64 {
-    let state=SHARED_STATE.lock().unwrap();
+    let state = SHARED_STATE.lock().unwrap();
     // Create a walkdir iterator over the directory
-    let ignorehiddenfiles=*state.excludehidden.read().unwrap();
+    let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(path)
-    .threads(threads)
-    .hidden(ignorehiddenfiles) // Include hidden files and directories
-    .follow_links(false)
-    .parents(true)
-    .git_exclude(true)
-    .ignore(true) // Disable the default ignore rules
-    .git_ignore(true)
-    .build()
-    // .min_depth(1) // skip the root directory
-    //   .max_depth(1)
+        .threads(threads)
+        .hidden(ignorehiddenfiles) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        .git_exclude(true)
+        .ignore(true) // Disable the default ignore rules
+        .git_ignore(true)
+        .build()
+        // .min_depth(1) // skip the root directory
+        //   .max_depth(1)
         // Convert errors into options
         .into_iter()
-        
         .filter_map(|e| e.ok());
 
     // Convert the walkdir iterator into a parallel iterator
@@ -43,14 +45,14 @@ pub fn dir_size(path: &String) -> u64 {
         // Filter out directories and symlinks
         .filter(|entry| {
             // eprintln!("checking size");
-            
+
             let path = entry.path();
-            path.is_file() 
+            path.is_file()
         })
         // Map each path to its file size
         .map(|entry| {
             // println!("parthread");
-            
+
             // w.emit("reloadlist",json!({
             //     "message": "pariter8",
             //     // "status": entry.path(),
