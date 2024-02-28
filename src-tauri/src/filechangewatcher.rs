@@ -47,7 +47,7 @@ pub fn initinfo(lopentime:&mut FileTime,path: &PathBuf){
 pub async fn stopserver(path:String,state: State<'_, AppStateStore>)->Result<(),()>{
     println!("stop server command send");
     let aborted = state.aborted.clone();
-    *aborted.lock().unwrap() = true;
+    *aborted.try_lock().unwrap() = true;
     Ok(())
 }
 
@@ -55,7 +55,7 @@ pub async fn stopserver(path:String,state: State<'_, AppStateStore>)->Result<(),
 pub async fn startserver(windowname:String,pathstr:String,window: Window,state: State<'_, AppStateStore>)->Result<(),()>{
     println!("start server command recieved");
     let aborted = state.aborted.clone();
-    *aborted.lock().unwrap() = false;
+    *aborted.try_lock().unwrap() = false;
     
     let mut lopentime=FileTime::now();
   let app_handle = window.app_handle();
@@ -69,7 +69,7 @@ pub async fn startserver(windowname:String,pathstr:String,window: Window,state: 
         move||{
         
         loop{
-            if *aborted.lock().unwrap() {
+            if *aborted.try_lock().unwrap() {
                 println!("stopped");
                 // app_handle.emit_to(
                 //     &windowname,

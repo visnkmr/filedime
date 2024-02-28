@@ -88,7 +88,7 @@ opendialogwindow(&window.app_handle(), "Loading search", &format!("{} is being i
                   let i = e.path().to_string_lossy().to_string();
                   let name=e.file_name().to_string_lossy().to_string().to_lowercase();
                   let map=state.stl.clone();
-                  let mut map =map.lock().unwrap();
+                  let mut map =map.try_lock().unwrap();
                   if let Some(hs) = map.get_mut(&name) {
                       // If yes, append the value to the existing vector
                       // if(!hs.contains(&i)){
@@ -114,7 +114,7 @@ opendialogwindow(&window.app_handle(), "Loading search", &format!("{} is being i
         "",
       )
       .map_err(|e| e.to_string())?; 
-    opendialogwindow(&window.app_handle(),"Loaded",&format!("total {} file names can be searched",state.stl.lock().unwrap().len()),"");
+    opendialogwindow(&window.app_handle(),"Loaded",&format!("total {} file names can be searched",state.stl.try_lock().unwrap().len()),"");
     opendialogwindow(&window.app_handle(), "Ready to search", &format!("{} is ready to be searched.",path), "");
         let now = SystemTime::now();
         let duration = now.duration_since(UNIX_EPOCH).unwrap();

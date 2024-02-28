@@ -113,7 +113,7 @@ fn main() {
                     if functionname == "list_files" {
                         list_file(tx.clone(), arguments);
                     }
-                    let state = SHARED_STATE.lock().unwrap();
+                    let state = SHARED_STATE.try_lock().unwrap();
                     let outc = out.clone();
                     thread::spawn(move || {
                         loop {

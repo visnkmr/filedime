@@ -30,7 +30,7 @@ fn add_tab(arguments:Vec<String>){
  let oid=arguments.get(0).unwrap();
  let path=arguments.get(1).unwrap();
  let windowname=arguments.get(2).unwrap();
- let state=SHARED_STATE.lock().unwrap();
+ let state=SHARED_STATE.try_lock().unwrap();
  state.addtab(oid.clone(), path.clone(), "".to_string(),windowname.clone());
 
   

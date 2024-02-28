@@ -55,7 +55,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
     let windowname = arguments.get(1).unwrap();
     let oid = arguments.get(2).unwrap();
     let mut path = arguments.get(3).unwrap().clone();
-    let state = SHARED_STATE.lock().unwrap();
+    // let state = SHARED_STATE.try_lock().unwrap();
 
     println!("lfiles");
     // let ignorehiddenfiles=*state.excludehidden.read().unwrap();
@@ -136,7 +136,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
     }
     // window.emit_to(&wname,"reloadlist","resettable").unwrap();
 
-    // let orig = *state.process_count.lock().unwrap();
+    // let orig = *state.process_count.try_lock().unwrap();
 
     // state.filesetcollection.write().unwrap().clear();
     //empty existing filesetcollection
@@ -218,13 +218,13 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
 
             // check milliseconds passed since the last print
             if last_print.elapsed() >= Duration::from_millis(*msval) {
-                let files = files_clone.lock().unwrap();
-                let don = doneornot.lock().unwrap();
+                let files = files_clone.try_lock().unwrap();
+                let don = doneornot.try_lock().unwrap();
 
                 // folsize(&windowname.clone(),&app_handle,
                 // serde_json::to_string(&json!({
                 //   "caller":startime,
-                //   "size":sizeunit::size(*tfsize.lock().unwrap(),true)
+                //   "size":sizeunit::size(*tfsize.try_lock().unwrap(),true)
                 // })).unwrap(),
                 // );
                 let wn = windowname3.clone();
@@ -269,10 +269,10 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
                 let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path());
-                let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+                let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
                                                        // println!("added--->{:?}",e);
-                // *tfsize_clone.lock().unwrap() += file.rawfs;
+                // *tfsize_clone.try_lock().unwrap() += file.rawfs;
 
                 //send each file to frontend
                 files.push(file.clone()); // push a clone of the file to the vector
@@ -289,7 +289,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
             // Ok(()) // return Ok to continue the iteration
         });
         println!("reachedhere");
-    *doneornot_clone.lock().unwrap() = true;
+    *doneornot_clone.try_lock().unwrap() = true;
     // .collect();
     //  state.print_cache_size();
 
@@ -300,7 +300,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
 
     // folsize(&wname,&app_handle,serde_json::to_string(&json!({
     //   "caller":startime,
-    //   "size":sizeunit::size(*tfsize_clone.lock().unwrap(),true)
+    //   "size":sizeunit::size(*tfsize_clone.try_lock().unwrap(),true)
     // })).unwrap())?;
     println!("reachedhere");
     // window.emit("infiniteloader",

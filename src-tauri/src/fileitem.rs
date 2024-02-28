@@ -35,7 +35,7 @@ pub fn populatefileitem(name: String, path: &Path) -> FileItem {
     println!("preparing file item");
     // println!("path=-------->{:?}",path);
     // println!("{}",name);
-    // let state = SHARED_STATE.lock().unwrap();
+    // let state = SHARED_STATE.try_lock().unwrap();
     let pathtf = path.to_string_lossy().into_owned();
     println!("preparing file item");
     // let ignorehiddenfiles=*state.excludehidden.read().unwrap();
@@ -43,8 +43,8 @@ pub fn populatefileitem(name: String, path: &Path) -> FileItem {
 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size = if (!path.is_symlink()) {
-        0
-        // find_size(&pathtf)
+        // 0
+        find_size(&pathtf)
     } else {
         0
     };

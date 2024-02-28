@@ -43,7 +43,7 @@ pub fn size(B: u64, isbytes: bool) -> String {
 }
 pub fn find_size(path: &str) -> u64 {
     // return 0 as u64;
-    let state = SHARED_STATE.lock().unwrap();
+    let state = SHARED_STATE.try_lock().unwrap();
     let cstore = state.cstore.read().unwrap();
 
     // let k=0;

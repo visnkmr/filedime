@@ -18,7 +18,7 @@ fn file_size(path: &std::path::Path) -> u64 {
 
 // A function to calculate the total size of a directory and its subdirectories
 pub fn dir_size(path: &String) -> u64 {
-    let state = SHARED_STATE.lock().unwrap();
+    let state = SHARED_STATE.try_lock().unwrap();
     // Create a walkdir iterator over the directory
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;

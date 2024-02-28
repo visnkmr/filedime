@@ -31,7 +31,7 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
     return Ok(());
   }
  
-  let searchthrough=state.stl.lock().unwrap();
+  let searchthrough=state.stl.try_lock().unwrap();
   let map=searchthrough.clone();
   let filescount=map.len();
  
@@ -46,7 +46,7 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
     exactmatch=true;
     string = string[1..string.len() - 1].to_string();
   }
-  let orig = *state.process_count.lock().unwrap();
+  let orig = *state.process_count.try_lock().unwrap();
   
   window.emit("reloadlist","resettable").unwrap();
 
@@ -87,7 +87,7 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
       let mut last_print = Instant::now(); // initialize the last print time to the current time
       loop {
         // let string=string.clone();
-        // if &s2.lock().unwrap().process_count.lock().unwrap().clone().abs_diff(orig)>&0 { // check if the current count value is different from the original one
+        // if &s2.try_lock().unwrap().process_count.try_lock().unwrap().clone().abs_diff(orig)>&0 { // check if the current count value is different from the original one
         //   break; // if yes, it means a new command has been invoked and the old one should be canceled
         // }
         nootimes+=1;
@@ -100,12 +100,12 @@ pub async fn search_try(mut starttime:i64,windowname:String,mut string: String,w
           }
           
           if last_print.elapsed() >= Duration::from_millis(*msval) { 
-                let files = files_clone.lock().unwrap();
+                let files = files_clone.try_lock().unwrap();
                 countoff=files.len();
                 if(countoff>1){
                   firsttime=false;
                 }
-                let don = doneornot.lock().unwrap();
+                let don = doneornot.try_lock().unwrap();
                   // check if 200 milliseconds have passed since the last print
                     
                     // println!("{}------{}----{}",nootimes,files.len(),fcount);
@@ -223,7 +223,7 @@ let u:HashSet<String>=map.clone()
     .for_each(| (c,ei)|{
       if(sts.load(Ordering::SeqCst)!=starttime){
         println!("closing search started @ {} ",starttime);
-        *doneornot_clone.lock().unwrap()=true;
+        *doneornot_clone.try_lock().unwrap()=true;
           sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
           opendialogwindow(&app_handle,"Search halted",&format!("Halted search for {}",string),"");
@@ -243,8 +243,8 @@ let u:HashSet<String>=map.clone()
       let path=Path::new(&ei);
       let fname=path.file_name().unwrap().to_string_lossy().to_string();
         let file = populatefileitem(fname,path,&window,&state);
-          let mut files = files.lock().unwrap(); 
-          *tfsize_clone.lock().unwrap()+=file.rawfs;
+          let mut files = files.try_lock().unwrap(); 
+          *tfsize_clone.try_lock().unwrap()+=file.rawfs;
           files.push(file.clone()); 
             fileslist(&windowname2.clone(),&window.app_handle(),&serde_json::to_string(&json!({
               "caller":starttime,
@@ -266,7 +266,7 @@ let u:HashSet<String>=map.clone()
   //   }
   //  }
   }
-  *doneornot_clone.lock().unwrap()=true;
+  *doneornot_clone.try_lock().unwrap()=true;
   sendfilesetcollection(&wname,&app_handle,&serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap());
 
  
