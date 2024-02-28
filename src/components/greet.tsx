@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from "react"
 import { FileItem } from "../shared/types"
-import { convertFileSrc } from "@tauri-apps/api/tauri";
-import { appWindow } from "@tauri-apps/api/window";
+// import { convertFileSrc } from "@tauri-apps/api/tauri";
+// import { appWindow } from "@tauri-apps/api/window";
 import { Folder, FileIcon, EyeIcon, ScanSearchIcon } from "lucide-react";
-import path from "path";
+// import path from "path";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import ReadFileComp, { IMAGE_TYPES, VIDEO_TYPES } from "./readfile";
+// import ReadFileComp, { IMAGE_TYPES, VIDEO_TYPES } from "./readfile";
 import { Button } from "./ui/button";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "./ui/hover-card";
 import { Sheet,SheetTrigger, SheetContent } from "./ui/sheet";
-import { VideoComponent } from "./videoplaycomp";
+// import { VideoComponent } from "./videoplaycomp";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -24,6 +24,7 @@ export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 
 export default function Greet() {
+  const lastcalledtime=useRef()
   let socket;
   useEffect(() => {
     if (typeof window !== undefined) {
@@ -41,6 +42,25 @@ export default function Greet() {
         let recieved=JSON.parse(event.data);
         if(recieved[0]==="sendbacktofileslist"){
           console.log(recieved)
+          if(recieved[1]===lastcalledtime.current){
+            let tocompute=JSON.parse(recieved[2])
+            // console.log(printtxt+"------->"+returned.caller+"---------------->"+JSON.stringify(tocompute))
+            // setwbv(false)
+            // setfc((old) => {
+              // console.log(old+"------------"+lastcalledtime.current )
+              // const newFileCount = old + 1;
+               {
+                setfl((plog) => {
+                  // console.log(plog)
+                  return [...plog, tocompute]
+                });
+                
+              }
+            //  });
+          }
+          else{
+            console.log("obsolete results recieved.")
+          }
         }
         document.getElementById('output').textContent = event.data;
       };
@@ -52,14 +72,14 @@ export default function Greet() {
     // socket.send(message);
       
     }
-    const lastcalledtime=useRef()
+    
     function listfiles(path){
       let lct=new Date().getTime().toString();
       
       lastcalledtime.current=lct
       invoke('list_files', { 
         starttime:lct,
-        windowname:appWindow?.label,
+        windowname:"appWindow?.label",
         oid: "".toString(),
         path: path,
         ff: "" 
@@ -146,11 +166,11 @@ export default function Greet() {
                                   setfl([])
                                   // updatetabs(message.path)
                                 }
-                                  listfiles(activetabid,message.path);
+                                  listfiles(message.path);
                                 }
                               }>
                                 <div className="w-full">
-                                  <div className={`w-full ${showthumbnail?"":"hidden"}`}>
+                                  {/* <div className={`w-full ${showthumbnail?"":"hidden"}`}>
                               {![...IMAGE_TYPES,...VIDEO_TYPES].some(type => message.name.includes(type))?<div 
                               className={`flex bg-gray-200 dark:bg-slate-500 w-full place-items-center h-[200px] overflow-${scrollorauto}`}
                             ></div>:""}
@@ -165,7 +185,7 @@ export default function Greet() {
                             ):""} 
                             {VIDEO_TYPES.some(type => message.name.includes(type))?(
                             <VideoComponent path={message.path} hoverplay={true}/>):""}
-                                  </div>
+                                  </div> */}
                              <div className="flex flex-row justify-start gap-3 items-center">
 
                               <div className="overflow-visible">
@@ -213,7 +233,7 @@ export default function Greet() {
                           invoke(
                             "addmark",
                             {
-                          windowname:appWindow?.label,
+                          windowname:"appWindow?.label",
                               path: message.path,
                               id:new Date().getTime().toString()
                             }
@@ -221,15 +241,15 @@ export default function Greet() {
                         }}>Add bookmark</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
                           useEffect(() => {
-                            if (typeof window !== 'undefined'){
+                            // if (typeof window !== 'undefined'){
               
-                              try {
-                                navigator.clipboard.writeText(path);
-                                console.log('Content copied to clipboard');
-                              } catch (err) {
-                                console.error('Failed to copy: ', err);
-                              }
-                            }
+                            //   try {
+                            //     navigator.clipboard.writeText(path);
+                            //     console.log('Content copied to clipboard');
+                            //   } catch (err) {
+                            //     console.error('Failed to copy: ', err);
+                            //   }
+                            // }
                           },[])}}
                         >Copy path to clipboard</ContextMenuItem>
                         <ContextMenuItem onSelect={(e)=>{
@@ -257,7 +277,7 @@ export default function Greet() {
                               </SheetTrigger>
                               <SheetContent 
                                 className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                                  <ReadFileComp message={message}/>
+                                  {/* <ReadFileComp message={message}/> */}
                               </SheetContent>
                             </Sheet>):(
                             <div className="">
