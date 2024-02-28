@@ -104,7 +104,7 @@ fn main() {
             // let outc=(out.clone());
             // The handler needs to take ownership of out, so we use move
             move |msg: Message| {
-                let (tx, rx) = mpsc::channel::<String>();
+                let (tx, rx) = mpsc::channel::<Vec<String>>();
                 let mut retvec = String::new();
                 // Handle messages received on this connection
                 println!("Server got message '{}'. ", msg);
@@ -118,10 +118,10 @@ fn main() {
                     thread::spawn(move || {
                         loop {
                             match (rx.recv()) {
-                                Ok(recieved) => {
-                                  println!("{}",recieved);
-                                    let whatrecieved: Vec<String> =
-                                        serde_json::from_str(&recieved).unwrap();
+                                Ok(whatrecieved) => {
+                                  println!("{:?}",whatrecieved);
+                                    // let whatrecieved: Vec<String> =
+                                        // serde_json::from_str(&recieved).unwrap();
                                     let whichone = whatrecieved.get(0).unwrap();
                                     match (whichone.as_str()) {
                                         "sendparent" => {
@@ -130,7 +130,7 @@ fn main() {
                                         }
                                         "sendbacktofileslist" => {
                                           
-                                            outc.send(recieved).unwrap();
+                                            outc.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
                                         }
                                         _ => {}
                                     }

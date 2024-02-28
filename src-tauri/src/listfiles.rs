@@ -50,7 +50,7 @@ pub async fn checkiffile(path: String, window: Window) {
         check_if_file(vec![path]),
     );
 }
-pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>)->Result<(), String> {
+pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<(), String> {
     let starttime = arguments.get(0).unwrap();
     let windowname = arguments.get(1).unwrap();
     let oid = arguments.get(2).unwrap();
@@ -64,10 +64,9 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>)->Result<(), S
             Some(spath) => {
                 path = spath.to_string_lossy().to_string();
                 tx.send(
-                    serde_json::to_string(&json!({
-                      "granparent":path
-                    }))
-                    .unwrap(),
+                    vec![
+                      "granparent".to_string(),path.clone()
+                    ]
                 );
             }
             None => {
@@ -155,7 +154,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>)->Result<(), S
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
     let startime = duration.as_secs();
     println!("{:?}----{}", parent, startime);
-    tx.send("starttimer".to_string());
+    tx.send(vec!["starttimer".to_string()]);
     // starttimer(&windowname,&app_handle)?;
     println!("start timer");
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -279,12 +278,11 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>)->Result<(), S
                 files.push(file.clone()); // push a clone of the file to the vector
                 println!("{:?}",file.clone());
                 tx.send(
-                    serde_json::to_string(&json!([
-                        "sendbacktofileslist",
-                        starttime,
-                        &serde_json::to_string(&file.clone()).unwrap(),
-                    ]))
-                    .unwrap(),
+                    vec![
+                        "sendbacktofileslist".to_string(),
+                        starttime.to_string(),
+                        serde_json::to_string(&file.clone()).unwrap(),
+                    ]
                 );
             }
 
@@ -341,13 +339,13 @@ pub async fn list_files(
     arguments.push(windowname);
     arguments.push(oid);
     arguments.push(path);
-    let (tx, rx) = mpsc::channel::<String>();
+    let (tx, rx) = mpsc::channel::<Vec<String>>();
     list_file(tx.clone(), arguments);
     thread::spawn(move || {
         loop {
             match (rx.recv()) {
-                Ok(recieved) => {
-                    let whatrecieved: Vec<String> = serde_json::from_str(&recieved).unwrap();
+                Ok(whatrecieved) => {
+                    // let whatrecieved: Vec<String> = serde_json::from_str(&recieved).unwrap();
                     let whichone = whatrecieved.get(0).unwrap();
                     match (whichone.as_str()) {
                         "sendparent" => {

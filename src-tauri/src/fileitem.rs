@@ -32,19 +32,23 @@ use crate::{
 };
 
 pub fn populatefileitem(name: String, path: &Path) -> FileItem {
+    println!("preparing file item");
     // println!("path=-------->{:?}",path);
     // println!("{}",name);
-    let state = SHARED_STATE.lock().unwrap();
+    // let state = SHARED_STATE.lock().unwrap();
     let pathtf = path.to_string_lossy().into_owned();
+    println!("preparing file item");
     // let ignorehiddenfiles=*state.excludehidden.read().unwrap();
     // println!("-----------{}",path.clone());
 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size = if (!path.is_symlink()) {
-        find_size(&pathtf)
+        0
+        // find_size(&pathtf)
     } else {
         0
     };
+    println!("preparing file item");
     // let size=0;
     let mut foldercon = 0;
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -80,11 +84,13 @@ pub fn populatefileitem(name: String, path: &Path) -> FileItem {
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
     let mut folderloc = 0;
     let mut filetype = "Folder".to_string();
+    println!("preparing file item");
     // let mut filesetcollection=HashSet::new();
     let issymlink = path.is_relative() || path.is_symlink();
     if (issymlink) {
         filetype += "symlink";
     }
+    println!("preparing file item");
     if !path.is_dir() {
         //modify here to add more extensions to list linecount
         match (path.extension()) {
@@ -163,6 +169,7 @@ pub fn populatefileitem(name: String, path: &Path) -> FileItem {
     //       *hm.entry(filetype.clone()).or_insert(0)+=1;
     let tr;
     let (lmdate, timestamp) = lastmodified(&pathtf);
+    println!("sending file item");
     FileItem {
         name: name.clone(),
         path: pathtf.clone(),
