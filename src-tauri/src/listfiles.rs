@@ -211,48 +211,48 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
     //init random interval to send updates to UI
     let update: Vec<u64> = vec![1, 2, 5, 7, 10, 20, 40, 65, 90, 120];
     // spawn a new thread to print the value of the files vector every 200 milliseconds
-    let handle = thread::spawn(move || {
-        let mut last_print = Instant::now(); // initialize the last print time to the current time
-        loop {
-            let msval = update.iter().next().unwrap_or(&120);
+    // let handle = thread::spawn(move || {
+    //     let mut last_print = Instant::now(); // initialize the last print time to the current time
+    //     loop {
+    //         let msval = update.iter().next().unwrap_or(&120);
 
-            // check milliseconds passed since the last print
-            if last_print.elapsed() >= Duration::from_millis(*msval) {
-                let files = files_clone.try_lock().unwrap();
-                let don = doneornot.try_lock().unwrap();
+    //         // check milliseconds passed since the last print
+    //         if last_print.elapsed() >= Duration::from_millis(*msval) {
+    //             let files = files_clone.try_lock().unwrap();
+    //             let don = doneornot.try_lock().unwrap();
 
-                // folsize(&windowname.clone(),&app_handle,
-                // serde_json::to_string(&json!({
-                //   "caller":startime,
-                //   "size":sizeunit::size(*tfsize.try_lock().unwrap(),true)
-                // })).unwrap(),
-                // );
-                let wn = windowname3.clone();
-                // progress(&wn,&window2.app_handle(),{
-                //   let pv=files.len() as f32/fcount as f32*100 as f32;
-                //   println!("{}",pv);
-                //   pv as i32});
-                // processing(&windowname.clone(),&window2.app_handle(),{"loading files".to_string()});
+    //             // folsize(&windowname.clone(),&app_handle,
+    //             // serde_json::to_string(&json!({
+    //             //   "caller":startime,
+    //             //   "size":sizeunit::size(*tfsize.try_lock().unwrap(),true)
+    //             // })).unwrap(),
+    //             // );
+    //             let wn = windowname3.clone();
+    //             // progress(&wn,&window2.app_handle(),{
+    //             //   let pv=files.len() as f32/fcount as f32*100 as f32;
+    //             //   println!("{}",pv);
+    //             //   pv as i32});
+    //             // processing(&windowname.clone(),&window2.app_handle(),{"loading files".to_string()});
 
-                if *don || fcount == files.len() {
-                    // processing(&windowname.clone(),&window2.app_handle(),{"completed ".to_string()});
-                    // window2.emit("infiniteloader",
-                    //   json!({
-                    //       "message": "lfiles",
-                    //       "status": "stop",
-                    //       })
-                    //   );
-                    // handle.abort();
-                    // stoptimer(&windowname, &window.app_handle());
-                    break;
-                }
-                // lock the mutex and get a reference to the vector
-                // println!("Files: {:?}", files); // print the vector value
-                last_print = Instant::now(); // update the last print time to the current time
-            }
-            thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
-        }
-    });
+    //             if *don || fcount == files.len() {
+    //                 // processing(&windowname.clone(),&window2.app_handle(),{"completed ".to_string()});
+    //                 // window2.emit("infiniteloader",
+    //                 //   json!({
+    //                 //       "message": "lfiles",
+    //                 //       "status": "stop",
+    //                 //       })
+    //                 //   );
+    //                 // handle.abort();
+    //                 // stoptimer(&windowname, &window.app_handle());
+    //                 break;
+    //             }
+    //             // lock the mutex and get a reference to the vector
+    //             // println!("Files: {:?}", files); // print the vector value
+    //             last_print = Instant::now(); // update the last print time to the current time
+    //         }
+    //         thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
+    //     }
+    // });
     println!("walking path");
     println!("{}",path);
 
@@ -269,14 +269,14 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
                 let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path());
-                let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+                // let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
                                                        // println!("added--->{:?}",e);
                 // *tfsize_clone.try_lock().unwrap() += file.rawfs;
 
                 //send each file to frontend
-                files.push(file.clone()); // push a clone of the file to the vector
-                println!("{:?}",file.clone());
+                // files.push(file.clone()); // push a clone of the file to the vector
+                // println!("{:?}",file.clone());
                 tx.send(
                     vec![
                         "sendbacktofileslist".to_string(),
@@ -294,7 +294,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
     //  state.print_cache_size();
 
     // wait for the printing thread to finish
-    handle.join().unwrap();
+    // handle.join().unwrap();
 
     // let app_handle=window.clone().app_handle();
 

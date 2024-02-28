@@ -43,8 +43,10 @@ pub fn size(B: u64, isbytes: bool) -> String {
 }
 pub fn find_size(path: &str) -> u64 {
     // return 0 as u64;
-    let state = SHARED_STATE.try_lock().unwrap();
-    let cstore = state.cstore.read().unwrap();
+    // if 
+    let (state) = SHARED_STATE.try_lock().unwrap();
+    // {
+        let cstore = state.cstore.read().unwrap();
 
     // let k=0;
     // if(k==0){
@@ -86,7 +88,8 @@ pub fn find_size(path: &str) -> u64 {
         return (0);
     }
     let nosize = state.nosize.read().unwrap();
-    if (*nosize) {
+    // if (*nosize)
+     {
         // window.emit("infiniteloader",
         // // json!(
         //     {
@@ -140,4 +143,5 @@ pub fn find_size(path: &str) -> u64 {
     // self.size += mem::size_of_val(&expirytime);
 
     (size)
+    
 }
