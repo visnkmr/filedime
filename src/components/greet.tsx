@@ -36,32 +36,31 @@ export default function Greet() {
         console.log('Connected to WebSocket server');
       };
   
-      socket.onmessage = (event) => {
+      socket.onmessage = (event:MessageEvent) => {
+        console.log(event.data)
+        let recieved=JSON.parse(event.data);
+        if(recieved[0]==="sendbacktofileslist"){
+          console.log(recieved)
+        }
         document.getElementById('output').textContent = event.data;
       };
   }, []);
 
     function sendMessage() {
       const message = document.getElementById('message').value;
-      invoke('list_files', { 
-        starttime:"123",
-          windowname:"appWindow?.label",
-          oid: message,
-          path: "/home",
-          ff: "" 
-    })
+      listfiles("drives://")
     // socket.send(message);
       
     }
     const lastcalledtime=useRef()
-    function listfiles(oid,path){
+    function listfiles(path){
       let lct=new Date().getTime().toString();
       
       lastcalledtime.current=lct
       invoke('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
-        oid: oid.toString(),
+        oid: "".toString(),
         path: path,
         ff: "" 
     })

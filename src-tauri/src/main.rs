@@ -110,7 +110,7 @@ fn main() {
                 println!("Server got message '{}'. ", msg);
                 if (msg.is_text()) {
                     let (functionname, arguments) = parserecieved(msg);
-                    if functionname == "listfiles" {
+                    if functionname == "list_files" {
                         list_file(tx.clone(), arguments);
                     }
                     let state = SHARED_STATE.lock().unwrap();
@@ -119,6 +119,7 @@ fn main() {
                         loop {
                             match (rx.recv()) {
                                 Ok(recieved) => {
+                                  println!("{}",recieved);
                                     let whatrecieved: Vec<String> =
                                         serde_json::from_str(&recieved).unwrap();
                                     let whichone = whatrecieved.get(0).unwrap();

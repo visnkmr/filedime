@@ -76,7 +76,7 @@ const nextConfig =
         tls: false
       };
       config.optimization = {
-        minimize: false,
+        minimize: true,
         minimizer: [
           new TerserPlugin({
             // minify: TerserPlugin.swcMinify,
@@ -147,7 +147,7 @@ const nextConfig =
     // };
 
     // Merge chunks instead of creating new ones
-    config.optimization.minimize = false;
+    config.optimization.minimize = true;
 //     if (typeof nextRuntime === "undefined") {
 //       config.resolve.fallback = {
 //                 ...config.resolve.fallback,

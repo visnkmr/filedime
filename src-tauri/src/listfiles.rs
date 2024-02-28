@@ -50,7 +50,7 @@ pub async fn checkiffile(path: String, window: Window) {
         check_if_file(vec![path]),
     );
 }
-pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
+pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>)->Result<(), String> {
     let starttime = arguments.get(0).unwrap();
     let windowname = arguments.get(1).unwrap();
     let oid = arguments.get(2).unwrap();
@@ -71,7 +71,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
                 );
             }
             None => {
-                // return Err("home not found".to_string())
+                return Err("home not found".to_string())
             }
         };
         // return Ok(())
@@ -82,7 +82,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
                 // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
             }
             None => {
-                // return Err("home not found".to_string())
+                return Err("home not found".to_string())
             }
         };
         // return Ok(())
@@ -94,7 +94,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
                 // sendparentloc(&windowname,&window.app_handle(), path.to_string(),&oid)?;
             }
             None => {
-                // return Err("home not found".to_string())
+                return Err("home not found".to_string())
             }
         };
         // return Ok(())
@@ -192,7 +192,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
     println!("read dir done on path");
 
     // folcount(&windowname,&app_handle, fcount)?;
-    println!("folcount sent");
+    println!("folcount sent {}",fcount);
 
     // if let Some(granloc)=parent.parent(){
     //   sendgparentloc(&windowname,&app_handle,granloc.to_string_lossy().to_string())?;
@@ -254,22 +254,30 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
             thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
         }
     });
+    println!("walking path");
+    println!("{}",path);
 
     let walker = par_walker3
         .into_par_iter()
-        .filter_map(|e| e.ok())
+        .filter_map(|e| {
+          println!("{:?}",e);
+          e.ok()
+        })
         .for_each(|e| {
-            if (!e.path().to_string_lossy().to_string().eq(&path)) {
+          // println!("reached par for each for {:?}",e);
+          if (!e.path().to_string_lossy().to_string().eq(&path)) {
+              println!("adding file");
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
                 let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path());
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
                                                        // println!("added--->{:?}",e);
-                *tfsize_clone.lock().unwrap() += file.rawfs;
+                // *tfsize_clone.lock().unwrap() += file.rawfs;
 
                 //send each file to frontend
                 files.push(file.clone()); // push a clone of the file to the vector
+                println!("{:?}",file.clone());
                 tx.send(
                     serde_json::to_string(&json!([
                         "sendbacktofileslist",
@@ -282,6 +290,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
 
             // Ok(()) // return Ok to continue the iteration
         });
+        println!("reachedhere");
     *doneornot_clone.lock().unwrap() = true;
     // .collect();
     //  state.print_cache_size();
@@ -314,6 +323,7 @@ pub fn list_file(tx: mpsc::Sender<String>, arguments: Vec<String>) {
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
     let endtime = duration.as_secs();
     println!("endtime----{}", endtime - startime);
+    Ok(())
 }
 #[tauri::command]
 pub async fn list_files(
