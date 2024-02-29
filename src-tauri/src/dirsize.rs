@@ -3,23 +3,24 @@ use rayon::prelude::*;
 use serde_json::json;
 use std::{
     fs,
-    path::{Path, PathBuf}, sync::{RwLock, Arc},
+    path::{Path, PathBuf},
 };
 use tauri::{State, Window};
 
-use crate::{appstate::AppStateStore, sizeunit::find_size};
+use crate::{appstate::AppStateStore, sizeunit::find_size, SHARED_STATE};
 
 // A helper function to get the size of a file in bytes
-fn file_size(path: &std::path::Path, g: Arc<RwLock<AppStateStore>>) -> u64 {
-    find_size(&path.to_string_lossy(),  g)
+fn file_size(path: &std::path::Path) -> u64 {
+    find_size(&path.to_string_lossy())
     // g.addsize(&path.to_string_lossy(),fs::metadata(path).map(|m| m.len()).unwrap_or(0))
     // fs::metadata(path).map(|m| m.len()).unwrap_or(0)
 }
 
 // A function to calculate the total size of a directory and its subdirectories
-pub fn dir_size(path: &String, g: Arc<RwLock<AppStateStore>>) -> u64 {
+pub fn dir_size(path: &String) -> u64 {
+    let state = SHARED_STATE.try_lock().unwrap();
     // Create a walkdir iterator over the directory
-    let ignorehiddenfiles = *g.read().unwrap().excludehidden.read().unwrap();
+    let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(path)
         .threads(threads)
@@ -57,17 +58,16 @@ pub fn dir_size(path: &String, g: Arc<RwLock<AppStateStore>>) -> u64 {
             //     // "status": entry.path(),
             //     "status": "running",
             // }));
-            file_size(entry.path(), g)
+            file_size(entry.path())
         })
         // Sum up all file sizes
         .sum::<u64>();
-    // w.emit(
-    //     "infiniteloader",
-    //     json!({
-    //     "message": "lfiles",
-    //     "status": "stop",
-    //     }),
-    // );
+    // w.emit("infiniteloader",
+    //   json!({
+    //       "message": "lfiles",
+    //       "status": "stop",
+    //       })
+    //   );
 
     total_size
 }

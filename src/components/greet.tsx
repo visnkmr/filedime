@@ -147,12 +147,8 @@ export default function Greet() {
   <div>
   <input type="text" id="message" placeholder="Type a message..." />
   <button onClick={()=>sendMessage()}>Send</button>
-  <button onClick={()=>{
-    invoke('print_state', { 
-  })
-  }}>Print state</button>
 
-  {/* <div id="output">{recievedlist}</div> */}
+  <div id="output">{recievedlist}</div>
   {
   // isgrid &&
   fileslist

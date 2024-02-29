@@ -98,7 +98,7 @@ impl AppStateStore {
             whichthread: Arc::new(AtomicI8::new(0)),
             searchcounter: Arc::new(AtomicI16::new(0)),
             starttime: Arc::new(AtomicI64::new(0)),
-            nosize: RwLock::new(false),
+            nosize: RwLock::new(true),
             excludehidden: RwLock::new({
                 let truechecker = getcustom("filedime", "storevals/excludehidden.set", "false");
                 match (truechecker.as_str()) {

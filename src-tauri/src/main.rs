@@ -12,7 +12,7 @@ use std::{
     fs,
     io::*,
     net::{TcpListener, TcpStream},
-    path::Path, sync::{Arc, mpsc, Mutex, RwLock}, thread, collections::HashMap,
+    path::Path, sync::{Arc, mpsc, Mutex}, thread, collections::HashMap,
 };
 use tauri::{GlobalWindowEvent, WindowEvent};
 
@@ -110,10 +110,9 @@ let out_shared_clone = Arc::clone(&out_shared);
         let end_point: String = format!("{}:{}", HOST, PORT);
         if let Err(error) = listen(end_point, |out| {
             let mut out_lock = out_shared_clone.lock().unwrap();
-            let state = Arc::new(RwLock::new(AppStateStore::default()));
+            let state = Arc::new(Mutex::new(AppStateStore::default()));
             let connid=out.connection_id().clone();
-            out_lock.insert(connid.to_string(),(out.clone(), state.clone()));
-            // let state_clone = state.clone();
+        out_lock.insert(connid.to_string(),(out.clone(), state));
             // *out_lock = Some(out.clone());
             let tx_clone=tx.clone();
             // let outc=(out.clone());
@@ -126,10 +125,7 @@ let out_shared_clone = Arc::clone(&out_shared);
                 if (msg.is_text()) {
                     let (functionname, arguments) = parserecieved(msg);
                     if functionname == "list_files" {
-                        list_file(connid.to_string(),tx_clone.clone(), arguments,state.clone()).unwrap();
-                    }
-                    else if(functionname=="print_state"){
-                        tx_clone.clone().send((connid.to_string(),vec![])).unwrap();
+                        list_file(connid.to_string(),tx_clone.clone(), arguments).unwrap();
                     }
                 }
                 // out.send(retvec)
@@ -152,13 +148,8 @@ let out_shared_clone = Arc::clone(&out_shared);
                     let out_lock = out_shared.lock().unwrap();
                     if let Some((sender,state)) = out_lock.get(&connection_id) {
                         // Convert the message to a string and send it
-                        if(message.is_empty()){
-                            println!("{:?}",state);
-                        }
-                        else{
-                            let message_str = serde_json::to_string(&message).unwrap();
-                            sender.send(message_str).unwrap();
-                        }
+                        let message_str = serde_json::to_string(&message).unwrap();
+                        sender.send(message_str).unwrap();
                     } else {
                         println!("WebSocket connection with ID {} not established yet.", connection_id);
                     }
