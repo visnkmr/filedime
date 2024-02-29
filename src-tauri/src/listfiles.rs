@@ -50,7 +50,7 @@ pub async fn checkiffile(path: String, window: Window) {
         check_if_file(vec![path]),
     );
 }
-pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments: Vec<String>)->Result<(), String> {
+pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<(), String> {
     let starttime = arguments.get(0).unwrap();
     let windowname = arguments.get(1).unwrap();
     let oid = arguments.get(2).unwrap();
@@ -64,11 +64,9 @@ pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments
             Some(spath) => {
                 path = spath.to_string_lossy().to_string();
                 tx.send(
-                    (
-                        connid.clone(),
-                        vec![
+                    vec![
                       "granparent".to_string(),path.clone()
-                    ])
+                    ]
                 );
             }
             None => {
@@ -156,7 +154,7 @@ pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments
     let duration = now.duration_since(UNIX_EPOCH).unwrap();
     let startime = duration.as_secs();
     println!("{:?}----{}", parent, startime);
-    tx.send((connid.to_string(),vec!["starttimer".to_string()]));
+    tx.send(vec!["starttimer".to_string()]);
     // starttimer(&windowname,&app_handle)?;
     println!("start timer");
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -284,11 +282,11 @@ pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments
                 // println!("{:?}",file.clone());
                 println!("sending to websocket2");
                 tx.send(
-                    (connid.clone(),vec![
+                    vec![
                         "sendbacktofileslist".to_string(),
                         starttime.to_string(),
                         serde_json::to_string(&file.clone()).unwrap(),
-                    ])
+                    ]
                 ).unwrap();
                 println!("sending to websocket3");
             }
@@ -346,14 +344,14 @@ pub async fn list_files(
     arguments.push(windowname);
     arguments.push(oid);
     arguments.push(path);
-    let (tx, rx) = mpsc::channel::<(String,Vec<String>)>();
-    list_file("".to_string(),tx.clone(), arguments);
+    let (tx, rx) = mpsc::channel::<Vec<String>>();
+    list_file(tx.clone(), arguments);
     thread::spawn(move || {
         loop {
             match (rx.recv()) {
                 Ok(whatrecieved) => {
                     // let whatrecieved: Vec<String> = serde_json::from_str(&recieved).unwrap();
-                    let whichone = whatrecieved.1.get(0).unwrap();
+                    let whichone = whatrecieved.get(0).unwrap();
                     match (whichone.as_str()) {
                         "sendparent" => {
 
