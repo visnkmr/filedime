@@ -12,7 +12,7 @@ use std::{
     fs,
     io::*,
     net::{TcpListener, TcpStream},
-    path::Path, sync::{Arc, mpsc, Mutex}, thread,
+    path::Path, sync::{Arc, mpsc, Mutex}, thread, collections::HashMap,
 };
 use tauri::{GlobalWindowEvent, WindowEvent};
 
@@ -97,17 +97,23 @@ fn main() {
             handle_connection(_stream);
         }
     });
-    let (tx, rx) = mpsc::channel::<Vec<String>>();
-    let out_shared = Arc::new(Mutex::new(None));
+    let out_shared = Arc::new(Mutex::new(HashMap::new())); // Use HashMap to store state for each connection
 
-    let out_shared_clone = Arc::clone(&out_shared);
+let out_shared_clone = Arc::clone(&out_shared);
+    let (tx, rx) = mpsc::channel::<(String,Vec<String>)>();
+    // let out_shared = Arc::new(Mutex::new(None));
+
+    // let out_shared_clone = Arc::clone(&out_shared);
     thread::spawn(move || {
         const HOST: &str = "127.0.0.1";
         const PORT: &str = "8488";
         let end_point: String = format!("{}:{}", HOST, PORT);
         if let Err(error) = listen(end_point, |out| {
             let mut out_lock = out_shared_clone.lock().unwrap();
-            *out_lock = Some(out.clone());
+            let state = Arc::new(Mutex::new(AppStateStore::default()));
+            let connid=out.connection_id().clone();
+        out_lock.insert(connid.to_string(),(out.clone(), state));
+            // *out_lock = Some(out.clone());
             let tx_clone=tx.clone();
             // let outc=(out.clone());
             // The handler needs to take ownership of out, so we use move
@@ -119,23 +125,8 @@ fn main() {
                 if (msg.is_text()) {
                     let (functionname, arguments) = parserecieved(msg);
                     if functionname == "list_files" {
-                        list_file(tx_clone.clone(), arguments).unwrap();
+                        list_file(connid.to_string(),tx_clone.clone(), arguments).unwrap();
                     }
-                    // let state = SHARED_STATE.try_lock().unwrap();
-                    // let outc = out.clone();
-                    
-                    // let prev=state.cstore.read().unwrap().clone();
-                    // retvec=format!("{}",prev);
-                    // // retvec=format!("{}{:?}",functionname,arguments);
-                    // *state.cstore.write().unwrap()=format!("{}-----{}",prev,arguments.get(2).unwrap().clone());
-                    // drop(state);
-                    // match(functionname.as_str()){
-
-                    //       _=>{
-                    //         "Error".to_string()
-                    //       }
-                    //   };
-                    // println!("{}", retvec)
                 }
                 // out.send(retvec)
                Ok(())
@@ -150,12 +141,17 @@ fn main() {
         loop {
             match (rx.recv()) {
                 Ok(whatrecieved) => {
+                    // Assuming `whatrecieved` contains information to identify the connection
+                // For demonstration, let's assume `whatrecieved` is a tuple of (connection_id, message)
+                let (connection_id, message) = whatrecieved;
+
                     let out_lock = out_shared.lock().unwrap();
-                    if let Some(ref sender) = *out_lock {
-                        sender.send(serde_json::to_string(&whatrecieved).unwrap()).unwrap();
-                    
+                    if let Some((sender,state)) = out_lock.get(&connection_id) {
+                        // Convert the message to a string and send it
+                        let message_str = serde_json::to_string(&message).unwrap();
+                        sender.send(message_str).unwrap();
                     } else {
-                        println!("WebSocket connection not established yet.");
+                        println!("WebSocket connection with ID {} not established yet.", connection_id);
                     }
                   
                 }

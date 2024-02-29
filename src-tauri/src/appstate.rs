@@ -21,7 +21,7 @@ pub struct cachestore {
     pub expirytime: u64,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct AppStateStore {
     pub cstore: RwLock<FxHashMap<String, cachestore>>,
     pub includefolderinsearch: RwLock<bool>,
