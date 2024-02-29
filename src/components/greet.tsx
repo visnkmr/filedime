@@ -24,9 +24,29 @@ export let scrollorauto="auto";
 export let setcolorpertheme="bg-white dark:bg-gray-800"
 
 export default function Greet() {
+  // useEffect(()=>{
+  //     if(!startstopfilewatch){
+  //       invoke('senddriveslist', { 
+  //         windowname:appWindow?.label,
+  //     })
+  //     reloadsize("loadmarks")
+  //     invoke("listtabs",{})
+  //     .then((e)=>{
+  //       console.log("onopen---->"+e)
+  //       let tabslist=JSON.parse(e) as string[];
+  //       for (const [index,ei] of tabslist.entries()){
+  //         reset(ei)
+  //         setpath(ei)
+  //         newtab(ei,index.toString());
+  //       }
+  //     })          
+  //     }
+  // },[])
   const lastcalledtime=useRef()
   const filesobjinit:FileItem[]=[]
-  const [fileslist,setfl] =useState(filesobjinit)
+  const [fileslist, setfileslist] = useState(filesobjinit);
+  const [watchbuttonvisibility,setwbv]=useState(false)
+    const [filecount, setfc] = useState(0);
   const [recievedlist,setrl] =useState("")
   const [socket,setsocket]=useState()
   useEffect(() => {
@@ -47,20 +67,27 @@ export default function Greet() {
         if(recieved[0]==="sendbacktofileslist"){
           console.log(recieved)
           if(recieved[1]===lastcalledtime.current){
-            let tocompute=JSON.parse(recieved[2])
+            // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
+      let returned=JSON.parse(recieved[2]);
+      // console.log(returned.caller)
+      // setlct((returned.caller))
+      // console.log(lastcalledtime+"-------"+returned.caller)
+            let tocompute=JSON.parse(returned.files)
             // console.log(printtxt+"------->"+returned.caller+"---------------->"+JSON.stringify(tocompute))
-            // setwbv(false)
-            // setfc((old) => {
+            setwbv(false)
+            setfc((old) => {
               // console.log(old+"------------"+lastcalledtime.current )
-              // const newFileCount = old + 1;
+              const newFileCount = old + 1;
                {
-                setfl((plog) => {
+                setfileslist((plog) => {
                   // console.log(plog)
                   return [...plog, tocompute]
                 });
                 
               }
-            //  });
+              return newFileCount;
+             });
+         
           }
           else{
             console.log("obsolete results recieved.")
