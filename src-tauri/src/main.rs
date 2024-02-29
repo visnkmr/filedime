@@ -21,10 +21,10 @@ use ws::{listen, Message};
 
 use crate::listfiles::list_file;
 // Use lazy_static to initialize your shared state
-lazy_static! {
-    static ref SHARED_STATE: Arc<Mutex<AppStateStore>> =
-        Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
-}
+// lazy_static! {
+//     static ref SHARED_STATE: Arc<Mutex<AppStateStore>> =
+//         Arc::new(Mutex::new(AppStateStore::new(CACHE_EXPIRY)));
+// }
 #[derive(Serialize, Clone, Debug, PartialEq, Hash, Eq)]
 pub struct FileItem {
     name: String,
@@ -170,7 +170,7 @@ fn main() {
     let app = tauri::Builder::default()
         .setup(|app| Ok(()))
         .on_window_event(on_window_event)
-        .manage(SHARED_STATE.clone())
+        .manage(g)
         .invoke_handler(tauri::generate_handler![
             // getpathfromid,
             listfiles::list_files

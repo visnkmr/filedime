@@ -22,16 +22,16 @@ use crate::{
     // lastmodcalc::lastmodified,
     appstate::{get_enum_value, set_enum_value, wThread, AppStateStore},
     // openhtml::loadfromhtml,
-    fileitem::populatefileitem,
+    // fileitem::populatefileitem,
     // filltrie::populate_try,
     sendtofrontend::*,
     sizeunit,
     // markdown::loadmarkdown,
     // openpath,
     // tabinfo::newtab,
-    FileItem,
+    FileItem, fileitem::populate_file_item,
     // startup, opendialogwindow, getuniquewindowlabel, drivelist::{get_drives, get_disks},
-    SHARED_STATE,
+    // SHARED_STATE,
     // loadjs::loadjs
 };
 
@@ -269,7 +269,7 @@ pub fn list_file(tx: mpsc::Sender<Vec<String>>, arguments: Vec<String>)->Result<
               println!("adding file");
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
-                let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path());
+                let file = populate_file_item(e.file_name().to_string_lossy().to_string(), e.path());
                 println!("sending to websocket");
                 
                 // let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector

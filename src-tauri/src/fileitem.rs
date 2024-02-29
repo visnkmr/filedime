@@ -27,11 +27,11 @@ use crate::{
     // openpath,
     // tabinfo::newtab,
     FileItem,
-    SHARED_STATE,
+    // SHARED_STATE,
     // loadjs::loadjs
 };
 
-pub fn populatefileitem(name: String, path: &Path) -> FileItem {
+pub fn populate_file_item(name: String, path: &Path) -> FileItem {
     println!("preparing file item");
     // println!("path=-------->{:?}",path);
     // println!("{}",name);

@@ -10,7 +10,7 @@ use tauri::{State, Window};
 
 use crate::{
     appstate::{cachestore, AppStateStore},
-    dirsize, SHARED_STATE,
+     dirsize, //SHARED_STATE,
 };
 
 // Define constants for kilobyte, megabyte, gigabyte and terabyte
