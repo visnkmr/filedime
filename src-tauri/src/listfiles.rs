@@ -15,7 +15,7 @@ use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
-use tauri::{Manager, State, Window};
+use tauri::{Manager, State, Window, App};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{
@@ -50,7 +50,7 @@ pub async fn checkiffile(path: String, window: Window) {
         check_if_file(vec![path]),
     );
 }
-pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments: Vec<String>)->Result<(), String> {
+pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments: Vec<String>,state: Arc<RwLock<AppStateStore>>)->Result<(), String> {
     let starttime = arguments.get(0).unwrap();
     let windowname = arguments.get(1).unwrap();
     let oid = arguments.get(2).unwrap();
@@ -271,7 +271,7 @@ pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments
               println!("adding file");
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
-                let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path());
+                let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path(),state);
                 println!("sending to websocket");
                 
                 // let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -338,6 +338,7 @@ pub async fn list_files(
     mut path: String,
     ff: String,
     window: Window,
+    state: State<'_, AppStateStore>,
 ) -> Result<(), String> {
     // startup(&window.app_handle());
 
@@ -347,7 +348,8 @@ pub async fn list_files(
     arguments.push(oid);
     arguments.push(path);
     let (tx, rx) = mpsc::channel::<(String,Vec<String>)>();
-    list_file("".to_string(),tx.clone(), arguments);
+    // let 
+    // list_file("".to_string(),tx.clone(), arguments,state);
     thread::spawn(move || {
         loop {
             match (rx.recv()) {

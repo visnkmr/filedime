@@ -31,20 +31,21 @@ use crate::{
     // loadjs::loadjs
 };
 
-pub fn populatefileitem(name: String, path: &Path) -> FileItem {
+pub fn populatefileitem(name: String, path: &Path,state: Arc<RwLock<AppStateStore>>,) -> FileItem {
     println!("preparing file item");
     // println!("path=-------->{:?}",path);
     // println!("{}",name);
     // let state = SHARED_STATE.try_lock().unwrap();
     let pathtf = path.to_string_lossy().into_owned();
     println!("preparing file item");
-    // let ignorehiddenfiles=*state.excludehidden.read().unwrap();
+    let stater=state.read().unwrap();
+    let ignorehiddenfiles=*stater.excludehidden.read().unwrap();
     // println!("-----------{}",path.clone());
 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size = if (!path.is_symlink()) {
         // 0
-        find_size(&pathtf)
+        find_size(&pathtf,state)
     } else {
         0
     };
@@ -52,33 +53,33 @@ pub fn populatefileitem(name: String, path: &Path) -> FileItem {
     // let size=0;
     let mut foldercon = 0;
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
-    // if(*state.showfolderchildcount.read().unwrap()){
-    //   if(path.is_dir()){
-    //     let count = WalkBuilder::new(&path)
-    //     .max_depth(Some(1))
-    //     .threads(threads)
-    //     .hidden(ignorehiddenfiles) // Include hidden files and directories
-    //     .follow_links(false)
-    //     .parents(true)
+    if(*stater.showfolderchildcount.read().unwrap()){
+      if(path.is_dir()){
+        let count = WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        .threads(threads)
+        .hidden(ignorehiddenfiles) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
 
-    //     .git_exclude(true)
-    //     .ignore(false) // Disable the default ignore rules
-    //     .git_ignore(true).build()
-    //     .into_iter()
-    //     .filter_map(|entry| entry.ok())
-    //     .par_bridge()
-    //     .filter(|entry| {
-    //     //   window.emit("reloadlist",json!({
-    //     //     "message": "immediatechildcount",
-    //     //     "status": "running",
-    //     // }));
-    //       // entry.file_type().is_file()
-    //       true
-    //     })
-    //     .count();
-    //   foldercon=count as i32;
-    //   }
-    // }
+        .git_exclude(true)
+        .ignore(false) // Disable the default ignore rules
+        .git_ignore(true).build()
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+        .par_bridge()
+        .filter(|entry| {
+        //   window.emit("reloadlist",json!({
+        //     "message": "immediatechildcount",
+        //     "status": "running",
+        // }));
+          // entry.file_type().is_file()
+          true
+        })
+        .count();
+      foldercon=count as i32;
+      }
+    }
 
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
