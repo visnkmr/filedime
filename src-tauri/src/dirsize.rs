@@ -57,7 +57,7 @@ pub fn dir_size(path: &String, g: Arc<RwLock<AppStateStore>>) -> u64 {
             //     // "status": entry.path(),
             //     "status": "running",
             // }));
-            file_size(entry.path(), g.clone())
+            file_size(entry.path(), g)
         })
         // Sum up all file sizes
         .sum::<u64>();

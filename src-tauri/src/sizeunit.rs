@@ -85,7 +85,7 @@ pub fn find_size(path: &str, state: Arc<RwLock<AppStateStore>>) -> u64 {
     if !entry_path.is_dir() {
         return (0);
     }
-    let nosize = stater.nosize.read().unwrap();
+    let nosize = state.read().unwrap().nosize.read().unwrap();
     if (*nosize) {
         // window.emit("infiniteloader",
         // // json!(
@@ -106,14 +106,13 @@ pub fn find_size(path: &str, state: Arc<RwLock<AppStateStore>>) -> u64 {
                 .to_string_lossy()
                 .to_string(),
             
-            state.clone(),
+            state,
         )
     };
 
     if (size != 0) {
         // Use a single write lock guard to update the cache
-        let sw=state.try_write().unwrap();
-        let cstore = sw.cstore.try_write().unwrap();
+        let cstore = state.write().unwrap().cstore.write().unwrap();
 
         let mut cache = cstore;
 

@@ -45,7 +45,7 @@ pub fn populatefileitem(name: String, path: &Path,state: Arc<RwLock<AppStateStor
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size = if (!path.is_symlink()) {
         // 0
-        find_size(&pathtf,state.clone())
+        find_size(&pathtf,state)
     } else {
         0
     };

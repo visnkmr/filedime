@@ -271,7 +271,7 @@ pub fn list_file(connid:String,tx: mpsc::Sender<(String,Vec<String>)>, arguments
               println!("adding file");
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
-                let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path(),state.clone());
+                let file = populatefileitem(e.file_name().to_string_lossy().to_string(), e.path(),state);
                 println!("sending to websocket");
                 
                 // let mut files = files.try_lock().unwrap(); // lock the mutex and get a mutable reference to the vector
