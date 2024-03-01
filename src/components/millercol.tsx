@@ -33,7 +33,7 @@ export default function MillerCol({eachif,populatesearchlist,goto}:argprops){
         // setfileslist(e)
     })
 },[]);
-    return <div>
+    return <div className="overflow-scroll min-w-20">
         {fileslist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -41,7 +41,7 @@ export default function MillerCol({eachif,populatesearchlist,goto}:argprops){
           .map((message,index)  => {
             // if(eachitem.size>0){
                 
-              return <div key={index} className="m-3 flex flex-row">
+              return <div key={index} className="m-3 flex flex-row overflow-hidden">
               <Button size={"none"} variant={"outline"} className="relative m-0 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700">
 
               <ContextMenu >

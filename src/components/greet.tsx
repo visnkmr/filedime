@@ -71,7 +71,7 @@ import {  ArrowUpDown } from 'lucide-react';
 import { DateTime } from 'luxon';
 // import LetterClamp from '../../src/components/letterclamp';
 import '../styles/committablestyle.css'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Input } from "./ui/input";
 import { useTheme } from "next-themes";
@@ -130,7 +130,7 @@ export default function Greet() {
     const [driveslist, setdriveslist] = useState(driveobjinit);
     const [activetabid,setactivetabid]=useState(0)
     const [listlimit,setll]=useState(true)
-    const [islayout,setil]=useState(0)
+    const [layout,setl]=useState("table")
     const [startstopfilewatch,setstartstopfilewatch]=useState(false)
     const [watchbuttonvisibility,setwbv]=useState(false)
     const [filecount, setfc] = useState(0);
@@ -1562,14 +1562,20 @@ export default function Greet() {
 
         <HoverCard>
               <HoverCardTrigger>
-            <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
-                ()=>{
-                  setig((old)=>{return !old})
-                }
-            }>
-            {isgrid?<LayoutGrid className="h-4 w-4"/>:<LayoutList className="h-4 w-4"/>}
-              
-          </Button>
+              <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Open</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Layout</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup value={layout} onValueChange={setl}>
+          <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="detail  ">Detail</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="miller">Mac OS Style</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
           </HoverCardTrigger>
               <HoverCardContent className={`${setcolorpertheme}`} >
                List / Grid
@@ -1864,12 +1870,16 @@ export default function Greet() {
         </div>
         </div>
        
-        <span className={`overflow-${scrollorauto} ${(fileslist.length>0) && !isgrid ? 'block' : 'hidden'}`}>
+        {
+          layout==="table" ?
+          (<span className={`overflow-${scrollorauto} ${(fileslist.length>0) && layout==="table" ? 'block' : 'hidden'}`}>
         
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
-        </span>
-        
-        <div className={`${isgrid?"flex flex-row":"hidden"}`}>
+        </span>):null}
+        {
+          layout==="detail"?(
+          <div>
+            <div className={`flex flex-row}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
 
 <DropdownMenu>
@@ -1950,7 +1960,7 @@ export default function Greet() {
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
-                <Button variant={"outline"} className={`${isgrid?"":"hidden"}`} onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
+                <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
                 </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Show Thumbnails
@@ -1972,12 +1982,10 @@ export default function Greet() {
                 }/>
                 </div>
         </div>
-        <div className={`${isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`:"hidden"}`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}}`}>
 
         
         {
-        isgrid 
-        && 
         filestoshow
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
@@ -2126,9 +2134,13 @@ export default function Greet() {
         
         ))}
         </div>
-        <div>
+            </div>):null
 
-        <div className={`flex ms-2 overflow-${scrollorauto}`}>
+        }
+        
+        {
+          layout==="miller"?(
+            <div className={`flex ms-2 overflow-scroll`}>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2136,12 +2148,18 @@ export default function Greet() {
           .map((eachif,index)  => {
             if(eachif.pathtofol.trim().length>0){
 
-              return <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto}/>
+              return <div className={`flex ms-2`}>
+              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto}/>
+              </div>
+              
             }
             return;
         })}
+        
         </div>
-        </div>
+          ):null
+        }
+        
         </ResizablePanel>
       </ResizablePanelGroup>
     )
