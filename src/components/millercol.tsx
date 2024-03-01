@@ -34,7 +34,7 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
         setfileslist(itemslist)
         // setfileslist(e)
     })
-},[]);
+},[eachif.pathtofol]);
     return <div className="overflow-scroll min-w-20">
         {fileslist
           // .filter(function (el) {
