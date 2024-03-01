@@ -1,6 +1,6 @@
 {
   "name": "filedime",
-  "version": "0.8.91",
+  "version": "0.9",
   "private": true,
   "engines": {
     "node": "20.x"

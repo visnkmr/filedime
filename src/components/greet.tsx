@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -130,7 +130,7 @@ export default function Greet() {
     const [driveslist, setdriveslist] = useState(driveobjinit);
     const [activetabid,setactivetabid]=useState(0)
     const [listlimit,setll]=useState(true)
-    const [layout,setl]=useState("table")
+    const [layout,setl]=useState("detail")
     const [startstopfilewatch,setstartstopfilewatch]=useState(false)
     const [watchbuttonvisibility,setwbv]=useState(false)
     const [filecount, setfc] = useState(0);
@@ -1564,15 +1564,19 @@ export default function Greet() {
               <HoverCardTrigger>
               <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Open</Button>
+        <Button variant="outline">
+          {layout==="grid"?<LayoutGrid className="h-4 w-4"/>:(null)}
+          {layout==="detail"?<LayoutList className="h-4 w-4"/>:(null)}
+          {layout==="miller"?<Columns className="h-4 w-4"/>:(null)}
+            </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Layout</DropdownMenuLabel>
+      <DropdownMenuContent className="bg-gray-100 dark:bg-gray-800 ">
+        <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup value={layout} onValueChange={setl}>
-          <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="detail  ">Detail</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="miller">Mac OS Style</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="grid"><LayoutGrid className="h-4 w-4 pr-2"/>Grid</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="detail"><LayoutList className="h-4 w-4 pr-2"/>Detail</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="miller"><Columns className="h-4 w-4 pr-2"/>Mac OS Style</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -1871,13 +1875,13 @@ export default function Greet() {
         </div>
        
         {
-          layout==="table" ?
-          (<span className={`overflow-${scrollorauto} ${(fileslist.length>0) && layout==="table" ? 'block' : 'hidden'}`}>
+          layout==="detail" ?
+          (<span className={`overflow-${scrollorauto} ${(fileslist.length>0)}`}>
         
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>):null}
         {
-          layout==="detail"?(
+          layout==="grid"?(
           <div>
             <div className={`flex flex-row}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
