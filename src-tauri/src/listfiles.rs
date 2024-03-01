@@ -356,3 +356,68 @@ pub async fn list_files(
 
     Ok(())
 }
+#[tauri::command]
+fn files_list_for_miller_col(
+path:String,
+window: Window,
+state: State<'_, AppStateStore>,
+)->Result<Vec<String>,()>
+{
+    let ignorehiddenfiles = *state.excludehidden.read().unwrap();
+    let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
+    let walker = WalkBuilder::new(&path)
+        .max_depth(Some(1))
+        .threads(threads)
+        .hidden(ignorehiddenfiles) // Include hidden files and directories
+        .follow_links(false)
+        .parents(true)
+        .git_exclude(true)
+        .ignore(true) // Disable the default ignore rules
+        .git_ignore(true)
+        .clone();
+    let walker2 = walker
+        .clone() // Respect the .gitignore file
+        .build();
+    let walker3 = walker
+        .clone() // Respect the .gitignore file
+        .build();
+
+        let par_walker2 = walker2.par_bridge(); // ignore errors
+        let par_walker3 = walker3.par_bridge(); // ignore errors
+
+        let files = Arc::new(Mutex::new(Vec::<FileItem>::new()));
+    let walker = par_walker3
+        .into_par_iter()
+        .filter_map(|e| e.ok())
+        .for_each(|e| {
+            if (!e.path().to_string_lossy().to_string().eq(&path)) {
+                // thread::sleep(Duration::from_millis(1000));
+                // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
+                let file = populatefileitem(
+                    e.file_name().to_string_lossy().to_string(),
+                    e.path(),
+                    &window,
+                    &state,
+                );
+                let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
+                                                       // println!("{:?}",file);
+                                                       // println!("added--->{:?}",e);
+                // *tfsize_clone.lock().unwrap() += file.rawfs;
+
+                //send each file to frontend
+                files.push(file.clone()); // push a clone of the file to the vector
+                // fileslist(
+                //     &windowname2.clone(),
+                //     &window.app_handle(),
+                //     &serde_json::to_string(&json!({
+                //       "caller":starttime,
+                //       "files":&serde_json::to_string(&file.clone()).unwrap(),
+                //     }))
+                //     .unwrap(),
+                // );
+            }
+
+            // Ok(()) // return Ok to continue the iteration
+        });
+    Ok(vec![])
+}

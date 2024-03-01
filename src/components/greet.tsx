@@ -83,6 +83,7 @@ import { Toaster } from "./ui/toaster"
 import { Progress } from "./ui/progress"
 import { ToastAction } from "./ui/toast";
 import Link from "next/link";
+import MillerCol from "./millercol";
 
 export default function Greet() {
   const { theme, setTheme } = useTheme()
@@ -1965,7 +1966,10 @@ export default function Greet() {
         <div className={`${isgrid?`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`:"hidden"}`}>
 
         
-        {isgrid && filestoshow
+        {
+        !isgrid 
+        && 
+        filestoshow
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
@@ -2117,6 +2121,19 @@ export default function Greet() {
                         </div>
         
         ))}
+        <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}>
+          {pathsplitlist
+          // .filter(function (el) {
+          //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
+          // })
+          .map((eachif,index)  => {
+            if(eachif.pathtofol.trim().length>0){
+
+              return <MillerCol eachif={eachif}/>
+            }
+            return;
+        })}
+        </div>
         </div>
         </ResizablePanel>
       </ResizablePanelGroup>
