@@ -41,7 +41,7 @@ pub fn size(B: u64, isbytes: bool) -> String {
         "".to_string()
     }
 }
-pub fn find_size(path: &str, window: &Window, state: &State<'_, AppStateStore>) -> u64 {
+pub fn find_size(path: &str, state: &State<'_, AppStateStore>) -> u64 {
     // return 0 as u64;
     let cstore = state.cstore.read().unwrap();
 
@@ -104,7 +104,6 @@ pub fn find_size(path: &str, window: &Window, state: &State<'_, AppStateStore>) 
                 .to_os_string()
                 .to_string_lossy()
                 .to_string(),
-            window,
             &state,
         )
     };

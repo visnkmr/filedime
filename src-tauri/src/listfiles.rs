@@ -289,7 +289,6 @@ pub async fn list_files(
                 let file = populatefileitem(
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
-                    &window,
                     &state,
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -359,9 +358,8 @@ pub async fn list_files(
 #[tauri::command]
 fn files_list_for_miller_col(
 path:String,
-window: Window,
 state: State<'_, AppStateStore>,
-)->Result<Vec<String>,()>
+)->Result<Vec<FileItem>,()>
 {
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -396,7 +394,6 @@ state: State<'_, AppStateStore>,
                 let file = populatefileitem(
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
-                    &window,
                     &state,
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
@@ -419,5 +416,5 @@ state: State<'_, AppStateStore>,
 
             // Ok(()) // return Ok to continue the iteration
         });
-    Ok(vec![])
+    Ok(*files.lock().unwrap())
 }

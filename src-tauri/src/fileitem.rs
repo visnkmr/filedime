@@ -33,7 +33,6 @@ use crate::{
 pub fn populatefileitem(
     name: String,
     path: &Path,
-    window: &Window,
     state: &State<'_, AppStateStore>,
 ) -> FileItem {
     // println!("path=-------->{:?}",path);
@@ -44,7 +43,7 @@ pub fn populatefileitem(
 
     // let size = fs::metadata(e.path()).map(|m| m.len()).unwrap_or(0); // get their size
     let size = if (!path.is_symlink()) {
-        find_size(&pathtf, window, state)
+        find_size(&pathtf, state)
     } else {
         0
     };
