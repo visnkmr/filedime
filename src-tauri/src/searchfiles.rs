@@ -290,7 +290,7 @@ pub async fn search_try(
             // }));
             let path = Path::new(&ei);
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
-            let file = populatefileitem(fname, path, &window, &state);
+            let file = populatefileitem(fname, path, &state);
             let mut files = files.lock().unwrap();
             *tfsize_clone.lock().unwrap() += file.rawfs;
             files.push(file.clone());

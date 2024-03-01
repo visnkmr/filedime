@@ -356,10 +356,10 @@ pub async fn list_files(
     Ok(())
 }
 #[tauri::command]
-fn files_list_for_miller_col(
+pub async fn files_list_for_miller_col(
 path:String,
 state: State<'_, AppStateStore>,
-)->Result<Vec<FileItem>,()>
+)->Result<String,()>
 {
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
@@ -416,5 +416,5 @@ state: State<'_, AppStateStore>,
 
             // Ok(()) // return Ok to continue the iteration
         });
-    Ok(*files.lock().unwrap())
+    Ok(serde_json::to_string(&files.clone().lock().unwrap().clone()).unwrap())
 }

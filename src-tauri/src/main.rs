@@ -375,7 +375,6 @@ fn configfolpath(window: Window, state: State<'_, AppStateStore>) -> String {
       "cfpath":config_folder_path("filedime").as_path().to_string_lossy().to_string(),
       "cfpathsize":(sizeunit::size(dirsize::dir_size(
           &config_folder_path("filedime").as_path().to_string_lossy().to_string(),
-          &window,
           &state,
       ),true)),
     }))
@@ -404,7 +403,7 @@ async fn foldersize(
     window: Window,
     state: State<'_, AppStateStore>,
 ) -> Result<String, ()> {
-    let sizetosend = dirsize::dir_size(&path.to_string(), &window, &state);
+    let sizetosend = dirsize::dir_size(&path.to_string(), &state);
     Ok(sizeunit::size(sizetosend, true))
 }
 #[tauri::command]
@@ -485,6 +484,7 @@ fn main() {
             searchload,
             // defaulttoopen,
             foldersize,
+            files_list_for_miller_col,
             get_path_options,
             get_timestamp,
             // getuniquewindowlabel,

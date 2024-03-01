@@ -2121,7 +2121,7 @@ export default function Greet() {
                         </div>
         
         ))}
-        <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}>
+        {/* <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}> */}
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2133,7 +2133,7 @@ export default function Greet() {
             }
             return;
         })}
-        </div>
+        {/* </div> */}
         </div>
         </ResizablePanel>
       </ResizablePanelGroup>
