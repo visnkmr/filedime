@@ -18,8 +18,9 @@ import { VideoComponent } from "./videoplaycomp";
 interface argprops{
     eachif:pathsplit
     populatesearchlist:(path: String) => void;
+    goto:(path: FileItem) => void;
 }
-export default function MillerCol({eachif,populatesearchlist}:argprops){
+export default function MillerCol({eachif,populatesearchlist,goto}:argprops){
     const filesobjinit:FileItem[]=[]
     const [fileslist, setfileslist] = useState(filesobjinit);
     useEffect(()=>{
@@ -50,7 +51,7 @@ export default function MillerCol({eachif,populatesearchlist}:argprops){
                       <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
                       ()=>
                       { 
-                       goto(message.path)
+                       goto(message)
                         }
                       }>
                         <div className="w-full">

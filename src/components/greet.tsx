@@ -130,7 +130,7 @@ export default function Greet() {
     const [driveslist, setdriveslist] = useState(driveobjinit);
     const [activetabid,setactivetabid]=useState(0)
     const [listlimit,setll]=useState(true)
-    const [isgrid,setig]=useState(false)
+    const [islayout,setil]=useState(0)
     const [startstopfilewatch,setstartstopfilewatch]=useState(false)
     const [watchbuttonvisibility,setwbv]=useState(false)
     const [filecount, setfc] = useState(0);
@@ -1064,6 +1064,14 @@ export default function Greet() {
       b: 90,
     });
     const [loadervisible,setlv]=useState(false)
+    function goto(message:FileItem){
+      if(message.is_dir){
+        addToTabHistory(activetabid.toString(),message.path)
+        reset(message.path)
+        updatetabs(message.path)
+      }
+        listfiles(activetabid,message.path);
+    }
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a}>
@@ -1968,7 +1976,7 @@ export default function Greet() {
 
         
         {
-        !isgrid 
+        isgrid 
         && 
         filestoshow
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
@@ -1983,12 +1991,7 @@ export default function Greet() {
                               <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
                               ()=>
                               { 
-                                if(message.is_dir){
-                                  addToTabHistory(activetabid.toString(),message.path)
-                                  reset(message.path)
-                                  updatetabs(message.path)
-                                }
-                                  listfiles(activetabid,message.path);
+                                goto(message)
                                 }
                               }>
                                 <div className="w-full">
@@ -2122,7 +2125,10 @@ export default function Greet() {
                         </div>
         
         ))}
-        {/* <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}> */}
+        </div>
+        <div>
+
+        <div className={`flex ms-2 overflow-${scrollorauto}`}>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2130,11 +2136,11 @@ export default function Greet() {
           .map((eachif,index)  => {
             if(eachif.pathtofol.trim().length>0){
 
-              return <MillerCol eachif={eachif} populatesearchlist={populatesearchlist}/>
+              return <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto}/>
             }
             return;
         })}
-        {/* </div> */}
+        </div>
         </div>
         </ResizablePanel>
       </ResizablePanelGroup>
