@@ -19,8 +19,10 @@ interface argprops{
     eachif:pathsplit
     populatesearchlist:(path: String) => void;
     goto:(path: FileItem) => void;
+    newtab:(path: string,salt?:string) => void;
+    addmark:(path: string) => void;
 }
-export default function MillerCol({eachif,populatesearchlist,goto}:argprops){
+export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark}:argprops){
     const filesobjinit:FileItem[]=[]
     const [fileslist, setfileslist] = useState(filesobjinit);
     useEffect(()=>{
@@ -97,30 +99,23 @@ export default function MillerCol({eachif,populatesearchlist,goto}:argprops){
 
                 }}>Open in new window</ContextMenuItem>
                 <ContextMenuItem onSelect={(e)=>{
-                //   newtab(message.path)
+                  newtab(message.path)
                 }}>Open in new tab</ContextMenuItem>
                 <ContextMenuItem onSelect={()=>{
-                //   invoke(
-                //     "addmark",
-                //     {
-                //   windowname:appWindow?.label,
-                //       path: message.path,
-                //       id:new Date().getTime().toString()
-                //     }
-                //   );
+                  addmark(message.path)
                 }}>Add bookmark</ContextMenuItem>
                 <ContextMenuItem onSelect={(e)=>{
-                //   useEffect(() => {
-                //     if (typeof window !== 'undefined'){
+                  useEffect(() => {
+                    if (typeof window !== 'undefined'){
       
-                //       try {
-                //         navigator.clipboard.writeText(path);
-                //         console.log('Content copied to clipboard');
-                //       } catch (err) {
-                //         console.error('Failed to copy: ', err);
-                //       }
-                //     }
-                //   },[])
+                      try {
+                        navigator.clipboard.writeText(message.path);
+                        console.log('Content copied to clipboard');
+                      } catch (err) {
+                        console.error('Failed to copy: ', err);
+                      }
+                    }
+                  },[])
                 }}
                 >Copy path to clipboard</ContextMenuItem>
                 <ContextMenuItem onSelect={(e)=>{

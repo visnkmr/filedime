@@ -910,7 +910,16 @@ export default function Greet() {
   ];
   
     
-   
+   function addmark(path:String){
+    invoke(
+      "addmark",
+      {
+    windowname:appWindow?.label,
+        path: path,
+        id:new Date().getTime().toString()
+      }
+    );
+   }
    function reloadlist(){
         reset(path)
             // setpath()
@@ -1570,13 +1579,13 @@ export default function Greet() {
           {layout==="miller"?<Columns className="h-4 w-4"/>:(null)}
             </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-gray-100 dark:bg-gray-800 ">
+      <DropdownMenuContent className="bg-gray-100 dark:bg-gray-800">
         <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup value={layout} onValueChange={setl}>
-          <DropdownMenuRadioItem value="grid"><LayoutGrid className="h-4 w-4 pr-2"/>Grid</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="detail"><LayoutList className="h-4 w-4 pr-2"/>Detail</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="miller"><Columns className="h-4 w-4 pr-2"/>Mac OS Style</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="grid"><LayoutGrid className="h-4 w-4 mr-2"/>Grid</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="detail"><LayoutList className="h-4 w-4 mr-2"/>Detail</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="miller"><Columns className="h-4 w-4 mr-2"/>Mac OS Style</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -1850,7 +1859,9 @@ export default function Greet() {
         })}
         </div>
         </div>
-        <div className="">
+        {
+          layout==="detail" || layout==="grid"?(
+            <div className="">
 
         <div className='grid grid-flow-col justify-start overflow-x-auto'> 
         <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
@@ -1873,6 +1884,9 @@ export default function Greet() {
           ))}
         </div>
         </div>
+          ):(null) 
+        }
+        
        
         {
           layout==="detail" ?
@@ -2081,7 +2095,7 @@ export default function Greet() {
                             if (typeof window !== 'undefined'){
               
                               try {
-                                navigator.clipboard.writeText(path);
+                                navigator.clipboard.writeText(message.path);
                                 console.log('Content copied to clipboard');
                               } catch (err) {
                                 console.error('Failed to copy: ', err);
@@ -2153,7 +2167,7 @@ export default function Greet() {
             if(eachif.pathtofol.trim().length>0){
 
               return <div className={`flex ms-2`}>
-              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto}/>
+              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark}/>
               </div>
               
             }
