@@ -35,7 +35,7 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
         // setfileslist(e)
     })
 },[eachif.pathtofol]);
-    return <div className="overflow-auto max-w-96">
+    return <div className="overflow-auto">
         {fileslist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())

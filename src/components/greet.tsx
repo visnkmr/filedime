@@ -2159,7 +2159,11 @@ export default function Greet() {
         {
            
           layout==="miller"?(
-            <div className={`flex ms-2 overflow-scroll`}>
+            <div className={`flex ms-2 overflow-scroll w-full`}>
+                <ResizablePanelGroup
+      direction="horizontal"
+      className="overflow-hidden"
+    >
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2167,14 +2171,23 @@ export default function Greet() {
           .map((eachif,index)  => {
             if(eachif.pathtofol.trim().length>0){
 
-              return <div className={`flex ms-2`}>
+              return <>
+              <ResizablePanel >
+              {/* <div className="flex h-full items-center justify-center p-6">
+                <span className="font-semibold">Sidebar</span>
+              </div> */}
+            
+              <div className="flex h-full">
               <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark}/>
               </div>
+              </ResizablePanel>
+               <ResizableHandle withHandle />
+              </>
               
             }
             return;
         })}
-        
+        </ResizablePanelGroup>
         </div>
           ):null
         }
