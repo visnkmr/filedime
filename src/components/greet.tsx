@@ -86,6 +86,7 @@ import Link from "next/link";
 import MillerCol from "./millercol";
 
 export default function Greet() {
+  
   const { theme, setTheme } = useTheme()
   // if(activewindow.label!=="settings"){
     const { toast } = useToast()
@@ -2129,7 +2130,7 @@ export default function Greet() {
           .map((eachif,index)  => {
             if(eachif.pathtofol.trim().length>0){
 
-              return <MillerCol eachif={eachif}/>
+              return <MillerCol eachif={eachif} populatesearchlist={populatesearchlist}/>
             }
             return;
         })}
