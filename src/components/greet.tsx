@@ -1081,35 +1081,41 @@ export default function Greet() {
       }
         listfiles(activetabid,message.path);
     }
+    const [ws,setws]=useState();;
     useEffect(()=>{
       console.log("init websocket")
       const ws = new WebSocket('ws://127.0.0.1:8477');
       let videoBlob = new Blob();
-
+      ws.onopen = () => {
+        console.log('Connected to WebSocket server');
+      };
       // Handle incoming video chunks
       ws.onmessage = function(event) {
-        console.log(event)
-        if (event.data instanceof ArrayBuffer) {
+        console.log(event.data)
+        // if (event.data instanceof ArrayBuffer) {
             // Convert ArrayBuffer to Blob
             const arrayBuffer = event.data;
             const chunk = new Uint8Array(arrayBuffer);
-            const blob = new Blob([chunk], { type: 'video/mp4' });
+            const blob = new Blob([event.data], { type: 'video/mp4' });
             
             // Append the new chunk to the videoBlob
             videoBlob = new Blob([videoBlob, blob], { type: 'video/mp4' });
             console.log(videoBlob)
-            
+            let op=document.getElementById('videoPlayer')
+            console.log(op)
             // Update the video source if the video element is available
-            if (document.getElementById('videoPlayer')) {
+            if (op) {
+              console.log(document.getElementById('videoPlayer'))
                 document.getElementById('videoPlayer').src = URL.createObjectURL(videoBlob);
             }
-        }
+        // }
     };
 
       // Handle WebSocket close
       ws.onclose = function() {
           // mediaSource.endOfStream();
       };
+      setws(ws);
       // Create a MediaSource object
       // const mediaSource = new MediaSource();
       // const video = document.getElementById('video')! as HTMLVideoElement;
@@ -1127,7 +1133,9 @@ export default function Greet() {
       
     }
     return (<>
-    <button onClick={()=>playvid()}>test</button>
+    <button onClick={()=>{
+      ws.send("");
+    }}>test</button>
       <video id="videoPlayer" controls>
  Your browser does not support the video tag.
 </video>

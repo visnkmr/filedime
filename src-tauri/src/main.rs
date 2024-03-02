@@ -505,7 +505,8 @@ fn main() {
         listen("127.0.0.1:8477", |out|  {
             move |msg| {
                 println!("{:?}",msg);
-                let video_path = Path::new("C:/Users/wkramer/Downloads/file.mp4");
+                let video_path = Path::new("/home/roger/Downloads/others/jobsecurity.mp4");
+                // let video_path = Path::new("C:/Users/wkramer/Downloads/file.mp4");
                 let mut video_file = File::open(&video_path).unwrap();
                 video_file.seek(SeekFrom::Start(0)).unwrap();
 
