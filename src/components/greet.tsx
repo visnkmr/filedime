@@ -1081,7 +1081,56 @@ export default function Greet() {
       }
         listfiles(activetabid,message.path);
     }
-    return (
+    useEffect(()=>{
+      console.log("init websocket")
+      const ws = new WebSocket('ws://127.0.0.1:8477');
+      let videoBlob = new Blob();
+
+      // Handle incoming video chunks
+      ws.onmessage = function(event) {
+        console.log(event)
+        if (event.data instanceof ArrayBuffer) {
+            // Convert ArrayBuffer to Blob
+            const arrayBuffer = event.data;
+            const chunk = new Uint8Array(arrayBuffer);
+            const blob = new Blob([chunk], { type: 'video/mp4' });
+            
+            // Append the new chunk to the videoBlob
+            videoBlob = new Blob([videoBlob, blob], { type: 'video/mp4' });
+            console.log(videoBlob)
+            
+            // Update the video source if the video element is available
+            if (document.getElementById('videoPlayer')) {
+                document.getElementById('videoPlayer').src = URL.createObjectURL(videoBlob);
+            }
+        }
+    };
+
+      // Handle WebSocket close
+      ws.onclose = function() {
+          // mediaSource.endOfStream();
+      };
+      // Create a MediaSource object
+      // const mediaSource = new MediaSource();
+      // const video = document.getElementById('video')! as HTMLVideoElement;
+      // video.src = URL.createObjectURL(mediaSource);
+
+      // Open the MediaSource and create a SourceBuffer when it's ready
+      // mediaSource.addEventListener('sourceopen', function() {
+      //     const sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="mp4"');
+
+          // Connect to WebSocket server
+         
+      // });
+    },[])
+    function playvid(){
+      
+    }
+    return (<>
+    <button onClick={()=>playvid()}>test</button>
+      <video id="videoPlayer" controls>
+ Your browser does not support the video tag.
+</video>
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a}>
         {/* {lastcalledtime.current} */}
@@ -2181,6 +2230,7 @@ export default function Greet() {
         
         </ResizablePanel>
       </ResizablePanelGroup>
+    </>
     )
   // }
   

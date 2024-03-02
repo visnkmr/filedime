@@ -21,6 +21,7 @@ mod navtimeline;
 mod sendtofrontend;
 use chrono::{DateTime, Local, Utc};
 use navtimeline::{BrowserHistory, Page};
+use ws::{listen, CloseCode, Handler, Handshake, Message, Sender};
 // use filesize::PathExt;
 
 use crate::driveops::*;
@@ -450,7 +451,74 @@ async fn checker() -> Result<String, String> {
         Err(_) => Err("Could not check for updates".to_string()),
     }
 }
+
+// struct Server {
+//     out: Sender,
+// }
+
+// impl Handler for Server {
+//     fn on_open(&mut self, _: Handshake) -> Result<(), ws::Error> {
+//         Ok(())
+//     }
+
+//     fn on_message(&mut self, msg: Message) -> Result<(), ws::Error> {
+//         if let Message::Text(text) = msg {
+//             // if text == "request_video" {
+//                 // Assuming the video file path is hardcoded for simplicity.
+//                 // In a real application, you might want to receive the path as part of the message.
+//                 let video_path = "C:/Users/wkramer/Downloads/sample-15s.mp4";
+//                 let start: u64 = msg.as_text().unwrap().parse().unwrap_or(0);
+//             video_file.seek(SeekFrom::Start(start)).unwrap();
+
+//             let mut buffer = vec![0; 1024 * 1024]; // 1MB
+//             let bytes_read = self.video_file.read(&mut buffer).unwrap();
+//             buffer.truncate(bytes_read);
+
+//             // Send the video chunk over WebSocket
+//             out.send(Message::Binary(buffer))
+
+//             // }
+//         }
+//         Ok(())
+//     }
+
+//     fn on_close(&mut self, code: CloseCode, reason: &str) {
+//         println!("WebSocket closing for ({:?}) {}", code, reason);
+//     }
+// }
+#[tokio::test]
+async fn strvideo(){
+    // Get video stats (about  61MB)
+    let video_path = Path::new("C:/Users/wkramer/Downloads/file.mp4");
+    let mut video_file = File::open(&video_path).unwrap();
+    video_file.seek(SeekFrom::Start(0)).unwrap();
+
+    // Read a chunk of the video file (e.g., 1MB)
+    let mut buffer = vec![0; 1024 *1]; // 1MB
+    let bytes_read = video_file.read(&mut buffer).unwrap();
+    buffer.truncate(bytes_read);
+        println!("{:?}",buffer);
+}// #[tokio::main]
+// async
 fn main() {
+    thread::spawn(move||{
+        listen("127.0.0.1:8477", |out|  {
+            move |msg| {
+                println!("{:?}",msg);
+                let video_path = Path::new("C:/Users/wkramer/Downloads/file.mp4");
+                let mut video_file = File::open(&video_path).unwrap();
+                video_file.seek(SeekFrom::Start(0)).unwrap();
+
+                // Read a chunk of the video file (e.g., 1MB)
+                let mut buffer = vec![0; 1024 *1024]; // 1MB
+                let bytes_read = video_file.read(&mut buffer).unwrap();
+                buffer.truncate(bytes_read);
+                println!("{:?}",buffer);
+                out.send(Message::Binary(buffer))
+            }
+    }).unwrap();
+    });
+    
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
         .setup(|app| {
