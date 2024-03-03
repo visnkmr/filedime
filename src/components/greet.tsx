@@ -2168,7 +2168,7 @@ export default function Greet() {
             if(eachif.pathtofol.trim().length>0){
 
               return <div className={`flex ms-2`}>
-              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark}/>
+              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark} searchstring={searchstring} sftype={sftype}/>
               </div>
               
             }

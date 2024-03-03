@@ -21,8 +21,10 @@ interface argprops{
     goto:(path: FileItem) => void;
     newtab:(path: string,salt?:string) => void;
     addmark:(path: string) => void;
+    searchstring:String,
+    sftype:String,
 }
-export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark}:argprops){
+export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark,searchstring,sftype}:argprops){
     const filesobjinit:FileItem[]=[]
     const [fileslist, setfileslist] = useState(filesobjinit);
     useEffect(()=>{
@@ -35,8 +37,17 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
         // setfileslist(e)
     })
 },[eachif.pathtofol]);
-    return <div className="overflow-auto max-w-96">
-        {fileslist
+    return <>
+    <div className="flex flex-col text-center mt-3 mb-3">
+
+    <p>{eachif.interfolpath}</p>
+    <div className="overflow-auto max-w-96">
+      
+        {fileslist.filter(function (el) {
+        return (searchstring.trim().length>0?
+          el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
+          (el.ftype===sftype || sftype ==="all"):(true))))
+       })
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
@@ -168,4 +179,6 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
             // return;
         })}
         </div>
+    </div>
+    </>
 }
