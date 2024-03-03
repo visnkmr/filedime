@@ -9,6 +9,7 @@ interface FileItem {
     timestamp: number;
     foldercon: number;
     ftype: string;
+    parent: string;
   }
 interface DriveItem {
     name: string;

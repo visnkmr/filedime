@@ -78,7 +78,7 @@ pub struct FileItem {
     timestamp: i64,
     foldercon: i32,
     ftype: String, // grandparent:String,
-                   // parent:String
+    parent:String
 }
 const CACHE_EXPIRY: u64 = 60;
 

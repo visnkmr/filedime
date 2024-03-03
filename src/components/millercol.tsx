@@ -61,7 +61,7 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
               <ContextMenuTrigger className="h-full w-full overflow-hidden">
                 <HoverCard >
                   <HoverCardTrigger className="h-full w-full">
-                      <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onDoubleClick={
+                      <span className="flex justify-items-center w-full h-full p-6 overflow-hidden" onClick={
                       ()=>
                       { 
                        goto(message)

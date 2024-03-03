@@ -388,7 +388,6 @@ export default function Greet() {
         })  
         
      };
-   
    const [currentchoice,changechoiceto]=useState("")
   useEffect(()=>{
     // console.log("update listen-----"+lastcalledtime)
@@ -671,6 +670,21 @@ export default function Greet() {
                  <br/>
                  {converttstodt(timestamp)}
                 <FRc location={path} size={size} rawsize={rawfs}/>
+                { <button onClick={()=>{
+                   let fi:FileItem={
+                    name: "",
+                    path: row.original.parent,
+                    is_dir: true,
+                    size: 0,
+                    rawfs: 0,
+                    lmdate: 0,
+                    timestamp: 0,
+                    foldercon: 0,
+                    ftype: "",
+                    parent: "",
+                  }
+                  goto(fi)
+                }}>Open file location</button>}
                 </HoverCardContent>
               </HoverCard>
   
@@ -2062,6 +2076,22 @@ export default function Greet() {
                           <br/>
                           {converttstodt(message.timestamp)}
                           <FRc location={message.path} size={message.size} rawsize={message.rawfs}/>
+                          <br/>
+                          {<button onClick={()=>{
+                            let fi:FileItem={
+                              name: "",
+                              path: message.parent,
+                              is_dir: true,
+                              size: 0,
+                              rawfs: 0,
+                              lmdate: 0,
+                              timestamp: 0,
+                              foldercon: 0,
+                              ftype: "",
+                              parent: "",
+                            }
+                            goto(fi)
+                          }}>Open file location</button>}
                           </HoverCardContent>
                         </HoverCard>
 

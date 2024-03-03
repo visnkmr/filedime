@@ -77,7 +77,12 @@ pub fn populatefileitem(
             foldercon = count as i32;
         }
     }
-
+    let mut pp="".to_string();
+    if let Some(parent_path) = path.parent() {
+        if let Ok(ppath)=parent_path.canonicalize(){
+                pp=ppath.to_string_lossy().to_string()
+        }
+    };
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
     let mut folderloc = 0;
@@ -186,5 +191,6 @@ pub fn populatefileitem(
             folderloc as i32
         },
         ftype: filetype,
+        parent:pp
     }
 }
