@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -84,6 +84,7 @@ import { Progress } from "./ui/progress"
 import { ToastAction } from "./ui/toast";
 import Link from "next/link";
 import MillerCol from "./millercol";
+import GPTchatinterface from "./gptchatinterface";
 
 export default function Greet() {
   
@@ -752,6 +753,7 @@ export default function Greet() {
               // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
               // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
               ?(
+                <div>
           <Sheet modal={false}>
           <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
             <HoverCard>
@@ -784,7 +786,42 @@ export default function Greet() {
                 {/* <SheetDescription></SheetDescription> */}
               
             </SheetContent>
-          </Sheet>):(
+          </Sheet>
+          <Sheet modal={false}>
+          <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
+            <HoverCard>
+              <HoverCardTrigger>
+                <BotIcon className="h-4 w-4 "/>
+                </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+              Ask queries about this file
+              </HoverCardContent>
+            </HoverCard>
+            </SheetTrigger>
+            <SheetContent 
+              // style={{ width: `${width}px` }}
+              // onMouseDown={handleMouseDown}
+              // onMouseMove={handleMouseMove}
+              // onMouseUp={handleMouseUp}
+              // onMouseLeave={handleMouseUp}
+              className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+                {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
+                <ResizablePanel/>
+                <ResizableHandle />
+                <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
+                 
+        
+                <GPTchatinterface message={row.original}/>
+                {/* </ResizablePanel>
+              </ResizablePanelGroup> */}
+                
+          
+                {/* <SheetDescription></SheetDescription> */}
+              
+            </SheetContent>
+          </Sheet>
+                  </div>
+          ):(
           <div className="">
             <HoverCard>
   
