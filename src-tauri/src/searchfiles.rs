@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::{self, File},
     io::{BufRead, BufReader},
     path::{Path, PathBuf},
@@ -93,12 +93,12 @@ pub async fn search_try(
     // opendialogwindow(&window.app_handle(),"received search","iop",&windowname);
     // populate_try(path, &state);
 
-    state.filesetcollection.write().unwrap().clear();
-    sendfilesetcollection(
-        &wname,
-        &window.app_handle(),
-        &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
-    );
+    // state.filesetcollection.write().unwrap().clear();
+    // sendfilesetcollection(
+    //     &wname,
+    //     &window.app_handle(),
+    //     &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
+    // );
 
     let files = Arc::new(Mutex::new(Vec::<FileItem>::new()));
     let files_clone = Arc::clone(&files);
@@ -229,7 +229,7 @@ pub async fn search_try(
     println!("{}", u.len());
 
     // if(u.len()<2000)
-    {
+    // {
         let mut v: Vec<String> = u
             .into_par_iter()
             .filter(|_| {
@@ -259,6 +259,7 @@ pub async fn search_try(
         // v.split_off(100);
         // for (c,ei) in
         // let (tx,rx)=mpsc::channel::<String>();
+        let fsc=Arc::new(Mutex::new(HashMap::new()));
         v.par_iter().enumerate().panic_fuse().for_each(|(c, ei)| {
             if (sts.load(Ordering::SeqCst) != starttime) {
                 println!("closing search started @ {} ", starttime);
@@ -266,7 +267,7 @@ pub async fn search_try(
                 sendfilesetcollection(
                     &wname,
                     &app_handle,
-                    &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
+                    &serde_json::to_string(&fsc.lock().unwrap().clone()).unwrap(),
                 );
 
                 opendialogwindow(
@@ -288,9 +289,10 @@ pub async fn search_try(
             //     "message": "pariter3",
             //     "status": "running",
             // }));
+            let fsc_clone=Arc::clone(&fsc);
             let path = Path::new(&ei);
             let fname = path.file_name().unwrap().to_string_lossy().to_string();
-            let file = populatefileitem(fname, path, &state);
+            let file = populatefileitem(fname, path, &state,fsc_clone);
             let mut files = files.lock().unwrap();
             *tfsize_clone.lock().unwrap() += file.rawfs;
             files.push(file.clone());
@@ -317,12 +319,12 @@ pub async fn search_try(
         //       Err(TryRecvError::Empty) => {}
         //   }
         //  }
-    }
+    // }
     *doneornot_clone.lock().unwrap() = true;
     sendfilesetcollection(
         &wname,
         &app_handle,
-        &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
+        &serde_json::to_string(&fsc.lock().unwrap().clone()).unwrap(),
     );
 
     stoptimer(&wname, &window.app_handle());

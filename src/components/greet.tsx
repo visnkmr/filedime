@@ -1881,6 +1881,7 @@ export default function Greet() {
         <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
           {
           Object.entries(filesetcollectionlist)
+          // .filter
           .sort((a, b) => b[1] - a[1])
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())

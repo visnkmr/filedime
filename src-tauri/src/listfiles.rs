@@ -137,13 +137,13 @@ pub async fn list_files(
 
     let orig = *state.process_count.lock().unwrap();
 
-    state.filesetcollection.write().unwrap().clear();
-    //empty existing filesetcollection
-    sendfilesetcollection(
-        &wname,
-        &window.app_handle(),
-        &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
-    );
+    // state.filesetcollection.write().unwrap().clear();
+    // //empty existing filesetcollection
+    // sendfilesetcollection(
+    //     &wname,
+    //     &window.app_handle(),
+    //     &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
+    // );
 
     //create new tab
     newtab(
@@ -278,18 +278,21 @@ pub async fn list_files(
             thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
         }
     });
-
+    let fsc=Arc::new(Mutex::new(HashMap::new()));
+    
     let walker = par_walker3
         .into_par_iter()
         .filter_map(|e| e.ok())
         .for_each(|e| {
             if (!e.path().to_string_lossy().to_string().eq(&path)) {
+                let fsc_clone=Arc::clone(&fsc);
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
                 let file = populatefileitem(
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
                     &state,
+                    fsc_clone
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
@@ -340,7 +343,7 @@ pub async fn list_files(
     sendfilesetcollection(
         &wname,
         &app_handle,
-        &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
+        &serde_json::to_string(&fsc.lock().unwrap().clone()).unwrap(),
     );
     stoptimer(&wname, &app_handle)?;
 
@@ -384,10 +387,12 @@ state: State<'_, AppStateStore>,
         let par_walker3 = walker3.par_bridge(); // ignore errors
 
         let files = Arc::new(Mutex::new(Vec::<FileItem>::new()));
+        let fsc=Arc::new(Mutex::new(HashMap::new()));
     let walker = par_walker3
         .into_par_iter()
         .filter_map(|e| e.ok())
         .for_each(|e| {
+            let fsc_clone=Arc::clone(&fsc);
             if (!e.path().to_string_lossy().to_string().eq(&path)) {
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
@@ -395,6 +400,7 @@ state: State<'_, AppStateStore>,
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
                     &state,
+                    fsc_clone
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
@@ -416,5 +422,18 @@ state: State<'_, AppStateStore>,
 
             // Ok(()) // return Ok to continue the iteration
         });
+        // let fsinfoset: Vec<fscinfo> = fsc.clone().lock().unwrap().clone().into_iter().map(|(ftype,count)| fscinfo{
+        //     filetype:ftype,
+        //     numoffiles:count
+        // }).collect();
     Ok(serde_json::to_string(&files.clone().lock().unwrap().clone()).unwrap())
+    // Ok(serde_json::to_string(&json!({
+    //     "files":files.clone().lock().unwrap().clone(),
+    //     "fscl":serde_json::to_string(&fsc.clone().lock().unwrap().clone()).unwrap()
+    // })).unwrap())
+}
+#[derive(Serialize)]
+struct fscinfo{
+    filetype:String,
+    numoffiles:i32
 }

@@ -34,6 +34,7 @@ pub fn populatefileitem(
     name: String,
     path: &Path,
     state: &State<'_, AppStateStore>,
+    filesetcollection:Arc<Mutex<HashMap<String,i32>>>
 ) -> FileItem {
     // println!("path=-------->{:?}",path);
     // println!("{}",name);
@@ -166,7 +167,9 @@ pub fn populatefileitem(
             }
         }
     }
-    let mut hm = state.filesetcollection.write().unwrap();
+    // let mut hm = state.filesetcollection.write().unwrap();
+    // *hm.entry(filetype.clone()).or_insert(0) += 1;
+    let mut hm = filesetcollection.lock().unwrap();
     *hm.entry(filetype.clone()).or_insert(0) += 1;
     let tr;
     let (lmdate, timestamp) = lastmodified(&pathtf);

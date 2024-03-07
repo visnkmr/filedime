@@ -27,7 +27,7 @@ pub struct AppStateStore {
     pub includefolderinsearch: RwLock<bool>,
     pub nosize: RwLock<bool>,
     pub excludehidden: RwLock<bool>,
-    pub filesetcollection: RwLock<HashMap<String, i32>>,
+    // pub filesetcollection: RwLock<HashMap<String, i32>>,
     pub history: RwLock<HashMap<String, BrowserHistory>>,
     pub showfolderchildcount: RwLock<bool>,
     pub loadsearchlist: RwLock<bool>,
@@ -37,20 +37,21 @@ pub struct AppStateStore {
     pub searchcounter: Arc<AtomicI16>,
     pub starttime: Arc<AtomicI64>,
     bookmarks: RwLock<HashSet<marks>>,
-    messagetothread: RwLock<String>,
-    recents: Vec<String>,
+    // messagetothread: RwLock<String>,
+    // recents: Vec<String>,
     pub aborted: Arc<Mutex<bool>>,
-    filechanged: Arc<Mutex<bool>>,
+    // filechanged: Arc<Mutex<bool>>,
     pub searchtry: Arc<Mutex<HashSet<String>>>,
     // pub st:Arc<Mutex<TrieNode>>,
     pub stl: Arc<Mutex<FxHashMap<String, HashSet<String>>>>,
     pub process_count: Arc<Mutex<i32>>,
-    pub buttonnames: HashMap<String, String>, // tx: Mutex<Option<Sender<String>>>,
-                                              // rx: Mutex<Option<Receiver<String>>>,
-                                              // tx:(RwLock<Sender<String>>),
-                                              // rx:RwLock<Receiver<String>>
-                                              // app_handle:AppHandle
-                                              // size:usize
+    pub buttonnames: HashMap<String, String>, 
+    // tx: Mutex<Option<Sender<String>>>,
+    // rx: Mutex<Option<Receiver<String>>>,
+    // tx:(RwLock<Sender<String>>),
+    // rx:RwLock<Receiver<String>>
+    // app_handle:AppHandle
+    // size:usize
 }
 #[derive(Debug)]
 pub enum wThread {
@@ -107,7 +108,7 @@ impl AppStateStore {
                 }
             }),
             history: RwLock::new(HashMap::new()),
-            filesetcollection: RwLock::new(HashMap::new()),
+            // filesetcollection: RwLock::new(HashMap::new()),
             showfolderchildcount: RwLock::new(false),
             loadsearchlist: RwLock::new(false),
             tabs: RwLock::new({
@@ -148,10 +149,10 @@ impl AppStateStore {
                 }
                 fxhs
             }),
-            messagetothread: RwLock::new(String::new()),
-            recents: Vec::new(),
+            // messagetothread: RwLock::new(String::new()),
+            // recents: Vec::new(),
             aborted: Arc::new(Mutex::new(false)),
-            filechanged: Arc::new(Mutex::new(false)),
+            // filechanged: Arc::new(Mutex::new(false)),
             searchtry: Arc::new(Mutex::new(HashSet::new())),
             // st:Arc::new(Mutex::new(TrieNode::new())),
             stl: Arc::new(Mutex::new(FxHashMap::default())),
