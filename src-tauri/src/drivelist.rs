@@ -65,7 +65,7 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
                     },
                     mount_point: ed.mountpoint.clone().unwrap_or("".to_string()).clone(),
                     total: sizeunit::size(ed.size, true),
-                    free: sizeunit::size(ed.fsavail.unwrap_or(0), true),
+                    free: sizeunit::size(ed.clone().fsavail.unwrap_or("0".to_string()).clone().parse::<u64>().unwrap_or(0), true),
                     is_removable: ed.is_removable.clone(),
                     disk_type: ed.device_type.clone(),
                     file_system: format!(
@@ -128,7 +128,8 @@ pub struct Drives {
 
 // #[tauri::command]
 
-fn get_lsblk_output() -> Result<Vec<u8>, ()> {
+fn get_lsblk_output() -> Result<String, ()> {
+    //lsblk  --bytes --output NAME,FSTYPE,FSVER,LABEL,UUID,FSAVAIL,FSUSED,MOUNTPOINT,HOTPLUG,SIZE,VENDOR,MODEL,RM,STATE,TYPE,KNAME --json --paths
     let mut command = Command::new("lsblk");
     command.args([
         // Print size in bytes
@@ -152,10 +153,10 @@ fn get_lsblk_output() -> Result<Vec<u8>, ()> {
     ]);
     let g = get_command_output(command);
 
-    // let output = String::from_utf8(g.clone().unwrap()).unwrap();
+    let output = String::from_utf8(g.clone().unwrap()).unwrap();
     // println!("{}",output);
-    // Ok(output)
-    g
+    Ok(output)
+    // g
 }
 fn get_command_output(mut command: Command) -> Result<Vec<u8>, ()> {
     // info!("running command: {:?}", command);
@@ -186,10 +187,21 @@ struct LsBlkOutput {
     #[serde(rename = "blockdevices")]
     block_devices: Vec<LsBlkDeviceWithChildren>,
 }
-fn parse(input: &[u8]) -> Result<LsBlkOutput, ()> {
-    Ok(serde_json::from_slice(input).unwrap())
+fn parse(input: &String) -> Result<LsBlkOutput, ()> {
+    // match(serde_json::from_slice(input)){
+    //     Ok(a)=> return a,
+    //     Err(e)=>return Err(())
+
+    // }
+    let mut count=0;
+    for input in input.lines(){
+        count+=1;
+        println!("{}---{}",count,input)
+    }
+    Ok(serde_json::from_str(input).unwrap())
 }
 /// Struct for deserializing the JSON output of `lsblk`.
+/// 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct LsBlkDevice {
     pub name: Option<String>,
@@ -197,8 +209,8 @@ pub struct LsBlkDevice {
     pub fsver: Option<String>,
     pub label: Option<String>,
     pub uuid: Option<String>,
-    pub fsavail: Option<u64>,
-    pub fsused: Option<u64>,
+    pub fsavail: Option<String>,
+    pub fsused: Option<String>,
     pub mountpoint: Option<String>,
     pub hotplug: bool,
     pub size: u64,
@@ -222,6 +234,11 @@ fn flattened(parsed: LsBlkOutput) -> Vec<LsBlkDevice> {
             child.details.vendor = device.details.vendor.clone();
             child.details.model = device.details.model.clone();
             stack.push(child);
+            print!("{}",format!(
+                "{:?} {:?}",
+                device.details.vendor.clone(),
+                device.details.model.clone())
+            )
         }
     }
     // println!("output------{:?}",output);
@@ -230,6 +247,7 @@ fn flattened(parsed: LsBlkOutput) -> Vec<LsBlkDevice> {
 
 pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>, ()> {
     let output = get_lsblk_output()?;
+    // println!("{:?}", output.clone());
     let parsed = parse(&output)?;
     println!("{:?}", parsed.clone());
     Ok(flattened(parsed))
@@ -252,6 +270,11 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>, Vec<LsBlkDevice>), ()> {
         }
     }
     Ok((disks, uddisks))
+}
+
+#[test]
+fn newdriveslist(){
+    println!("{:?}",get_disks());
 }
 
 pub fn get_drives() -> Result<Drives, String> {
