@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import {filegptendpoint}from "../shared/serverinfo"
-const FileUploadComponent = () => {
+interface fuargs{
+    fge:string;
+}
+const FileUploadComponent = ({fge}:fuargs) => {
  const [files, setFiles] = useState([]);
  const [collectionName, setCollectionName] = useState('');
 
@@ -26,7 +28,7 @@ const FileUploadComponent = () => {
     // }
 
     try {
-      const response = await axios.post(`${filegptendpoint}/embedfromremote`, formData, {
+      const response = await axios.post(`${fge}/embedfromremote`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

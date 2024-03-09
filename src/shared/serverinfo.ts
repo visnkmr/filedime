@@ -1,1 +1,1 @@
-export let filegptendpoint="http://10.0.0.19:8694";
+export let filegptendpoint="http://localhost:8694";

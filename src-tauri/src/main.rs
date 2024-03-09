@@ -153,6 +153,17 @@ async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     }
 }
 #[tauri::command]
+fn filegptendpoint(endpoint: String,state: State<'_, AppStateStore>) -> Result<String, String> {
+    if(endpoint==""){
+
+        Ok(getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"))
+    }
+    else{
+        savecustom("filedime", "gpt/filegpt.endpoint", endpoint.clone());
+        Ok(endpoint)
+    }
+}
+#[tauri::command]
 async fn openpath(path: String) -> Result<(), String> {
     println!("{}", path);
     if (is_appimage(path.clone())) {
@@ -226,6 +237,7 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
             "cmd /k cd %f",
         );
     }
+
 
     let mut buttonnames = Vec::new();
     // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
@@ -468,6 +480,7 @@ fn main() {
         .manage(g)
         .invoke_handler(tauri::generate_handler![
             // getpathfromid,
+            filegptendpoint,
             configfolpath,
             listtabs,
             closealltabs,

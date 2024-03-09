@@ -23,6 +23,7 @@ pub struct cachestore {
 
 #[derive(Debug)]
 pub struct AppStateStore {
+    // pub filegptendpoint:String,
     pub cstore: RwLock<FxHashMap<String, cachestore>>,
     pub includefolderinsearch: RwLock<bool>,
     pub nosize: RwLock<bool>,
@@ -86,6 +87,7 @@ impl AppStateStore {
         // let (tx, rx) = mpsc::channel::<String>();
 
         Self {
+            // filegptendpoint:getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"),
             // Wrap the cache in a RwLock
             cstore: RwLock::new(FxHashMap::default()),
             includefolderinsearch: RwLock::new({

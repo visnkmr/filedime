@@ -6,17 +6,69 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import FileUploadComponent from "./FIleuploadfromremote";
-import { filegptendpoint } from "../shared/serverinfo";
+import { invoke } from "@tauri-apps/api/tauri";
 interface gptargs{
     message:FileItem
-    localorremote:boolean
+    // localorremote:boolean
 }
 interface mitem{
   from:string
   message:string,
   time:string
 }
-export default function GPTchatinterface({message,localorremote}:gptargs){
+export default function GPTchatinterface({message}:gptargs){
+  const [socket,setsocket]=useState()
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      // execute your logic here
+    }
+    const eventSource = new EventSource("/stream-token");
+    eventSource.onmessage = function(event) {
+      console.log("Received token:", event.data);
+    };
+    // let socket = new WebSocket('ws://localhost:8765');
+  
+    //   socket.onopen = () => {
+    //     console.log('Connected to WebSocket server');
+    //   };
+  
+    //   socket.onmessage = (event:MessageEvent) => {
+    //     // setrl((old)=>old+"\n"+event.data);
+    //     console.log(event.data)
+    //     // let recieved=JSON.parse(event.data);
+    //     // if(recieved[0]==="sendbacktofileslist"){
+    //     //   console.log(recieved)
+    //       // if(recieved[1]===lastcalledtime.current){
+    //         // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
+    //   // let returned=JSON.parse(recieved[2]);
+    //   // console.log(returned.caller)
+    //   // setlct((returned.caller))
+    //   // console.log(lastcalledtime+"-------"+returned.caller)
+    //         // let tocompute=JSON.parse(returned.files)
+    //         // console.log(printtxt+"------->"+returned.caller+"---------------->"+JSON.stringify(tocompute))
+    //         // setwbv(false)
+    //         // setfc((old) => {
+    //         //   // console.log(old+"------------"+lastcalledtime.current )
+    //         //   const newFileCount = old + 1;
+    //         //    {
+    //         //     setfileslist((plog) => {
+    //         //       // console.log(plog)
+    //         //       return [...plog, tocompute]
+    //         //     });
+                
+    //         //   }
+    //         //   return newFileCount;
+    //         //  });
+         
+    //       // }
+    //       // else{
+    //       //   console.log("obsolete results recieved.")
+    //       // }
+    //     // }
+    //     // document.getElementById('output').textContent = recievedlist;
+    //   };
+    //   setsocket(socket);
+  }, []);
     const [filePaths, setFilePaths] = useState([message.path]);
     const [chathistory, setchathistory] = useState([{
       from:"bot",
@@ -25,11 +77,13 @@ export default function GPTchatinterface({message,localorremote}:gptargs){
     } as mitem]);
     const [chatbuttonstate,setcbs]=useState(false)
     const [question,setq]=useState("")
+    const[filegptendpoint,setfge]=useState("http://localhost:8694")
+    const[localorremote,setlor]=useState(true)
     
     // const [querystring, setqs] = useState([message.path]);
 
     const embed = async () => {
-      if(localorremote){
+      // if(localorremote){
         try {
          const response = await axios.post(`${filegptendpoint}/embed`, { files: filePaths });
          setchathistory((old)=>[...old,{
@@ -42,7 +96,7 @@ export default function GPTchatinterface({message,localorremote}:gptargs){
        } catch (error) {
          console.error('Error:', error);
        }
-      }
+      // }
     };
     const handleSubmit = async () => {
       
@@ -72,11 +126,21 @@ export default function GPTchatinterface({message,localorremote}:gptargs){
        
     };
     useEffect(()=>{
-        embed();
+      // embed();
+      invoke("filegptendpoint",{
+        endpoint:""
+      }).then((e)=>{
+        console.log(e)
+        setfge(e)
+        setlor(()=>{
+          (e as string).includes("localhost")?embed():null;
+          return (e as string).includes("localhost")
+        })
+      })  
     },[])
     return (<>
     {localorremote?(<h1 className="flex flex-row gap-2"><BotIcon className="h-4 w-4"/>FileGPT : {message.name}</h1>):(<>
-    <FileUploadComponent/>
+    <FileUploadComponent fge={filegptendpoint}/>
     </>)}
     
     <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]">
