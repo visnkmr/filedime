@@ -194,10 +194,10 @@ fn parse(input: &String) -> Result<LsBlkOutput, ()> {
 
     // }
     let mut count=0;
-    for input in input.lines(){
-        count+=1;
-        println!("{}---{}",count,input)
-    }
+    // for input in input.lines(){
+    //     count+=1;
+    //     println!("{}---{}",count,input)
+    // }
     Ok(serde_json::from_str(input).unwrap())
 }
 /// Struct for deserializing the JSON output of `lsblk`.
@@ -249,7 +249,7 @@ pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>, ()> {
     let output = get_lsblk_output()?;
     // println!("{:?}", output.clone());
     let parsed = parse(&output)?;
-    println!("{:?}", parsed.clone());
+    // println!("{:?}", parsed.clone());
     Ok(flattened(parsed))
 }
 pub fn get_disks() -> Result<(Vec<LsBlkDevice>, Vec<LsBlkDevice>), ()> {

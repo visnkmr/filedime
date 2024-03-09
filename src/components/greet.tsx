@@ -811,7 +811,7 @@ export default function Greet() {
                 <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
                  
         
-                <GPTchatinterface message={row.original}/>
+                <GPTchatinterface message={row.original} localorremote={false}/>
                 {/* </ResizablePanel>
               </ResizablePanelGroup> */}
                 

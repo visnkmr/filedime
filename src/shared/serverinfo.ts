@@ -1,0 +1,1 @@
+export let filegptendpoint="http://10.0.0.19:8694";
