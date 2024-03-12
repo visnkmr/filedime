@@ -225,11 +225,11 @@ async fn check_if_installed(appname: &str) -> Result<bool, String> {
 fn startup(window: &AppHandle) -> Result<(), ()> {
     //define format for adding custom button as extensions to ui
     if cfg!(target_os = "linux") {
-        getcustom(
-            "filedime",
-            "custom_scripts/terminal_open.fds",
-            "exo-open --working-directory %f --launch TerminalEmulator",
-        );
+        // getcustom(
+        //     "filedime",
+        //     "custom_scripts/terminal_open.fds",
+        //     "exo-open --working-directory %f --launch TerminalEmulator",
+        // );
     } else if cfg!(target_os = "windows") {
         getcustom(
             "filedime",
