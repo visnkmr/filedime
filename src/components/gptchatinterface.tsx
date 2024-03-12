@@ -1,12 +1,13 @@
-import { BotIcon, UserIcon } from "lucide-react";
+import { BotIcon, CheckIcon, Loader2, UserIcon, XIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { FileItem } from "../shared/types";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import FileUploadComponent from "./FIleuploadfromremote";
 import { invoke } from "@tauri-apps/api/tauri";
+import {fetchEventSource} from '@microsoft/fetch-event-source';
 interface gptargs{
     message:FileItem
     // localorremote:boolean
@@ -14,67 +15,43 @@ interface gptargs{
 interface mitem{
   from:string
   message:string,
-  time:string
+  time:string,
+  timestamp:number
+}
+function getchattime(){
+  return `${new Date().getHours()}:${new Date().getMinutes() < 10 ? '0' : ''}${new Date().getMinutes()}`
+}
+function getchattimestamp(){
+  return new Date().getTime()
 }
 export default function GPTchatinterface({message}:gptargs){
-  const [socket,setsocket]=useState()
-  useEffect(() => {
-    if (typeof window !== undefined) {
-      // execute your logic here
-    }
-    const eventSource = new EventSource("/stream-token");
-    eventSource.onmessage = function(event) {
-      console.log("Received token:", event.data);
-    };
-    // let socket = new WebSocket('ws://localhost:8765');
-  
-    //   socket.onopen = () => {
-    //     console.log('Connected to WebSocket server');
-    //   };
-  
-    //   socket.onmessage = (event:MessageEvent) => {
-    //     // setrl((old)=>old+"\n"+event.data);
-    //     console.log(event.data)
-    //     // let recieved=JSON.parse(event.data);
-    //     // if(recieved[0]==="sendbacktofileslist"){
-    //     //   console.log(recieved)
-    //       // if(recieved[1]===lastcalledtime.current){
-    //         // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
-    //   // let returned=JSON.parse(recieved[2]);
-    //   // console.log(returned.caller)
-    //   // setlct((returned.caller))
-    //   // console.log(lastcalledtime+"-------"+returned.caller)
-    //         // let tocompute=JSON.parse(returned.files)
-    //         // console.log(printtxt+"------->"+returned.caller+"---------------->"+JSON.stringify(tocompute))
-    //         // setwbv(false)
-    //         // setfc((old) => {
-    //         //   // console.log(old+"------------"+lastcalledtime.current )
-    //         //   const newFileCount = old + 1;
-    //         //    {
-    //         //     setfileslist((plog) => {
-    //         //       // console.log(plog)
-    //         //       return [...plog, tocompute]
-    //         //     });
-                
-    //         //   }
-    //         //   return newFileCount;
-    //         //  });
-         
-    //       // }
-    //       // else{
-    //       //   console.log("obsolete results recieved.")
-    //       // }
-    //     // }
-    //     // document.getElementById('output').textContent = recievedlist;
-    //   };
-    //   setsocket(socket);
-  }, []);
+  // const [time, setTime] = useState(new Date());
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setTime(new Date());
+  //   }, 1);
+
+  //   // Clean up the interval when the component is unmounted
+  //   return () => clearInterval(timer);
+  // }, []);
+
+  const [onemessage,setmessage]=useState("")
+  // useEffect(()=>{
+  //   if(onemessage.includes("[DONESTREAM]")){
+  //         console.log("end-------------->"+onemessage)
+            
+          
+  //       // setmessage("")
+  //         }
+  // },[onemessage])
     const [filePaths, setFilePaths] = useState([message.path]);
     const [chathistory, setchathistory] = useState([{
       from:"bot",
       message:message.path,
-      time:new Date().getTime().toString()
+      time:getchattime(),
+      timestamp:getchattimestamp()
     } as mitem]);
+    const [chathistorytemp, setchathistorytemp] = useState([] as mitem[]);
     const [chatbuttonstate,setcbs]=useState(false)
     const [question,setq]=useState("")
     const[filegptendpoint,setfge]=useState("http://localhost:8694")
@@ -89,41 +66,101 @@ export default function GPTchatinterface({message}:gptargs){
          setchathistory((old)=>[...old,{
           from:"bot",
           message:`${message.name} is ready for your questions`,
-          time:new Date().getTime().toString()
+          time:getchattime(),
+          timestamp:getchattimestamp()
         }])
-         setcbs(true)
+         setcbs(false)
          console.log(response.data);
        } catch (error) {
          console.error('Error:', error);
        }
       // }
     };
+    
+    
+    const fetchData = async () => {
+      await fetchEventSource(`${filegptendpoint}/query-stream`, {
+        method: "POST",
+        body: JSON.stringify({
+          query:question,
+        }),
+        headers: { 'Content-Type': 'application/json', Accept: "text/event-stream" },
+        onopen: async (res)=> {
+          if (res.ok && res.status === 200) {
+            setcbs(true)
+            console.log("Connection made ", res);
+            // setmessage("")
+          } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+            setcbs(false)
+            console.log("Client-side error ", res);
+          }
+        },
+        onmessage: async (event)=> {
+          {
+
+            setmessage((old)=>{
+              console.log("-----------"+old)
+              console.log(event.data);
+              let dm=old+event.data;
+              return dm})
+          }
+        },
+        onclose:async ()=> {
+          setcbs(false)
+          console.log("Connection closed by the server");
+          
+        },
+        onerror (err) {
+          console.log("There was an error from server", err);
+        },
+      });
+    };
     const handleSubmit = async () => {
-      
+      if(onemessage.trim()!==""){
+        setchathistory((old)=>[...old,
+          {
+            from:"bot",
+          message:onemessage.replace("[DONESTREAM]",""),
+          time:getchattime(),
+          timestamp:getchattimestamp()
+        }
+      ])
+      }
         setchathistory((old)=>[...old,
           {
             from:"you",
           message:`${question}`,
-          time:new Date().getTime().toString()
+          time:getchattime(),
+          timestamp:getchattimestamp()
         }
       ])
       
-        try {
-            const response = await axios.post(`${filegptendpoint}/retrieve`, { query: question });
-            console.log(response.data['results']);
-            setchathistory((old)=>[...old,
-              {
-                from:"bot",
-              message:`${response.data['results']}`,
-              time:new Date().getTime().toString()
-            }
-          ])
-        } catch (error) {
-          console.error('Error:', error);
-        }
+      //   const sendreq=async ()=>{
+      //     try {
+      //       setcbs(false)
+      //       const response =  await axios.post(`${filegptendpoint}/retrieve`, { query: question });
+      //       console.log(response.data['results']);
+      //       setchathistory((old)=>[...old,
+      //         {
+      //           from:"bot",
+      //         message:`${response.data['results']}`,
+      //         time:getchattime(),
+            // timestamp:getchattimestamp()
+      //       }
+      //     ])
+
+      //     setcbs(true)
+      //   } catch (error) {
+      //     setcbs(true)
+      //     console.error('Error:', error);
+      //   }
+      // }
+      // sendreq();
       
-         
-       
+      
+        setmessage("")
+        setq("")
+        fetchData();       
     };
     useEffect(()=>{
       // embed();
@@ -136,23 +173,41 @@ export default function GPTchatinterface({message}:gptargs){
           (e as string).includes("localhost")?embed():null;
           return (e as string).includes("localhost")
         })
-      })  
+      })
+      oir(); //check if ollama is running
+      fgtest(); //check if filedimegpt is running
+      // console.log("-----------------"+filegptendpoint+"-----------------")
     },[])
+    let [ollamaisrunning,setoir]=useState(false);
+    let oir=async () => {
+      try {
+        await axios.head(`http://localhost:11434/`); //endpoint to check for ollama
+        setoir(true)
+      } catch (error) {
+        setoir(false)
+      }
+    };
+    let [filedimegptisrunning,setfgir]=useState(false);
+    let fgtest=async () => {
+      try {
+        await axios.get(`${filegptendpoint}/`);
+        setfgir(true)
+      } catch (error) {
+        setfgir(false)
+      }
+    };
     return (<>
+    
+    {/* {time.toLocaleString()} */}
+    <div className="flex flex-row p-2 gap-2 place-content-center">
+      <div className="flex flex-row p-2 border-2 place-items-center">{ollamaisrunning?<CheckIcon className="w-4 h-4"/>:<XIcon className="w-4 h-4"/>} Ollama</div>
+      <div className="flex flex-row p-2 border-2 place-items-center">{filedimegptisrunning?<CheckIcon className="w-4 h-4"/>:<XIcon className="w-4 h-4"/>} FiledimeGPT</div>
+      </div>
     {localorremote?(<h1 className="flex flex-row gap-2"><BotIcon className="h-4 w-4"/>FileGPT : {message.name}</h1>):(<>
     <FileUploadComponent fge={filegptendpoint}/>
     </>)}
     
     <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]">
-        {/* <div className="flex items-start gap-4">
-          <div className="flex flex-col gap-1">
-            <time className="text-xs text-gray-500 dark:text-gray-400">2 minutes ago</time>
-            <p>
-              Hey, I just wanted to follow up on the email I sent last week about the upcoming conference. Let me know
-              if you have any questions!
-            </p>
-          </div> */}
-        {/* </div> */}
         <div className="flex items-start gap-4 flex-col">
         {chathistory.map((e)=>{
           console.log(e)
@@ -171,15 +226,30 @@ export default function GPTchatinterface({message}:gptargs){
           </div>
             </>
         })}
+        { onemessage!==""?  (
+            <div className="flex items-start gap-4">
+              <div>
+
+              <BotIcon className="h-4 w-4"/>
+              </div>
+          <div className="flex flex-col gap-1">
+            <time className="text-xs text-gray-500 dark:text-gray-400">{getchattime()}</time>
+            <p>
+              {onemessage.replace("[DONESTREAM]","")}
+            </p>
+          </div>
+          </div>):null
+        }
         </div>
         
       </div>
      <div className="p-4 border-t">
         <div className="flex gap-2">
-          <Input className="flex-1" value={question} placeholder="Type your message..." onChange={(event)=>{
+          <Input className="flex-1" value={question} placeholder="Ask the file(s)..." onChange={(event)=>{
             setq(event.target.value)
           }} />
-          <Button className={``} onClick={handleSubmit}>Send</Button>
+          <Loader2 className={`${chatbuttonstate?"h-4 w-4 animate-spin":"hidden"}`}/>
+          <Button disabled={chatbuttonstate} className={``} onClick={handleSubmit}>Send</Button>
         </div>
       </div>
     </>)
