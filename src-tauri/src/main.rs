@@ -2,15 +2,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::{
-    collections::{HashMap, HashSet},
-    fmt::format,
-    io::{Cursor, Read},
-    mem,
-    path::{self, Path},
-    process::Command,
-    sync::{Arc, Mutex, RwLock},
-    thread,
-    time::{self, Duration, Instant, SystemTime, UNIX_EPOCH},
+    collections::{HashMap, HashSet}, fmt::format, io::{Cursor, Read}, mem, net::{TcpListener, TcpStream}, path::{self, Path}, process::Command, sync::{Arc, Mutex, RwLock}, thread, time::{self, Duration, Instant, SystemTime, UNIX_EPOCH}
 };
 mod dirsize;
 mod drivelist;
@@ -462,7 +454,53 @@ async fn checker() -> Result<String, String> {
         Err(_) => Err("Could not check for updates".to_string()),
     }
 }
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 1024];
+    stream.read(&mut buffer).unwrap();
+    let request = String::from_utf8_lossy(&buffer[..]);
+    println!("Request: {}", request);
+
+    // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
+    let filename = request.split_whitespace().nth(1).unwrap_or("/");
+    let filename = filename.trim_start_matches('/');
+
+    // Construct the full path to the file in the 'out' directory
+    let path = Path::new("../out").join(filename);
+
+    // Check if the file exists and is readable
+    if path.is_file() {
+        if let Ok(contents) = fs::read_to_string(path) {
+            let response = format!(
+                "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+                contents.len(),
+                contents
+            );
+            stream.write(response.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        } else {
+            let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+            stream.write(response.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        }
+    } else {
+        let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+    }
+}
 fn main() {
+    thread::spawn(move || {
+        const HOST: &str = "0.0.0.0";
+        const PORT: &str = "8477";
+        let end_point: String = format!("{}:{}", HOST, PORT);
+        let listener = TcpListener::bind(end_point).unwrap();
+        println!("Web server is listening at port {}", PORT);
+
+        for stream in listener.incoming() {
+            let _stream = stream.unwrap();
+            handle_connection(_stream);
+        }
+    });
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
         .setup(|app| {

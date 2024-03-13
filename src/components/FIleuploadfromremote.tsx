@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import axios from 'axios';
 interface fuargs{
     fge:string;
+    setcmsg:Dispatch<SetStateAction<string>>
 }
-const FileUploadComponent = ({fge}:fuargs) => {
+const FileUploadComponent = ({fge,setcmsg}:fuargs) => {
  const [files, setFiles] = useState([]);
  const [collectionName, setCollectionName] = useState('');
 
@@ -16,6 +17,7 @@ const FileUploadComponent = ({fge}:fuargs) => {
 //  };
 
  const handleSubmit = async (e) => {
+  console.log(fge)
     e.preventDefault();
 
     const formData = new FormData();
@@ -33,11 +35,13 @@ const FileUploadComponent = ({fge}:fuargs) => {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+      setcmsg(response.data)
       console.log(response.data);
       // Handle the response as needed
     } catch (error) {
       console.error('Error uploading files:', error);
+      setcmsg('Error uploading files:'+ error)
+      
       // Handle the error as needed
     }
  };

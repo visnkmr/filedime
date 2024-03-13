@@ -6,10 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import FileUploadComponent from "./FIleuploadfromremote";
+import { useRouter } from 'next/router';
+
 import { invoke } from "@tauri-apps/api/tauri";
 import {fetchEventSource} from '@microsoft/fetch-event-source';
+import MyComponent from "./route";
 interface gptargs{
-    message:FileItem
+    message?:FileItem,
+    fgptendpoint?:string
     // localorremote:boolean
 }
 interface mitem{
@@ -24,7 +28,7 @@ function getchattime(){
 function getchattimestamp(){
   return new Date().getTime()
 }
-export default function GPTchatinterface({message}:gptargs){
+export default function GPTchatinterface({message,fgptendpoint}:gptargs){
   // const [time, setTime] = useState(new Date());
   // useEffect(() => {
   //   const timer = setInterval(() => {
@@ -44,10 +48,10 @@ export default function GPTchatinterface({message}:gptargs){
   //       // setmessage("")
   //         }
   // },[onemessage])
-    const [filePaths, setFilePaths] = useState([message.path]);
+    const [filePaths, setFilePaths] = useState([message?message.path:null]);
     const [chathistory, setchathistory] = useState([{
       from:"bot",
-      message:message.path,
+      message:message?message.path:"Choose files to embed",
       time:getchattime(),
       timestamp:getchattimestamp()
     } as mitem]);
@@ -55,7 +59,7 @@ export default function GPTchatinterface({message}:gptargs){
     const [chatbuttonstate,setcbs]=useState(false)
     const [question,setq]=useState("")
     const[filegptendpoint,setfge]=useState("http://localhost:8694")
-    const[localorremote,setlor]=useState(true)
+    const[localorremote,setlor]=useState(message?true:false)
     
     // const [querystring, setqs] = useState([message.path]);
 
@@ -65,7 +69,7 @@ export default function GPTchatinterface({message}:gptargs){
          const response = await axios.post(`${filegptendpoint}/embed`, { files: filePaths });
          setchathistory((old)=>[...old,{
           from:"bot",
-          message:`${message.name} is ready for your questions`,
+          message:`${message?message.path:"The file(s)"} is ready for your questions`,
           time:getchattime(),
           timestamp:getchattimestamp()
         }])
@@ -76,8 +80,8 @@ export default function GPTchatinterface({message}:gptargs){
        }
       // }
     };
-    
-    
+    //scroll to bottom in chatview
+    useEffect(()=> divRef.current.scrollIntoView({behavior: "smooth", block:"end"}), [onemessage])
     const fetchData = async () => {
       await fetchEventSource(`${filegptendpoint}/query-stream`, {
         method: "POST",
@@ -102,7 +106,8 @@ export default function GPTchatinterface({message}:gptargs){
               console.log("-----------"+old)
               console.log(event.data);
               let dm=old+event.data;
-              return dm})
+              return dm});
+              // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
           }
         },
         onclose:async ()=> {
@@ -164,17 +169,23 @@ export default function GPTchatinterface({message}:gptargs){
     };
     useEffect(()=>{
       // embed();
-      invoke("filegptendpoint",{
-        endpoint:""
-      }).then((e)=>{
-        console.log(e)
-        setfge(e)
-        setlor(()=>{
-          (e as string).includes("localhost")?embed():null;
-          return (e as string).includes("localhost")
+      if(!fgptendpoint){
+
+        invoke("filegptendpoint",{
+          endpoint:""
+        }).then((e)=>{
+          console.log(e)
+          setfge(e)
+          setlor(()=>{
+            (e as string).includes("localhost")?embed():null;
+            return (e as string).includes("localhost")
+          })
         })
-      })
-      oir(); //check if ollama is running
+        oir(); //check if ollama is running
+      }
+      else{
+        setfge(`http://${fgptendpoint}:8694`)
+      }
       fgtest(); //check if filedimegpt is running
       // console.log("-----------------"+filegptendpoint+"-----------------")
     },[])
@@ -196,19 +207,30 @@ export default function GPTchatinterface({message}:gptargs){
         setfgir(false)
       }
     };
+    const divRef = useRef(null);
+
+    const [cmsg,setcmsg]=useState("")
+    useEffect(()=>{
+      setchathistory((old)=>[...old,{
+                from:"bot",
+                message:cmsg,
+                time:getchattime(),
+                timestamp:getchattimestamp()
+              }])
+    },[cmsg])
     return (<>
-    
+    {/* <MyComponent/> */}
     {/* {time.toLocaleString()} */}
     <div className="flex flex-row p-2 gap-2 place-content-center">
       <div className="flex flex-row p-2 border-2 place-items-center">{ollamaisrunning?<CheckIcon className="w-4 h-4"/>:<XIcon className="w-4 h-4"/>} Ollama</div>
       <div className="flex flex-row p-2 border-2 place-items-center">{filedimegptisrunning?<CheckIcon className="w-4 h-4"/>:<XIcon className="w-4 h-4"/>} FiledimeGPT</div>
       </div>
-    {localorremote?(<h1 className="flex flex-row gap-2"><BotIcon className="h-4 w-4"/>FileGPT : {message.name}</h1>):(<>
-    <FileUploadComponent fge={filegptendpoint}/>
+    {localorremote?(<h1 className="flex flex-row gap-2"><BotIcon className="h-4 w-4"/>FileGPT : {message?message.path:null}</h1>):(<>
+    <FileUploadComponent fge={filegptendpoint} setcmsg={setcmsg}/>
     </>)}
     
-    <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]">
-        <div className="flex items-start gap-4 flex-col">
+    <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]" >
+        <div className="flex items-start gap-4 flex-col" ref={divRef}>
         {chathistory.map((e)=>{
           console.log(e)
             return <>
@@ -229,7 +251,6 @@ export default function GPTchatinterface({message}:gptargs){
         { onemessage!==""?  (
             <div className="flex items-start gap-4">
               <div>
-
               <BotIcon className="h-4 w-4"/>
               </div>
           <div className="flex flex-col gap-1">
