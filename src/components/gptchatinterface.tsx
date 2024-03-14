@@ -103,9 +103,10 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
           {
 
             setmessage((old)=>{
-              console.log("-----------"+old)
+              // console.log("-----------"+old)
               console.log(event.data);
-              let dm=old+event.data;
+              let jp=JSON.parse(event.data);
+              let dm=old+jp.token;
               return dm});
               // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
           }
@@ -120,7 +121,7 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
         },
       });
     };
-    const handleSubmit = async () => {
+        const handleSubmit = async () => {
       if(onemessage.trim()!==""){
         setchathistory((old)=>[...old,
           {
@@ -211,12 +212,16 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
 
     const [cmsg,setcmsg]=useState("")
     useEffect(()=>{
-      setchathistory((old)=>[...old,{
-                from:"bot",
-                message:cmsg,
-                time:getchattime(),
-                timestamp:getchattimestamp()
-              }])
+      console.log(cmsg)
+      if(cmsg!==""){
+
+        setchathistory((old)=>[...old,{
+                  from:"bot",
+                  message:cmsg,
+                  time:getchattime(),
+                  timestamp:getchattimestamp()
+                }])
+      }
     },[cmsg])
     return (<>
     {/* <MyComponent/> */}
@@ -232,7 +237,7 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
     <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]" >
         <div className="flex items-start gap-4 flex-col" ref={divRef}>
         {chathistory.map((e)=>{
-          console.log(e)
+          // console.log(e)
             return <>
             <div className="flex items-start gap-4">
               <div>
@@ -255,9 +260,11 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
               </div>
           <div className="flex flex-col gap-1">
             <time className="text-xs text-gray-500 dark:text-gray-400">{getchattime()}</time>
-            <p>
-              {onemessage.replace("[DONESTREAM]","")}
-            </p>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: onemessage.replace(/\n/g, '<br/>').replace("[DONESTREAM]","")
+              }}
+            ></p>
           </div>
           </div>):null
         }

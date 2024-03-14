@@ -35,8 +35,8 @@ const FileUploadComponent = ({fge,setcmsg}:fuargs) => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setcmsg(response.data)
-      console.log(response.data);
+      console.log(response.data['message']);
+      setcmsg(response.data['message'])
       // Handle the response as needed
     } catch (error) {
       console.error('Error uploading files:', error);
