@@ -87,6 +87,7 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
         method: "POST",
         body: JSON.stringify({
           query:question,
+          where:""
         }),
         headers: { 'Content-Type': 'application/json', Accept: "text/event-stream" },
         onopen: async (res)=> {
