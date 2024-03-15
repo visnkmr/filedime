@@ -83,44 +83,102 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
     //scroll to bottom in chatview
     useEffect(()=> divRef.current.scrollIntoView({behavior: "smooth", block:"end"}), [onemessage])
     const fetchData = async () => {
-      await fetchEventSource(`${filegptendpoint}/query-stream`, {
-        method: "POST",
-        body: JSON.stringify({
-          query:question,
-          where:""
-        }),
-        headers: { 'Content-Type': 'application/json', Accept: "text/event-stream" },
-        onopen: async (res)=> {
-          if (res.ok && res.status === 200) {
-            setcbs(true)
-            console.log("Connection made ", res);
-            // setmessage("")
-          } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-            setcbs(false)
-            console.log("Client-side error ", res);
-          }
-        },
-        onmessage: async (event)=> {
-          {
+      // Example URL for the Ollama API generate endpoint
 
-            setmessage((old)=>{
-              // console.log("-----------"+old)
-              console.log(event.data);
-              let jp=JSON.parse(event.data);
-              let dm=old+jp.token;
-              return dm});
-              // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
-          }
-        },
-        onclose:async ()=> {
-          setcbs(false)
-          console.log("Connection closed by the server");
+// Example request body for the generate endpoint
+if(question.toLocaleLowerCase().startsWith("o2c")){ //outside of current context -o2c
+
+  const requestBody = {
+   "model": "llama2",
+   "prompt": question,
+   "stream": true // Ensure streaming is enabled
+  };
+  
+  // Fetch the stream from the Ollama API
+  fetch(`http://${fgptendpoint}:11434/api/generate`, {
+   method: 'POST',
+   headers: {
+      'Content-Type': 'application/json'
+   },
+   body: JSON.stringify(requestBody)
+  })
+  .then(response => {
+   const reader = response.body.getReader();
+   const decoder = new TextDecoder('utf-8');
+  
+   return reader.read().then(function processChunk({ done, value }) {
+      if (done) {
+        console.log('Stream complete');
+        return;
+      }
+  
+      // Decode the chunk and log it
+      const chunk = decoder.decode(value);
+      // console.log(JSON.parse(chunk).response);
+      if(JSON.parse(chunk).response){
+          setmessage((old)=>{
           
-        },
-        onerror (err) {
-          console.log("There was an error from server", err);
-        },
-      });
+          let resp=JSON.parse(chunk).response;
+                  // console.log("-----------"+old)
+                  // console.log();
+                  // let jp=JSON.parse(resp);
+                  let dm=old+resp;
+                  return dm});
+        }
+      // Read the next chunk
+      return reader.read().then(processChunk);
+   });
+  })
+  .catch(error => console.error('Error reading stream:', error));
+}
+else{
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  
+  await fetchEventSource(`${filegptendpoint}/query-stream`, {
+    signal:signal,
+    
+    method: "POST",
+    body: JSON.stringify({
+      query:question,
+      where:question.toLocaleLowerCase().startsWith("generally")?"ollama":""
+    }),
+    headers: { 'Content-Type': 'application/json', Accept: "text/event-stream" },
+    onopen: async (res)=> {
+      if (res.ok && res.status === 200) {
+        setcbs(true)
+        console.log("Connection made ", res);
+        // setmessage("")
+      } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        setcbs(false)
+        console.log("Client-side error ", res);
+      }
+    },
+    onmessage: async (event)=> {
+      {
+
+        setmessage((old)=>{
+          // console.log("-----------"+old)
+          console.log(event.data);
+          let jp=JSON.parse(event.data);
+          let dm=old+jp.token;
+          return dm});
+          // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
+      }
+    },
+    onclose:async ()=> {
+      setcbs(false)
+      console.log("Connection closed by the server");
+      
+    },
+    onerror (err) {
+      throw "There was some issue with your filedimegpt instance. Is it not running?"
+      // abortController.abort()
+      // console.log("There was an error from server", err);
+    },
+  });
+  
+}
     };
         const handleSubmit = async () => {
       if(onemessage.trim()!==""){
