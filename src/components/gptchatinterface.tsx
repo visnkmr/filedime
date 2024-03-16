@@ -96,7 +96,7 @@ if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //ou
 
   const requestBody = {
    "model": "llama2",
-   "prompt": question,
+   "prompt": question.replace("o2c", ""),
    "stream": true // Ensure streaming is enabled
   };
   

@@ -31,8 +31,9 @@ Subtle features
 
 Will be added based on demand
 - [ ] System Tray icons for opening new window and access recent files.
+- [ ] Chat history is not passed along with query as this will severely constraint query token size, or increase time needed for reply.
 
-Thanks Tauri, Typescript, Webpack->RSPack, NextJS, ShadCN
+Thanks Tauri, Typescript, Webpack->RSPack, NextJS, ShadCN, Ollama, Langchain, llama.cpp
 
 
 ## Recommended IDE Setup
@@ -51,3 +52,11 @@ when browsing through code use the extensions listed in extensions.code-profile 
 when building on nixos use the shell.nix file provided if necessary
 
 currently the code may contains lots of comments in rust it will be cleared up in the future.
+
+## Server guide for the complete stack for reference
+Ollama- http://localhost:11434/
+FiledimeGPT (Python)- http://localhost:8694/
+FiledimeGPT LAN url - http://<pclanipaddress>:8477
+
+## Chat self reference
+Chat normally should query ollama contextless if FiledimeGPT server is not running, else if FiledimeGPT server is running to specifically run query on ollama endpoint include "o2c" (abbrevation for outside of current context) at the begging of the chat.You can also start with generally to run on ollama endpoint via FiledimeGPT server.
