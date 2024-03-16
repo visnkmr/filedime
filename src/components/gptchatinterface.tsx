@@ -260,12 +260,12 @@ else{
             return (e as string).includes("localhost")
           })
         })
-        oir(); //check if ollama is running
       }
       else{
         setfge(`http://${fgptendpoint}:8694`)
       }
       fgtest(); //check if filedimegpt is running
+      oir(); //check if ollama is running
       // console.log("-----------------"+filegptendpoint+"-----------------")
     },[])
     let [ollamaisrunning,setoir]=useState(false);
@@ -277,6 +277,10 @@ else{
         setoir(false)
       }
     };
+    useEffect(()=>{
+      oir();
+
+    },[fgptendpoint])
     let [filedimegptisrunning,setfgir]=useState(false);
     let fgtest=async () => {
       try {

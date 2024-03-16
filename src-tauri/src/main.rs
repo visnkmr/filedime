@@ -12,6 +12,8 @@ mod lastmodcalc;
 mod navtimeline;
 mod sendtofrontend;
 use chrono::{DateTime, Local, Utc};
+use local_ip_address::local_ip;
+// use get_size::GetSize;
 use navtimeline::{BrowserHistory, Page};
 // use filesize::PathExt;
 
@@ -124,6 +126,12 @@ mod fileops;
 //   }
 
 #[tauri::command]
+async fn getlocalip() -> Result<String, String> {
+    println!("{}",local_ip().unwrap().to_string());
+    Ok(local_ip().unwrap().to_string())
+}
+    
+    #[tauri::command]
 async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
@@ -142,7 +150,7 @@ async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     }
 }
 #[tauri::command]
-fn filegptendpoint(endpoint: String,state: State<'_, AppStateStore>) -> Result<String, String> {
+fn filegptendpoint(endpoint: String) -> Result<String, String> {
     if(endpoint==""){
 
         Ok(getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"))
@@ -378,6 +386,7 @@ fn configfolpath(window: Window, state: State<'_, AppStateStore>) -> String {
           &config_folder_path("filedime").as_path().to_string_lossy().to_string(),
           &state,
       ),true)),
+    //   "frontend_size":(sizeunit::size(&PROJECT_DIR.,true)),
     }))
     .unwrap()
 }
@@ -483,8 +492,25 @@ fn handle_connection(mut stream: TcpStream) {
 use include_dir::{include_dir, Dir};
 
 static PROJECT_DIR: Dir = include_dir!("../out/");
-
+// fn findsize(tf:&include_dir::Dir)->usize{
+//     let mut total_size=0;
+//     for i in tf.entries(){
+//         // if()
+//         {
+//             if let Some(ed)=i.as_dir(){
+//                 total_size+=findsize(ed)
+//             }
+//             else if let Some(ef)=i.as_file(){
+//                 // ef.contents()
+//                 total_size += mem::size_of_val(&ef.contents());
+//             }
+//             // total_size+=i.get_size();
+//         }
+//     }
+//     total_size
+// }
 fn main() {
+    // println!("{:?}",findsize(&PROJECT_DIR));
     thread::spawn(move || {
         const HOST: &str = "0.0.0.0";
         const PORT: &str = "8477";
@@ -523,6 +549,7 @@ fn main() {
             mirror,
             addmark,
             fileop,
+            getlocalip,
             checkiffile,
             checkforconflicts,
             // backbutton,

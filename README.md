@@ -1,5 +1,5 @@
 [![Github All Releases](https://img.shields.io/github/downloads/visnkmr/filedime/total.svg)]()  
-Filedime, an open source almost feature complete file explorer written in Rust (for all filesystem interaction,backend), Tauri(for frontend, front-backend intercom).
+Filedime, an open source almost feature complete file explorer written in Rust (for all filesystem interaction,backend), Tauri(for frontend, front-backend intercom), File querying using Ollama (Go) and RAG (Python).
 
 ![](https://cdn.jsdelivr.net/gh/visnkmr/filedime@nextrelease/quickintro.png) 
 
@@ -59,4 +59,5 @@ FiledimeGPT (Python)- http://localhost:8694/
 FiledimeGPT LAN url - http://<pclanipaddress>:8477
 
 ## Chat self reference
-Chat normally should query ollama contextless if FiledimeGPT server is not running, else if FiledimeGPT server is running to specifically run query on ollama endpoint include "o2c" (abbrevation for outside of current context) at the begging of the chat.You can also start with generally to run on ollama endpoint via FiledimeGPT server.
+Chat normally should query ollama endpoint from ts contextless if FiledimeGPT server is not running, else if FiledimeGPT server is running to specifically run query on ollama endpoint include "o2c" (abbrevation for outside of current context) at the begging of the chat.You can also start with generally to run on ollama endpoint via FiledimeGPT server.
+From LAN FiledimeGPT you can use ollama only if ollama is set to accept requests from 0.0.0.0/ if FiledimeGPT Python server is running
