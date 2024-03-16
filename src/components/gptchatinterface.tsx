@@ -76,6 +76,12 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
          setcbs(false)
          console.log(response.data);
        } catch (error) {
+        setchathistory((old)=>[...old,{
+          from:"bot",
+          message:`Issue finding Filegpt endpoint, maybe its not be running.`,
+          time:getchattime(),
+          timestamp:getchattimestamp()
+        }])
          console.error('Error:', error);
        }
       // }
@@ -86,7 +92,7 @@ export default function GPTchatinterface({message,fgptendpoint}:gptargs){
       // Example URL for the Ollama API generate endpoint
 
 // Example request body for the generate endpoint
-if(question.toLocaleLowerCase().startsWith("o2c")){ //outside of current context -o2c
+if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //outside of current context -o2c
 
   const requestBody = {
    "model": "llama2",
@@ -129,7 +135,14 @@ if(question.toLocaleLowerCase().startsWith("o2c")){ //outside of current context
       return reader.read().then(processChunk);
    });
   })
-  .catch(error => console.error('Error reading stream:', error));
+  .catch(error => {
+    setchathistory((old)=>[...old,{
+      from:"bot",
+      message:`Issue finding Ollama http://${fgptendpoint}:11434 endpoint, maybe its not be running.`,
+      time:getchattime(),
+      timestamp:getchattimestamp()
+    }])
+    console.error('Error reading stream:', error)});
 }
 else{
   const abortController = new AbortController();
@@ -172,6 +185,12 @@ else{
       
     },
     onerror (err) {
+      setchathistory((old)=>[...old,{
+        from:"bot",
+        message:`Issue finding Filegpt endpoint ${filegptendpoint} endpoint, maybe its not be running.`,
+        time:getchattime(),
+        timestamp:getchattimestamp()
+      }])
       throw "There was some issue with your filedimegpt instance. Is it not running?"
       // abortController.abort()
       // console.log("There was an error from server", err);
@@ -252,7 +271,7 @@ else{
     let [ollamaisrunning,setoir]=useState(false);
     let oir=async () => {
       try {
-        await axios.head(`http://localhost:11434/`); //endpoint to check for ollama
+        await axios.head(`http://${fgptendpoint}:11434/`); //endpoint to check for ollama
         setoir(true)
       } catch (error) {
         setoir(false)

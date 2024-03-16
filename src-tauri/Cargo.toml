@@ -70,6 +70,9 @@ dirs="5.0.1"
 regex="1.10.2"
 # gtk = "0.15.5"
 # gio = "0.18.4"
+# ollama-rs = {version="0.1.7",features= ["stream"] }
+# warp="0.3.6"
+include_dir = "0.7.3"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

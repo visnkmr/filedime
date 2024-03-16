@@ -11,8 +11,8 @@ import DarkButton from "../components/but"
 import {Metadata} from 'next'
 
 export const metadata:Metadata = {
-  title: 'Wireless file Manager',
-  description: 'Open source frontend that uses apis of wireless file manager available on google play, amazon appstore for fire tv, android tv, phones, tablets, wsa, and all android devices.',
+  title: 'Filedime',
+  description: 'Rust logic based, NextJS frontend file explorer',
 }
 
 export default function RootLayout({

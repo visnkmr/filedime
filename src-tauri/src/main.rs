@@ -25,10 +25,7 @@ use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tauri::{
-    api::{file::read_string, shell},
-    http::ResponseBuilder,
-    window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, Runtime, State, Submenu,
-    WindowEvent,
+    api::{file::read_string, shell}, http::ResponseBuilder, window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, PathResolver, Runtime, State, Submenu, WindowEvent
 };
 
 // use walkdir::WalkDir;
@@ -459,35 +456,34 @@ fn handle_connection(mut stream: TcpStream) {
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
     println!("Request: {}", request);
-
     // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
-    let filename = request.split_whitespace().nth(1).unwrap_or("/");
-    let filename = filename.trim_start_matches('/');
-
-    // Construct the full path to the file in the 'out' directory
-    let path = Path::new("../out").join(filename);
+    let mut filename = request.split_whitespace().nth(1).unwrap_or("/");
+    filename = filename.trim_start_matches('/');
+    // println!("---->{}----",filename);
+    if(filename.is_empty()){
+        filename=("filegpt.html");
+    }
 
     // Check if the file exists and is readable
-    if path.is_file() {
-        if let Ok(contents) = fs::read_to_string(path) {
+    if PROJECT_DIR.contains(filename) {
+            let contents=PROJECT_DIR.get_file(filename).unwrap();
             let response = format!(
                 "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
-                contents.len(),
-                contents
+                contents.contents().len(),
+                contents.contents_utf8().unwrap()
             );
             stream.write(response.as_bytes()).unwrap();
             stream.flush().unwrap();
-        } else {
-            let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
-            stream.write(response.as_bytes()).unwrap();
-            stream.flush().unwrap();
-        }
     } else {
         let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
         stream.write(response.as_bytes()).unwrap();
         stream.flush().unwrap();
     }
 }
+use include_dir::{include_dir, Dir};
+
+static PROJECT_DIR: Dir = include_dir!("../out/");
+
 fn main() {
     thread::spawn(move || {
         const HOST: &str = "0.0.0.0";
@@ -501,11 +497,12 @@ fn main() {
             handle_connection(_stream);
         }
     });
+    
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle();
-
+            // let resource_path = app_handle.path_resolver();
             let ss = startup(&app_handle).is_ok();
             if ss {
                 println!("loaded buttons successfully.")

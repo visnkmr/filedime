@@ -21,6 +21,7 @@ Features implemented:
 
 
 Subtle features
+- [x] ollama api based integration for asking questions to your files.
 - [x] path autocomplete as you type.
 - [x] no of each file type in present location.
 - [x] show name of right click file above context menu
