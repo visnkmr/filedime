@@ -169,15 +169,22 @@ else{
     },
     onmessage: async (event)=> {
       {
-
+    // if(typeof event.data === "string"){
+      try{
+        let jp=JSON.parse(event.data);
         setmessage((old)=>{
           // console.log("-----------"+old)
           console.log(event.data);
-          let jp=JSON.parse(event.data);
-          let dm=old+jp.token;
+            let dm=old+jp.token;
           return dm});
-          // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
       }
+      catch(e){
+        
+      }
+        
+        }
+          // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
+      // }
     },
     onclose:async ()=> {
       setcbs(false)
