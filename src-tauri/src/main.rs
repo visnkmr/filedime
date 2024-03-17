@@ -509,6 +509,12 @@ static PROJECT_DIR: Dir = include_dir!("../out/");
 //     }
 //     total_size
 // }
+#[tauri::command]
+async fn show_main_window(window: tauri::Window) {
+    window.set_decorations(true).unwrap();
+    window.maximize().unwrap();
+    window.show().unwrap();
+}
 fn main() {
     // println!("{:?}",findsize(&PROJECT_DIR));
     thread::spawn(move || {
@@ -546,6 +552,7 @@ fn main() {
             listtabs,
             closealltabs,
             getparentpath,
+            show_main_window,
             mirror,
             addmark,
             fileop,

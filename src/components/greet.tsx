@@ -95,6 +95,7 @@ export default function Greet() {
     async function setupAppWindow() {
       console.log(Math.random());
       const appWindow = (await import('@tauri-apps/api/window')).appWindow
+      setTimeout(async () => await invoke('show_main_window'), 100)
       console.log("windowname top---------->"+appWindow.label)
   
       setAppWindow(appWindow)

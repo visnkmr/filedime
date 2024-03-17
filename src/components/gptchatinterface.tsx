@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 
 import { invoke } from "@tauri-apps/api/tauri";
 import {fetchEventSource} from '@microsoft/fetch-event-source';
-import MyComponent from "./route";
+// import MyComponent from "./route";
 interface gptargs{
     message?:FileItem,
     fgptendpoint?:string
