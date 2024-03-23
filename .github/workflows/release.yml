@@ -2,8 +2,8 @@ name: Release
 on:
   push:
     branches:
-      - 'main'
-      # - '*'
+      # - 'main'
+      - '*'
       # - 'v*'
 
 jobs:
@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: setup node
-        uses: actions/setup-node@v4
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 20
+          node-version: "20"
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: create release
@@ -101,10 +101,10 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./desktop/src-tauri -> target"
-      - name: setup node
-        uses: actions/setup-node@v4
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 20
+          node-version: "20"
       # - name: Uninstall Homebrew
       #   run: |
       #     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
@@ -123,7 +123,7 @@ jobs:
           args: "--target ${{ matrix.settings.target }}"
           # tagName: ${{ env.TAG }} 
           # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: 'App v__VERSION__'
+          releaseName: 'Filedime'
           # releaseBody: 'See the assets to download this version and install.'
           # releaseDraft: true
           prerelease: false
