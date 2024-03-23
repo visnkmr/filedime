@@ -7,8 +7,10 @@
   },
   "scripts": {
     "start": "next start",
-    "build": "next build",
+    "build:frontend": "next build",
+    "dev:frontend": "next dev",
     "postbuild": "next-sitemap",
+    "build":"next build",
     "dev": "next dev",
     "lint": "next lint",
     "export": "next export"
