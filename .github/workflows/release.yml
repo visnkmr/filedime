@@ -126,7 +126,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tauriScript: bun tauri
-          args: "--target ${{ matrix.settings.target }}"
           # tagName: ${{ env.TAG }} 
           # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'Filedime'
