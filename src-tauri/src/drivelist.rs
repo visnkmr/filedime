@@ -1,6 +1,7 @@
 use chrono::format::format;
 use regex::Regex;
-use serde::{de, Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
+use serde_json::Value;
 use std::{
     path::{Path, PathBuf},
     process::Command,
@@ -202,6 +203,25 @@ fn parse(input: &String) -> Result<LsBlkOutput, ()> {
 }
 /// Struct for deserializing the JSON output of `lsblk`.
 /// 
+/// 
+///
+fn deserialize_fsavail<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Value::deserialize(deserializer)?;
+    match value {
+        Value::String(s) => Ok(Some(s)),
+        Value::Number(n) => {
+            if n.is_u64() {
+                Ok(Some(n.as_u64().unwrap().to_string()))
+            } else {
+                Err(serde::de::Error::custom("fsavail must be a string or a u64"))
+            }
+        },
+        _ => Ok(None),
+    }
+}
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct LsBlkDevice {
     pub name: Option<String>,
@@ -209,7 +229,9 @@ pub struct LsBlkDevice {
     pub fsver: Option<String>,
     pub label: Option<String>,
     pub uuid: Option<String>,
+    #[serde(deserialize_with = "deserialize_fsavail")]
     pub fsavail: Option<String>,
+    #[serde(deserialize_with = "deserialize_fsavail")]
     pub fsused: Option<String>,
     pub mountpoint: Option<String>,
     pub hotplug: bool,
