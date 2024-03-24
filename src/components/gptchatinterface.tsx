@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import FileUploadComponent from "./FIleuploadfromremote";
 import { useRouter } from 'next/router';
-
+import {Textarea} from "./ui/textarea"
 import { invoke } from "@tauri-apps/api/tauri";
 import {fetchEventSource} from '@microsoft/fetch-event-source';
 // import MyComponent from "./route";
@@ -312,6 +312,16 @@ else{
                 }])
       }
     },[cmsg])
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter' && event.shiftKey) {
+        event.preventDefault(); // Prevent the default behavior of the Enter key
+        const start = event.target.selectionStart;
+        const end = event.target.selectionEnd;
+        setQuestion(prevQuestion => prevQuestion.substring(0, start) + '\n' + prevQuestion.substring(end));
+        // Set the cursor position after the inserted newline
+        event.target.selectionStart = event.target.selectionEnd = start + 1;
+      }
+   };
     return (<>
     {/* <MyComponent/> */}
     {/* {time.toLocaleString()} */}
@@ -362,7 +372,7 @@ else{
       </div>
      <div className="p-4 border-t">
         <div className="flex gap-2">
-          <Input className="flex-1" value={question} placeholder="Ask the file(s)..." onChange={(event)=>{
+          <Textarea className="flex-1" value={question} placeholder="Ask the file(s)..." onChange={(event)=>{
             setq(event.target.value)
           }} />
           <Loader2 className={`${chatbuttonstate?"h-4 w-4 animate-spin":"hidden"}`}/>
