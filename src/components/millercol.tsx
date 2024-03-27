@@ -15,9 +15,9 @@ interface argprops{
     addmark:(path: string) => void;
     searchstring:String,
     sftype:String,
-    appWindow?
+    showthumbnail?
 }
-export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark,searchstring,sftype}:argprops){
+export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark,searchstring,sftype,showthumbnail}:argprops){
     const filesobjinit:FileItem[]=[]
     const [fileslist, setfileslist] = useState(filesobjinit);
     useEffect(()=>{
@@ -48,7 +48,7 @@ export default function MillerCol({eachif,populatesearchlist,goto,newtab,addmark
             // if(eachitem.size>0){
                 
               return <div key={index} className="m-3 flex flex-row overflow-hidden">
-                <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} addmark={addmark}/>
+                <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} addmark={addmark} showthumbnail={showthumbnail}/>
                 </div>
             // }
             // return;

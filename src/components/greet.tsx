@@ -1969,7 +1969,7 @@ export default function Greet() {
         </span>):null}
         {
           layout==="grid"?(
-          <div>
+          <>
             <div className={`flex flex-row}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
 
@@ -2073,7 +2073,7 @@ export default function Greet() {
                 }/>
                 </div>
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}}`}>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`}>
 
         
         {
@@ -2081,19 +2081,28 @@ export default function Greet() {
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
-                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} showthumbnail={showthumbnail} appWindow={appWindow}/>
+                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} showthumbnail={showthumbnail} addmark={addmark}/>
                         </div>
         
         ))}
         </div>
-            </div>):null
+            </>):null
 
         }
         
         {
            
-          layout==="miller"?(
+          layout==="miller"?(<>
+          <HoverCard>
+                <HoverCardTrigger>
+                <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
+                </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               Show Thumbnails
+              </HoverCardContent>
+            </HoverCard>
             <div className={`flex ms-2 overflow-scroll`}>
+              
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2102,7 +2111,7 @@ export default function Greet() {
             if(eachif.pathtofol.trim().length>0){
 
               return <div className={`flex ms-2`}>
-              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark} searchstring={searchstring} sftype={sftype}/>
+              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark} searchstring={searchstring} sftype={sftype} showthumbnail={showthumbnail}/>
               </div>
               
             }
@@ -2110,7 +2119,7 @@ export default function Greet() {
         })}
         
         </div>
-          ):null
+         </> ):null
         }
         
         </ResizablePanel>
