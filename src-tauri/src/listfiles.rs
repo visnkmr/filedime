@@ -278,21 +278,21 @@ pub async fn list_files(
             thread::sleep(Duration::from_millis(30)); // sleep for 10 milliseconds to avoid busy waiting
         }
     });
-    let fsc=Arc::new(Mutex::new(HashMap::new()));
-    
+    let fsc = Arc::new(Mutex::new(HashMap::new()));
+
     let walker = par_walker3
         .into_par_iter()
         .filter_map(|e| e.ok())
         .for_each(|e| {
             if (!e.path().to_string_lossy().to_string().eq(&path)) {
-                let fsc_clone=Arc::clone(&fsc);
+                let fsc_clone = Arc::clone(&fsc);
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
                 let file = populatefileitem(
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
                     &state,
-                    fsc_clone
+                    fsc_clone,
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
@@ -360,10 +360,9 @@ pub async fn list_files(
 }
 #[tauri::command]
 pub async fn files_list_for_miller_col(
-path:String,
-state: State<'_, AppStateStore>,
-)->Result<String,()>
-{
+    path: String,
+    state: State<'_, AppStateStore>,
+) -> Result<String, ()> {
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
     let walker = WalkBuilder::new(&path)
@@ -383,16 +382,16 @@ state: State<'_, AppStateStore>,
         .clone() // Respect the .gitignore file
         .build();
 
-        let par_walker2 = walker2.par_bridge(); // ignore errors
-        let par_walker3 = walker3.par_bridge(); // ignore errors
+    let par_walker2 = walker2.par_bridge(); // ignore errors
+    let par_walker3 = walker3.par_bridge(); // ignore errors
 
-        let files = Arc::new(Mutex::new(Vec::<FileItem>::new()));
-        let fsc=Arc::new(Mutex::new(HashMap::new()));
+    let files = Arc::new(Mutex::new(Vec::<FileItem>::new()));
+    let fsc = Arc::new(Mutex::new(HashMap::new()));
     let walker = par_walker3
         .into_par_iter()
         .filter_map(|e| e.ok())
         .for_each(|e| {
-            let fsc_clone=Arc::clone(&fsc);
+            let fsc_clone = Arc::clone(&fsc);
             if (!e.path().to_string_lossy().to_string().eq(&path)) {
                 // thread::sleep(Duration::from_millis(1000));
                 // println!("send to frontend  {:?}",e.file_name().to_string_lossy().to_string());
@@ -400,32 +399,32 @@ state: State<'_, AppStateStore>,
                     e.file_name().to_string_lossy().to_string(),
                     e.path(),
                     &state,
-                    fsc_clone
+                    fsc_clone,
                 );
                 let mut files = files.lock().unwrap(); // lock the mutex and get a mutable reference to the vector
                                                        // println!("{:?}",file);
                                                        // println!("added--->{:?}",e);
-                // *tfsize_clone.lock().unwrap() += file.rawfs;
+                                                       // *tfsize_clone.lock().unwrap() += file.rawfs;
 
                 //send each file to frontend
                 files.push(file.clone()); // push a clone of the file to the vector
-                // fileslist(
-                //     &windowname2.clone(),
-                //     &window.app_handle(),
-                //     &serde_json::to_string(&json!({
-                //       "caller":starttime,
-                //       "files":&serde_json::to_string(&file.clone()).unwrap(),
-                //     }))
-                //     .unwrap(),
-                // );
+                                          // fileslist(
+                                          //     &windowname2.clone(),
+                                          //     &window.app_handle(),
+                                          //     &serde_json::to_string(&json!({
+                                          //       "caller":starttime,
+                                          //       "files":&serde_json::to_string(&file.clone()).unwrap(),
+                                          //     }))
+                                          //     .unwrap(),
+                                          // );
             }
 
             // Ok(()) // return Ok to continue the iteration
         });
-        // let fsinfoset: Vec<fscinfo> = fsc.clone().lock().unwrap().clone().into_iter().map(|(ftype,count)| fscinfo{
-        //     filetype:ftype,
-        //     numoffiles:count
-        // }).collect();
+    // let fsinfoset: Vec<fscinfo> = fsc.clone().lock().unwrap().clone().into_iter().map(|(ftype,count)| fscinfo{
+    //     filetype:ftype,
+    //     numoffiles:count
+    // }).collect();
     Ok(serde_json::to_string(&files.clone().lock().unwrap().clone()).unwrap())
     // Ok(serde_json::to_string(&json!({
     //     "files":files.clone().lock().unwrap().clone(),
@@ -433,7 +432,7 @@ state: State<'_, AppStateStore>,
     // })).unwrap())
 }
 #[derive(Serialize)]
-struct fscinfo{
-    filetype:String,
-    numoffiles:i32
+struct fscinfo {
+    filetype: String,
+    numoffiles: i32,
 }

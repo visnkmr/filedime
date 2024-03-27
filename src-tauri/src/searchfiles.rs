@@ -230,95 +230,95 @@ pub async fn search_try(
 
     // if(u.len()<2000)
     // {
-        let mut v: Vec<String> = u
-            .into_par_iter()
-            .filter(|_| {
-                let counter = Arc::clone(&counter);
-                let local_counter = Arc::clone(&local_counter);
-                let val = counter.load(Ordering::SeqCst);
-                let localaval = local_counter.load(Ordering::SeqCst);
-                if (val == localaval) {
-                    return true;
-                }
-                // // local_counter.store(val+1, Ordering::SeqCst);
-                // panic!("Stopping iteration");
-                return false;
-            })
-            .collect(); // Collect into a vector
-        v.par_sort_by_key(|ei| {
-            // Sort by key
-            let path = Path::new(&ei); // Get the path
-            let fname = path.file_name().unwrap().to_string_lossy().to_string(); // Get the file name
-            let score = fuzzy_match(&fname, &string).unwrap(); // Get the score
-                                                               // println!("{}---{}", fname, score); // Print the file name and score
-            score // Return the score as the key
-        });
-        v.reverse();
-        let sts = &state.starttime;
-        state.starttime.store(starttime, Ordering::SeqCst);
-        // v.split_off(100);
-        // for (c,ei) in
-        // let (tx,rx)=mpsc::channel::<String>();
-        let fsc=Arc::new(Mutex::new(HashMap::new()));
-        v.par_iter().enumerate().panic_fuse().for_each(|(c, ei)| {
-            if (sts.load(Ordering::SeqCst) != starttime) {
-                println!("closing search started @ {} ", starttime);
-                *doneornot_clone.lock().unwrap() = true;
-                sendfilesetcollection(
-                    &wname,
-                    &app_handle,
-                    &serde_json::to_string(&fsc.lock().unwrap().clone()).unwrap(),
-                );
-
-                opendialogwindow(
-                    &app_handle,
-                    "Search halted",
-                    &format!("Halted search for {}", string),
-                    "",
-                );
-                stoptimer(&wname, &window.app_handle());
-
-                let now = SystemTime::now();
-                let duration = now.duration_since(UNIX_EPOCH).unwrap();
-                let endtime = duration.as_secs();
-                println!("endtime----{}", endtime - startime);
-                panic!("")
+    let mut v: Vec<String> = u
+        .into_par_iter()
+        .filter(|_| {
+            let counter = Arc::clone(&counter);
+            let local_counter = Arc::clone(&local_counter);
+            let val = counter.load(Ordering::SeqCst);
+            let localaval = local_counter.load(Ordering::SeqCst);
+            if (val == localaval) {
+                return true;
             }
-            // thread::sleep(Duration::from_millis(3000));
-            //   window.emit("reloadlist",json!({
-            //     "message": "pariter3",
-            //     "status": "running",
-            // }));
-            let fsc_clone=Arc::clone(&fsc);
-            let path = Path::new(&ei);
-            let fname = path.file_name().unwrap().to_string_lossy().to_string();
-            let file = populatefileitem(fname, path, &state,fsc_clone);
-            let mut files = files.lock().unwrap();
-            *tfsize_clone.lock().unwrap() += file.rawfs;
-            files.push(file.clone());
-            fileslist(
-                &windowname2.clone(),
-                &window.app_handle(),
-                &serde_json::to_string(&json!({
-                  "caller":starttime,
-                  "files":&serde_json::to_string(&file.clone()).unwrap(),
-                }))
-                .unwrap(),
-            )
-            .unwrap();
-        });
-        //  loop{
-        //   match rx.try_recv() {
-        //       Ok(status) => {
-        //           println!("{}",status);
-        //       }
-        //       Err(TryRecvError::Disconnected) => {
-        //           println!("finished");
-        //           break;
-        //       }
-        //       Err(TryRecvError::Empty) => {}
-        //   }
-        //  }
+            // // local_counter.store(val+1, Ordering::SeqCst);
+            // panic!("Stopping iteration");
+            return false;
+        })
+        .collect(); // Collect into a vector
+    v.par_sort_by_key(|ei| {
+        // Sort by key
+        let path = Path::new(&ei); // Get the path
+        let fname = path.file_name().unwrap().to_string_lossy().to_string(); // Get the file name
+        let score = fuzzy_match(&fname, &string).unwrap(); // Get the score
+                                                           // println!("{}---{}", fname, score); // Print the file name and score
+        score // Return the score as the key
+    });
+    v.reverse();
+    let sts = &state.starttime;
+    state.starttime.store(starttime, Ordering::SeqCst);
+    // v.split_off(100);
+    // for (c,ei) in
+    // let (tx,rx)=mpsc::channel::<String>();
+    let fsc = Arc::new(Mutex::new(HashMap::new()));
+    v.par_iter().enumerate().panic_fuse().for_each(|(c, ei)| {
+        if (sts.load(Ordering::SeqCst) != starttime) {
+            println!("closing search started @ {} ", starttime);
+            *doneornot_clone.lock().unwrap() = true;
+            sendfilesetcollection(
+                &wname,
+                &app_handle,
+                &serde_json::to_string(&fsc.lock().unwrap().clone()).unwrap(),
+            );
+
+            opendialogwindow(
+                &app_handle,
+                "Search halted",
+                &format!("Halted search for {}", string),
+                "",
+            );
+            stoptimer(&wname, &window.app_handle());
+
+            let now = SystemTime::now();
+            let duration = now.duration_since(UNIX_EPOCH).unwrap();
+            let endtime = duration.as_secs();
+            println!("endtime----{}", endtime - startime);
+            panic!("")
+        }
+        // thread::sleep(Duration::from_millis(3000));
+        //   window.emit("reloadlist",json!({
+        //     "message": "pariter3",
+        //     "status": "running",
+        // }));
+        let fsc_clone = Arc::clone(&fsc);
+        let path = Path::new(&ei);
+        let fname = path.file_name().unwrap().to_string_lossy().to_string();
+        let file = populatefileitem(fname, path, &state, fsc_clone);
+        let mut files = files.lock().unwrap();
+        *tfsize_clone.lock().unwrap() += file.rawfs;
+        files.push(file.clone());
+        fileslist(
+            &windowname2.clone(),
+            &window.app_handle(),
+            &serde_json::to_string(&json!({
+              "caller":starttime,
+              "files":&serde_json::to_string(&file.clone()).unwrap(),
+            }))
+            .unwrap(),
+        )
+        .unwrap();
+    });
+    //  loop{
+    //   match rx.try_recv() {
+    //       Ok(status) => {
+    //           println!("{}",status);
+    //       }
+    //       Err(TryRecvError::Disconnected) => {
+    //           println!("finished");
+    //           break;
+    //       }
+    //       Err(TryRecvError::Empty) => {}
+    //   }
+    //  }
     // }
     *doneornot_clone.lock().unwrap() = true;
     sendfilesetcollection(

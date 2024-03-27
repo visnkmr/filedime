@@ -66,7 +66,15 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
                     },
                     mount_point: ed.mountpoint.clone().unwrap_or("".to_string()).clone(),
                     total: sizeunit::size(ed.size, true),
-                    free: sizeunit::size(ed.clone().fsavail.unwrap_or("0".to_string()).clone().parse::<u64>().unwrap_or(0), true),
+                    free: sizeunit::size(
+                        ed.clone()
+                            .fsavail
+                            .unwrap_or("0".to_string())
+                            .clone()
+                            .parse::<u64>()
+                            .unwrap_or(0),
+                        true,
+                    ),
                     is_removable: ed.is_removable.clone(),
                     disk_type: ed.device_type.clone(),
                     file_system: format!(
@@ -194,7 +202,7 @@ fn parse(input: &String) -> Result<LsBlkOutput, ()> {
     //     Err(e)=>return Err(())
 
     // }
-    let mut count=0;
+    let mut count = 0;
     // for input in input.lines(){
     //     count+=1;
     //     println!("{}---{}",count,input)
@@ -202,8 +210,8 @@ fn parse(input: &String) -> Result<LsBlkOutput, ()> {
     Ok(serde_json::from_str(input).unwrap())
 }
 /// Struct for deserializing the JSON output of `lsblk`.
-/// 
-/// 
+///
+///
 ///
 fn deserialize_fsavail<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
@@ -216,9 +224,11 @@ where
             if n.is_u64() {
                 Ok(Some(n.as_u64().unwrap().to_string()))
             } else {
-                Err(serde::de::Error::custom("fsavail must be a string or a u64"))
+                Err(serde::de::Error::custom(
+                    "fsavail must be a string or a u64",
+                ))
             }
-        },
+        }
         _ => Ok(None),
     }
 }
@@ -256,10 +266,13 @@ fn flattened(parsed: LsBlkOutput) -> Vec<LsBlkDevice> {
             child.details.vendor = device.details.vendor.clone();
             child.details.model = device.details.model.clone();
             stack.push(child);
-            print!("{}",format!(
-                "{:?} {:?}",
-                device.details.vendor.clone(),
-                device.details.model.clone())
+            print!(
+                "{}",
+                format!(
+                    "{:?} {:?}",
+                    device.details.vendor.clone(),
+                    device.details.model.clone()
+                )
             )
         }
     }
@@ -295,8 +308,8 @@ pub fn get_disks() -> Result<(Vec<LsBlkDevice>, Vec<LsBlkDevice>), ()> {
 }
 
 #[test]
-fn newdriveslist(){
-    println!("{:?}",get_disks());
+fn newdriveslist() {
+    println!("{:?}", get_disks());
 }
 
 pub fn get_drives() -> Result<Drives, String> {

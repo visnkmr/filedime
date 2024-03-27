@@ -1,0 +1,338 @@
+chrono v0.4.31 {android-tzdata,clock,default,iana-time-zone,js-sys,oldtime,std,wasm-bindgen,wasmbind,winapi,windows-targets}
+iana-time-zone v0.1.59 {fallback}
+num-traits v0.2.17
+autocfg v1.1.0
+comrak v0.18.0 {clap,cli,default,shell-words,syntect,xdg}
+clap v4.4.18 {color,default,derive,error-context,help,std,string,suggestions,usage,wrap_help}
+clap_builder v4.4.18 {color,error-context,help,std,string,suggestions,usage,wrap_help}
+anstream v0.6.11 {auto,default,wincon}
+anstyle v1.0.4 {default,std}
+anstyle-parse v0.2.3 {default,utf8}
+utf8parse v0.2.1 {default}
+anstyle-query v1.0.2
+colorchoice v1.0.0
+clap_lex v0.6.0
+strsim v0.10.0
+terminal_size v0.3.0
+rustix v0.38.30 {alloc,default,fs,std,termios,use-libc-auxv}
+bitflags v2.4.2 {std}
+linux-raw-sys v0.4.13 {elf,errno,general,ioctl,no_std,std}
+clap_derive v4.4.7
+heck v0.4.1 {default}
+proc-macro2 v1.0.76 {default,proc-macro,span-locations}
+unicode-ident v1.0.12
+quote v1.0.35 {default,proc-macro}
+syn v2.0.48 {clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,quote}
+entities v1.0.1
+memchr v2.7.1 {alloc,default,std}
+once_cell v1.19.0 {alloc,default,race,std}
+regex v1.10.2 {default,perf,perf-backtrack,perf-cache,perf-dfa,perf-inline,perf-literal,perf-onepass,std,unicode,unicode-age,unicode-bool,unicode-case,unicode-gencat,unicode-perl,unicode-script,unicode-segment}
+aho-corasick v1.1.2 {default,perf-literal,std}
+regex-automata v0.4.3 {alloc,dfa-onepass,dfa-search,hybrid,meta,nfa,nfa-backtrack,nfa-pikevm,nfa-thompson,perf,perf-inline,perf-literal,perf-literal-multisubstring,perf-literal-substring,std,syntax,unicode,unicode-age,unicode-bool,unicode-case,unicode-gencat,unicode-perl,unicode-script,unicode-segment,unicode-word-boundary}
+regex-syntax v0.8.2 {default,std,unicode,unicode-age,unicode-bool,unicode-case,unicode-gencat,unicode-perl,unicode-script,unicode-segment}
+shell-words v1.1.0 {default,std}
+slug v0.1.5
+deunicode v1.4.2 {alloc,default}
+syntect v5.1.0 {bincode,default,default-onig,default-syntaxes,default-themes,dump-create,dump-load,flate2,fnv,html,onig,parsing,plist,plist-load,regex-onig,regex-syntax,yaml-load,yaml-rust}
+bincode v1.3.3
+serde v1.0.195 {alloc,default,derive,serde_derive,std}
+serde_derive v1.0.195
+bitflags v1.3.2 {default}
+flate2 v1.0.28 {any_impl,default,miniz_oxide,rust_backend}
+crc32fast v1.3.2 {default,std}
+cfg-if v1.0.0
+miniz_oxide v0.7.1 {default,simd,simd-adler32,with-alloc}
+adler v1.0.2
+simd-adler32 v0.3.7 {const-generics,default,std}
+fnv v1.0.7 {default,std}
+onig v6.4.0
+onig_sys v69.8.1
+cc v1.0.83
+libc v0.2.152 {default,std}
+pkg-config v0.3.29
+plist v1.6.0 {default,serde}
+base64 v0.21.7 {alloc,default,std}
+indexmap v2.1.0 {default,std}
+equivalent v1.0.1
+hashbrown v0.14.3 {raw}
+line-wrap v0.1.1
+safemem v0.3.3 {default,std}
+quick-xml v0.31.0 {default}
+time v0.3.31 {alloc,default,formatting,parsing,std}
+deranged v0.3.11 {alloc,powerfmt,std}
+powerfmt v0.2.0
+itoa v1.0.10
+time-core v0.1.2
+regex-syntax v0.7.5 {default,std,unicode,unicode-age,unicode-bool,unicode-case,unicode-gencat,unicode-perl,unicode-script,unicode-segment}
+serde_json v1.0.111 {default,raw_value,std}
+ryu v1.0.16
+thiserror v1.0.56
+thiserror-impl v1.0.56
+walkdir v2.4.0
+same-file v1.0.6
+yaml-rust v0.4.5
+linked-hash-map v0.5.6
+typed-arena v2.0.2 {default,std}
+unicode_categories v0.1.1
+xdg v2.5.2
+dirs v5.0.1
+dirs-sys v0.4.1
+option-ext v0.2.0
+filesize v0.2.0
+filetime v0.2.23
+fs_extra v1.3.0
+fuzzy-matcher v0.3.7 {default}
+thread_local v1.1.7
+ignore v0.4.22
+crossbeam-deque v0.8.5 {default,std}
+crossbeam-epoch v0.9.18 {alloc,std}
+crossbeam-utils v0.8.19 {default,std}
+globset v0.4.14 {default,log}
+bstr v1.9.0 {alloc,default,std,unicode}
+log v0.4.20
+include_dir v0.7.3 {default}
+include_dir_macros v0.7.3
+local-ip-address v0.6.1
+neli v0.6.4 {default}
+byteorder v1.5.0 {default,std}
+neli-proc-macros v0.1.3
+either v1.9.0 {default,use_std}
+syn v1.0.109 {clone-impls,default,derive,extra-traits,fold,full,parsing,printing,proc-macro,quote}
+num_cpus v1.16.0
+opener v0.6.1
+prefstore v0.8.0
+glob v0.3.1
+rayon v1.8.1
+either v1.9.0
+rayon-core v1.12.1
+reqwest v0.11.24 {__tls,default,default-tls,hyper-tls,native-tls-crate,tokio-native-tls}
+bytes v1.5.0 {default,std}
+encoding_rs v0.8.33 {alloc,default}
+futures-core v0.3.30 {alloc,default,std}
+futures-util v0.3.30 {alloc,async-await,async-await-macro,default,futures-macro,slab,std}
+futures-macro v0.3.30
+futures-task v0.3.30 {alloc,std}
+pin-project-lite v0.2.13
+pin-utils v0.1.0
+slab v0.4.9 {default,std}
+h2 v0.3.24
+futures-sink v0.3.30 {alloc,default,std}
+http v0.2.11
+tokio v1.36.0 {bytes,default,fs,io-util,libc,macros,mio,net,num_cpus,rt,rt-multi-thread,socket2,sync,time,tokio-macros}
+mio v0.8.10 {net,os-ext,os-poll}
+socket2 v0.5.5 {all}
+tokio-macros v2.2.0
+tokio-util v0.7.10 {codec,default,io,tracing}
+tracing v0.1.40 {std}
+tracing-core v0.1.32 {once_cell,std}
+http-body v0.4.6
+hyper v0.14.28 {client,h2,http1,http2,runtime,socket2,tcp}
+futures-channel v0.3.30 {alloc,default,std}
+httparse v1.8.0 {default,std}
+httpdate v1.0.3
+tower-service v0.3.2
+want v0.3.1
+try-lock v0.2.5
+hyper-tls v0.5.0
+native-tls v0.2.11
+openssl v0.10.63 {default}
+foreign-types v0.3.2
+foreign-types-shared v0.1.1
+openssl-macros v0.1.1
+openssl-sys v0.9.99
+vcpkg v0.2.15
+openssl-probe v0.1.5
+tokio-native-tls v0.3.1
+ipnet v2.9.0 {default,std}
+mime v0.3.17
+percent-encoding v2.3.1 {alloc,default,std}
+rustls-pemfile v1.0.4
+serde_urlencoded v0.7.1
+form_urlencoded v1.2.1 {alloc,default,std}
+sync_wrapper v0.1.2
+url v2.5.0 {default,serde}
+idna v0.5.0 {alloc,default,std}
+unicode-bidi v0.3.15 {hardcoded-data,std}
+unicode-normalization v0.1.22 {std}
+tinyvec v1.6.0 {alloc,default,tinyvec_macros}
+tinyvec_macros v0.1.1
+rustc-hash v1.1.0 {default,std}
+sysinfo v0.29.11 {default,multithread,rayon}
+tauri v1.5.4 {compression,default,devtools,fs-read-file,objc-exception,open,os-all,os-api,os_info,path-all,protocol-all,protocol-asset,regex,shell-open,shell-open-api,sys-locale,tauri-runtime-wry,wry}
+anyhow v1.0.79 {default,std}
+dirs-next v2.0.0
+dirs-sys-next v0.1.2
+glib v0.15.12
+futures-executor v0.3.30 {default,std}
+glib-macros v0.15.13
+proc-macro-crate v1.3.1
+toml_edit v0.19.15 {default,serde}
+serde_spanned v0.6.5 {serde}
+toml_datetime v0.6.5 {serde}
+winnow v0.5.34 {alloc,default,std}
+proc-macro-error v1.0.4 {default,syn,syn-error}
+proc-macro-error-attr v1.0.4
+version_check v0.9.4
+glib-sys v0.15.10
+system-deps v6.2.0
+cfg-expr v0.15.6 {default,target-lexicon,targets}
+smallvec v1.13.1
+target-lexicon v0.12.13 {default}
+toml v0.8.8 {default,display,parse}
+toml_edit v0.21.0 {display,parse,serde}
+version-compare v0.1.1
+gobject-sys v0.15.10
+gtk v0.15.5 {v3_20,v3_22}
+atk v0.15.1
+atk-sys v0.15.1
+cairo-rs v0.15.12 {default,glib,use_glib}
+cairo-sys-rs v0.15.1 {glib,use_glib}
+field-offset v0.3.6
+memoffset v0.9.0 {default}
+rustc_version v0.4.0
+semver v1.0.21 {default,std}
+gdk v0.15.4 {v3_20,v3_22}
+gdk-pixbuf v0.15.11 {v2_36,v2_36_8}
+gdk-pixbuf-sys v0.15.10 {v2_36,v2_36_8}
+gio-sys v0.15.10
+gio v0.15.12
+futures-io v0.3.30 {default,std}
+gdk-sys v0.15.1 {v3_20,v3_22}
+pango-sys v0.15.10
+pango v0.15.10
+gtk-sys v0.15.3 {v3_20,v3_22}
+gtk3-macros v0.15.6
+open v3.2.0
+pathdiff v0.2.1
+os_info v3.7.0 {default,serde}
+rand v0.8.5 {alloc,default,getrandom,libc,rand_chacha,std,std_rng}
+rand_chacha v0.3.1 {std}
+ppv-lite86 v0.2.17 {simd,std}
+rand_core v0.6.4 {alloc,getrandom,std}
+getrandom v0.2.12 {std}
+raw-window-handle v0.5.2
+semver v1.0.21 {default,serde,std}
+serde_repr v0.1.18
+serialize-to-javascript v0.1.1
+serialize-to-javascript-impl v0.1.1
+state v0.5.3
+sys-locale v0.2.4
+tar v0.4.40 {default,xattr}
+xattr v1.3.1 {default,unsupported}
+tauri-macros v1.4.3
+tauri-codegen v1.4.2 {brotli,compression,regex,shell-scope}
+brotli v3.4.0 {alloc-stdlib,std}
+alloc-no-stdlib v2.0.4
+alloc-stdlib v0.2.2
+brotli-decompressor v2.5.1 {alloc-stdlib,std}
+ico v0.3.0
+png v0.17.11
+fdeflate v0.3.4
+json-patch v1.2.0 {default,diff,treediff}
+serde_json v1.0.111 {default,std}
+treediff v4.0.2 {serde_json,with-serde-json}
+sha2 v0.10.8 {default,std}
+cpufeatures v0.2.12
+digest v0.10.7 {alloc,block-buffer,core-api,default,std}
+block-buffer v0.10.4
+generic-array v0.14.7 {more_lengths}
+typenum v1.17.0
+crypto-common v0.1.6 {std}
+tauri-utils v1.5.2 {brotli,build,compression,glob,proc-macro2,quote,resources,walkdir}
+ctor v0.2.6
+dunce v1.0.4
+html5ever v0.26.0
+mac v0.1.1
+markup5ever v0.11.0
+phf v0.10.1 {default,std}
+phf_shared v0.10.0 {default,std}
+siphasher v0.3.11 {default,std}
+string_cache v0.8.7 {default,serde,serde_support}
+new_debug_unreachable v1.0.4
+parking_lot v0.12.1 {default}
+lock_api v0.4.11 {atomic_usize,default}
+scopeguard v1.2.0
+parking_lot_core v0.9.9
+precomputed-hash v0.1.1
+tendril v0.4.3
+futf v0.1.5
+utf-8 v0.7.6
+phf_codegen v0.10.0
+phf_generator v0.10.0
+rand v0.8.5 {alloc,default,getrandom,libc,rand_chacha,small_rng,std,std_rng}
+string_cache_codegen v0.5.2
+infer v0.13.0 {alloc,cfb,default,std}
+cfb v0.7.3
+uuid v1.7.0 {default,rng,std,v4}
+kuchikiki v0.8.2
+cssparser v0.27.2
+cssparser-macros v0.6.1
+dtoa-short v0.3.4
+dtoa v1.0.9
+itoa v0.4.8 {default,std}
+matches v0.1.10
+phf v0.8.0 {default,macros,phf_macros,proc-macro-hack,std}
+phf_macros v0.8.0
+phf_generator v0.8.0
+phf_shared v0.8.0 {default,std}
+rand v0.7.3 {alloc,default,getrandom,getrandom_package,libc,rand_pcg,small_rng,std}
+getrandom v0.1.16 {std}
+rand_chacha v0.2.2 {std}
+rand_core v0.5.1 {alloc,getrandom,std}
+rand_pcg v0.2.1
+proc-macro-hack v0.5.20+deprecated
+indexmap v1.9.3
+hashbrown v0.12.3 {raw}
+selectors v0.22.0
+derive_more v0.99.17
+convert_case v0.4.0
+fxhash v0.2.1
+servo_arc v0.1.1
+nodrop v0.1.14 {default,std}
+stable_deref_trait v1.2.0 {alloc,default,std}
+thin-slice v0.1.1
+phf_codegen v0.8.0
+phf v0.11.2 {default,macros,phf_macros,std}
+phf_macros v0.11.2
+phf_generator v0.11.2
+phf_shared v0.11.2 {std}
+serde_with v3.4.0 {alloc,default,macros,std}
+serde_with_macros v3.4.0
+darling v0.20.3 {default,suggestions}
+darling_core v0.20.3 {strsim,suggestions}
+ident_case v1.0.1
+darling_macro v0.20.3
+tauri-runtime v0.14.2 {devtools}
+http-range v0.1.5
+tauri-utils v1.5.2 {brotli,compression,glob,resources,walkdir}
+tauri-runtime-wry v0.14.3 {devtools,objc-exception}
+webkit2gtk v0.18.2 {v2_10,v2_12,v2_14,v2_16,v2_18,v2_2,v2_20,v2_22,v2_4,v2_6,v2_8}
+javascriptcore-rs v0.16.0
+javascriptcore-rs-sys v0.4.0
+system-deps v5.0.0
+cfg-expr v0.9.1 {default}
+heck v0.3.3
+unicode-segmentation v1.10.1
+toml v0.5.11
+version-compare v0.0.11 {default}
+soup2 v0.2.1 {default,v2_24,v2_26,v2_26_3,v2_28,v2_30,v2_32,v2_34,v2_36,v2_38,v2_40,v2_42,v2_44,v2_46,v2_48,v2_50,v2_52,v2_54,v2_56,v2_58,v2_60,v2_62}
+soup2-sys v0.2.0 {v2_24,v2_26,v2_26_3,v2_28,v2_30,v2_32,v2_34,v2_36,v2_38,v2_40,v2_42,v2_44,v2_46,v2_48,v2_50,v2_52,v2_54,v2_56,v2_58,v2_60,v2_62}
+webkit2gtk-sys v0.18.0 {v2_10,v2_12,v2_14,v2_16,v2_18,v2_20,v2_22,v2_6,v2_8}
+wry v0.24.7 {devtools,file-drop,objc-exception,protocol}
+tao v0.16.6 {serde}
+crossbeam-channel v0.5.11 {default,std}
+gdkwayland-sys v0.15.3
+gdkx11-sys v0.15.1
+x11 v2.21.0
+instant v0.1.12
+lazy_static v1.4.0
+x11-dl v2.21.0
+tempfile v3.9.0
+fastrand v2.0.1 {alloc,default,std}
+tauri-build v1.5.1
+cargo_toml v0.15.3
+toml v0.7.8 {default,display,parse}
+tauri-winres v0.1.1
+embed-resource v2.4.1
+
+Total dependencies: 336

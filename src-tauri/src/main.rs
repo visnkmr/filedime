@@ -2,7 +2,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use std::{
-    collections::{HashMap, HashSet}, fmt::format, io::{Cursor, Read}, mem, net::{TcpListener, TcpStream}, path::{self, Path}, process::Command, sync::{Arc, Mutex, RwLock}, thread, time::{self, Duration, Instant, SystemTime, UNIX_EPOCH}
+    collections::{HashMap, HashSet},
+    fmt::format,
+    io::{Cursor, Read},
+    mem,
+    net::{TcpListener, TcpStream},
+    path::{self, Path},
+    process::Command,
+    sync::{Arc, Mutex, RwLock},
+    thread,
+    time::{self, Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 mod dirsize;
 mod drivelist;
@@ -27,7 +36,10 @@ use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tauri::{
-    api::{file::read_string, shell}, http::ResponseBuilder, window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, PathResolver, Runtime, State, Submenu, WindowEvent
+    api::{file::read_string, shell},
+    http::ResponseBuilder,
+    window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, PathResolver, Runtime,
+    State, Submenu, WindowEvent,
 };
 
 // use walkdir::WalkDir;
@@ -69,7 +81,7 @@ pub struct FileItem {
     timestamp: i64,
     foldercon: i32,
     ftype: String, // grandparent:String,
-    parent:String
+    parent: String,
 }
 const CACHE_EXPIRY: u64 = 60;
 
@@ -127,11 +139,11 @@ mod fileops;
 
 #[tauri::command]
 async fn getlocalip() -> Result<String, String> {
-    println!("{}",local_ip().unwrap().to_string());
+    println!("{}", local_ip().unwrap().to_string());
     Ok(local_ip().unwrap().to_string())
 }
-    
-    #[tauri::command]
+
+#[tauri::command]
 async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
@@ -151,11 +163,13 @@ async fn highlightfile(path: String, theme: String) -> Result<String, String> {
 }
 #[tauri::command]
 fn filegptendpoint(endpoint: String) -> Result<String, String> {
-    if(endpoint==""){
-
-        Ok(getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"))
-    }
-    else{
+    if (endpoint == "") {
+        Ok(getcustom(
+            "filedime",
+            "gpt/filegpt.endpoint",
+            "http://localhost:8694",
+        ))
+    } else {
         savecustom("filedime", "gpt/filegpt.endpoint", endpoint.clone());
         Ok(endpoint)
     }
@@ -234,7 +248,6 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
             "cmd /k cd %f",
         );
     }
-
 
     let mut buttonnames = Vec::new();
     // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
@@ -469,20 +482,20 @@ fn handle_connection(mut stream: TcpStream) {
     let mut filename = request.split_whitespace().nth(1).unwrap_or("/");
     filename = filename.trim_start_matches('/');
     // println!("---->{}----",filename);
-    if(filename.is_empty()){
-        filename=("filegpt.html");
+    if (filename.is_empty()) {
+        filename = ("filegpt.html");
     }
 
     // Check if the file exists and is readable
     if PROJECT_DIR.contains(filename) {
-            let contents=PROJECT_DIR.get_file(filename).unwrap();
-            let response = format!(
-                "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
-                contents.contents().len(),
-                contents.contents_utf8().unwrap()
-            );
-            stream.write(response.as_bytes()).unwrap();
-            stream.flush().unwrap();
+        let contents = PROJECT_DIR.get_file(filename).unwrap();
+        let response = format!(
+            "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+            contents.contents().len(),
+            contents.contents_utf8().unwrap()
+        );
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
     } else {
         let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
         stream.write(response.as_bytes()).unwrap();
@@ -529,7 +542,7 @@ fn main() {
             handle_connection(_stream);
         }
     });
-    
+
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
         .setup(|app| {

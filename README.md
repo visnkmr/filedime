@@ -61,3 +61,5 @@ FiledimeGPT LAN url - http://<pclanipaddress>:8477
 ## Chat self reference
 Chatting normally should query ollama endpoint from ts, if contextless or if FiledimeGPT server is not running, else if FiledimeGPT server is running, to specifically run query on ollama endpoint include "o2c" (abbrevation for outside of current context) at the begging of the chat.You can also start with generally to run on ollama endpoint via FiledimeGPT server.
 From LAN FiledimeGPT you can use ollama only if ollama is set to accept requests from 0.0.0.0/ if FiledimeGPT Python server is running
+
+Thanks to all the maintainers of the libraries listed in the frontenddepslist.txt and depslist.txt files in the repo.

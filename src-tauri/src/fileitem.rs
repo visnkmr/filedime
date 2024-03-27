@@ -34,7 +34,7 @@ pub fn populatefileitem(
     name: String,
     path: &Path,
     state: &State<'_, AppStateStore>,
-    filesetcollection:Arc<Mutex<HashMap<String,i32>>>
+    filesetcollection: Arc<Mutex<HashMap<String, i32>>>,
 ) -> FileItem {
     // println!("path=-------->{:?}",path);
     // println!("{}",name);
@@ -78,10 +78,10 @@ pub fn populatefileitem(
             foldercon = count as i32;
         }
     }
-    let mut pp="".to_string();
+    let mut pp = "".to_string();
     if let Some(parent_path) = path.parent() {
-        if let Ok(ppath)=parent_path.canonicalize(){
-                pp=ppath.to_string_lossy().to_string()
+        if let Ok(ppath) = parent_path.canonicalize() {
+            pp = ppath.to_string_lossy().to_string()
         }
     };
     // let foldercon=state.foldercon(&path); //counts number of folders using hashmap..slows things down
@@ -194,6 +194,6 @@ pub fn populatefileitem(
             folderloc as i32
         },
         ftype: filetype,
-        parent:pp
+        parent: pp,
     }
 }

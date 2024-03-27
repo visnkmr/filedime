@@ -1,0 +1,1402 @@
+/tmp/new/filedime node_modules
+├── @aashutoshrathi/word-wrap@1.2.6
+├── @alloc/quick-lru@5.2.0
+├── @ampproject/remapping@2.2.1
+├── @apideck/better-ajv-errors@0.3.6
+├── @babel/code-frame@7.23.5
+│   └── chalk@2.4.2
+│       ├── ansi-styles@3.2.1
+│       │   └── color-convert@1.9.3
+│       │       └── color-name@1.1.3
+│       ├── escape-string-regexp@1.0.5
+│       └── supports-color@5.5.0
+│           └── has-flag@3.0.0
+├── @babel/compat-data@7.23.5
+├── @babel/core@7.23.9
+│   └── semver@6.3.1
+├── @babel/generator@7.23.6
+├── @babel/helper-annotate-as-pure@7.22.5
+├── @babel/helper-builder-binary-assignment-operator-visitor@7.22.15
+├── @babel/helper-compilation-targets@7.23.6
+│   ├── lru-cache@5.1.1
+│   │   └── yallist@3.1.1
+│   └── semver@6.3.1
+├── @babel/helper-create-class-features-plugin@7.23.9
+│   └── semver@6.3.1
+├── @babel/helper-create-regexp-features-plugin@7.22.15
+│   └── semver@6.3.1
+├── @babel/helper-define-polyfill-provider@0.5.0
+├── @babel/helper-environment-visitor@7.22.20
+├── @babel/helper-function-name@7.23.0
+├── @babel/helper-hoist-variables@7.22.5
+├── @babel/helper-member-expression-to-functions@7.23.0
+├── @babel/helper-module-imports@7.22.15
+├── @babel/helper-module-transforms@7.23.3
+├── @babel/helper-optimise-call-expression@7.22.5
+├── @babel/helper-plugin-utils@7.22.5
+├── @babel/helper-remap-async-to-generator@7.22.20
+├── @babel/helper-replace-supers@7.22.20
+├── @babel/helper-simple-access@7.22.5
+├── @babel/helper-skip-transparent-expression-wrappers@7.22.5
+├── @babel/helper-split-export-declaration@7.22.6
+├── @babel/helper-string-parser@7.23.4
+├── @babel/helper-validator-identifier@7.22.20
+├── @babel/helper-validator-option@7.23.5
+├── @babel/helper-wrap-function@7.22.20
+├── @babel/helpers@7.23.9
+├── @babel/highlight@7.23.4
+│   └── chalk@2.4.2
+│       ├── ansi-styles@3.2.1
+│       │   └── color-convert@1.9.3
+│       │       └── color-name@1.1.3
+│       ├── escape-string-regexp@1.0.5
+│       └── supports-color@5.5.0
+│           └── has-flag@3.0.0
+├── @babel/parser@7.23.9
+├── @babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression@7.23.3
+├── @babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining@7.23.3
+├── @babel/plugin-bugfix-v8-static-class-fields-redefine-readonly@7.23.7
+├── @babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2
+├── @babel/plugin-syntax-async-generators@7.8.4
+├── @babel/plugin-syntax-class-properties@7.12.13
+├── @babel/plugin-syntax-class-static-block@7.14.5
+├── @babel/plugin-syntax-dynamic-import@7.8.3
+├── @babel/plugin-syntax-export-namespace-from@7.8.3
+├── @babel/plugin-syntax-import-assertions@7.23.3
+├── @babel/plugin-syntax-import-attributes@7.23.3
+├── @babel/plugin-syntax-import-meta@7.10.4
+├── @babel/plugin-syntax-json-strings@7.8.3
+├── @babel/plugin-syntax-logical-assignment-operators@7.10.4
+├── @babel/plugin-syntax-nullish-coalescing-operator@7.8.3
+├── @babel/plugin-syntax-numeric-separator@7.10.4
+├── @babel/plugin-syntax-object-rest-spread@7.8.3
+├── @babel/plugin-syntax-optional-catch-binding@7.8.3
+├── @babel/plugin-syntax-optional-chaining@7.8.3
+├── @babel/plugin-syntax-private-property-in-object@7.14.5
+├── @babel/plugin-syntax-top-level-await@7.14.5
+├── @babel/plugin-syntax-unicode-sets-regex@7.18.6
+├── @babel/plugin-transform-arrow-functions@7.23.3
+├── @babel/plugin-transform-async-generator-functions@7.23.9
+├── @babel/plugin-transform-async-to-generator@7.23.3
+├── @babel/plugin-transform-block-scoped-functions@7.23.3
+├── @babel/plugin-transform-block-scoping@7.23.4
+├── @babel/plugin-transform-class-properties@7.23.3
+├── @babel/plugin-transform-class-static-block@7.23.4
+├── @babel/plugin-transform-classes@7.23.8
+│   └── globals@11.12.0
+├── @babel/plugin-transform-computed-properties@7.23.3
+├── @babel/plugin-transform-destructuring@7.23.3
+├── @babel/plugin-transform-dotall-regex@7.23.3
+├── @babel/plugin-transform-duplicate-keys@7.23.3
+├── @babel/plugin-transform-dynamic-import@7.23.4
+├── @babel/plugin-transform-exponentiation-operator@7.23.3
+├── @babel/plugin-transform-export-namespace-from@7.23.4
+├── @babel/plugin-transform-for-of@7.23.6
+├── @babel/plugin-transform-function-name@7.23.3
+├── @babel/plugin-transform-json-strings@7.23.4
+├── @babel/plugin-transform-literals@7.23.3
+├── @babel/plugin-transform-logical-assignment-operators@7.23.4
+├── @babel/plugin-transform-member-expression-literals@7.23.3
+├── @babel/plugin-transform-modules-amd@7.23.3
+├── @babel/plugin-transform-modules-commonjs@7.23.3
+├── @babel/plugin-transform-modules-systemjs@7.23.9
+├── @babel/plugin-transform-modules-umd@7.23.3
+├── @babel/plugin-transform-named-capturing-groups-regex@7.22.5
+├── @babel/plugin-transform-new-target@7.23.3
+├── @babel/plugin-transform-nullish-coalescing-operator@7.23.4
+├── @babel/plugin-transform-numeric-separator@7.23.4
+├── @babel/plugin-transform-object-rest-spread@7.23.4
+├── @babel/plugin-transform-object-super@7.23.3
+├── @babel/plugin-transform-optional-catch-binding@7.23.4
+├── @babel/plugin-transform-optional-chaining@7.23.4
+├── @babel/plugin-transform-parameters@7.23.3
+├── @babel/plugin-transform-private-methods@7.23.3
+├── @babel/plugin-transform-private-property-in-object@7.23.4
+├── @babel/plugin-transform-property-literals@7.23.3
+├── @babel/plugin-transform-regenerator@7.23.3
+├── @babel/plugin-transform-reserved-words@7.23.3
+├── @babel/plugin-transform-shorthand-properties@7.23.3
+├── @babel/plugin-transform-spread@7.23.3
+├── @babel/plugin-transform-sticky-regex@7.23.3
+├── @babel/plugin-transform-template-literals@7.23.3
+├── @babel/plugin-transform-typeof-symbol@7.23.3
+├── @babel/plugin-transform-unicode-escapes@7.23.3
+├── @babel/plugin-transform-unicode-property-regex@7.23.3
+├── @babel/plugin-transform-unicode-regex@7.23.3
+├── @babel/plugin-transform-unicode-sets-regex@7.23.3
+├── @babel/preset-env@7.23.9
+│   └── semver@6.3.1
+├── @babel/preset-modules@0.1.6-no-external-plugins
+├── @babel/regjsgen@0.8.0
+├── @babel/runtime@7.23.9
+├── @babel/template@7.23.9
+├── @babel/traverse@7.23.9
+│   └── globals@11.12.0
+├── @babel/types@7.23.9
+├── @corex/deepmerge@4.0.43
+├── @discoveryjs/json-ext@0.5.7
+├── @eslint-community/eslint-utils@4.4.0
+├── @eslint-community/regexpp@4.10.0
+├── @eslint/eslintrc@2.1.4
+│   └── ajv@6.12.6
+│       └── json-schema-traverse@0.4.1
+├── @eslint/js@8.55.0
+├── @floating-ui/core@1.6.0
+├── @floating-ui/dom@1.6.1
+├── @floating-ui/react-dom@2.0.8
+├── @floating-ui/utils@0.2.1
+├── @humanwhocodes/config-array@0.11.14
+├── @humanwhocodes/module-importer@1.0.1
+├── @humanwhocodes/object-schema@2.0.2
+├── @isaacs/cliui@8.0.2
+│   ├── string-width@5.1.2
+│   ├── string-width-cjs@4.2.3
+│   │   ├── emoji-regex@8.0.0
+│   │   └── strip-ansi@6.0.1
+│   ├── strip-ansi@7.1.0
+│   │   └── ansi-regex@6.0.1
+│   ├── strip-ansi-cjs@6.0.1
+│   ├── wrap-ansi@8.1.0
+│   └── wrap-ansi-cjs@7.0.0
+│       ├── ansi-styles@4.3.0
+│       │   └── color-convert@2.0.1
+│       │       └── color-name@1.1.4
+│       ├── string-width@4.2.3
+│       │   ├── emoji-regex@8.0.0
+│       │   └── is-fullwidth-code-point@3.0.0
+│       └── strip-ansi@6.0.1
+├── @jest/schemas@29.6.3
+├── @jest/types@29.6.3
+│   └── chalk@4.1.2
+│       ├── ansi-styles@4.3.0
+│       │   └── color-convert@2.0.1
+│       │       └── color-name@1.1.4
+│       └── supports-color@7.2.0
+├── @jridgewell/gen-mapping@0.3.3
+├── @jridgewell/resolve-uri@3.1.1
+├── @jridgewell/set-array@1.1.2
+├── @jridgewell/source-map@0.3.5
+├── @jridgewell/sourcemap-codec@1.4.15
+├── @jridgewell/trace-mapping@0.3.22
+├── @microsoft/fetch-event-source@2.0.1
+├── @next/bundle-analyzer@14.1.0
+├── @next/env@14.1.0
+├── @next/eslint-plugin-next@14.0.4
+├── @next/swc-darwin-arm64@14.1.0
+├── @next/swc-darwin-x64@14.1.0
+├── @next/swc-linux-arm64-gnu@14.1.0
+├── @next/swc-linux-arm64-musl@14.1.0
+├── @next/swc-linux-x64-gnu@14.1.0
+├── @next/swc-linux-x64-musl@14.1.0
+├── @next/swc-win32-arm64-msvc@14.1.0
+├── @next/swc-win32-ia32-msvc@14.1.0
+├── @next/swc-win32-x64-msvc@14.1.0
+├── @nodelib/fs.scandir@2.1.5
+├── @nodelib/fs.stat@2.0.5
+├── @nodelib/fs.walk@1.2.8
+├── @pkgjs/parseargs@0.11.0
+├── @polka/url@1.0.0-next.24
+├── @radix-ui/number@1.0.1
+├── @radix-ui/primitive@1.0.1
+├── @radix-ui/react-accessible-icon@1.0.3
+├── @radix-ui/react-accordion@1.1.2
+├── @radix-ui/react-alert-dialog@1.0.5
+├── @radix-ui/react-arrow@1.0.3
+├── @radix-ui/react-aspect-ratio@1.0.3
+├── @radix-ui/react-avatar@1.0.4
+├── @radix-ui/react-checkbox@1.0.4
+├── @radix-ui/react-collapsible@1.0.3
+├── @radix-ui/react-collection@1.0.3
+├── @radix-ui/react-compose-refs@1.0.1
+├── @radix-ui/react-context@1.0.1
+├── @radix-ui/react-context-menu@2.1.5
+├── @radix-ui/react-dialog@1.0.5
+├── @radix-ui/react-direction@1.0.1
+├── @radix-ui/react-dismissable-layer@1.0.5
+├── @radix-ui/react-dropdown-menu@2.0.6
+├── @radix-ui/react-focus-guards@1.0.1
+├── @radix-ui/react-focus-scope@1.0.4
+├── @radix-ui/react-hover-card@1.0.7
+├── @radix-ui/react-id@1.0.1
+├── @radix-ui/react-label@2.0.2
+├── @radix-ui/react-menu@2.0.6
+├── @radix-ui/react-navigation-menu@1.1.4
+├── @radix-ui/react-popover@1.0.7
+├── @radix-ui/react-popper@1.1.3
+├── @radix-ui/react-portal@1.0.4
+├── @radix-ui/react-presence@1.0.1
+├── @radix-ui/react-primitive@1.0.3
+├── @radix-ui/react-progress@1.0.3
+├── @radix-ui/react-radio-group@1.1.3
+├── @radix-ui/react-roving-focus@1.0.4
+├── @radix-ui/react-scroll-area@1.0.5
+├── @radix-ui/react-select@2.0.0
+├── @radix-ui/react-separator@1.0.3
+├── @radix-ui/react-slider@1.1.2
+├── @radix-ui/react-slot@1.0.2
+├── @radix-ui/react-switch@1.0.3
+├── @radix-ui/react-tabs@1.0.4
+├── @radix-ui/react-toast@1.1.5
+├── @radix-ui/react-toggle@1.0.3
+├── @radix-ui/react-toggle-group@1.0.4
+├── @radix-ui/react-toolbar@1.0.4
+├── @radix-ui/react-tooltip@1.0.7
+├── @radix-ui/react-use-callback-ref@1.0.1
+├── @radix-ui/react-use-controllable-state@1.0.1
+├── @radix-ui/react-use-escape-keydown@1.0.3
+├── @radix-ui/react-use-layout-effect@1.0.1
+├── @radix-ui/react-use-previous@1.0.1
+├── @radix-ui/react-use-rect@1.0.1
+├── @radix-ui/react-use-size@1.0.1
+├── @radix-ui/react-visually-hidden@1.0.3
+├── @radix-ui/rect@1.0.1
+├── @react-spring/animated@9.7.3
+├── @react-spring/core@9.7.3
+├── @react-spring/shared@9.7.3
+├── @react-spring/types@9.7.3
+├── @react-spring/web@9.7.3
+├── @rollup/plugin-babel@5.3.1
+├── @rollup/plugin-node-resolve@11.2.1
+├── @rollup/plugin-replace@2.4.2
+├── @rollup/pluginutils@3.1.0
+│   ├── @types/estree@0.0.39
+│   └── picomatch@2.3.1
+├── @rushstack/eslint-patch@1.7.2
+├── @sinclair/typebox@0.27.8
+├── @surma/rollup-plugin-off-main-thread@2.2.3
+├── @svgr/babel-plugin-add-jsx-attribute@5.4.0
+├── @svgr/babel-plugin-remove-jsx-attribute@5.4.0
+├── @svgr/babel-plugin-remove-jsx-empty-expression@5.0.1
+├── @svgr/babel-plugin-replace-jsx-attribute-value@5.0.1
+├── @svgr/babel-plugin-svg-dynamic-title@5.4.0
+├── @svgr/babel-plugin-svg-em-dimensions@5.4.0
+├── @svgr/babel-plugin-transform-react-native-svg@5.4.0
+├── @svgr/babel-plugin-transform-svg-component@5.5.0
+├── @svgr/babel-preset@5.5.0
+├── @svgr/core@5.5.0
+├── @svgr/hast-util-to-babel-ast@5.5.0
+├── @svgr/plugin-jsx@5.5.0
+├── @swc/core@1.3.107
+├── @swc/core-darwin-arm64@1.3.107
+├── @swc/core-darwin-x64@1.3.107
+├── @swc/core-linux-arm-gnueabihf@1.3.107
+├── @swc/core-linux-arm64-gnu@1.3.107
+├── @swc/core-linux-arm64-musl@1.3.107
+├── @swc/core-linux-x64-gnu@1.3.107
+├── @swc/core-linux-x64-musl@1.3.107
+├── @swc/core-win32-arm64-msvc@1.3.107
+├── @swc/core-win32-ia32-msvc@1.3.107
+├── @swc/core-win32-x64-msvc@1.3.107
+├── @swc/counter@0.1.2
+├── @swc/helpers@0.5.2
+├── @swc/types@0.1.5
+├── @tailwindcss/line-clamp@0.4.4
+├── @tanstack/query-core@5.17.19
+├── @tanstack/query-devtools@5.17.21
+├── @tanstack/react-query@5.17.19
+├── @tanstack/react-query-devtools@5.17.21
+├── @tanstack/react-table@8.11.7
+├── @tanstack/table-core@8.11.7
+├── @tauri-apps/api@1.5.3
+├── @tauri-apps/cli@1.5.9
+├── @tauri-apps/cli-darwin-arm64@1.5.9
+├── @tauri-apps/cli-darwin-x64@1.5.9
+├── @tauri-apps/cli-linux-arm-gnueabihf@1.5.9
+├── @tauri-apps/cli-linux-arm64-gnu@1.5.9
+├── @tauri-apps/cli-linux-arm64-musl@1.5.9
+├── @tauri-apps/cli-linux-x64-gnu@1.5.9
+├── @tauri-apps/cli-linux-x64-musl@1.5.9
+├── @tauri-apps/cli-win32-arm64-msvc@1.5.9
+├── @tauri-apps/cli-win32-ia32-msvc@1.5.9
+├── @tauri-apps/cli-win32-x64-msvc@1.5.9
+├── @trysound/sax@0.2.0
+├── @types/classnames@2.3.1
+├── @types/eslint@8.56.2
+├── @types/eslint-scope@3.7.7
+├── @types/estree@1.0.5
+├── @types/glob@7.2.0
+├── @types/istanbul-lib-coverage@2.0.6
+├── @types/istanbul-lib-report@3.0.3
+├── @types/istanbul-reports@3.0.4
+├── @types/json-schema@7.0.15
+├── @types/json5@0.0.29
+├── @types/lodash@4.14.202
+├── @types/lodash.debounce@4.0.9
+├── @types/lodash.take@4.1.9
+├── @types/luxon@3.4.2
+├── @types/minimatch@5.1.2
+├── @types/node@20.11.10
+├── @types/parse-json@4.0.2
+├── @types/prop-types@15.7.11
+├── @types/q@1.5.8
+├── @types/react@18.2.48
+├── @types/react-lazy-load-image-component@1.6.3
+├── @types/react-virtualized@9.21.29
+├── @types/resolve@1.17.1
+├── @types/scheduler@0.16.8
+├── @types/simple-peer@9.11.8
+├── @types/trusted-types@2.0.7
+├── @types/yargs@17.0.32
+├── @types/yargs-parser@21.0.3
+├── @typescript-eslint/parser@6.19.1
+├── @typescript-eslint/scope-manager@6.19.1
+├── @typescript-eslint/types@6.19.1
+├── @typescript-eslint/typescript-estree@6.19.1
+│   └── minimatch@9.0.3
+│       └── brace-expansion@2.0.1
+├── @typescript-eslint/visitor-keys@6.19.1
+├── @ungap/structured-clone@1.2.0
+├── @wasm-codecs/gifsicle@1.0.0
+├── @wasm-codecs/mozjpeg@1.0.1
+├── @wasm-codecs/oxipng@1.0.1
+├── @webassemblyjs/ast@1.11.6
+├── @webassemblyjs/floating-point-hex-parser@1.11.6
+├── @webassemblyjs/helper-api-error@1.11.6
+├── @webassemblyjs/helper-buffer@1.11.6
+├── @webassemblyjs/helper-numbers@1.11.6
+├── @webassemblyjs/helper-wasm-bytecode@1.11.6
+├── @webassemblyjs/helper-wasm-section@1.11.6
+├── @webassemblyjs/ieee754@1.11.6
+├── @webassemblyjs/leb128@1.11.6
+├── @webassemblyjs/utf8@1.11.6
+├── @webassemblyjs/wasm-edit@1.11.6
+├── @webassemblyjs/wasm-gen@1.11.6
+├── @webassemblyjs/wasm-opt@1.11.6
+├── @webassemblyjs/wasm-parser@1.11.6
+├── @webassemblyjs/wast-printer@1.11.6
+├── @xtuc/ieee754@1.2.0
+├── @xtuc/long@4.2.2
+├── accepts@1.3.8
+├── acorn@8.11.2
+├── acorn-import-assertions@1.9.0
+├── acorn-jsx@5.3.2
+├── acorn-jsx-walk@2.0.0
+├── acorn-loose@8.4.0
+├── acorn-walk@8.3.0
+├── ajv@8.12.0
+├── ajv-formats@2.1.1
+├── ajv-keywords@5.1.0
+├── amqplib@0.5.2
+│   ├── readable-stream@1.1.14
+│   │   ├── isarray@0.0.1
+│   │   └── string_decoder@0.10.31
+│   └── safe-buffer@5.2.1
+├── ansi-regex@5.0.1
+├── ansi-styles@6.2.1
+├── any-promise@1.3.0
+├── anymatch@3.1.3
+│   └── picomatch@2.3.1
+├── app-root-path@2.1.0
+├── aproba@1.2.0
+├── are-we-there-yet@1.1.7
+│   └── readable-stream@2.3.8
+│       ├── isarray@1.0.0
+│       └── safe-buffer@5.1.2
+├── arg@5.0.2
+├── argparse@2.0.1
+├── aria-hidden@1.2.3
+├── aria-query@5.3.0
+├── array-buffer-byte-length@1.0.0
+├── array-flatten@1.1.1
+├── array-includes@3.1.7
+├── array-union@2.1.0
+├── array-uniq@1.0.3
+├── array.prototype.findlastindex@1.2.3
+├── array.prototype.flat@1.3.2
+├── array.prototype.flatmap@1.3.2
+├── array.prototype.reduce@1.0.6
+├── array.prototype.tosorted@1.1.2
+├── arraybuffer.prototype.slice@1.0.2
+├── asn1@0.2.3
+├── ast-types-flow@0.0.8
+├── async@3.2.5
+├── async-limiter@1.0.1
+├── async-retry@1.2.3
+├── asynciterator.prototype@1.0.0
+├── asynckit@0.4.0
+├── at-least-node@1.0.0
+├── autoprefixer@10.4.17
+├── available-typed-arrays@1.0.5
+├── axe-core@4.7.0
+├── axios@1.6.7
+├── axobject-query@3.2.1
+├── babel-code-frame@6.26.0
+│   ├── chalk@1.1.3
+│   │   ├── ansi-styles@2.2.1
+│   │   ├── escape-string-regexp@1.0.5
+│   │   ├── strip-ansi@3.0.1
+│   │   │   └── ansi-regex@2.1.1
+│   │   └── supports-color@2.0.0
+│   └── js-tokens@3.0.2
+├── babel-core@6.26.3
+│   ├── convert-source-map@1.9.0
+│   ├── debug@2.6.9
+│   │   └── ms@2.0.0
+│   ├── json5@0.5.1
+│   ├── slash@1.0.0
+│   └── source-map@0.5.7
+├── babel-errors@1.1.1
+├── babel-explode-module@3.0.0
+├── babel-file@3.0.0
+├── babel-file-loader@2.0.0
+├── babel-generator@6.26.1
+│   ├── jsesc@1.3.0
+│   └── source-map@0.5.7
+├── babel-helpers@6.24.1
+├── babel-loader@8.3.0
+│   └── schema-utils@2.7.1
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── babel-messages@6.23.0
+├── babel-plugin-polyfill-corejs2@0.4.8
+│   └── semver@6.3.1
+├── babel-plugin-polyfill-corejs3@0.9.0
+├── babel-plugin-polyfill-regenerator@0.5.5
+├── babel-plugin-syntax-jsx@6.18.0
+├── babel-plugin-tester@3.3.0
+│   └── path-exists@3.0.0
+├── babel-register@6.26.0
+│   └── source-map-support@0.4.18
+│       └── source-map@0.5.7
+├── babel-runtime@6.26.0
+│   └── regenerator-runtime@0.11.1
+├── babel-template@6.26.0
+├── babel-traverse@6.26.0
+│   ├── debug@2.6.9
+│   │   └── ms@2.0.0
+│   └── globals@9.18.0
+├── babel-types@6.26.0
+│   └── to-fast-properties@1.0.3
+├── babylon@6.18.0
+├── balanced-match@1.0.2
+├── base64-js@1.5.1
+├── basic-auth@2.0.1
+│   └── safe-buffer@5.1.2
+├── big-integer@1.6.52
+├── big.js@5.2.2
+├── binary-extensions@2.2.0
+├── bitsyntax@0.0.4
+├── bl@4.1.0
+│   ├── buffer@5.7.1
+│   └── readable-stream@3.6.2
+├── bluebird@3.7.2
+├── body-parser@1.18.3
+│   └── debug@2.6.9
+│       └── ms@2.0.0
+├── boolbase@1.0.0
+├── brace-expansion@1.1.11
+├── braces@3.0.2
+├── broadcast-channel@3.7.0
+├── browserslist@4.22.3
+├── buffer@6.0.3
+├── buffer-equal-constant-time@1.0.1
+├── buffer-from@1.1.2
+├── buffer-more-ints@0.0.2
+├── builtin-modules@3.3.0
+├── busboy@1.6.0
+├── bytes@3.0.0
+├── call-bind@1.0.5
+├── callsites@3.1.0
+├── camelcase@6.3.0
+├── camelcase-css@2.0.1
+├── caniuse-api@3.0.0
+├── caniuse-lite@1.0.30001581
+├── chalk@5.3.0
+├── chokidar@3.5.3
+│   └── glob-parent@5.1.2
+├── chownr@2.0.0
+├── chrome-trace-event@1.0.3
+├── ci-info@3.9.0
+├── class-variance-authority@0.7.0
+│   └── clsx@2.0.0
+├── classnames@2.5.1
+├── clean-css@5.3.3
+├── clean-webpack-plugin@4.0.0
+├── client-only@0.0.1
+├── clone@2.1.2
+├── clsx@2.1.0
+├── coa@2.0.2
+│   └── chalk@2.4.2
+│       ├── ansi-styles@3.2.1
+│       │   └── color-convert@1.9.3
+│       │       └── color-name@1.1.3
+│       ├── escape-string-regexp@1.0.5
+│       └── supports-color@5.5.0
+│           └── has-flag@3.0.0
+├── code-point-at@1.1.0
+├── color@3.2.1
+│   └── color-convert@1.9.3
+│       └── color-name@1.1.3
+├── color-convert@2.0.1
+├── color-name@1.1.4
+├── color-string@1.9.1
+│   └── color-name@1.1.3
+├── colord@2.9.3
+├── combined-stream@1.0.8
+├── commander@11.1.0
+├── commands-events@1.0.4
+│   ├── @babel/runtime@7.2.0
+│   │   └── regenerator-runtime@0.12.1
+│   └── uuidv4@2.0.0
+├── common-tags@1.8.2
+├── commondir@1.0.1
+├── comparejs@1.0.0
+├── compressible@2.0.18
+├── compression@1.7.3
+│   └── debug@2.6.9
+│       └── ms@2.0.0
+├── concat-map@0.0.1
+├── console-control-strings@1.1.0
+├── content-disposition@0.5.2
+├── content-type@1.0.4
+├── convert-source-map@2.0.0
+├── cookie@0.3.1
+├── cookie-signature@1.0.6
+├── core-js@2.6.12
+├── core-js-compat@3.35.1
+├── core-util-is@1.0.3
+├── cors@2.8.5
+├── cosmiconfig@7.1.0
+│   └── yaml@1.10.2
+├── countup.js@2.8.0
+├── cross-spawn@7.0.3
+├── crypto-random-string@2.0.0
+├── crypto2@2.0.0
+├── css-declaration-sorter@7.1.1
+├── css-minimizer-webpack-plugin@5.0.1
+├── css-select@2.1.0
+│   └── domutils@1.7.0
+│       ├── dom-serializer@0.2.2
+│       │   ├── domelementtype@2.3.0
+│       │   └── entities@2.2.0
+│       └── domelementtype@1.3.1
+├── css-select-base-adapter@0.1.1
+├── css-tree@1.0.0-alpha.37
+├── css-what@3.4.2
+├── cssesc@3.0.0
+├── cssnano@6.0.3
+│   └── lilconfig@3.0.0
+├── cssnano-preset-default@6.0.3
+├── cssnano-utils@4.0.1
+├── csso@4.2.0
+│   └── css-tree@1.1.3
+│       └── mdn-data@2.0.14
+├── csstype@3.1.3
+├── damerau-levenshtein@1.0.8
+├── datasette@1.0.1
+│   └── lodash@4.17.5
+├── debounce@1.2.1
+├── debug@4.3.4
+├── decompress-response@6.0.0
+├── deep-extend@0.6.0
+├── deep-is@0.1.4
+├── deepmerge@4.3.1
+├── define-data-property@1.1.1
+├── define-properties@1.2.1
+├── del@4.1.1
+│   ├── globby@6.1.0
+│   │   ├── array-union@1.0.2
+│   │   └── pify@2.3.0
+│   ├── pify@4.0.1
+│   └── rimraf@2.7.1
+├── delayed-stream@1.0.0
+├── delegates@1.0.0
+├── depd@1.1.2
+├── dependency-cruiser@15.5.0
+├── dequal@2.0.3
+├── destroy@1.0.4
+├── detect-indent@4.0.0
+├── detect-libc@1.0.3
+├── detect-node@2.1.0
+├── detect-node-es@1.1.0
+├── didyoumean@1.2.2
+├── dir-glob@3.0.1
+├── dlv@1.1.3
+├── doctrine@3.0.0
+├── dom-helpers@5.2.1
+├── dom-serializer@2.0.0
+├── domelementtype@2.3.0
+├── domhandler@5.0.3
+├── domutils@3.1.0
+├── draht@1.0.1
+├── duplexer@0.1.2
+├── eastasianwidth@0.2.0
+├── ecdsa-sig-formatter@1.0.11
+│   └── safe-buffer@5.2.1
+├── ee-first@1.1.1
+├── ejs@3.1.9
+├── electron-to-chromium@1.4.648
+├── emoji-regex@9.2.2
+├── emojis-list@3.0.0
+├── encodeurl@1.0.2
+├── end-of-stream@1.4.4
+├── enhanced-resolve@5.15.0
+├── entities@4.5.0
+├── err-code@3.0.1
+├── error-ex@1.3.2
+├── es-abstract@1.22.3
+├── es-array-method-boxes-properly@1.0.0
+├── es-iterator-helpers@1.0.15
+├── es-module-lexer@1.4.1
+├── es-set-tostringtag@2.0.2
+├── es-shim-unscopables@1.0.2
+├── es-to-primitive@1.2.1
+├── escalade@3.1.1
+├── escape-html@1.0.3
+├── escape-string-regexp@4.0.0
+├── eslint@8.55.0
+│   ├── ajv@6.12.6
+│   │   └── json-schema-traverse@0.4.1
+│   └── chalk@4.1.2
+│       ├── ansi-styles@4.3.0
+│       └── supports-color@7.2.0
+├── eslint-config-next@14.0.4
+├── eslint-import-resolver-node@0.3.9
+│   └── debug@3.2.7
+├── eslint-import-resolver-typescript@3.6.1
+├── eslint-module-utils@2.8.0
+│   └── debug@3.2.7
+├── eslint-plugin-import@2.29.1
+│   ├── debug@3.2.7
+│   ├── doctrine@2.1.0
+│   ├── semver@6.3.1
+│   └── tsconfig-paths@3.15.0
+│       └── json5@1.0.2
+├── eslint-plugin-jsx-a11y@6.8.0
+├── eslint-plugin-react@7.33.2
+│   ├── doctrine@2.1.0
+│   ├── resolve@2.0.0-next.5
+│   └── semver@6.3.1
+├── eslint-plugin-react-hooks@4.6.0
+├── eslint-scope@7.2.2
+├── eslint-visitor-keys@3.4.3
+├── espree@9.6.1
+├── esprima@4.0.1
+├── esquery@1.5.0
+├── esrecurse@4.3.0
+├── estraverse@5.3.0
+├── estree-walker@1.0.1
+├── esutils@2.0.3
+├── etag@1.8.1
+├── eventemitter2@5.0.1
+├── events@3.3.0
+├── expand-template@2.0.3
+├── express@4.16.4
+│   ├── debug@2.6.9
+│   │   └── ms@2.0.0
+│   └── safe-buffer@5.1.2
+├── extend-shallow@2.0.1
+├── fast-deep-equal@3.1.3
+├── fast-glob@3.3.2
+│   └── glob-parent@5.1.2
+├── fast-json-stable-stringify@2.1.0
+├── fast-levenshtein@2.0.6
+├── fastest-levenshtein@1.0.16
+├── fastq@1.17.0
+├── figures@6.0.1
+├── file-entry-cache@6.0.1
+├── file-loader@6.2.0
+│   └── schema-utils@3.3.0
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── filelist@1.0.4
+│   └── minimatch@5.1.6
+│       └── brace-expansion@2.0.1
+├── fill-range@7.0.1
+├── finalhandler@1.1.1
+│   └── debug@2.6.9
+│       └── ms@2.0.0
+├── find-cache-dir@3.3.2
+├── find-root@1.1.0
+├── find-up@5.0.0
+├── flaschenpost@1.1.3
+│   ├── @babel/runtime@7.2.0
+│   │   └── regenerator-runtime@0.12.1
+│   ├── app-root-path@2.1.0
+│   ├── chalk@2.4.1
+│   │   ├── ansi-styles@3.2.1
+│   │   │   └── color-convert@1.9.3
+│   │   │       └── color-name@1.1.3
+│   │   ├── escape-string-regexp@1.0.5
+│   │   └── supports-color@5.5.0
+│   │       └── has-flag@3.0.0
+│   ├── lodash@4.17.11
+│   └── util.promisify@1.0.0
+├── flat-cache@3.2.0
+├── flatted@3.2.9
+├── follow-redirects@1.15.5
+├── for-each@0.3.3
+├── foreground-child@3.1.1
+├── form-data@4.0.0
+├── formats@1.0.0
+├── forwarded@0.2.0
+├── fraction.js@4.3.7
+├── fresh@0.5.2
+├── fs-constants@1.0.0
+├── fs-extra@9.1.0
+├── fs-minipass@2.1.0
+│   └── minipass@3.3.6
+│       └── yallist@4.0.0
+├── fs.realpath@1.0.0
+├── fsevents@2.3.3
+├── function-bind@1.1.2
+├── function.prototype.name@1.1.6
+├── functions-have-names@1.2.3
+├── fuse.js@7.0.0
+├── gauge@2.7.4
+│   ├── signal-exit@3.0.7
+│   ├── string-width@1.0.2
+│   │   ├── is-fullwidth-code-point@1.0.0
+│   │   └── strip-ansi@3.0.1
+│   │       └── ansi-regex@2.1.1
+│   └── strip-ansi@3.0.1
+│       └── ansi-regex@2.1.1
+├── gensync@1.0.0-beta.2
+├── get-browser-rtc@1.1.0
+├── get-east-asian-width@1.2.0
+├── get-intrinsic@1.2.2
+├── get-nonce@1.0.1
+├── get-own-enumerable-property-symbols@3.0.2
+├── get-rgba-palette@2.0.1
+├── get-symbol-description@1.0.0
+├── get-tsconfig@4.7.2
+├── github-from-package@0.0.0
+├── glob@7.1.7
+├── glob-parent@6.0.2
+├── glob-to-regexp@0.4.1
+├── global-directory@4.0.1
+├── globals@13.24.0
+├── globalthis@1.0.3
+├── globby@11.1.0
+├── goober@2.1.14
+├── gopd@1.0.1
+├── graceful-fs@4.2.11
+├── graphemer@1.4.0
+├── gray-matter@4.0.3
+│   └── js-yaml@3.14.1
+│       └── argparse@1.0.10
+├── gzip-size@6.0.0
+├── has-ansi@2.0.0
+│   └── ansi-regex@2.1.1
+├── has-bigints@1.0.2
+├── has-flag@4.0.0
+├── has-property-descriptors@1.0.1
+├── has-proto@1.0.1
+├── has-symbols@1.0.3
+├── has-tostringtag@1.0.0
+├── has-unicode@2.0.1
+├── hase@2.0.0
+│   └── @babel/runtime@7.1.2
+│       └── regenerator-runtime@0.12.1
+├── hasown@2.0.0
+├── home-or-tmp@2.0.0
+├── html-dom-parser@5.0.7
+├── html-escaper@2.0.2
+├── html-react-parser@5.1.1
+├── htmlparser2@9.1.0
+├── http-errors@1.6.3
+│   └── inherits@2.0.3
+├── iconv-lite@0.4.23
+├── idb@7.1.1
+├── ieee754@1.2.1
+├── ignore@5.3.0
+├── import-fresh@3.3.0
+├── imurmurhash@0.1.4
+├── indent-string@5.0.0
+├── inflight@1.0.6
+├── inherits@2.0.4
+├── ini@4.1.1
+├── inline-style-parser@0.2.2
+├── internal-slot@1.0.6
+├── interpret@3.1.1
+├── invariant@2.2.4
+├── ipaddr.js@1.9.1
+├── is-array-buffer@3.0.2
+├── is-arrayish@0.2.1
+├── is-async-function@2.0.0
+├── is-bigint@1.0.4
+├── is-binary-path@2.1.0
+├── is-boolean-object@1.1.2
+├── is-callable@1.2.7
+├── is-core-module@2.13.1
+├── is-date-object@1.0.5
+├── is-extendable@0.1.1
+├── is-extglob@2.1.1
+├── is-finalizationregistry@1.0.2
+├── is-finite@1.1.0
+├── is-fullwidth-code-point@3.0.0
+├── is-generator-function@1.0.10
+├── is-glob@4.0.3
+├── is-installed-globally@1.0.0
+│   └── is-path-inside@4.0.0
+├── is-map@2.0.2
+├── is-module@1.0.0
+├── is-negative-zero@2.0.2
+├── is-number@7.0.0
+├── is-number-object@1.0.7
+├── is-obj@1.0.1
+├── is-path-cwd@2.2.0
+├── is-path-in-cwd@2.1.0
+│   └── is-path-inside@2.1.0
+├── is-path-inside@3.0.3
+├── is-plain-object@5.0.0
+├── is-regex@1.1.4
+├── is-regexp@1.0.0
+├── is-set@2.0.2
+├── is-shared-array-buffer@1.0.2
+├── is-stream@2.0.1
+├── is-string@1.0.7
+├── is-symbol@1.0.4
+├── is-typed-array@1.1.12
+├── is-unicode-supported@2.0.0
+├── is-weakmap@2.0.1
+├── is-weakref@1.0.2
+├── is-weakset@2.0.2
+├── isarray@2.0.5
+├── isexe@2.0.0
+├── iterator.prototype@1.1.2
+├── jackspeak@2.3.6
+├── jake@10.8.7
+│   └── chalk@4.1.2
+│       ├── ansi-styles@4.3.0
+│       │   └── color-convert@2.0.1
+│       │       └── color-name@1.1.4
+│       └── supports-color@7.2.0
+├── jest-util@29.7.0
+│   ├── chalk@4.1.2
+│   │   ├── ansi-styles@4.3.0
+│   │   │   └── color-convert@2.0.1
+│   │   │       └── color-name@1.1.4
+│   │   └── supports-color@7.2.0
+│   └── picomatch@2.3.1
+├── jest-worker@29.7.0
+├── jiti@1.21.0
+├── js-file-download@0.4.12
+├── js-sha3@0.8.0
+├── js-tokens@4.0.0
+├── js-yaml@4.1.0
+├── jsesc@2.5.2
+├── json-buffer@3.0.1
+├── json-lines@1.0.0
+├── json-parse-even-better-errors@2.3.1
+├── json-schema@0.4.0
+├── json-schema-traverse@1.0.0
+├── json-stable-stringify-without-jsonify@1.0.1
+├── json5@2.2.3
+├── jsonfile@6.1.0
+├── jsonpointer@5.0.1
+├── jsonwebtoken@8.5.0
+│   └── semver@5.7.2
+├── jsx-ast-utils@3.3.5
+├── jwa@1.4.1
+│   └── safe-buffer@5.2.1
+├── jws@3.2.2
+│   └── safe-buffer@5.2.1
+├── keyv@4.5.4
+├── kind-of@6.0.3
+├── kleur@3.0.3
+├── language-subtag-registry@0.3.22
+├── language-tags@1.0.9
+├── leven@3.1.0
+├── levn@0.4.1
+├── lilconfig@2.1.0
+├── limes@2.0.0
+│   └── @babel/runtime@7.3.4
+│       └── regenerator-runtime@0.12.1
+├── lines-and-columns@1.2.4
+├── loader-runner@4.3.0
+├── loader-utils@2.0.4
+├── locate-path@6.0.0
+├── lodash@4.17.21
+├── lodash.debounce@4.0.8
+├── lodash.includes@4.3.0
+├── lodash.isboolean@3.0.3
+├── lodash.isinteger@4.0.4
+├── lodash.isnumber@3.0.3
+├── lodash.isplainobject@4.0.6
+├── lodash.isstring@4.0.1
+├── lodash.memoize@4.1.2
+├── lodash.merge@4.6.2
+├── lodash.once@4.1.1
+├── lodash.sortby@4.7.0
+├── lodash.take@4.1.1
+├── lodash.throttle@4.1.1
+├── lodash.uniq@4.5.0
+├── loose-envify@1.4.0
+├── lru-cache@6.0.0
+├── lucide-react@0.295.0
+├── lusca@1.6.1
+├── luxon@3.4.4
+├── magic-string@0.25.9
+├── make-dir@3.1.0
+│   └── semver@6.3.1
+├── match-sorter@6.3.3
+├── mdn-data@2.0.4
+├── media-typer@0.3.0
+├── merge-descriptors@1.0.1
+├── merge-stream@2.0.0
+├── merge2@1.4.1
+├── methods@1.1.2
+├── micromatch@4.0.5
+│   └── picomatch@2.3.1
+├── microseconds@0.2.0
+├── mime@1.4.1
+├── mime-db@1.52.0
+├── mime-types@2.1.35
+├── mimic-response@3.1.0
+├── minimatch@3.1.2
+├── minimist@1.2.8
+├── minipass@5.0.0
+├── minizlib@2.1.2
+│   ├── minipass@3.3.6
+│   └── yallist@4.0.0
+├── mkdirp@0.5.6
+├── mkdirp-classic@0.5.3
+├── moment@2.22.2
+├── morgan@1.9.1
+│   └── debug@2.6.9
+│       └── ms@2.0.0
+├── mrmime@2.0.0
+├── ms@2.1.2
+├── mz@2.7.0
+├── nano-time@1.0.0
+├── nanoid@3.3.7
+├── napi-build-utils@1.0.2
+├── natural-compare@1.4.0
+├── negotiator@0.6.3
+├── neo-async@2.6.2
+├── next@14.1.0
+│   └── postcss@8.4.31
+├── next-optimized-images@3.0.0-canary.10
+├── next-pwa@5.6.0
+├── next-sitemap@4.2.3
+│   └── @next/env@13.5.6
+├── next-themes@0.2.1
+├── nocache@2.0.0
+├── node-abi@2.30.1
+│   └── semver@5.7.2
+├── node-addon-api@3.2.1
+├── node-releases@2.0.14
+├── node-rsa@0.4.2
+├── node-statsd@0.1.1
+├── noop-logger@0.1.1
+├── normalize-path@3.0.0
+├── normalize-range@0.1.2
+├── npmlog@4.1.2
+├── nth-check@1.0.2
+├── number-is-nan@1.0.1
+├── object-assign@4.1.1
+├── object-hash@3.0.0
+├── object-inspect@1.13.1
+├── object-keys@1.1.1
+├── object.assign@4.1.5
+├── object.entries@1.1.7
+├── object.fromentries@2.0.7
+├── object.getownpropertydescriptors@2.1.7
+├── object.groupby@1.0.1
+├── object.hasown@1.1.3
+├── object.values@1.1.7
+├── oblivious-set@1.0.0
+├── on-finished@2.3.0
+├── on-headers@1.0.2
+├── once@1.4.0
+├── opener@1.5.2
+├── optimized-images-loader@0.4.0
+│   └── schema-utils@2.7.1
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── optionator@0.9.3
+├── os-homedir@1.0.2
+├── os-tmpdir@1.0.2
+├── p-limit@3.1.0
+├── p-locate@5.0.0
+├── p-map@2.1.0
+├── p-try@2.2.0
+├── parent-module@1.0.1
+├── parse-json@5.2.0
+├── parseurl@1.3.3
+├── partof@1.0.0
+├── path-exists@4.0.0
+├── path-is-absolute@1.0.1
+├── path-is-inside@1.0.2
+├── path-key@3.1.1
+├── path-parse@1.0.7
+├── path-scurry@1.10.1
+│   └── lru-cache@10.2.0
+├── path-to-regexp@0.1.7
+├── path-type@4.0.0
+├── picocolors@1.0.0
+├── picomatch@3.0.1
+├── pify@2.3.0
+├── pinkie@2.0.4
+├── pinkie-promise@2.0.1
+├── pirates@4.0.6
+├── pkg-dir@4.2.0
+│   └── find-up@4.1.0
+│       └── locate-path@5.0.0
+│           └── p-locate@4.1.0
+│               └── p-limit@2.3.0
+├── postcss@8.4.33
+├── postcss-calc@9.0.1
+├── postcss-colormin@6.0.2
+├── postcss-convert-values@6.0.2
+├── postcss-discard-comments@6.0.1
+├── postcss-discard-duplicates@6.0.1
+├── postcss-discard-empty@6.0.1
+├── postcss-discard-overridden@6.0.1
+├── postcss-import@15.1.0
+├── postcss-js@4.0.1
+├── postcss-load-config@4.0.2
+│   └── lilconfig@3.0.0
+├── postcss-merge-longhand@6.0.2
+├── postcss-merge-rules@6.0.3
+├── postcss-minify-font-values@6.0.1
+├── postcss-minify-gradients@6.0.1
+├── postcss-minify-params@6.0.2
+├── postcss-minify-selectors@6.0.2
+├── postcss-nested@6.0.1
+├── postcss-normalize-charset@6.0.1
+├── postcss-normalize-display-values@6.0.1
+├── postcss-normalize-positions@6.0.1
+├── postcss-normalize-repeat-style@6.0.1
+├── postcss-normalize-string@6.0.1
+├── postcss-normalize-timing-functions@6.0.1
+├── postcss-normalize-unicode@6.0.2
+├── postcss-normalize-url@6.0.1
+├── postcss-normalize-whitespace@6.0.1
+├── postcss-ordered-values@6.0.1
+├── postcss-reduce-initial@6.0.2
+├── postcss-reduce-transforms@6.0.1
+├── postcss-selector-parser@6.0.15
+├── postcss-svgo@6.0.2
+│   └── svgo@3.2.0
+│       ├── commander@7.2.0
+│       ├── css-select@5.1.0
+│       │   └── nth-check@2.1.1
+│       ├── css-tree@2.3.1
+│       │   └── mdn-data@2.0.30
+│       ├── css-what@6.1.0
+│       └── csso@5.0.5
+│           └── css-tree@2.2.1
+│               └── mdn-data@2.0.28
+├── postcss-unique-selectors@6.0.2
+├── postcss-value-parser@4.2.0
+├── prebuild-install@5.3.6
+│   └── simple-get@3.1.1
+│       └── decompress-response@4.2.1
+│           └── mimic-response@2.1.0
+├── prelude-ls@1.2.1
+├── pretty-bytes@5.6.0
+├── private@0.1.8
+├── process-nextick-args@2.0.1
+├── processenv@1.1.0
+├── prompts@2.4.2
+├── prop-types@15.8.1
+├── proxy-addr@2.0.7
+├── proxy-from-env@1.1.0
+├── pump@3.0.0
+├── punycode@2.3.1
+├── q@1.5.1
+├── qs@6.5.2
+├── quantize@1.0.2
+├── queue-microtask@1.2.3
+├── radix-ui@1.0.1
+├── randombytes@2.1.0
+│   └── safe-buffer@5.2.1
+├── range-parser@1.2.1
+├── raw-body@2.3.3
+├── rc@1.2.8
+│   ├── ini@1.3.8
+│   └── strip-json-comments@2.0.1
+├── react@18.2.0
+├── react-countup@6.5.0
+├── react-dom@18.2.0
+├── react-fast-marquee@1.6.3
+├── react-hooks-global-state@2.1.0
+├── react-hot-toast@2.4.1
+├── react-is@16.13.1
+├── react-lazy-load-image-component@1.6.0
+├── react-lifecycles-compat@3.0.4
+├── react-optimized-image@0.4.1
+│   └── app-root-path@3.1.0
+├── react-property@2.0.2
+├── react-query@3.39.3
+├── react-remove-scroll@2.5.5
+├── react-remove-scroll-bar@2.3.4
+├── react-resizable-panels@1.0.10
+├── react-style-singleton@2.2.1
+├── react-text-transition@3.1.0
+├── react-toastify@9.1.3
+│   └── clsx@1.2.1
+├── react-virtualized@9.22.5
+│   └── clsx@1.2.1
+├── react-wrap-balancer@1.1.0
+├── react-zoom-pan-pinch@3.4.3
+├── read-cache@1.0.0
+├── read-file-async@1.0.0
+├── readable-stream@3.6.2
+├── readdirp@3.6.0
+│   └── picomatch@2.3.1
+├── rechoir@0.8.0
+├── reflect.getprototypeof@1.0.4
+├── regenerate@1.4.2
+├── regenerate-unicode-properties@10.1.1
+├── regenerator-runtime@0.14.1
+├── regenerator-transform@0.15.2
+├── regexp-tree@0.1.27
+├── regexp.prototype.flags@1.5.1
+├── regexpu-core@5.3.2
+├── regjsparser@0.9.1
+│   └── jsesc@0.5.0
+├── remove-accents@0.5.0
+├── repeating@2.0.1
+├── require-from-string@2.0.2
+├── resolve@1.22.8
+├── resolve-async@1.0.1
+├── resolve-from@4.0.0
+├── resolve-pkg-maps@1.0.0
+├── retry@0.12.0
+├── reusify@1.0.4
+├── rimraf@3.0.2
+├── rollup@2.79.1
+├── rollup-plugin-terser@7.0.2
+│   ├── jest-worker@26.6.2
+│   │   └── supports-color@7.2.0
+│   └── serialize-javascript@4.0.0
+├── run-parallel@1.2.0
+├── safe-array-concat@1.1.0
+├── safe-buffer@5.1.2
+├── safe-regex@2.1.1
+├── safe-regex-test@1.0.2
+├── safer-buffer@2.1.2
+├── sax@1.2.4
+├── scheduler@0.23.0
+├── schema-utils@4.2.0
+├── section-matter@1.0.0
+├── semver@7.5.4
+├── semver-try-require@6.2.3
+├── send@0.16.2
+│   ├── debug@2.6.9
+│   └── ms@2.0.0
+├── serialize-javascript@6.0.2
+├── serve-static@1.13.2
+├── set-blocking@2.0.0
+├── set-function-length@1.2.0
+├── set-function-name@2.0.1
+├── setprototypeof@1.1.0
+├── sha-1@0.1.1
+├── sharp@0.25.4
+├── shebang-command@2.0.0
+├── shebang-regex@3.0.0
+├── side-channel@1.0.4
+├── signal-exit@4.1.0
+├── simple-concat@1.0.1
+├── simple-get@4.0.1
+├── simple-peer@9.11.1
+├── simple-swizzle@0.2.2
+│   └── is-arrayish@0.3.2
+├── sirv@2.0.4
+├── sisteransi@1.0.5
+├── slash@3.0.0
+├── source-list-map@2.0.1
+├── source-map@0.6.1
+├── source-map-js@1.0.2
+├── source-map-support@0.5.21
+├── sourcemap-codec@1.4.8
+├── split2@3.0.0
+│   └── readable-stream@3.6.2
+├── sprintf-js@1.0.3
+├── stable@0.1.8
+├── stack-trace@0.0.10
+├── statuses@1.4.0
+├── stethoskop@1.0.0
+├── streamsearch@1.1.0
+├── string-width@7.1.0
+│   ├── emoji-regex@10.3.0
+│   └── strip-ansi@7.1.0
+│       └── ansi-regex@6.0.1
+├── string.prototype.matchall@4.0.10
+├── string.prototype.trim@1.2.8
+├── string.prototype.trimend@1.0.7
+├── string.prototype.trimstart@1.0.7
+├── string_decoder@1.1.1
+│   └── safe-buffer@5.1.2
+├── stringify-object@3.3.0
+├── strip-ansi@6.0.1
+├── strip-bom@3.0.0
+├── strip-bom-string@1.0.0
+├── strip-comments@2.0.1
+├── strip-indent@2.0.0
+├── strip-json-comments@3.1.1
+├── style-to-js@1.1.10
+├── style-to-object@1.0.5
+├── styled-jsx@5.1.1
+├── stylehacks@6.0.2
+├── sucrase@3.35.0
+│   ├── commander@4.1.1
+│   └── glob@10.3.10
+│       └── minimatch@9.0.3
+│           └── brace-expansion@2.0.1
+├── supports-color@8.1.1
+├── supports-preserve-symlinks-flag@1.0.0
+├── svg-parser@2.0.4
+├── svgo@1.3.2
+│   ├── chalk@2.4.2
+│   │   ├── ansi-styles@3.2.1
+│   │   │   └── color-convert@1.9.3
+│   │   │       └── color-name@1.1.3
+│   │   ├── escape-string-regexp@1.0.5
+│   │   └── supports-color@5.5.0
+│   │       └── has-flag@3.0.0
+│   ├── js-yaml@3.14.1
+│   │   └── argparse@1.0.10
+│   └── util.promisify@1.0.1
+├── swr@2.2.4
+├── tailwind@4.0.0
+│   ├── @babel/runtime@7.3.4
+│   │   └── regenerator-runtime@0.12.1
+│   ├── ajv@6.10.0
+│   │   ├── fast-deep-equal@2.0.1
+│   │   └── json-schema-traverse@0.4.1
+│   └── lodash@4.17.11
+├── tailwind-merge@2.2.1
+├── tailwindcss@3.4.1
+├── tapable@2.2.1
+├── tar@6.2.0
+│   ├── mkdirp@1.0.4
+│   └── yallist@4.0.0
+├── tar-fs@2.1.1
+│   └── chownr@1.1.4
+├── tar-stream@2.2.0
+│   └── readable-stream@3.6.2
+├── teamcity-service-messages@0.1.14
+├── temp-dir@2.0.0
+├── tempy@0.6.0
+│   └── type-fest@0.16.0
+├── terser@5.27.0
+│   └── commander@2.20.3
+├── terser-webpack-plugin@5.3.10
+│   ├── jest-worker@27.5.1
+│   └── schema-utils@3.3.0
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── text-table@0.2.0
+├── thenify@3.3.1
+├── thenify-all@1.6.0
+├── timer2@1.0.0
+├── to-fast-properties@2.0.0
+├── to-regex-range@5.0.1
+├── toast-notification-js@1.0.3
+├── totalist@3.0.1
+├── tr46@1.0.1
+├── trim-right@1.0.1
+├── ts-api-utils@1.0.3
+├── ts-interface-checker@0.1.13
+├── tsconfig-paths@4.2.0
+├── tsconfig-paths-webpack-plugin@4.1.0
+│   └── chalk@4.1.2
+│       ├── ansi-styles@4.3.0
+│       │   └── color-convert@2.0.1
+│       │       └── color-name@1.1.4
+│       └── supports-color@7.2.0
+├── tslib@2.6.2
+├── tsscmp@1.0.6
+├── tunnel-agent@0.6.0
+│   └── safe-buffer@5.2.1
+├── type-check@0.4.0
+├── type-fest@0.20.2
+├── type-is@1.6.18
+├── typeable-promisify@1.0.1
+├── typed-array-buffer@1.0.0
+├── typed-array-byte-length@1.0.0
+├── typed-array-byte-offset@1.0.0
+├── typed-array-length@1.0.4
+├── typescript@5.3.3
+├── unbox-primitive@1.0.2
+├── undici-types@5.26.5
+├── unicode-canonical-property-names-ecmascript@2.0.0
+├── unicode-match-property-ecmascript@2.0.0
+├── unicode-match-property-value-ecmascript@2.1.0
+├── unicode-property-aliases-ecmascript@2.1.0
+├── unique-string@2.0.0
+├── universalify@2.0.1
+├── unload@2.2.0
+├── unpipe@1.0.0
+├── unquote@1.1.1
+├── untildify@3.0.3
+├── upath@1.2.0
+├── update-browserslist-db@1.0.13
+├── uri-js@4.4.1
+├── url-loader@4.1.1
+│   └── schema-utils@3.3.0
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── use-callback-ref@1.3.1
+├── use-sidecar@1.1.2
+├── use-sync-external-store@1.2.0
+├── util-deprecate@1.0.2
+├── util.promisify@1.0.0
+├── utils-merge@1.0.1
+├── uuid@3.3.2
+├── uuidv4@3.0.1
+├── varname@2.0.3
+├── vary@1.1.2
+├── watchpack@2.4.0
+├── watskeburt@2.0.2
+├── webidl-conversions@4.0.2
+├── webpack@5.90.0
+│   ├── eslint-scope@5.1.1
+│   │   └── estraverse@4.3.0
+│   └── schema-utils@3.3.0
+│       ├── ajv@6.12.6
+│       │   └── json-schema-traverse@0.4.1
+│       └── ajv-keywords@3.5.2
+├── webpack-bundle-analyzer@4.10.1
+│   ├── commander@7.2.0
+│   └── ws@7.5.9
+├── webpack-sources@3.2.3
+├── whatwg-url@7.1.0
+├── which@2.0.2
+├── which-boxed-primitive@1.0.2
+├── which-builtin-type@1.1.3
+├── which-collection@1.0.1
+├── which-pm-runs@1.1.0
+├── which-typed-array@1.1.13
+├── wide-align@1.1.5
+│   └── string-width@1.0.2
+│       ├── is-fullwidth-code-point@1.0.0
+│       └── strip-ansi@3.0.1
+│           └── ansi-regex@2.1.1
+├── workbox-background-sync@6.6.0
+├── workbox-broadcast-update@6.6.0
+├── workbox-build@6.6.0
+│   └── source-map@0.8.0-beta.0
+├── workbox-cacheable-response@6.6.0
+├── workbox-core@6.6.0
+├── workbox-expiration@6.6.0
+├── workbox-google-analytics@6.6.0
+├── workbox-navigation-preload@6.6.0
+├── workbox-precaching@6.6.0
+├── workbox-range-requests@6.6.0
+├── workbox-recipes@6.6.0
+├── workbox-routing@6.6.0
+├── workbox-strategies@6.6.0
+├── workbox-streams@6.6.0
+├── workbox-sw@6.6.0
+├── workbox-webpack-plugin@6.6.0
+│   └── webpack-sources@1.4.3
+├── workbox-window@6.6.0
+├── wrap-ansi@9.0.0
+│   └── strip-ansi@7.1.0
+│       └── ansi-regex@6.0.1
+├── wrappy@1.0.2
+├── ws@6.2.0
+├── yallist@4.0.0
+├── yaml@2.3.4
+├── yocto-queue@0.1.0
+└── zustand@4.0.0

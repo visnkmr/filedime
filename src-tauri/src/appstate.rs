@@ -46,7 +46,7 @@ pub struct AppStateStore {
     // pub st:Arc<Mutex<TrieNode>>,
     pub stl: Arc<Mutex<FxHashMap<String, HashSet<String>>>>,
     pub process_count: Arc<Mutex<i32>>,
-    pub buttonnames: HashMap<String, String>, 
+    pub buttonnames: HashMap<String, String>,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
