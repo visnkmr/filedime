@@ -7,8 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "filedime",
-    "version":"app_release"
+    "productName": "filedime"
   },
   "tauri": {
     "allowlist": {
