@@ -868,7 +868,7 @@ dependencies = [
 
 [[package]]
 name = "filedime"
-version = "0.9.52"
+version = "0.9.53"
 dependencies = [
  "chrono",
  "comrak",
