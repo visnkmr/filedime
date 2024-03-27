@@ -312,16 +312,6 @@ else{
                 }])
       }
     },[cmsg])
-    const handleKeyDown = (event) => {
-      if (event.key === 'Enter' && event.shiftKey) {
-        event.preventDefault(); // Prevent the default behavior of the Enter key
-        const start = event.target.selectionStart;
-        const end = event.target.selectionEnd;
-        setQuestion(prevQuestion => prevQuestion.substring(0, start) + '\n' + prevQuestion.substring(end));
-        // Set the cursor position after the inserted newline
-        event.target.selectionStart = event.target.selectionEnd = start + 1;
-      }
-   };
     return (<>
     {/* <MyComponent/> */}
     {/* {time.toLocaleString()} */}
@@ -333,8 +323,8 @@ else{
     <FileUploadComponent fge={filegptendpoint} setcmsg={setcmsg}/>
     </>)}
     
-    <div className="flex-1 overflow-auto grid gap-4 p-4 h-[80%]" >
-        <div className="flex items-start gap-4 flex-col" ref={divRef}>
+    <div className="overflow-auto grid gap-4 p-4 h-[80%] mb-5" >
+        <div className="flex items-start gap-4 flex-col flex-grow" ref={divRef}>
         {chathistory.map((e)=>{
           // console.log(e)
             return <>
@@ -370,7 +360,7 @@ else{
         </div>
         
       </div>
-     <div className="p-4 border-t">
+     <div className="p-4 border-t sticky bottom-0">
         <div className="flex gap-2">
           <Textarea className="flex-1" value={question} placeholder="Ask the file(s)..." onChange={(event)=>{
             setq(event.target.value)

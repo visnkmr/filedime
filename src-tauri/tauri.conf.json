@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "filedime",
-    "version": "0.9.5"
+    "version": "0.9.52"
   },
   "tauri": {
     "allowlist": {

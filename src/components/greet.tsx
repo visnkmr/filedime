@@ -85,7 +85,25 @@ import { ToastAction } from "./ui/toast";
 import Link from "next/link";
 import MillerCol from "./millercol";
 import GPTchatinterface from "./gptchatinterface";
-
+let supportedfiles = [
+  "csv",
+  "xlsx",
+  "xls",
+  "odt",
+  "py",
+  "doc",
+  "docx",
+  "enex",
+  "eml",
+  "epub",
+  "html",
+  "md",
+  "odt",
+  "pdf",
+  "ppt",
+  "pptx",
+  "txt",
+]
 export default function Greet() {
   
   const { theme, setTheme } = useTheme()
@@ -611,7 +629,7 @@ export default function Greet() {
         row,
         getValue,
         row: {
-          original: { path,name,foldercon,size,rawfs,is_dir,timestamp },
+          original: { path,name,foldercon,size,rawfs,is_dir,timestamp,ftype },
         },
       }) => {
         
@@ -788,7 +806,7 @@ export default function Greet() {
               
             </SheetContent>
           </Sheet>
-          <Sheet modal={false}>
+          {(supportedfiles.includes(ftype))?(<Sheet modal={false}>
           <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
             <HoverCard>
               <HoverCardTrigger>
@@ -820,7 +838,8 @@ export default function Greet() {
                 {/* <SheetDescription></SheetDescription> */}
               
             </SheetContent>
-          </Sheet>
+          </Sheet>):(null)}
+          
                   </div>
           ):(
           <div className="">

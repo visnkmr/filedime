@@ -128,70 +128,70 @@ jobs:
           # releaseDraft: true
           prerelease: false
           releaseId: ${{ needs.create-release.outputs.release_id }}
-  release-arm:
-    needs: create-release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pguyot/arm-runner-action@v2.5.2
-        with:
-          base_image:  raspios_lite:latest
-          cpu: cortex-a7
-          bind_mount_repository: true
-          image_additional_mb: 10240
-          optimize_image: false
-          commands: |
-            # Rust complains (rightly) that $HOME doesn't match eid home
-            export HOME=/root
-            # Workaround to CI worker being stuck on Updating crates.io index
-            export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-            # Install setup prerequisites
-            apt update -y --allow-releaseinfo-change
-            apt upgrade -y
-            apt autoremove -y
-            apt install -y curl file
-            curl https://sh.rustup.rs -sSf | sh -s -- -y
-            . "$HOME/.cargo/env"
-            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
-            # Install framework specific packages
-            apt-get install -y nodejs
-            npm install --global yarn
-            yarn add next@latest react@latest react-dom@latest eslint-config-next@latest
-            # Install build tools and tauri-cli requirements
-            apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+  # release-arm:
+  #   needs: create-release
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: pguyot/arm-runner-action@v2.5.2
+  #       with:
+  #         base_image:  raspios_lite:latest
+  #         cpu: cortex-a7
+  #         bind_mount_repository: true
+  #         image_additional_mb: 10240
+  #         optimize_image: false
+  #         commands: |
+  #           # Rust complains (rightly) that $HOME doesn't match eid home
+  #           export HOME=/root
+  #           # Workaround to CI worker being stuck on Updating crates.io index
+  #           export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+  #           # Install setup prerequisites
+  #           apt update -y --allow-releaseinfo-change
+  #           apt upgrade -y
+  #           apt autoremove -y
+  #           apt install -y curl file
+  #           curl https://sh.rustup.rs -sSf | sh -s -- -y
+  #           . "$HOME/.cargo/env"
+  #           curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
+  #           # Install framework specific packages
+  #           apt-get install -y nodejs
+  #           npm install --global yarn
+  #           yarn add next@latest react@latest react-dom@latest eslint-config-next@latest
+  #           # Install build tools and tauri-cli requirements
+  #           apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
             
-            cargo install tauri-cli
-            # Install frontend dependencies
-            yarn 
-            # Build the application
-            cargo tauri build --verbose
-      - uses: AButler/upload-release-assets@v3.0
-        with:
-          files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-id: ${{ needs.create-release.outputs.release_id }}
-      # - name: Upload Release Asset
-      #     id: upload-release-asset
-      #   uses: actions/upload-release-asset@v1
-      #    env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ needs.steps.create-release.outputs.upload_url }}
-      #     asset_path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
-      #     asset_name: your-artifact-name
-      #     asset_content_type: application/octet-stream
-      - name: Upload deb bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: Debian Bundle
-          path:  ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
-      - name: Upload appimage bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: Appimage Bundle
-          path:  ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
+  #           cargo install tauri-cli
+  #           # Install frontend dependencies
+  #           yarn 
+  #           # Build the application
+  #           cargo tauri build --verbose
+  #     - uses: AButler/upload-release-assets@v3.0
+  #       with:
+  #         files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage"
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
+  #         release-id: ${{ needs.create-release.outputs.release_id }}
+  #     # - name: Upload Release Asset
+  #     #     id: upload-release-asset
+  #     #   uses: actions/upload-release-asset@v1
+  #     #    env:
+  #     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     #   with:
+  #     #     upload_url: ${{ needs.steps.create-release.outputs.upload_url }}
+  #     #     asset_path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+  #     #     asset_name: your-artifact-name
+  #     #     asset_content_type: application/octet-stream
+  #     - name: Upload deb bundle
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Debian Bundle
+  #         path:  ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+  #     - name: Upload appimage bundle
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Appimage Bundle
+  #         path:  ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
 
   publish-release:
     permissions:
