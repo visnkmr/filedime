@@ -16,7 +16,7 @@ use std::os::windows::fs::OpenOptionsExt;
 // use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
 use serde_json::json;
-use tauri::{Manager, State, Window};
+use tauri::{api::file, Manager, State, Window};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{
@@ -88,12 +88,26 @@ pub fn populatefileitem(
     let is_dir = fs::metadata(path).map(|m| m.is_dir()).unwrap_or(false); // check if folder
     let mut folderloc = 0;
     let mut filetype = "Folder".to_string();
+    let mut filedime=String::new();
     // let mut filesetcollection=HashSet::new();
     let issymlink = path.is_relative() || path.is_symlink();
     if (issymlink) {
         filetype += "symlink";
     }
     if !path.is_dir() {
+        #[cfg(unix)]
+                if let Ok(img) =
+                imagesize::size(path)
+                // image::image_dimensions(path)
+            //    reader.into_dimensions()
+                  {
+
+                    println!("image found");
+                    // let (width, height) = img;
+                    filedime= format!("{} x {}", img.width, img.height).to_string();
+                    println!("{}",filedime);
+                    // println!("{filedime}")
+                  }
         //modify here to add more extensions to list linecount
         match (path.extension()) {
             Some(g) => {
@@ -123,8 +137,10 @@ pub fn populatefileitem(
                             .open(path)
                             .unwrap(),
                     );
+                    println!("image found");
+
                     // #[cfg(unix)]
-                    // let f =
+                    // let f = 
 
                     // BufReader::new(
                     //   OpenOptions::new()
@@ -134,15 +150,16 @@ pub fn populatefileitem(
                     //   .open(path).unwrap());
 
                     // let mut reader = image::io::Reader::new(f);
-                    //         // println!("image found");
+                           
                     //         if let Ok(img) =
                     //         // image::image_dimensions(path)
                     //        reader.into_dimensions()
                     //           {
 
+                    //             println!("image found");
                     //             let (width, height) = img;
-                    //             filedime=
-                    //             format!("{} x {}", width, height).to_string();
+                    //             filedime= format!("{} x {}", width, height).to_string();
+                    //             println!("{}",filedime);
                     //             // println!("{filedime}")
                     //           }
                 }
@@ -174,7 +191,7 @@ pub fn populatefileitem(
     let tr;
     let (lmdate, timestamp) = lastmodified(&pathtf);
     FileItem {
-        name: name.clone(),
+        name: name.clone()+" "+&filedime,
         path: pathtf.clone(),
         is_dir,
         size: {
