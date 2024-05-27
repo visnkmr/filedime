@@ -38,6 +38,7 @@
     "classnames": "^2.3.2",
     "clean-css": "^5.3.2",
     "clsx": "^2.0.0",
+    
     "css-minimizer-webpack-plugin": "^5.0.1",
     "dependency-cruiser": "^15.5.0",
     "eslint": "8.55.0",
@@ -100,7 +101,11 @@
     "react-wrap-balancer": "^1.0.0",
     "react-zoom-pan-pinch": "^3.4.2",
     "simple-peer": "^9.11.1",
-    "toast-notification-js": "^1.0.3"
+    "toast-notification-js": "^1.0.3",
+    "sharp": "0.30.7"
+  },
+  "resolutions": {
+    "sharp": "0.30.7"
   },
   "postinstall": "npm dedupe"
 }
