@@ -116,39 +116,51 @@ export default function GPTchatinterface({message,fgptendpoint="localhost",setas
 if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //outside of current context -o2c
 
   const requestBody = {
-   "model": "llama2",
-   "prompt": question.replace("o2c", ""),
+   "model": "lmstudio-community/deepseek-r1-distill-qwen-7b",
+   "messages": [
+    // {"role": "system", "content": "Always answer in rhymes."},
+    {"role": "user", "content":question.replace("o2c", "")}
+  ],
    "stream": true // Ensure streaming is enabled
   };
   // let tempstore=useRef([])
   // Fetch the stream from the Ollama API
-  fetch(`http://${fgptendpoint}:11434/api/generate`, {
+  fetch(`http://${fgptendpoint}:11434/v1/chat/completions`, {
    method: 'POST',
    headers: {
       'Content-Type': 'application/json'
    },
    body: JSON.stringify(requestBody)
   })
+
   .then(response => {
-    
-   const reader = response.body.getReader();
+    const reader = response.body.getReader();
+    // console.log(reader)
    const decoder = new TextDecoder('utf-8');
   
    return reader.read().then(function processChunk({ done, value }) {
-      if (done) {
+     const chunk = decoder.decode(value).slice(5);
+      if (done || chunk.includes("[DONE]")) {
         console.log('Stream complete');
         return;
       }
   
       // Decode the chunk and log it
-      const chunk = decoder.decode(value);
-      // console.log(JSON.parse(chunk).response);
-      if(JSON.parse(chunk).response){
-        let resp=JSON.parse(chunk).response;
-                  setmessage((old)=>{
-                  let dm=old+resp;
-                  return dm});
-        }
+      // console.log(JSON.parse(chunk));
+      // if(JSON.parse(chunk)){
+      try{
+
+        let resp=JSON.parse(chunk);
+          resp=resp.choices[0].delta.content;
+          console.log(resp)
+                    setmessage((old)=>{
+                    let dm=old+resp;
+                    return dm});
+          // }
+      } 
+      catch (error) {
+        console.error(error)
+      }
       // Read the next chunk
       return reader.read().then(processChunk);
    });
@@ -162,7 +174,8 @@ if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //ou
     }])
     console.error('Error reading stream:', error)});
 }
-else{
+else
+{
   const abortController = new AbortController();
   const signal = abortController.signal;
   
@@ -426,3 +439,4 @@ else{
       </div>
     </>)
 }
+
