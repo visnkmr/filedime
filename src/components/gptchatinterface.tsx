@@ -13,7 +13,7 @@ import {fetchEventSource} from '@microsoft/fetch-event-source';
 import { Checkbox } from "./ui/checkbox";
 import { Markdown } from "./markdown";
 import { useDebounce } from "use-debounce";
-
+import bigDecimal from 'js-big-decimal'
 // import MyComponent from "./route";
 interface gptargs{
     message?:FileItem,
@@ -33,8 +33,94 @@ function getchattime(){
 function getchattimestamp(){
   return new Date().getTime()
 }
+interface ModelRow {
+  model: string
+  cost: {
+      prompt_token: number
+      completion_token: number
+  }
+}
+const supportedProviderList = [
+  'openai',
+  'anthropic',
+  'google',
+  'deepseek',
+  'perplexity',
+  'cohere',
+  'mistralai',
+  'meta-llama',
+]
 export default function GPTchatinterface({message,fgptendpoint="localhost",setasollama=false}:gptargs){
-  // let sao=(value:boolean)=>{setasollama=value};
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch('https://openrouter.ai/api/v1/models', {});
+        if (!res.ok) {
+          throw new Error(`Failed to fetch models: ${res.status} ${res.statusText}`);
+        }
+  
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error('Failed to parse API response as JSON');
+        }
+  
+        console.log(data.data);
+        const models = data.data
+
+    // // Create main directory
+    // if (!fs.existsSync(PATH_TO_PROVIDERS)) {
+    //     fs.mkdirSync(PATH_TO_PROVIDERS)
+    // }
+
+    // Group models by provider
+    const providerModels = new Map<string, ModelRow[]>()
+
+    for (const model of models) {
+        if (!model?.id || !model?.pricing?.prompt || !model?.pricing?.completion ) {
+            console.warn('Skipping invalid model:', model)
+            continue
+        }
+        const [provider, ...modelParts] = model.id.split('/')
+        // if (!supportedProviderList.includes(provider)) {
+        //     continue
+        // }
+        if (!providerModels.has(provider)) {
+            providerModels.set(provider, [])
+        }
+
+        // Convert pricing values to numbers before using toFixed(10)
+        const promptPrice = new bigDecimal(model.pricing.prompt).getValue()
+        const completionPrice = new bigDecimal(model.pricing.completion).getValue()
+
+        const modelRow: ModelRow = {
+            model: modelParts.join('/'), // Only include the part after the provider
+            cost: {
+                prompt_token: parseFloat(promptPrice),
+                completion_token: parseFloat(completionPrice),
+            },
+        }
+
+        providerModels.get(provider)!.push(modelRow)
+    }
+
+    const allProviders = Array.from(providerModels.values()).flat()
+
+    // Sort by model name for easier diffs
+    const freemodels=allProviders.filter((m)=>{return m.cost.prompt_token<=0?true:false}).sort((a, b) => a.model.localeCompare(b.model))  
+    console.log(freemodels)
+      } catch (error) {
+        console.error('Error fetching models:', error);
+      }
+    };
+
+    
+  
+    fetchModels();
+  }, []);
+  
+    // let sao=(value:boolean)=>{setasollama=value};
   const [isollama,sao]=useState(setasollama)
   
   // const [useollama,seto]=useState(setasollama)
@@ -116,7 +202,8 @@ export default function GPTchatinterface({message,fgptendpoint="localhost",setas
 if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //outside of current context -o2c
 
   const requestBody = {
-   "model": "lmstudio-community/deepseek-r1-distill-qwen-7b",
+   "model": "nousresearch/deephermes-3-mistral-24b-preview:free",
+  //  "model": "lmstudio-community/deepseek-r1-distill-qwen-7b",
    "messages": [
     // {"role": "system", "content": "Always answer in rhymes."},
     {"role": "user", "content":question.replace("o2c", "")}
@@ -125,11 +212,20 @@ if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //ou
   };
   // let tempstore=useRef([])
   // Fetch the stream from the Ollama API
-  fetch(`http://${fgptendpoint}:11434/v1/chat/completions`, {
-   method: 'POST',
-   headers: {
-      'Content-Type': 'application/json'
-   },
+  fetch(
+    "https://openrouter.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer ",
+    // "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
+    // "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
+    "Content-Type": "application/json"
+  },
+  //   `http://${fgptendpoint}:11434/v1/chat/completions`, {
+  //  method: 'POST',
+  //  headers: {
+  //     'Content-Type': 'application/json'
+  //  },
    body: JSON.stringify(requestBody)
   })
 
@@ -139,28 +235,59 @@ if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //ou
    const decoder = new TextDecoder('utf-8');
   
    return reader.read().then(function processChunk({ done, value }) {
-     const chunk = decoder.decode(value).slice(5);
-      if (done || chunk.includes("[DONE]")) {
+    console.log("cal:----?>"+decoder.decode(value))
+     const chunk = decoder.decode(value);
+     chunk
+    // Filter out the "OPENROUTER PROCESSING" chunks if using openrouter
+    .replaceAll(": OPENROUTER PROCESSING", "")
+    .split("data: ")
+    .filter((l: string) => l.trim())
+    .map((line: string) => {
+      if (done || line.includes("[DONE]")) {
         console.log('Stream complete');
+        done=true;
         return;
       }
+      try {
+        const choice = JSON.parse(line.trim()).choices[0];
+        const resp = "delta" in choice ? choice.delta.content : choice.text;
+        setmessage((old)=>{
+          let dm=old+resp;
+          return dm});
+        // if (content) output.completeChunks.push(content);
+      } catch (e) {
+        console.log(e)
+      }
+    });
+    if (done ) {
+      console.log('Stream complete');
+      done=true;
+      return;
+    }
+      // if (done || chunk.includes("[DONE]")) {
+      //   console.log('Stream complete');
+      //   return;
+      // }
+      
   
       // Decode the chunk and log it
       // console.log(JSON.parse(chunk));
       // if(JSON.parse(chunk)){
-      try{
-
-        let resp=JSON.parse(chunk);
-          resp=resp.choices[0].delta.content;
-          console.log(resp)
-                    setmessage((old)=>{
-                    let dm=old+resp;
-                    return dm});
-          // }
-      } 
-      catch (error) {
-        console.error(error)
-      }
+      // try{
+      //   console.log(chunk)
+      //   let resp=JSON.stringify((chunk));
+      //   resp=resp+"\n";
+      //   // let resp=JSON.parse((chunk));
+      //   //   resp=resp.choices[0].delta.content;
+      //   //   console.log(resp)
+      //               setmessage((old)=>{
+      //               let dm=old+resp;
+      //               return dm});
+      //     // }
+      // } 
+      // catch (error) {
+      //   console.error(error)
+      // }
       // Read the next chunk
       return reader.read().then(processChunk);
    });

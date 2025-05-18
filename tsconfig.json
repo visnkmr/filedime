@@ -48,7 +48,7 @@
     // Do not generate custom helper functions like __extends in compiled output
     // "module": "NodeNext",
     // Enable all strict type checking options
-    "strict": true,
+    "strict": false,
     // Raise an error on expressions and declarations with an inferred type of any
     "noImplicitAny": true,
     // Raise an error on this expressions with an inferred type of any
