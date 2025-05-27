@@ -22,10 +22,12 @@ const nextConfig =
 // withPWA(
   // withBundleAnalyzer(
     {
+      
       reactStrictMode: false,
   // withPWA,
   // withOptimizedImages,
   experimental: {
+    reactCompiler:true,
     // appDir: true,
     // optimizeCss: true,
     esmExternals: true,

@@ -26,6 +26,9 @@ export default function RootLayout({
   // const [showon, setshow] = useLocalStorage("dark",true);
   return (
     <html suppressHydrationWarning className="h-full" lang="en">
+      <head>
+      <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+      </head>
       <body className="h-full flex flex-col dark:bg-gray-900">
         <Providers>
 

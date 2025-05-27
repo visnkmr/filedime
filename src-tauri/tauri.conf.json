@@ -55,7 +55,7 @@
     },
     "windows": [
       {
-        "fullscreen": false,
+        "fullscreen": true,
         "maximized": true,
         "resizable": true,
         "title": "Filedime",
