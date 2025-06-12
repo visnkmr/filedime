@@ -1,0 +1,8 @@
+{
+  "name": "File Name Display",
+  "version": "1.0.0",
+  "author": "Example Author",
+  "description": "An example extension that displays the filename in the middle of the GPT chat interface popup.",
+  "entry_point": "index.tsx",
+  "permissions": ["chat:read_filename"]
+}

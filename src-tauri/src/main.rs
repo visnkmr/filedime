@@ -57,13 +57,14 @@ mod tabinfo;
 // mod recentfiles;
 mod bookmarks;
 mod openhtml;
+mod extensions;
 // // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 mod listfiles;
 mod markdown;
 // mod partialratio;
 use crate::{
     bookmarks::*, filechangewatcher::*, filltrie::populate_try, listfiles::*, markdown::*,
-    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*,
+    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*, extensions::*,
 };
 use lastmodcalc::lastmodified;
 // mod r  esync;
@@ -473,7 +474,7 @@ async fn checker() -> Result<String, String> {
         Err(_) => Err("Could not check for updates".to_string()),
     }
 }
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream, current_filename: &Arc<Mutex<String>>) {
     let mut buffer = [0; 1024];
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
@@ -486,20 +487,81 @@ fn handle_connection(mut stream: TcpStream) {
         filename = ("filegpt.html");
     }
 
-    // Check if the file exists and is readable
-    if PROJECT_DIR.contains(filename) {
-        let contents = PROJECT_DIR.get_file(filename).unwrap();
-        let response = format!(
-            "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
-            contents.contents().len(),
-            contents.contents_utf8().unwrap()
-        );
+    // Check if the request is for an extension file
+    if filename.starts_with("extensions/") {
+        // Extract the path after "extensions/"
+        let extension_path = filename.strip_prefix("extensions/").unwrap_or(filename);
+        // Get the app data directory
+        let app_data_dir = tauri::api::path::app_data_dir(&tauri::Config::default())
+            .unwrap_or_else(|| {
+                let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
+                home.join(".filedime")
+            });
+        let extensions_dir = app_data_dir.join("extensions");
+        let full_path = extensions_dir.join(extension_path);
+        println!("{}",full_path.to_string_lossy());
+        
+        if full_path.exists() {
+            match fs::read(&full_path) {
+                Ok(contents) => {
+                    let response = format!(
+                        "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n",
+                        contents.len()
+                    );
+                    stream.write(response.as_bytes()).unwrap();
+                    stream.write(&contents).unwrap();
+                    stream.flush().unwrap();
+                }
+                Err(e) => {
+                    let response = format!("HTTP/1.1  500 INTERNAL SERVER ERROR\r\n\r\nError reading file: {}", e);
+                    stream.write(response.as_bytes()).unwrap();
+                    stream.flush().unwrap();
+                }
+            }
+        } else {
+            let response = "HTTP/1.1  404 NOT FOUND\r\n\r\nExtension file not found";
+            stream.write(response.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        }
+    }
+     else if filename == "api/current_filename" {
+        // Handle API request for current filename
+        let mut fname = current_filename.lock().unwrap().clone();
+        let response = if fname.is_empty() {
+            fname="test".to_string();
+             let body = format!("{{\"filename\": \"{}\"}}", fname);
+            format!(
+                "HTTP/1.1 404 NOT FOUND\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                body.len(),
+                body
+            )
+        } else {
+            let body = format!("{{\"filename\": \"{}\"}}", fname);
+            format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+                body.len(),
+                body
+            )
+        };
         stream.write(response.as_bytes()).unwrap();
         stream.flush().unwrap();
-    } else {
-        let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+    } 
+    else {
+        // Check if the file exists and is readable in PROJECT_DIR
+        if PROJECT_DIR.contains(filename) {
+            let contents = PROJECT_DIR.get_file(filename).unwrap();
+            let response = format!(
+                "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+                contents.contents().len(),
+                contents.contents_utf8().unwrap()
+            );
+            stream.write(response.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        } else {
+            let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+            stream.write(response.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        }
     }
 }
 use include_dir::{include_dir, Dir};
@@ -528,9 +590,25 @@ async fn show_main_window(window: tauri::Window) {
     window.maximize().unwrap();
     window.show().unwrap();
 }
+
+// Global state for current filename
+static CURRENT_FILENAME: std::sync::LazyLock<Arc<Mutex<String>>> = std::sync::LazyLock::new(|| Arc::new(Mutex::new(String::new())));
+
+#[tauri::command]
+async fn set_current_file(filename: String) -> Result<(), String> {
+    let mut current_filename = CURRENT_FILENAME.lock().map_err(|e| e.to_string())?;
+    *current_filename = filename;
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_current_file() -> Result<String, String> {
+    let current_filename = CURRENT_FILENAME.lock().map_err(|e| e.to_string())?;
+    Ok(current_filename.clone())
+}
 fn main() {
     // println!("{:?}",findsize(&PROJECT_DIR));
-    thread::spawn(move || {
+    thread::spawn(|| {
         const HOST: &str = "0.0.0.0";
         const PORT: &str = "8477";
         let end_point: String = format!("{}:{}", HOST, PORT);
@@ -539,7 +617,7 @@ fn main() {
 
         for stream in listener.incoming() {
             let _stream = stream.unwrap();
-            handle_connection(_stream);
+            handle_connection(_stream, &CURRENT_FILENAME);
         }
     });
 
@@ -608,6 +686,14 @@ fn main() {
             addtotabhistory,
             mountdrive,
             unmountdrive,
+            install_extension,
+            uninstall_extension,
+            list_extensions,
+            toggle_extension,
+            load_extension_content,
+            get_extension_bundle_url,
+            set_current_file,
+            get_current_file,
             // whattoload,
             // get_window_label
         ])

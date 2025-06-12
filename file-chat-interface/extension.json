@@ -1,0 +1,8 @@
+{
+  "name": "File Chat Interface",
+  "version": "1.0.0",
+  "author": "FileDime Team",
+  "description": "An extension that provides the core file chat interface for interacting with files in FileDime.",
+  "entry_point": "index.tsx",
+  "permissions": ["chat:full_access", "file:read"]
+}
