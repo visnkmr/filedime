@@ -372,6 +372,15 @@ async fn newspecwindow(
         .title(name)
         .build()
         .unwrap();
+    } else if (winlabel.starts_with("chatui")) {
+        tauri::WindowBuilder::new(
+            &window.app_handle(),
+            winlabel,
+            tauri::WindowUrl::App("chatui.html".into()),
+        )
+        .title(name)
+        .build()
+        .unwrap();
     } else {
         opennewwindow(&window.app_handle(), &name, &winlabel);
     }
@@ -456,7 +465,7 @@ async fn loadsearchlist(
 // }
 #[tauri::command]
 async fn checker() -> Result<String, String> {
-    let url = "https://cdn.jsdelivr.net/gh/vishnunkmr/quickupdates/filedimeversion.txt";
+    let url = "https://cdn.jsdelivr.net/gh/visnkmr/filedime@nextrelease/version.txt";
     match (reqwest::get(url).await) {
         Ok(response) => {
             // Ensure the response is successful

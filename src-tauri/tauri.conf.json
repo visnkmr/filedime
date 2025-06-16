@@ -1,7 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "bun next dev",
-    "beforeBuildCommand": "bun next build",
+    "beforeDevCommand": "bun next dev --turbopack",
+    "beforeBuildCommand": "bun next build --turbopack",
     "devPath": "http://localhost:3000",
     "distDir": "../out",
     "withGlobalTauri": true
@@ -56,7 +56,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "maximized": true,
+        "maximized": false,
         "resizable": true,
         "title": "Filedime",
         "width": 800,

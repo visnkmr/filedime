@@ -25,11 +25,12 @@ export default function RootLayout({
 
   // const [showon, setshow] = useLocalStorage("dark",true);
   return (
-    <html suppressHydrationWarning className="h-full" lang="en">
+    <html suppressHydrationWarning lang="en">
       <head>
-      <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"/>
+      {/* <script src="https://unpkg.com/react-scan/dist/auto.global.js" /> */}
       </head>
-      <body className="h-full flex flex-col dark:bg-gray-900">
+      <body>
         <Providers>
 
         {/* <Thedarkhtml> */}

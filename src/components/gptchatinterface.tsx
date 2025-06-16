@@ -50,6 +50,8 @@ const supportedProviderList = [
   'mistralai',
   'meta-llama',
 ]
+
+
 export default function GPTchatinterface({message,fgptendpoint="localhost",setasollama=false}:gptargs){
   useEffect(() => {
     const fetchModels = async () => {
@@ -216,7 +218,7 @@ if(question.toLocaleLowerCase().startsWith("o2c") ||!filedimegptisrunning){ //ou
     "https://openrouter.ai/api/v1/chat/completions", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer ",
+    "Authorization": "Bearer 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",
     // "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
     // "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
     "Content-Type": "application/json"

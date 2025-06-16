@@ -17,7 +17,7 @@ import NewLeaf from "./new"
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
 import { useMouseShortcut } from "./mouseshortcuts";
-import { listen } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 import FiledimeSettings from "./filedimesettings"
 import {
   ResizableHandle,
@@ -64,7 +64,6 @@ export function converttstodt(ts){
   return utcTime
  }
 
-
 import {  ColumnDef } from '@tanstack/react-table';
 import {  ArrowUpDown } from 'lucide-react';
 
@@ -84,7 +83,7 @@ import { Progress } from "./ui/progress"
 import { ToastAction } from "./ui/toast";
 import Link from "next/link";
 import MillerCol from "./millercol";
-import GPTchatinterface from "./gptchatinterface";
+// import GPTchatinterface from "./gptchatinterface";
 import EachFromGrid from "./grideach";
 export let supportedfiles = [
   "csv",
@@ -141,6 +140,7 @@ export default function Greet() {
   
     useEffect(() => {
       setupAppWindow()
+      
     }, []) 
     const filesobjinit:FileItem[]=[]
     const objinit:string[]=[]
@@ -422,6 +422,9 @@ export default function Greet() {
     
       // console.log(data.payload.toString())
     });
+     const unlisten2=listen('intercomm', event => {
+  console.log('Received:', event.payload);
+});
     // let unlisten: (() => void) | undefined = undefined
     const unlisten1=listen('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
@@ -451,9 +454,11 @@ export default function Greet() {
           }
         // console.log("loading files---->"+event.payload);
     })
+
     return () => {
         unlisten.then(f => f());
         unlisten1.then(f => f());
+        unlisten2.then(f => f());
     }
   //   return () => {
   //     unlisten?.()
@@ -806,39 +811,28 @@ export default function Greet() {
               
             </SheetContent>
           </Sheet>
-          {(supportedfiles.includes(ftype))?(<Sheet modal={false}>
-          <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
-            <HoverCard>
+          {(supportedfiles.includes(ftype))?(
+            <Button className="ml-2" variant={"outline"} onClick={()=>{
+              const timestamp = Date.now();
+              invoke("newspecwindow",{
+                winlabel:`${"chatui"+timestamp}`,
+                name:"FileGPT"
+              })
+                emit('chatui', { myData: row.original });
+              // });
+              console.log("clicked")
+
+            
+
+            }}><HoverCard>
               <HoverCardTrigger>
                 <BotIcon className="h-4 w-4 "/>
                 </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
               Ask queries about this file
               </HoverCardContent>
-            </HoverCard>
-            </SheetTrigger>
-            <SheetContent 
-              // style={{ width: `${width}px` }}
-              // onMouseDown={handleMouseDown}
-              // onMouseMove={handleMouseMove}
-              // onMouseUp={handleMouseUp}
-              // onMouseLeave={handleMouseUp}
-              className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                <ResizablePanel/>
-                <ResizableHandle />
-                <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                 
-        
-                <GPTchatinterface message={row.original} setasollama={true}/>
-                {/* </ResizablePanel>
-              </ResizablePanelGroup> */}
-                
-          
-                {/* <SheetDescription></SheetDescription> */}
-              
-            </SheetContent>
-          </Sheet>):(null)}
+            </HoverCard></Button>
+            ):(null)}
           
                   </div>
           ):(
