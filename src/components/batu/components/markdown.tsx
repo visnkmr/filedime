@@ -20,6 +20,7 @@ function parseMarkdownIntoBlocks(markdown: string): string[] {
 }
 
 function extractLanguage(className?: string): string {
+  
   if (!className) return 'plaintext';
   const match = className.match(/language-(\w+)/);
   return match ? match[1] : 'plaintext';
@@ -45,7 +46,8 @@ const INITIAL_COMPONENTS: Partial<Components> = {
       );
     }
 
-    const language = extractLanguage(className);
+    let language = extractLanguage(className);
+    language=(language==="plantuml")?"plaintext":language 
 
     return (
       <CodeBlock className="rounded-md overflow-hidden my-4 border border-zinc-200 dark:border-zinc-800">

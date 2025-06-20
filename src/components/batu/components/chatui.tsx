@@ -7,7 +7,7 @@ import ApiKeyInput from "../components/api-key-input"
 import LMStudioURL from "../components/lmstudio-url"
 import LMStudioModelName from "../components/localmodelname"
 import FileGPTUrl from "../components/filegpt-url"
-import type { Chat, BranchPoint } from "../lib/types"
+import type { Chat, BranchPoint, ModelRow } from "../lib/types"
 import { Button } from "../components/ui/button"
 import { PlusIcon, MenuIcon, XIcon, Download, Bot } from "lucide-react"
 import ModelSelectionDialog from "../components/model-selection-dialog"
@@ -15,6 +15,9 @@ import ExportDialog from "../components/export-dialog"
 import { Toaster } from "../components/ui/toaster"
 import { cn } from "../lib/utils"
 import DarkButton from './dark-button'
+import axios from "axios"
+import { fetchEventSource } from "@microsoft/fetch-event-source"
+import bigDecimal from "js-big-decimal"
 interface FileItem {
     name: string;
     path: string;
@@ -33,13 +36,101 @@ interface gptargs{
     setasollama:boolean
     // localorremote:boolean
 }
+
+let fgtest=async (filegptendpoint):Promise<boolean> => {
+      try {
+        await axios.get(`${filegptendpoint}/`);
+        return true
+      } catch (error) {
+        return false
+      }
+    };
+let oir=async (fgptendpoint):Promise<boolean> => {
+      try {
+        await axios.head(`http://${fgptendpoint}:11434/`); //endpoint to check for ollama
+        return true
+      } catch (error) {
+        return false
+      }
+    };
+async function fileloader(filegptendpoint:string,filePaths:string[]):Promise<boolean>{
+  try{
+
+    const response = await axios.post(`${filegptendpoint}/embed`, { files: filePaths });
+    if(response.status==200) return true
+  }
+  catch(e){
+    console.log(e)
+  }
+  return false      
+}
+async function sendtofilegpt(filegptendpoint,question,isollama,setcbs,setmessage,setchathistory){
+   const abortController = new AbortController();
+  const signal = abortController.signal;
+  
+  await fetchEventSource(`${filegptendpoint}/query-stream`, {
+    signal:signal,
+    
+    method: "POST",
+    body: JSON.stringify({
+      query:question,
+      where:question.toLocaleLowerCase().startsWith("generally")||isollama?"ollama":""
+    }),
+    headers: { 'Content-Type': 'application/json', Accept: "text/event-stream" },
+    onopen: async (res)=> {
+      if (res.ok && res.status === 200) {
+        setcbs(true)
+        console.log("Connection made ", res);
+        // setmessage("")
+      } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        setcbs(false)
+        console.log("Client-side error ", res);
+      }
+    },
+    onmessage: async (event)=> {
+      {
+    // if(typeof event.data === "string"){
+      try{
+        let jp=JSON.parse(event.data);
+        setmessage((old)=>{
+          // console.log("-----------"+old)
+          console.log(event.data);
+            let dm=old+jp.token;
+          return dm});
+      }
+      catch(e){
+        
+      }
+        
+        }
+          // (divRef.current! as HTMLDivElement).scrollIntoView({ behavior: "smooth", block: "end" })
+      // }
+    },
+    onclose:async ()=> {
+      setcbs(false)
+      console.log("Connection closed by the server");
+      
+    },
+    onerror (err) {
+      setchathistory((old)=>[...old,{
+        from:"bot",
+        message:`Issue finding Filegpt endpoint ${filegptendpoint} endpoint, maybe its not be running.`,
+        time:getchattime(),
+        timestamp:getchattimestamp()
+      }])
+      throw "There was some issue with your filedimegpt instance. Is it not running?"
+      // abortController.abort()
+      // console.log("There was an error from server", err);
+    },
+  });
+}
 export default function ChatUI({message,fgptendpoint="localhost",setasollama=false}:gptargs) {
   const [apiKey, setApiKey] = useState<string>("")
   const [lmurl, setlmurl] = useState<string>("")
   const [model_name, set_model_name] = useState<string>("")
   const [filegpturl, setFilegpturl] = useState<string>("")
   const [selectedModel, setSelectedModel] = useState<string>("")
-  const [selectedModelInfo, setSelectedModelInfo] = useState<any>(null)
+  const [selectedModelInfo, setSelectedModelInfo] = useState<any>("")
   const [chats, setChats] = useState<Chat[]>([])
   const [currentChatId, setCurrentChatId] = useState<string>("")
   const [sidebarVisible, setSidebarVisible] = useState(true)
@@ -47,35 +138,58 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
   const [isModelDialogOpen, setIsModelDialogOpen] = useState(false)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [allModels, setAllModels] = useState<any[]>([])
-
+  const [filePaths, setFilePaths] = useState([message?message.path:null]);
+  //Collapse sidebar on chat select
+  const [collapsed, setCollapsed] = useState(true);
   useEffect(()=>{
     setCollapsed(true)
   },[currentChatId])
+  // useEffect(()=>{const storedApiKey = localStorage.getItem("openrouter_api_key")
+  //     if (storedApiKey) {
+  //       setApiKey(storedApiKey)
+  //     }},[collapsed])
   // Load API key and chats from localStorage on initial render
   useEffect(() => {
     const storedlmurl = localStorage.getItem("lmstudio_url")
-    if (ollamastate!==0 && storedlmurl) {
+    if (storedlmurl) {
       setlmurl(storedlmurl)
     }
     
     const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
-    if (ollamastate!==0 && storedlmurl && stored_lm_model_name) {
+    if (storedlmurl && stored_lm_model_name) {
       set_model_name(stored_lm_model_name)
       setSelectedModel(model_name)
     }
 
     const storedFilegpturl = localStorage.getItem("filegpt_url")
-    if (ollamastate === 3 && storedFilegpturl) {
+    if (storedFilegpturl) {
       setFilegpturl(storedFilegpturl)
     }
-  }, [ollamastate]);
-  console.log(lmurl)
-  console.log(model_name)
-  useEffect(() => {
-    const storedApiKey = localStorage.getItem("openrouter_api_key")
-    if (storedApiKey) {
-      setApiKey(storedApiKey)
+    console.log("checking here for ollamastate val")
+    {
+      const storedApiKey = localStorage.getItem("openrouter_api_key")
+      if (storedApiKey) {
+        setApiKey(storedApiKey)
+      }
+      const selmodel = localStorage.getItem("or_model")
+      const selmodelinfo = localStorage.getItem("or_model_info")
+      if(selmodel)
+      setSelectedModel(selmodel)
+      setSelectedModelInfo(selmodelinfo)
     }
+
+    localStorage.setItem("laststate",ollamastate.toString())
+  }, []);
+  // console.log("ollamastatae val "+ollamastate)
+  // console.log(lmurl)
+  // console.log(model_name)
+
+  //Chat history loader
+  useEffect(() => {
+ console.log("checking here for ollamastate val 1")
+    const lastState = localStorage.getItem("laststate");
+    setollamastate(lastState ? parseInt(lastState, 10) : 0);
+    
 
     
 
@@ -109,7 +223,7 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
 
   // Fetch models when API key is set
   useEffect(() => {
-    if (!apiKey) return
+    if (ollamastate!==0) return
 
     const fetchModels = async () => {
       try {
@@ -124,7 +238,55 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
         }
 
         const data = await response.json()
-        setAllModels(data.data)
+        const models = data.data
+    const freemodelss=models.filter((model)=>{if (!model?.id || !model?.pricing?.prompt || !model?.pricing?.completion ){return false}return true}).filter((m)=>{return parseFloat(new bigDecimal(m.pricing.prompt).getValue())<=0?true:false}).sort((a, b) => b.created-(a.created))  ;  
+      console.log(freemodelss)
+    // // Create main directory
+    // if (!fs.existsSync(PATH_TO_PROVIDERS)) {
+    //     fs.mkdirSync(PATH_TO_PROVIDERS)
+    // }
+
+    // Group models by provider
+    // const providerModels = new Map<string, ModelRow[]>()
+        
+    // for (const model of models) {
+    //     if (!model?.id || !model?.pricing?.prompt || !model?.pricing?.completion ) {
+    //         console.warn('Skipping invalid model:', model)
+    //         continue
+    //     }
+    //     const [provider, ...modelParts] = model.id.split('/')
+    //     // if (!supportedProviderList.includes(provider)) {
+    //     //     continue
+    //     // }
+    //     if (!providerModels.has(provider)) {
+    //         providerModels.set(provider, [])
+    //     }
+
+    //     // Convert pricing values to numbers before using toFixed(10)
+    //     const promptPrice = new bigDecimal(model.pricing.prompt).getValue()
+    //     const completionPrice = new bigDecimal(model.pricing.completion).getValue()
+
+    //     const modelRow: ModelRow = {
+    //         id:model.id,
+    //         context_length:model.context_length,
+    //         model: modelParts.join('/'), // Only include the part after the provider
+    //         cost: {
+    //             prompt_token: parseFloat(promptPrice),
+    //             completion_token: parseFloat(completionPrice),
+    //         },
+    //         supported_parameters:model.supported_parameters
+    //     }
+
+    //     providerModels.get(provider)!.push(modelRow)
+    // }
+
+    // const allProviders = Array.from(providerModels.values()).flat()
+
+    // Sort by model name for easier diffs
+    // const freemodels=allProviders.filter((m)=>{return m.cost.prompt_token<=0?true:false}).sort((a, b) => a.model.localeCompare(b.model))  
+    // console.log(freemodels)
+    setAllModels(freemodelss)
+        // setAllModels(data.data)
 
         // // Filter for free models (where pricing is 0)
         // const freeModels = data.data.filter((model: any) => {
@@ -212,11 +374,13 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
 
   const handleSelectModel = (modelId: string) => {
     setSelectedModel(modelId)
+    localStorage.setItem("or_model",modelId);
     const modelInfo = allModels.find((model: any) => model.id === modelId)
     setSelectedModelInfo(modelInfo || null)
+    localStorage.setItem("or_model_info",modelInfo ||null);
     setIsModelDialogOpen(false)
   }
-const [collapsed, setCollapsed] = useState(true);
+
 
   const toggleMenu = () => {
     setCollapsed(prev => !prev);
@@ -307,7 +471,7 @@ const [collapsed, setCollapsed] = useState(true);
           <DarkButton/>
 
           </div>
-          <div className={cn(`overflow-y-scroll absolute top-0 left-0 h-full bg-gray-50 dark:bg-gray-900 text-white transition-transform duration-300 ease-in-out z-40 ${
+          <div className={cn(`overflow-y-auto absolute top-0 left-0 h-full bg-gray-50 dark:bg-gray-900 text-white transition-transform duration-300 ease-in-out z-40 ${
           collapsed ? '-translate-x-full' : 'translate-x-0'}`,"pt-20 border-r border-gray-200 dark:border-r-gray-950")}>
           {ollamastate==0?(<div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} />
@@ -331,7 +495,7 @@ const [collapsed, setCollapsed] = useState(true);
           ) : <></>}
           
 
-          <div className="flex-1 overflow-y-scroll">
+          <div className="flex-1 overflow-y-auto pb-16 ">
             <ChatHistory
             chats={chats}
             currentChatId={currentChatId}
@@ -341,17 +505,18 @@ const [collapsed, setCollapsed] = useState(true);
       />
           </div>
 
-            <div className="absolute bottom-4 left-0 right-0 items-end gap-2 p-4 border-gray-200 dark:border-gray-700">
-          <Button onClick={createNewChat} className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-900 dark:text-white text-black border border-gray-200 dark:border-gray-700">
-              <PlusIcon size={16} />
-              New Chat
-            </Button>
+            
             </div>
-            </div>
+           
         </div>
       )}
                 {/* <SidebarMenu/> */}
-      
+       {/* <div className={` ${!collapsed?"absolute bottom-0 left-0 p-4 z-50 w-48":"hidden"}`}> */}
+              {/* <Button onClick={createNewChat} className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-900 dark:text-white text-black border border-gray-200 dark:border-gray-700">
+                <PlusIcon size={16} />
+                New Chat
+              </Button>
+            </div> */}
 
       {/* Main content */}
       <div  style={{ height: 'var(--100vh, 100vh)' }} className={cn("absolute bottom-0 z-10 w-full px-2 bg-gray-50 dark:bg-gray-900 overflow-hidden")} onClick={()=>{setCollapsed(true)}} >

@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog"
-import { BotIcon, Loader2 } from "lucide-react"
+import { BotIcon, CloudIcon, EyeIcon, FileIcon, Loader2 } from "lucide-react"
 import { cn } from "../lib/utils"
 import { ScrollArea } from "../components/ui/scroll-area"
 import { Input } from "../components/ui/input"
 import { Badge } from "../components/ui/badge"
 import Marquee from "react-fast-marquee";
+import type { Chat, BranchPoint, ModelRow, OpenRouterModel } from "../lib/types"
+
 interface ModelSelectionDialogProps {
   isOpen: boolean
   onClose: () => void
@@ -146,12 +148,12 @@ export default function ModelSelectionDialog({
   // const [isHovered, setIsHovered] = useState(false);
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="overflow-y-auto sm:max-w-[800px] max-h-[80vh] flex flex-col">
+      <DialogContent className="overflow-y-auto sm:max-w-[800px] max-h-[80vh] flex flex-col bg-gray-900">
         <DialogHeader>
           <DialogTitle>Select a Model</DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4">
+        <div className="sticky top-0 left-0 z-40">
           <Input
             placeholder="Search models..."
             value={searchQuery}
@@ -167,7 +169,7 @@ export default function ModelSelectionDialog({
         ) : (
           // <ScrollArea className="flex-1 pr-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredModels.slice(0, modelcount).map((model) => (
+              {filteredModels.slice(0, modelcount).map((model:OpenRouterModel) => (
                 <div
                   key={model.id}
                   className={cn(
@@ -188,12 +190,17 @@ export default function ModelSelectionDialog({
                   </div>
 
                   <div className="text-center w-full">
-                   <HoverMarqueeItem text={model.id.split("/").pop()} />
+                   <HoverMarqueeItem text={model.id.split("/").pop()!} />
                     <p className="text-xs text-gray-500 truncate w-full" title={model.id.split("/")[0]}>
                       {model.id.split("/")[0]}
                     </p>
                   </div>
+                  <div className="flex gap-2">
 
+                  {(model.supported_parameters.includes("include_reasoning") || model.supported_parameters.includes("reasoning"))?<CloudIcon/>:""}
+                  {model.architecture.input_modalities.includes("image")?<EyeIcon/>:""}
+                  {(model.architecture.input_modalities.includes("file") )?<FileIcon/>:""}
+                  </div>
                   <div className="mt-2 flex flex-col items-center gap-1 w-full">
                     <Badge variant="outline" className="text-xs">
                       {model.context_length.toLocaleString()} tokens

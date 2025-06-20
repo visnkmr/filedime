@@ -363,11 +363,12 @@ async fn newspecwindow(
     window: Window,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
+    println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
     if (winlabel == "settings") {
         tauri::WindowBuilder::new(
             &window.app_handle(),
             winlabel,
-            tauri::WindowUrl::App("settings.html".into()),
+            tauri::WindowUrl::App("setting".into()),
         )
         .title(name)
         .build()
@@ -376,7 +377,7 @@ async fn newspecwindow(
         tauri::WindowBuilder::new(
             &window.app_handle(),
             winlabel,
-            tauri::WindowUrl::App("chatui.html".into()),
+            tauri::WindowUrl::App("chatui".into()),
         )
         .title(name)
         .build()

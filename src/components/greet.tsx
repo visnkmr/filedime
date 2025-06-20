@@ -103,8 +103,15 @@ export let supportedfiles = [
   "pptx",
   "txt",
 ]
+// import { appWindow } from '@tauri-apps/api/window';
+// import {  WebviewWindow } from '@tauri-apps/api/window';
+const windowExists = async (label: string) => {
+  const win = (await import('@tauri-apps/api/window')).WebviewWindow.getByLabel(label);
+  return win !== null;
+};
 export default function Greet() {
   
+
   const { theme, setTheme } = useTheme()
   // if(activewindow.label!=="settings"){
     const { toast } = useToast()
@@ -814,11 +821,22 @@ export default function Greet() {
           {(supportedfiles.includes(ftype))?(
             <Button className="ml-2" variant={"outline"} onClick={()=>{
               const timestamp = Date.now();
+              // const timestamp=""
               invoke("newspecwindow",{
-                winlabel:`${"chatui"+timestamp}`,
+                winlabel:`${"chatui"}`,
                 name:"FileGPT"
               })
+              
+              const intervalId = setInterval(async () => {
+              const exists = await windowExists(`${"chatui"+timestamp}`);
+              // console.log("Window exists?", exists);
+              if (exists) {
+                // sendCommand();
+                console.log("checked for "+`${"chatui"+timestamp}`)
                 emit('chatui', { myData: row.original });
+                clearInterval(intervalId); // Stop checking after first success
+              }
+            }, 2000);
               // });
               console.log("clicked")
 

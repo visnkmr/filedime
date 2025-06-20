@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, type KeyboardEvent, useEffect } from "react"
+import { useState, useRef, type KeyboardEvent, useEffect, useCallback } from "react"
 import { Textarea } from "../components/ui/textarea"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import type { Chat, Message, BranchPoint, FileItem } from "../lib/types"
-import { SendIcon, Loader2, MenuIcon, Bot, FileIcon } from "lucide-react"
+import { SendIcon, Loader2, MenuIcon, Bot, FileIcon, ArrowDownAZ, MoveDown, Scroll } from "lucide-react"
 import { ScrollArea } from "../components/ui/scroll-area"
 import MessageItem from "../components/message-item"
 import { Progress } from "../components/ui/progress"
@@ -403,9 +403,22 @@ export default function ChatInterface({
       setError("Both URL and model name are required.");
     }
   };
-
+  const [autoscroll,setautoscroll]=useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const scrolltobottom = useCallback(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
+    }, [chat,scroll]);
+      
+    useEffect(() => {
+    if (autoscroll) {
+      setTimeout(scrolltobottom, 2); // run the function every 2ms
+    }
+    }, [chat]);
   // --- JSX Rendering ---
   const [sbi,setcobi] = useState(false)
+
   return (
     <div className="" onClick={()=>setcobi(false)}>
       {/* Dialog for URL and Model Name */}
@@ -455,8 +468,8 @@ export default function ChatInterface({
       {/* Message Area */}
       {/* <ScrollArea className="h-full justify-center"> w-9 */}
       {/* <div className="flex overflow-hidden"> Make chat history grow and handle overflow */}
-      <div className="absolute w-full bottom-0 top-0 pt-20 pb-[144px] overflow-y-scroll pl-8 pr-8" >
-        <div className="mx-auto flex w-full max-w-3xl flex-col pb-10">
+      <div className="absolute w-full bottom-0 top-0 pt-20 mb-[144px] overflow-y-scroll pl-8 pr-8" ref={containerRef}>
+        <div className="mx-auto flex w-full max-w-3xl flex-col mb-10">
           {/* mx-auto flex w-full max-w-3xl flex-col space-y-12 px-4 pb-10 pt-safe-offset-10 */}
           {chat.messages.length === 0 ? (
             <div className="flex items-center justify-center h-full w-full">
@@ -465,6 +478,7 @@ export default function ChatInterface({
           ) : (
             chat.messages.map((message) => (
               <MessageItem
+                
                 key={message.id}
                 message={message}
                 isStreaming={streamingMessageId === message.id}
@@ -480,6 +494,8 @@ export default function ChatInterface({
         </div>
         {/* </div> */}
       {/* </ScrollArea> */}
+
+      
 
       {/* Error Display */}
       {error && (
@@ -555,6 +571,24 @@ export default function ChatInterface({
           <Button variant={"outline"} onClick={() => handleSendMessage()} disabled={isLoading || !input.trim()} className= "text-black dark:text-white ">
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendIcon className="h-4 w-4" />}
           </Button>
+           <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={scrolltobottom} 
+          className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+          title="Scroll to bottom"
+        >
+          <MoveDown className="h-4 w-4" />
+        </Button> 
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={()=>setautoscroll(cv=>!cv)} 
+          className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+          title="Autoscroll"
+        >
+          <Scroll className="h-4 w-4" />
+        </Button>
         </div>
         </div>
       </div>
