@@ -142,6 +142,20 @@ async fn getlocalip() -> Result<String, String> {
     println!("{}", local_ip().unwrap().to_string());
     Ok(local_ip().unwrap().to_string())
 }
+#[tauri::command]
+async fn embedfile(path: String, state: State<'_, AppStateStore>) -> Result<bool, String> {
+    if let Ok(res)=state.embedfile(path).await{
+        return Ok(res)
+    }
+    Err("Could not embed file type not supported".to_string())
+}
+#[tauri::command]
+async fn queryfile(question: String, state: State<'_, AppStateStore>) -> Result<String, String> {
+    if let Ok(res)=state.retieve_from_file_and_generate(question).await{
+        return Ok(res)
+    }
+    Err("Could not check the file for query".to_string())
+}
 
 #[tauri::command]
 async fn highlightfile(path: String, theme: String) -> Result<String, String> {
