@@ -820,23 +820,23 @@ export default function Greet() {
           </Sheet>
           {(supportedfiles.includes(ftype))?(
             <Button className="ml-2" variant={"outline"} onClick={()=>{
-              const timestamp = Date.now();
-              // const timestamp=""
+              // const timestamp = Date.now();
+              const timestamp=""
               invoke("newspecwindow",{
                 winlabel:`${"chatui"}`,
-                name:"FileGPT"
+                name:"FileGPT: "+`${row.original.path}`
               })
               
-              const intervalId = setInterval(async () => {
-              const exists = await windowExists(`${"chatui"+timestamp}`);
-              // console.log("Window exists?", exists);
-              if (exists) {
-                // sendCommand();
-                console.log("checked for "+`${"chatui"+timestamp}`)
-                emit('chatui', { myData: row.original });
-                clearInterval(intervalId); // Stop checking after first success
-              }
-            }, 2000);
+            //   const intervalId = setInterval(async () => {
+            //   const exists = await windowExists(`${"chatui"+timestamp}`);
+            //   // console.log("Window exists?", exists);
+            //   if (exists) {
+            //     // sendCommand();
+            //     console.log("checked for "+`${"chatui"+timestamp}`)
+            //     emit('chatui', { myData: row.original });
+            //     clearInterval(intervalId); // Stop checking after first success
+            //   }
+            // }, 2000);
               // });
               console.log("clicked")
 

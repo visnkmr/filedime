@@ -59,9 +59,10 @@ pub struct AppStateStore {
     pub process_count: Arc<Mutex<i32>>,
     pub buttonnames: HashMap<String, String>,
     pub ollama: Ollama,
-    pub db: Mutex<CacheDB>,
-    pub embedding_model_name: String,
-    pub llm_model_name: String,
+    pub db: Arc<RwLock<CacheDB>>,
+    pub filelist:RwLock<Vec<String>>,
+    // pub embedding_model_name: String,
+    // pub llm_model_name: String,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
@@ -188,19 +189,21 @@ impl AppStateStore {
                 buttonnames
             },
             ollama,
-            db: Mutex::new(db),
-            embedding_model_name: embedding_model,
-            llm_model_name: llm_model,
+            db: Arc::new(RwLock::new(db)),
+            filelist: RwLock::new(vec![])
+            // embedding_model_name: embedding_model,
+            // llm_model_name: llm_model,
         }
     }
-    pub async fn embedfile(&self,path:String)->anyhow::Result<(bool)>{
+    pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<(bool)>{
+        println!("Path {}  exists? {}",path,Path::new(&path).exists());
         let input_vec = self.load_document_and_extract_text(Path::new(&path)).await?;
         let texts_to_embed=input_vec.content;
         let splitter = TextSplitter::new(256);
         let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).collect();
         let filetexts=texts_to_embed.clone();
         let request = GenerateEmbeddingsRequest::new(
-            self.embedding_model_name.clone(), // The model name
+            embedding_model_name, // The model name
             texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
         );
         let response = self.ollama.generate_embeddings(request).await?;
@@ -225,7 +228,9 @@ impl AppStateStore {
                 metadata: Some(input_vec.metadata.clone()),
             };
 
-            self.db.lock().unwrap().insert_into_collection("documents", embedding1)?;
+            let mut db=self.db.write().unwrap();
+            
+            db.insert_into_collection("documents", embedding1)?;
 
 
 
@@ -234,61 +239,67 @@ impl AppStateStore {
             // Remember to use `embedding.len()` as the dimension when creating your
             // vector database collection.
         }
+        let mut filelist=self.filelist.write().unwrap();
+        filelist.push(path.clone());
         Ok(true)
     }
-    pub async fn retieve_from_file_and_generate(&self,query:String)->anyhow::Result<String>{
-        let splitter = TextSplitter::new(256);
-        let texts_to_embed: Vec<&str> = splitter.chunks(&query).collect();
+    // pub async fn retieve_from_file_and_generate(&self,query:String)->anyhow::Result<String>{
+    //     let splitter = TextSplitter::new(256);
+    //     let texts_to_embed: Vec<&str> = splitter.chunks(&query).collect();
 
-        // println!("Generating embeddings for {:?} texts using model: {}", texts_to_embed, self.embedding_model_name);
+    //     // println!("Generating embeddings for {:?} texts using model: {}", texts_to_embed, self.embedding_model_name);
 
-        // 4. Create the embedding request
-        // You can send a single string or a Vec<String> for batch embedding
-        let queryreq = GenerateEmbeddingsRequest::new(
-            self.embedding_model_name.clone(), // The model name
-            texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
-        );
+    //     // 4. Create the embedding request
+    //     // You can send a single string or a Vec<String> for batch embedding
+    //     let queryreq = GenerateEmbeddingsRequest::new(
+    //         self.embedding_model_name.clone(), // The model name
+    //         texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
+    //     );
 
-        // 5. Send the request to Ollama and get the embeddings
-        let queryreq = self.ollama.generate_embeddings(queryreq).await?;
-        // for (i, embedding) in queryreq.embeddings.iter().enumerate() {
-        //         println!("Embedding for querytext {}: [{}, {}, ..., {}] (Dimension: {})",
-        //                 i,
-        //                 embedding[0],
-        //                 embedding[1],
-        //                 embedding[embedding.len() - 1],
-        //                 embedding.len()
-        //         );
-        // }
-        let collection = self.db.lock().unwrap();
-        let collection=collection.get_collection("documents").unwrap();
-        let mut retrieved_context=String::new();
-        for (_, embedding) in queryreq.embeddings.iter().enumerate() {
-            for similar_result_found in collection.get_similarity(&embedding, 3){
+    //     // 5. Send the request to Ollama and get the embeddings
+    //     let queryreq = self.ollama.generate_embeddings(queryreq).await?;
+    //     // for (i, embedding) in queryreq.embeddings.iter().enumerate() {
+    //     //         println!("Embedding for querytext {}: [{}, {}, ..., {}] (Dimension: {})",
+    //     //                 i,
+    //     //                 embedding[0],
+    //     //                 embedding[1],
+    //     //                 embedding[embedding.len() - 1],
+    //     //                 embedding.len()
+    //     //         );
+    //     // }
+    //     let collection = self.db.read().unwrap();
+    //     let collection=collection.get_collection("documents").unwrap();
+    //     let mut retrieved_context=String::new();
+    //     for (_, embedding) in queryreq.embeddings.iter().enumerate() {
+    //         for similar_result_found in collection.get_similarity(&embedding, 3){
 
-                let eachtext=(similar_result_found.embedding.id.get("title").unwrap()).to_string(); // Get top 5 similar
-                retrieved_context.push_str(&eachtext);
-            }
-        }
-        print!("Retrieved Content: {}",retrieved_context);
+    //             let eachtext=(similar_result_found.embedding.id.get("title").unwrap()).to_string(); // Get top 5 similar
+    //             retrieved_context.push_str(&eachtext);
+    //         }
+    //     }
+    //     print!("Retrieved Content: {}",retrieved_context);
 
-        let prompt = format!(
-            "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
-            retrieved_context.trim(),
-            querystr
-        );
-        let llm_model="qwen2.5:3b";
-        // --- 8. Generate Result from LLM ---
-        // println!("\nGenerating response from LLM (Model: {})...", llm_model);
-        let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
-        let llm_response = self.ollama.generate(llm_request).await?;
+    //     let prompt = format!(
+    //         "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+    //         retrieved_context.trim(),
+    //         query
+    //     );
+    //     self.db.clear_poison();
+    //     let llm_model="qwen2.5:3b";
+    //     // --- 8. Generate Result from LLM ---
+    //     // println!("\nGenerating response from LLM (Model: {})...", llm_model);
+    //     let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
+    //     if let llm_response = self.ollama.generate(llm_request).await?{
+    //         return Ok(llm_response.response)
+    //     }
+    //     Ok("no response generated".to_string())
 
-        // println!("\n--- LLM Response ---");
-        // println!("{}", llm_response.response);
-        // println!("--------------------");
-        Ok(llm_response.response)
-        // Ok(retrieved_context)
-    }
+    //     // println!("\n--- LLM Response ---");
+    //     // println!("{}", llm_response.response);
+    //     // println!("--------------------");
+        
+    //     // Ok(retrieved_context)
+    // }
     // pub async fn generatefromlocal(&self,retrieved_context:String,querystr:String)->anyhow::Result<String>{
     //     let prompt = format!(
     //         "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",

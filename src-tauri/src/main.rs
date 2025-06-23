@@ -24,6 +24,8 @@ use chrono::{DateTime, Local, Utc};
 use local_ip_address::local_ip;
 // use get_size::GetSize;
 use navtimeline::{BrowserHistory, Page};
+use ollama_rs::generation::{completion::request::GenerationRequest, embeddings::request::GenerateEmbeddingsRequest};
+use text_splitter::TextSplitter;
 // use filesize::PathExt;
 
 use crate::driveops::*;
@@ -143,18 +145,103 @@ async fn getlocalip() -> Result<String, String> {
     Ok(local_ip().unwrap().to_string())
 }
 #[tauri::command]
-async fn embedfile(path: String, state: State<'_, AppStateStore>) -> Result<bool, String> {
-    if let Ok(res)=state.embedfile(path).await{
-        return Ok(res)
+async fn fileslist(state: State<'_, AppStateStore>) -> Result<Vec<String>, String> {
+    let filelist=state.filelist.read().unwrap();
+    Ok(filelist.clone())
+}
+#[tauri::command]
+async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_, AppStateStore>) -> Result<(serde_json::Value), String> {
+    println!("{:?}",path);
+    let mut successcount=0;
+    let mut failcount=0;
+    for eachfile in path{
+        if let Ok(res)=state.embedfile(eachfile,embeddingmodelname.clone()).await{
+            successcount+=1
+        }
+        else{
+            failcount+=1
+        }
+    }
+    if(successcount>=1){
+        return Ok(json!({"successcount":successcount,"failcount":failcount}))
     }
     Err("Could not embed file type not supported".to_string())
 }
 #[tauri::command]
-async fn queryfile(question: String, state: State<'_, AppStateStore>) -> Result<String, String> {
-    if let Ok(res)=state.retieve_from_file_and_generate(question).await{
-        return Ok(res)
+async fn queryfile(question: String, model: String,embeddingmodelname:String, state: State<'_, AppStateStore>,usecompletefile:bool) -> Result<String, String> {
+        let mut doclist;
+        let mut retrieved_context=String::new();
+        if(usecompletefile){
+
+            {
+                let rwdoclist=state.filelist.read().unwrap();
+                doclist =rwdoclist.clone();
+                drop(rwdoclist);
+            }
+            for path in doclist{
+                let input_vec = state.load_document_and_extract_text(Path::new(&path)).await.unwrap();
+                let texts_to_embed=input_vec.content;
+                retrieved_context.push_str(texts_to_embed.as_str());
+            }
+        }
+        else{
+
+            let splitter = TextSplitter::new(256);
+            let texts_to_embed: Vec<&str> = splitter.chunks(&question).collect();
+        
+            // Create the embedding request for the user's question
+            let query_req = GenerateEmbeddingsRequest::new(
+                embeddingmodelname.clone(),
+                texts_to_embed.clone().into(),
+            );
+        
+            // 1. AWAIT: Generate embeddings for the question. No locks are held here.
+            let embeddings_response = state.ollama.generate_embeddings(query_req).await.unwrap();
+        
+            // This string will hold the data we retrieve from the database.
+            let mut retrieved_context = String::new();
+        
+            // --- Start of the critical section ---
+            // Use a block to strictly limit the lifetime of the RwLockReadGuard.
+            {
+                let db = Arc::clone(&state.db);
+                // The read guard 'collections_guard' is created here.
+                let collections_guard = db.read().unwrap(); 
+                let collection = collections_guard.get_collection("documents").unwrap();
+        
+                for embedding in embeddings_response.embeddings.iter() {
+                    // Perform the similarity search while the lock is held.
+                    for similar_result_found in collection.get_similarity(embedding, 10) {
+                        // Assuming the 'title' is what you want to retrieve.
+                        // Using .get() and handling the Option is safer.
+                        if let Some(title_value) = similar_result_found.embedding.id.get("title") {
+                            // Convert the value to a string slice and push it.
+                                retrieved_context.push_str(title_value.as_str());
+                                retrieved_context.push_str("\n"); // Add a separator for clarity
+                        }
+                    }
+                }
+            } // <-- The 'collections_guard' is dropped here, and the read lock is released.
+              // We are now safe to .await again.
+        
+            println!("Retrieved Content: {}", retrieved_context);
+        }
+    
+
+    let prompt = format!(
+        "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+        retrieved_context.trim(),
+        question
+    );
+
+    let llm_request = GenerationRequest::new(model, prompt);
+
+    // 2. AWAIT: Generate the final response from the LLM.
+    if let Ok(llm_response) = state.ollama.generate(llm_request).await {
+        return Ok(llm_response.response);
     }
-    Err("Could not check the file for query".to_string())
+
+    Ok("no response generated".to_string())
 }
 
 #[tauri::command]
@@ -388,13 +475,26 @@ async fn newspecwindow(
         .build()
         .unwrap();
     } else if (winlabel.starts_with("chatui")) {
+        println!("{:?}",embedfile(vec![name.replace("FileGPT: ","")], state).await.unwrap());
         tauri::WindowBuilder::new(
             &window.app_handle(),
             winlabel,
             tauri::WindowUrl::App("chatui".into()),
         )
-        .title(name)
+        .title(name.clone())
         .build()
+        .unwrap();
+    window.app_handle()
+        .emit_all(
+            // label,
+            "dialogshow",
+            serde_json::to_string(&json!({
+              "title":name.replace("FileGPT: ",""),
+              "content":"Sucessfully embeded",
+              // "arguments":arguments
+            }))
+            .unwrap(),
+        )
         .unwrap();
     } else {
         opennewwindow(&window.app_handle(), &name, &winlabel);
@@ -632,6 +732,9 @@ fn main() {
             addtotabhistory,
             mountdrive,
             unmountdrive,
+            embedfile,
+            queryfile,
+            fileslist,
             // whattoload,
             // get_window_label
         ])

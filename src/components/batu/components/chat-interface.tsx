@@ -11,7 +11,8 @@ import { ScrollArea } from "../components/ui/scroll-area"
 import MessageItem from "../components/message-item"
 import { Progress } from "../components/ui/progress"
 import LMStudioURL from "./lmstudio-url"
-
+import axios from "axios"
+import { invoke } from "@tauri-apps/api/tauri";
 // --- Type Definitions ---
 
 interface SendMessageStreamParams {
@@ -44,6 +45,68 @@ interface ChatInterfaceProps {
   getModelColor:any;
   getModelDisplayName:any;
   setollamastate:any;
+}
+
+async function fileloader(setIsLoading,chat: Chat,updateChat: (chat: Chat) => void,ollamastate: number,selectedModel: string,lmstudio_model_name: string,filegptendpoint:string,filePaths:string[]):Promise<boolean>{
+  // try{
+
+  //   const response = await axios.post(`${filegptendpoint}/embed`, { files: filePaths.map((r)=>r.replace("C:\\","\\mnt\\c\\")) });
+  //   if(response.status==200) return true
+  // }
+  // catch(e){
+  //   console.log(e)
+  // }
+  setIsLoading(true)
+  console.log(filePaths)
+  invoke("embedfile",{path:filePaths,embeddingmodelname:"nomic-embed-text"}).then((e)=>{
+            console.log(e)
+            // Prepare user and assistant messages
+              const assistantMessageId = (Date.now() + 1).toString();
+              const assistantMessage: Message = {
+                id: assistantMessageId,
+                role: "assistant",
+                content:  `File: ${filePaths} added to context`,
+                timestamp: new Date().toISOString(),
+                model:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+
+
+              const initialMessages = chat.messages;
+              let currentChatState = {
+                  ...chat,
+                  messages: [...initialMessages, assistantMessage],
+                  title: initialMessages.length === 0 ? `FileGPT: ${filePaths} ` : chat.title,
+                  lastModelUsed:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+              updateChat(currentChatState);
+        })
+        .catch((e)=>{
+          const assistantMessageId = (Date.now() + 1).toString();
+              const assistantMessage: Message = {
+                id: assistantMessageId,
+                role: "assistant",
+                content:  `Faled to add File: ${filePaths}`,
+                timestamp: new Date().toISOString(),
+                model:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+
+
+              const initialMessages = chat.messages;
+              let currentChatState = {
+                  ...chat,
+                  messages: [...initialMessages, assistantMessage],
+                  title: initialMessages.length === 0 ? `FileGPT: ${filePaths} ` : chat.title,
+                  lastModelUsed:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+              updateChat(currentChatState);
+              setIsLoading(false)
+        })
+
+        .finally(()=>{
+          setIsLoading(false)
+        })
+        setIsLoading(false)
+  return false      
 }
 
 // --- Exported Send Message Stream Function ---
@@ -210,12 +273,14 @@ export default function ChatInterface({
   getModelColor,
   setollamastate
 }: ChatInterfaceProps) {
+  // const [filePaths, setFilePaths] = useState([message?message.path:""]);
+
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [dsm,setdsm]=useState(directsendmessage)
   const [mts,setmts]=useState(messagetosend)
   const [error, setError] = useState<string | null>(null)
-  const [selectedFilePath, setSelectedFilePath] = useState<string>(message?.path || "")
+  const [selectedFilePath, setSelectedFilePath] = useState<string[]>([message?.path?message.path:""])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null)
@@ -230,9 +295,34 @@ export default function ChatInterface({
     setContextUsage(usagePercentage)
   }, [chat.messages, input, selectedModelInfo])
 
+  useEffect(()=>{invoke("fileslist",{}).then((filePaths)=>{
+            console.log(filePaths)
+            // Prepare user and assistant messages
+              const assistantMessageId = (Date.now() + 1).toString();
+              const assistantMessage: Message = {
+                id: assistantMessageId,
+                role: "assistant",
+                content:  `File: ${filePaths} added to context`,
+                timestamp: new Date().toISOString(),
+                model:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+
+
+              const initialMessages = chat.messages;
+              let currentChatState = {
+                  ...chat,
+                  messages: [...initialMessages, assistantMessage],
+                  title: initialMessages.length === 0 ? `FileGPT: ${filePaths} ` : chat.title,
+                  lastModelUsed:  ollamastate==0 ? selectedModel : lmstudio_model_name,
+              };
+              updateChat(currentChatState);
+        })
+  },[])
   useEffect(() => {
     if (message?.path) {
-      setSelectedFilePath(message.path)
+      setSelectedFilePath([...message.path])
+      // setFilePaths([message.path])
+      // fileloader(setIsLoading,chat,updateChat,ollamastate,selectedModel,lmstudio_model_name,filegpt_url,selectedFilePath)
     }
   }, [message])
 
@@ -291,61 +381,115 @@ export default function ChatInterface({
     };
     updateChat(currentChatState);
 
-    try {
-        // Determine API URL and model
-        let apiUrl = "https://openrouter.ai/api";
-        if (ollamastate === 0) {
-          apiUrl = "https://openrouter.ai/api";
-        } else if (ollamastate === 1 || ollamastate === 2) {
-          apiUrl = lmstudio_url;
-        } else if (ollamastate === 3) {
-          apiUrl = filegpt_url;
-        }
-        const modelToSend = ollamastate==0 ? selectedModel : lmstudio_model_name;
-        const messagesToSend = [...initialMessages, userMessage].map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-        }));
-
-        let accumulatedContent = "";
+    
 
         // Call the generator and process the stream
-        for await (const contentChunk of sendMessageStream({
-            url: apiUrl,
-            notollama: ollamastate,
-            apiKey: apiKey,
-            model: modelToSend,
-            messages: messagesToSend,
-            lmstudio_url:lmstudio_url,
-        })) {
-            accumulatedContent += contentChunk;
+        if(ollamastate!==3){
+          try {
+            // Determine API URL and model
+            let apiUrl = "";
+            if (ollamastate === 0) {
+              apiUrl = "https://openrouter.ai/api";
+            } else if (ollamastate === 1 || ollamastate === 2) {
+              apiUrl = lmstudio_url;
+            } else if (ollamastate === 3) {
+              apiUrl = filegpt_url;
+            }
+            const modelToSend = ollamastate==0 ? selectedModel : lmstudio_model_name;
+            const messagesToSend = [...initialMessages, userMessage].map((msg) => ({
+                role: msg.role,
+                content: msg.content,
+            }));
 
-            // Update the last message (assistant's) with new content
-            const updatedMessages = [...currentChatState.messages];
-            updatedMessages[updatedMessages.length - 1] = {
-                ...updatedMessages[updatedMessages.length - 1],
-                content: accumulatedContent,
-            };
+            let accumulatedContent = "";
 
-            currentChatState = {
-                ...currentChatState,
-                messages: updatedMessages,
-            };
-            updateChat(currentChatState); // Update UI
+              for await (const contentChunk of sendMessageStream({
+                  url: apiUrl,
+                  notollama: ollamastate,
+                  apiKey: apiKey,
+                  model: modelToSend,
+                  messages: messagesToSend,
+                  lmstudio_url:lmstudio_url,
+              })) {
+                  accumulatedContent += contentChunk;
+      
+                  // Update the last message (assistant's) with new content
+                  const updatedMessages = [...currentChatState.messages];
+                  updatedMessages[updatedMessages.length - 1] = {
+                      ...updatedMessages[updatedMessages.length - 1],
+                      content: accumulatedContent,
+                  };
+      
+                  currentChatState = {
+                      ...currentChatState,
+                      messages: updatedMessages,
+                  };
+                  updateChat(currentChatState); // Update UI
+              }
+            } catch (err) {
+              console.error("Error sending message:", err);
+              setError(err instanceof Error ? err.message : "An error occurred");
+              // On error, remove the assistant placeholder message
+              updateChat({
+                  ...chat,
+                  messages: [...initialMessages, userMessage],
+              });
+            } finally {
+                setIsLoading(false);
+                setStreamingMessageId(null);
+            }
         }
-
-    } catch (err) {
-        console.error("Error sending message:", err);
-        setError(err instanceof Error ? err.message : "An error occurred");
-        // On error, remove the assistant placeholder message
-        updateChat({
-            ...chat,
-            messages: [...initialMessages, userMessage],
-        });
-    } finally {
+        else{
+           const messagesToSend = [...initialMessages, userMessage].map((msg) => ({
+                role: msg.role,
+                content: msg.content,
+            }));
+        const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
+          invoke("queryfile",{question:JSON.stringify(messagesToSend),
+             model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
+             embeddingmodelname:"nomic-embed-text",
+             usecompletefile:false
+            }).then((e)=>{
+            // console.log(e)
+             // Update the last message (assistant's) with new content
+              const updatedMessages = [...currentChatState.messages];
+              updatedMessages[updatedMessages.length - 1] = {
+                  ...updatedMessages[updatedMessages.length - 1],
+                  content: e as string,
+              };
+  
+              currentChatState = {
+                  ...currentChatState,
+                  messages: updatedMessages,
+              };
+              updateChat(currentChatState); // Update UI
+              setIsLoading(false);
+              setStreamingMessageId(null);
+        //     setlocalip(
+        //         <>
+        //             <p className="font-semibold">Ollama should be running @ http://{e}:11434.</p>
+        //             <p className="font-semibold"><Link target="_blank" href="https://github.com/visnkmr/filegpt-filedime">FiledimeGPT python server</Link> if installed should be running @ http://{e}:8694.</p>
+        //             <p className="font-semibold">FiledimeGPT LAN local instance is accessible @ http://{e}:8477 for any device on your connected network.</p>
+        //         </>
+        // );
+        }).catch((e)=>{
+          const updatedMessages = [...currentChatState.messages];
+              updatedMessages[updatedMessages.length - 1] = {
+                  ...updatedMessages[updatedMessages.length - 1],
+                  content: e as string,
+              };
+  
+              currentChatState = {
+                  ...currentChatState,
+                  messages: updatedMessages,
+              };
+              updateChat(currentChatState); // Update UI
+        })
         setIsLoading(false);
         setStreamingMessageId(null);
-    }
+        }
+
+    
   };
 
     // Effect for direct message sending
@@ -558,12 +702,12 @@ export default function ChatInterface({
             <div className="flex flex-grow items-center gap-2">
               <Input
                 type="text"
-                value={selectedFilePath}
-                onChange={(e) => setSelectedFilePath(e.target.value)}
+                value={selectedFilePath[(selectedFilePath.length-1)]}
+                onChange={(e) => setSelectedFilePath([...e.target.value])}
                 placeholder="Enter file path or choose file"
                 className="flex-grow"
               />
-              <Button variant="outline" size="icon" onClick={() => setSelectedFilePath("")}>
+              <Button variant="outline" size="icon" onClick={() => fileloader(setIsLoading,chat,updateChat,ollamastate,selectedModel,lmstudio_model_name,filegpt_url,selectedFilePath)}>
                 <FileIcon className="h-4 w-4" />
               </Button>
             </div>
