@@ -5,9 +5,11 @@ import { useState, useRef, type KeyboardEvent, useEffect, useCallback } from "re
 import { Textarea } from "../components/ui/textarea"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
+import { HoverCard,HoverCardContent,HoverCardTrigger } from "../components/ui/hover-card"
 import type { Chat, Message, BranchPoint, FileItem } from "../lib/types"
-import { SendIcon, Loader2, MenuIcon, Bot, FileIcon, ArrowDownAZ, MoveDown, Scroll } from "lucide-react"
+import { SendIcon, Loader2, MenuIcon, Bot, FileIcon, ArrowDownAZ, MoveDown, Scroll, FileCheck, FileMinus, FileClock, BookX, File, FileStack } from "lucide-react"
 import { ScrollArea } from "../components/ui/scroll-area"
+import {setcolorpertheme} from "../../greet"
 import MessageItem from "../components/message-item"
 import { Progress } from "../components/ui/progress"
 import LMStudioURL from "./lmstudio-url"
@@ -402,6 +404,7 @@ export default function ChatInterface({
             }));
 
             let accumulatedContent = "";
+            
 
               for await (const contentChunk of sendMessageStream({
                   url: apiUrl,
@@ -445,10 +448,11 @@ export default function ChatInterface({
                 content: msg.content,
             }));
         const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
-          invoke("queryfile",{question:JSON.stringify(messagesToSend),
+          invoke("queryfile",{question:JSON.stringify(sendwithhistory?messagesToSend:messagesToSend[messagesToSend.length-1]),
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
-             usecompletefile:false
+             usecompletefile:fullfileascontext,
+             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
             }).then((e)=>{
             // console.log(e)
              // Update the last message (assistant's) with new content
@@ -548,6 +552,9 @@ export default function ChatInterface({
     }
   };
   const [autoscroll,setautoscroll]=useState(false);
+  const [fullfileascontext,setfullfileascontext]=useState(false);
+  const [sendwithhistory,setsendwithhistory]=useState(false);
+  const [searchcurrent,setsearchcurrent]=useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
     const scrolltobottom = useCallback(() => {
       if (containerRef.current) {
@@ -733,6 +740,54 @@ export default function ChatInterface({
         >
           <Scroll className="h-4 w-4" />
         </Button>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={()=>setfullfileascontext(cv=>!cv)} 
+              className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+              title="Include file history"
+            >
+              {fullfileascontext?(<FileCheck className="h-4 w-4" />):(<FileMinus className="h-4 w-4"/>)}
+          </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+            {fullfileascontext?"Full file contents will be passed as context":"Embeddings will be passed as context"}
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={()=>setsendwithhistory(cv=>!cv)} 
+              className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+              title="Include chat history"
+            >
+              {sendwithhistory?(<FileClock className="h-4 w-4" />):(<BookX className="h-4 w-4"/>)}
+          </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+            {fullfileascontext?"Full chat history will be passed as context":"Ignore chat history"}
+          </HoverCardContent>
+        </HoverCard>
+        <HoverCard>
+          <HoverCardTrigger>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={()=>setsearchcurrent(cv=>!cv)} 
+              className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+              title="Search which files"
+            >
+              {searchcurrent?(<File className="h-4 w-4" />):(<FileStack className="h-4 w-4"/>)}
+          </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+            {searchcurrent?"Search current file":"Search all the files"}
+          </HoverCardContent>
+        </HoverCard>
         </div>
         </div>
       </div>

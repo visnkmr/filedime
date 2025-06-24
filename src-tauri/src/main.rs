@@ -162,21 +162,26 @@ async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_,
             failcount+=1
         }
     }
-    if(successcount>=1){
+    if(successcount>=1)
+    {
         return Ok(json!({"successcount":successcount,"failcount":failcount}))
     }
     Err("Could not embed file type not supported".to_string())
 }
 #[tauri::command]
-async fn queryfile(question: String, model: String,embeddingmodelname:String, state: State<'_, AppStateStore>,usecompletefile:bool) -> Result<String, String> {
+async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,path:String, state: State<'_, AppStateStore>) -> Result<String, String> {
         let mut doclist;
         let mut retrieved_context=String::new();
+        // let path="ALL";
         if(usecompletefile){
-
+            if(path=="ALL")
             {
                 let rwdoclist=state.filelist.read().unwrap();
                 doclist =rwdoclist.clone();
                 drop(rwdoclist);
+            }
+            else{
+                doclist=vec![path.to_string()]
             }
             for path in doclist{
                 let input_vec = state.load_document_and_extract_text(Path::new(&path)).await.unwrap();
@@ -207,7 +212,7 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String, st
                 let db = Arc::clone(&state.db);
                 // The read guard 'collections_guard' is created here.
                 let collections_guard = db.read().unwrap(); 
-                let collection = collections_guard.get_collection("documents").unwrap();
+                let collection = collections_guard.get_collection(&path).unwrap();
         
                 for embedding in embeddings_response.embeddings.iter() {
                     // Perform the similarity search while the lock is held.
@@ -475,7 +480,7 @@ async fn newspecwindow(
         .build()
         .unwrap();
     } else if (winlabel.starts_with("chatui")) {
-        println!("{:?}",embedfile(vec![name.replace("FileGPT: ","")], state).await.unwrap());
+        println!("{:?}",embedfile(vec![name.replace("FileGPT: ","")],"nomic-embed-text".to_string(), state).await.unwrap());
         tauri::WindowBuilder::new(
             &window.app_handle(),
             winlabel,

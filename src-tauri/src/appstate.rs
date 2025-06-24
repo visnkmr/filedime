@@ -107,7 +107,6 @@ impl AppStateStore {
 
         // Initialize CacheDB
         let mut db = CacheDB::new();
-        db.create_collection("documents".to_string(), 768, Distance::Cosine).unwrap(); // 768 is common for nomic-embed-text
         Self {
             // filegptendpoint:getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"),
             // Wrap the cache in a RwLock
@@ -195,9 +194,23 @@ impl AppStateStore {
             // llm_model_name: llm_model,
         }
     }
-    pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<(bool)>{
+    pub async fn removeembed(&self,path:String)->anyhow::Result<(bool)>{
+        let mut db=self.db.write().unwrap();
+            db.delete_collection(&path)?;
+        Ok(true)
+    }
+    pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<bool>{
         println!("Path {}  exists? {}",path,Path::new(&path).exists());
-        let input_vec = self.load_document_and_extract_text(Path::new(&path)).await?;
+        {
+            let mut filelist=self.filelist.read().unwrap();
+            if(filelist.contains(&path)){
+                return Ok(true)
+            }
+        }
+        if(!Path::new(&path).exists()){
+            return Ok(false)
+        }
+        let input_vec = self.load_document_and_extract_text(Path::new(&path)).await.unwrap();
         let texts_to_embed=input_vec.content;
         let splitter = TextSplitter::new(256);
         let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).collect();
@@ -206,11 +219,13 @@ impl AppStateStore {
             embedding_model_name, // The model name
             texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
         );
-        let response = self.ollama.generate_embeddings(request).await?;
+        let response = self.ollama.generate_embeddings(request).await.unwrap();
         let (embeddings) = response.embeddings;
     //  {
         println!("Successfully generated {} embeddings.", embeddings.len());
-
+        let mut db=self.db.write().unwrap();
+        db.create_collection(path.clone(), 768, Distance::Cosine).unwrap(); // 768 is common for nomic-embed-text
+            
         for (i, embedding) in embeddings.iter().enumerate() {
             // println!("Embedding for text {}: [{}, {}, ..., {}] (Dimension: {})",
             //          i,
@@ -228,9 +243,8 @@ impl AppStateStore {
                 metadata: Some(input_vec.metadata.clone()),
             };
 
-            let mut db=self.db.write().unwrap();
             
-            db.insert_into_collection("documents", embedding1)?;
+            db.insert_into_collection(&path, embedding1).unwrap();
 
 
 

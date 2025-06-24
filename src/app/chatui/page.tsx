@@ -3,11 +3,56 @@
 import { emit, listen } from "@tauri-apps/api/event";
 import ChatUI from "../../components/batu/components/chatui"
 import { useEffect, useState } from "react";
+import { useToast } from "../../components/ui/use-toast"
+import { Toaster } from "../../components/ui/toaster"
+// import { appWindow } from "@tauri-apps/api/window";
 // import '../styles/globals.css'
+// async function getCurrentWindowLabel() {
+//   try {
+//     const label = (await appWindow.title()).replace("FileGPT: ","");
+//     console.log("Current window label:", label);
+//     return label;
+//   } catch (error) {
+//     console.error("Error getting window label:", error);
+//     return null;
+//   }
+// }
 export default function chatui(){
+      const { toast } = useToast()
+  
+  // const [path,setpath]=useState("")
+  useEffect(()=>{
+    listen('dialogshow', (pl) => {
+        let recieved=JSON.parse(pl.payload);
+        let content=(recieved.content)
+        let title=(recieved.title)
+        toast({
+          variant:"destructive",
+          title: title,
+          description: content,
+        })
+      });
+  //   (async()=> {
+  //     let fpath=(await getCurrentWindowLabel()) as string
+  //     console.log(fpath)
+  //     setfileinfo({
+  //       name: "string",
+  //       path: fpath,
+  //       is_dir: false,
+  //       size: 999,
+  //       rawfs: 999,
+  //       lmdate: 999,
+  //       timestamp: 999,
+  //       foldercon: 999,
+  //       ftype: "string",
+  //       parent: "string",
+  //     })
+  //   })()
+  },[])
+  // getCurrentWindowLabel();
     const [fileinfo,setfileinfo]=useState({
     name: "string",
-    path: "set path here",
+    path: "",
     is_dir: false,
     size: 999,
     rawfs: 999,
@@ -22,7 +67,7 @@ export default function chatui(){
   console.log('Received:', event.payload);
   setfileinfo(event.payload.myData)
 });
-emit('intercomm', { myData: 'Hello from chatui' });
+// emit('intercomm', { myData: 'Hello from chatui' });
     
         return () => {
             unlisten.then(f => f());
@@ -37,6 +82,7 @@ emit('intercomm', { myData: 'Hello from chatui' });
 //      
 // },[])
     return (<>
-    <ChatUI setasollama={false} message={fileinfo} />
+    <ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={3} />
+    <Toaster />
        </>)
 }

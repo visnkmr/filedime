@@ -33,7 +33,8 @@ interface FileItem {
 interface gptargs{
     message?:FileItem,
     fgptendpoint?:string,
-    setasollama:boolean
+    setasollama:boolean,
+    whichgpt:number
     // localorremote:boolean
 }
 
@@ -53,17 +54,7 @@ let oir=async (fgptendpoint):Promise<boolean> => {
         return false
       }
     };
-async function fileloader(filegptendpoint:string,filePaths:string[]):Promise<boolean>{
-  try{
 
-    const response = await axios.post(`${filegptendpoint}/embed`, { files: filePaths });
-    if(response.status==200) return true
-  }
-  catch(e){
-    console.log(e)
-  }
-  return false      
-}
 async function sendtofilegpt(filegptendpoint,question,isollama,setcbs,setmessage,setchathistory){
    const abortController = new AbortController();
   const signal = abortController.signal;
@@ -124,7 +115,7 @@ async function sendtofilegpt(filegptendpoint,question,isollama,setcbs,setmessage
     },
   });
 }
-export default function ChatUI({message,fgptendpoint="localhost",setasollama=false}:gptargs) {
+export default function ChatUI({message,fgptendpoint="localhost",setasollama=false,whichgpt=0}:gptargs) {
   const [apiKey, setApiKey] = useState<string>("")
   const [lmurl, setlmurl] = useState<string>("")
   const [model_name, set_model_name] = useState<string>("")
@@ -134,13 +125,13 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
   const [chats, setChats] = useState<Chat[]>([])
   const [currentChatId, setCurrentChatId] = useState<string>("")
   const [sidebarVisible, setSidebarVisible] = useState(true)
-  const [ollamastate, setollamastate] = useState(0)
+  const [ollamastate, setollamastate] = useState(whichgpt)
   const [isModelDialogOpen, setIsModelDialogOpen] = useState(false)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [allModels, setAllModels] = useState<any[]>([])
-  const [filePaths, setFilePaths] = useState([message?message.path:null]);
   //Collapse sidebar on chat select
   const [collapsed, setCollapsed] = useState(true);
+
   useEffect(()=>{
     setCollapsed(true)
   },[currentChatId])
@@ -148,8 +139,14 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
   //     if (storedApiKey) {
   //       setApiKey(storedApiKey)
   //     }},[collapsed])
+  // useEffect(()=>{
+  //   if (message && message.path && filePaths && whichgpt!==0  && whichgpt!==1 && whichgpt!==2){
+
+  //     fileloader(filegpturl,filePaths as string[])
+  //   }},[filePaths])
   // Load API key and chats from localStorage on initial render
   useEffect(() => {
+    
     const storedlmurl = localStorage.getItem("lmstudio_url")
     if (storedlmurl) {
       setlmurl(storedlmurl)
@@ -306,11 +303,11 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
     fetchModels()
   }, [apiKey])
 
-  const createNewChat = () => {
+  const createNewChat = (chattitle="New Chat") => {
     const newChatId = Date.now().toString()
     const newChat: Chat = {
       id: newChatId,
-      title: "New Chat",
+      title: chattitle,
       messages: [],
       createdAt: new Date().toISOString(),
       lastModelUsed: selectedModel,
@@ -432,6 +429,8 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
   }, []);
 
   useEffect(() => {
+    // (async ()=>createNewChat((await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ","")))()
+    createNewChat();
     if (typeof window !== 'undefined' && !window.isSecureContext) {
       // In a real Next.js app, you might use next/router here
       // For example: router.replace(window.location.href.replace('http:', 'https:'));
@@ -528,6 +527,9 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
 
         {currentChat && (
           <ChatInterface
+          // fileloader={fileloader}
+          // filegpturl={filegpturl}
+          // filePaths={filePaths}
             setollamastate={setollamastate}
             ollamastate={ollamastate}
             lmstudio_model_name={model_name}
