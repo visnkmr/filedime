@@ -204,7 +204,7 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String,use
             let embeddings_response = state.ollama.generate_embeddings(query_req).await.unwrap();
         
             // This string will hold the data we retrieve from the database.
-            let mut retrieved_context = String::new();
+            // let mut retrieved_context = String::new();
         
             // --- Start of the critical section ---
             // Use a block to strictly limit the lifetime of the RwLockReadGuard.
@@ -229,24 +229,24 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String,use
             } // <-- The 'collections_guard' is dropped here, and the read lock is released.
               // We are now safe to .await again.
         
-            println!("Retrieved Content: {}", retrieved_context);
-        }
-    
+            }
+    println!("Retrieved Content: {}", retrieved_context);
+    Ok(retrieved_context)
 
-    let prompt = format!(
-        "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
-        retrieved_context.trim(),
-        question
-    );
+    // let prompt = format!(
+    //     "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+    //     retrieved_context.trim(),
+    //     question
+    // );
 
-    let llm_request = GenerationRequest::new(model, prompt);
+    // let llm_request = GenerationRequest::new(model, prompt);
 
-    // 2. AWAIT: Generate the final response from the LLM.
-    if let Ok(llm_response) = state.ollama.generate(llm_request).await {
-        return Ok(llm_response.response);
-    }
+    // // 2. AWAIT: Generate the final response from the LLM.
+    // if let Ok(llm_response) = state.ollama.generate(llm_request).await {
+    //     return Ok(llm_response.response);
+    // }
 
-    Ok("no response generated".to_string())
+    // Ok("no response generated".to_string())
 }
 
 #[tauri::command]

@@ -533,7 +533,9 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
             setollamastate={setollamastate}
             ollamastate={ollamastate}
             lmstudio_model_name={model_name}
+            setlmmodel={set_model_name}
             lmstudio_url={lmurl}
+            setlmurl={setlmurl}
             filegpt_url={filegpturl}
             message={message}
             chat={currentChat}

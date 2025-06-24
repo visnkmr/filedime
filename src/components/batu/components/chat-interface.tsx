@@ -24,10 +24,12 @@ interface SendMessageStreamParams {
   model: string;
   messages: Array<{ role: string; content: string }>;
   lmstudio_url:string;
-  
+  context:string
 }
 
 interface ChatInterfaceProps {
+  setlmurl:any;
+  setlmmodel:any;
   ollamastate: number;
   chat: Chat;
   updateChat: (chat: Chat) => void;
@@ -126,11 +128,15 @@ export async function* sendMessageStream({
   apiKey,
   model,
   messages,
-  lmstudio_url
+  lmstudio_url,
+  context
 }: SendMessageStreamParams): AsyncGenerator<string, void, unknown> {
+  const storedApiKey = localStorage.getItem("openrouter_api_key")
+  let prompt = context.trim()===""?`Given the following chathistory, answer the question accurately and concisely. \n\nChat History:\n${messages.slice(0,messages.length-1).map(m => m.content).join('\n')}\n\nQuestion: ${messages[messages.length-1].content}`:`Given the following chathistory, context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nChat History:\n${messages.slice(0,messages.length-1).map(m => m.content).join('\n')}\n\nContext: ${context}\n\nQuestion: ${messages[messages.length-1].content}`;
+  console.log(prompt)
   let headers_openrouter = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${storedApiKey}`,
         "HTTP-Referer": typeof window !== "undefined" ? window.location.href : "",
         "X-Title": "Batu",
       };
@@ -141,7 +147,7 @@ export async function* sendMessageStream({
       headers: (notollama===0 || notollama===2)?headers_openrouter:headers_ollama,
       body: JSON.stringify({
         model: model,
-        messages: messages,
+        messages: [{role:'user',content:prompt}],
         stream: true,
       }),
     });
@@ -259,6 +265,8 @@ export default function ChatInterface({
   updateChat,
   apiKey,
   lmstudio_url,
+  setlmmodel,
+  setlmurl,
   lmstudio_model_name,
   filegpt_url,
   message,
@@ -328,11 +336,12 @@ export default function ChatInterface({
     }
   }, [message])
 
+            // const [context,setcontext]=useState("")
 
   // State for dialog to request URL and model name
   const [showDialog, setShowDialog] = useState(false);
-  const [tempUrl, setTempUrl] = useState(lmstudio_url);
-  const [tempModelName, setTempModelName] = useState(lmstudio_model_name);
+  // const [tempUrl, setTempUrl] = useState(lmstudio_url);
+  // const [tempModelName, setTempModelName] = useState(lmstudio_model_name);
 
   // Main function to handle sending a message
   const handleSendMessage = async (messageContent: string = input) => {
@@ -402,17 +411,24 @@ export default function ChatInterface({
                 role: msg.role,
                 content: msg.content,
             }));
-
+             const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
             let accumulatedContent = "";
-            
+            const context=await invoke("queryfile",{question:JSON.stringify(messagesToSend[messagesToSend.length-1].content),
+             model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
+             embeddingmodelname:"nomic-embed-text",
+             usecompletefile:fullfileascontext,
+             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
+            }).catch(e=>console.log(e)) as string; 
+            console.log(`----------context: ${context}`)
 
               for await (const contentChunk of sendMessageStream({
                   url: apiUrl,
                   notollama: ollamastate,
                   apiKey: apiKey,
                   model: modelToSend,
-                  messages: messagesToSend,
+                  messages: sendwithhistory?messagesToSend:[messagesToSend[messagesToSend.length-1]],
                   lmstudio_url:lmstudio_url,
+                  context:context?context:""
               })) {
                   accumulatedContent += contentChunk;
       
@@ -448,7 +464,7 @@ export default function ChatInterface({
                 content: msg.content,
             }));
         const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
-          invoke("queryfile",{question:JSON.stringify(sendwithhistory?messagesToSend:messagesToSend[messagesToSend.length-1]),
+          invoke("queryfile",{question:JSON.stringify(messagesToSend[messagesToSend.length-1].content),
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
@@ -539,13 +555,14 @@ export default function ChatInterface({
 
   // Function to handle dialog submission
   const handleDialogSubmit = () => {
-    if (tempUrl && tempModelName) {
+    if (lmstudio_model_name && lmstudio_url) {
+      // localStorage.setItem("lmstudio_url", tempUrl)
+      // localStorage.setItem("lmstudio_model_name", tempModelName)
       // Assuming there is a way to update these values in the parent component or context
       // For now, we'll just log a message since updating parent state requires additional props
-      console.log("Updated LM Studio/Ollama URL and Model:", tempUrl, tempModelName);
+      // console.log("Updated LM Studio/Ollama URL and Model:", tempUrl, tempModelName);
       setShowDialog(false);
       // Trigger sending the message again with updated values
-      // This is a placeholder; actual implementation depends on how state is managed
       handleSendMessage();
     } else {
       setError("Both URL and model name are required.");
@@ -586,8 +603,8 @@ export default function ChatInterface({
               <label className="block text-sm font-medium mb-1">URL</label>
               <Input
                 type="text"
-                value={tempUrl}
-                onChange={(e) => setTempUrl(e.target.value)}
+                value={lmstudio_url}
+                onChange={(e) => setlmurl(e.target.value)}
                 placeholder="Enter URL"
                 className="w-full"
                 autoFocus
@@ -597,8 +614,8 @@ export default function ChatInterface({
               <label className="block text-sm font-medium mb-1">Model Name</label>
               <Input
                 type="text"
-                value={tempModelName}
-                onChange={(e) => setTempModelName(e.target.value)}
+                value={lmstudio_model_name}
+                onChange={(e) => setlmmodel(e.target.value)}
                 placeholder="Enter Model Name"
                 className="w-full"
               />
@@ -769,7 +786,7 @@ export default function ChatInterface({
           </Button>
           </HoverCardTrigger>
           <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
-            {fullfileascontext?"Full chat history will be passed as context":"Ignore chat history"}
+            {sendwithhistory?"Full chat history will be passed as context":"Ignore chat history"}
           </HoverCardContent>
         </HoverCard>
         <HoverCard>
