@@ -474,7 +474,7 @@ async fn newspecwindow(
         tauri::WindowBuilder::new(
             &window.app_handle(),
             winlabel,
-            tauri::WindowUrl::App("setting".into()),
+            tauri::WindowUrl::App("settings".into()),
         )
         .title(name)
         .build()
@@ -602,14 +602,131 @@ async fn checker() -> Result<String, String> {
         Err(_) => Err("Could not check for updates".to_string()),
     }
 }
-fn handle_connection(mut stream: TcpStream) {
+
+fn get_boundary(request: &str) -> Option<String> {
+    // Look for "Content-Type: multipart/form-data; boundary=----WebKitFormBoundary"
+    if let Some(pos) = request.find("Content-Type: multipart/form-data;") {
+        let content_type = &request[pos..];
+        if let Some(boundary_pos) = content_type.find("boundary=") {
+            let boundary_start = boundary_pos + "boundary=".len();
+            let boundary_end = content_type[boundary_start..].find("\r\n").unwrap_or(content_type.len());
+            return Some(content_type[boundary_start..boundary_start + boundary_end].to_string());
+        }
+    }
+    None
+}
+
+fn get_body(request: &str) -> Option<String> {
+    // The body starts after the headers, which are separated by a double newline (CRLF)
+    if let Some(pos) = request.find("\r\n\r\n") {
+        let body = &request[pos + 4..];
+        return Some(body.to_string());
+    }
+    None
+}
+
+fn parse_multipart_form_data(body: &str, boundary: &str) -> Vec<(String, String)> {
+    let mut form_data = Vec::new();
+    let boundarystring=format!("--{}", boundary);
+    let mut parts = body.split(&boundarystring); // Split by the boundary
+
+    for part in parts {
+        if part.is_empty() {
+            continue;
+        }
+
+        // Find the headers in the part
+        if let Some(pos) = part.find("\r\n\r\n") {
+            let headers = &part[..pos];
+            let content = &part[pos + 4..]; // After the headers is the content
+
+            // Check for the content-disposition header for form fields
+            if let Some(disposition_pos) = headers.find("Content-Disposition: form-data;") {
+                let header = &headers[disposition_pos..];
+                if let Some(name_pos) = header.find("name=\"") {
+                    let name_start = name_pos + "name=\"".len();
+                    let name_end = header[name_start..].find("\"").unwrap_or(header.len());
+                    let name = &header[name_start..name_start + name_end];
+
+                    // Capture the content of the field
+                    form_data.push((name.to_string(), content.to_string()));
+                }
+            }
+        }
+    }
+
+    form_data
+}
+fn handle_connection(mut stream: TcpStream)->anyhow::Result<()> {
     let mut buffer = [0; 1024];
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
     println!("Request: {}", request);
-    // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
+
+     // Handle CORS preflight (OPTIONS) requests
+    if request.starts_with("OPTIONS") {
+        let response = "HTTP/1.1 200 OK\r\n\
+                        Access-Control-Allow-Origin: *\r\n\
+                        Access-Control-Allow-Methods: POST, OPTIONS\r\n\
+                        Access-Control-Allow-Headers: Content-Type\r\n\
+                        Content-Length: 0\r\n\r\n";
+        stream.write(response.as_bytes())?;
+        stream.flush()?;
+        return Ok(());
+    }
+
+
+     // Check if the request is a POST request
+    if request.starts_with("POST") {
+        // Find the boundary from the Content-Type header
+        if let Some(boundary) = get_boundary(&request) {
+            println!("Boundary: {}", boundary);
+
+            if let Some(body) = get_body(&request) {
+                // Use multipart crate to parse the body
+                let mut multipart = multipart::server::Multipart::with_body(body.as_bytes(), boundary);
+                
+                while let Some(mut field) = multipart.read_entry()? {
+                    // let name = field.name().unwrap_or("unknown");
+                    // let filename = field.filename().unwrap_or("unknown");
+                    let mut file_content = Vec::new();
+
+                    // Read the content of the file
+                    field.data.read_to_end(&mut file_content)?;
+
+                    // println!("Field name: {}", name);
+                    // println!("File name: {}", filename);
+                    println!("File content: {:?}", str::from_utf8(&file_content)?);
+                }
+
+                // Send a response back with CORS headers and ensure it's properly flushed
+                let response = "HTTP/1.1 200 OK\r\n\
+                                Access-Control-Allow-Origin: *\r\n\
+                                Content-Length: 13\r\n\r\n\
+                                Hello, World!";
+                stream.write_all(response.as_bytes())?;
+                stream.flush()?;
+            } else {
+                println!("No body content found.");
+            }
+        } else {
+            println!("No boundary found in Content-Type.");
+        }
+        let retjson=serde_json::to_string(&json!({"ok":"ok"}))?;
+        // Send a response back with CORS headers
+        let response = format!("HTTP/1.1 200 OK\r\n\
+                        Access-Control-Allow-Origin: *\r\n\
+                        Content-Length: 13\r\n\r\n\
+                        {}",retjson);
+        stream.write(response.as_bytes())?;
+        stream.flush()?;
+    }
+    else{
+         // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
     let mut filename = request.split_whitespace().nth(1).unwrap_or("/");
     filename = filename.trim_start_matches('/');
+
+
     // println!("---->{}----",filename);
     if (filename.is_empty()) {
         filename = ("filegpt.html");
@@ -630,6 +747,8 @@ fn handle_connection(mut stream: TcpStream) {
         stream.write(response.as_bytes()).unwrap();
         stream.flush().unwrap();
     }
+    }
+    Ok(())
 }
 use include_dir::{include_dir, Dir};
 

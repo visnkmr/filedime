@@ -15,6 +15,8 @@ import { Progress } from "../components/ui/progress"
 import LMStudioURL from "./lmstudio-url"
 import axios from "axios"
 import { invoke } from "@tauri-apps/api/tauri";
+import { Label } from "./ui/label"
+import { FileUploader } from "./fileupoader"
 // --- Type Definitions ---
 
 interface SendMessageStreamParams {
@@ -586,7 +588,10 @@ export default function ChatInterface({
     }, [chat]);
   // --- JSX Rendering ---
   const [sbi,setcobi] = useState(false)
-
+    const [morethanonefile,setmtof]=useState(false)
+    useEffect(()=>{
+      invoke("fileslist",{}).then((filePaths)=>{setmtof(filePaths!.length>1?true:false)})
+    },[])
   return (
     <div className="" onClick={()=>setcobi(false)}>
       {/* Dialog for URL and Model Name */}
@@ -710,7 +715,7 @@ export default function ChatInterface({
               // disabled={!currentChat || currentChat.messages.length === 0}
             >
               <Bot size={16} className="mr-2"/>
-              {`${sbi?(ollamastate===0?"Using Openrouter":(ollamastate===1?"Using Ollama":(ollamastate===2?"Using LM Studio":"Using FileGPT"))):""}`}
+              {`${sbi?(ollamastate===0?"Using Openrouter":(ollamastate===1?"Using Ollama":("Using LM Studio"))):""}`}
             </Button>
           {ollamastate==0?(<Button variant="outline" onClick={() => setIsModelDialogOpen(true)} className="flex items-center gap-2">
                         {selectedModelInfo ? (
@@ -723,17 +728,21 @@ export default function ChatInterface({
                         )}
                       </Button>):null}
           {ollamastate===3 && (
-            <div className="flex flex-grow items-center gap-2">
+            <div className="flex items-center gap-2">
+              <FileUploader/>
+               {/* <Label htmlFor="picture">Picture</Label>
+            <Input id="picture" type="file" />
               <Input
                 type="text"
                 value={selectedFilePath[(selectedFilePath.length-1)]}
                 onChange={(e) => setSelectedFilePath([...e.target.value])}
                 placeholder="Enter file path or choose file"
                 className="flex-grow"
-              />
-              <Button variant="outline" size="icon" onClick={() => fileloader(setIsLoading,chat,updateChat,ollamastate,selectedModel,lmstudio_model_name,filegpt_url,selectedFilePath)}>
+              /> */}
+              {/* <Button variant="outline" size="icon" onClick={() => fileloader(setIsLoading,chat,updateChat,ollamastate,selectedModel,lmstudio_model_name,filegpt_url,selectedFilePath)}>
                 <FileIcon className="h-4 w-4" />
-              </Button>
+                <Input  id="picture" type="file" />
+              </Button> */}
             </div>
           )}
           <Button variant={"outline"} onClick={() => handleSendMessage()} disabled={isLoading || !input.trim()} className= "text-black dark:text-white ">
@@ -764,7 +773,7 @@ export default function ChatInterface({
               size="icon" 
               onClick={()=>setfullfileascontext(cv=>!cv)} 
               className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
-              title="Include file history"
+              // title="Include file history"
             >
               {fullfileascontext?(<FileCheck className="h-4 w-4" />):(<FileMinus className="h-4 w-4"/>)}
           </Button>
@@ -780,7 +789,7 @@ export default function ChatInterface({
               size="icon" 
               onClick={()=>setsendwithhistory(cv=>!cv)} 
               className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
-              title="Include chat history"
+              // title="Include chat history"
             >
               {sendwithhistory?(<FileClock className="h-4 w-4" />):(<BookX className="h-4 w-4"/>)}
           </Button>
@@ -789,14 +798,14 @@ export default function ChatInterface({
             {sendwithhistory?"Full chat history will be passed as context":"Ignore chat history"}
           </HoverCardContent>
         </HoverCard>
-        <HoverCard>
+        {(morethanonefile)?( <HoverCard>
           <HoverCardTrigger>
             <Button 
               variant="outline" 
               size="icon" 
               onClick={()=>setsearchcurrent(cv=>!cv)} 
               className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
-              title="Search which files"
+              // title="Search which files"
             >
               {searchcurrent?(<File className="h-4 w-4" />):(<FileStack className="h-4 w-4"/>)}
           </Button>
@@ -804,7 +813,8 @@ export default function ChatInterface({
           <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
             {searchcurrent?"Search current file":"Search all the files"}
           </HoverCardContent>
-        </HoverCard>
+        </HoverCard>):null}
+       
         </div>
         </div>
       </div>

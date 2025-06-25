@@ -10,6 +10,16 @@ edition = "2021"
 # [build]
 # target-dir="H:\\rust_deps\\"
 
+# [profile.dev]
+# # opt-level = 1
+# debug = 1
+# incremental = true
+# debug-assertions = false
+# overflow-checks = false
+# # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+# [profile.dev.package."*"]
+# # opt-level = 3
+
 [profile.release]
 # strip = true  # Automatically strip symbols from the binary.
 # opt-level = "z"
@@ -81,7 +91,8 @@ memvdb = "0.1.1"
 text-splitter = { version = "0.27.0" } # Or "tiktoken-rs"
 # extractous ="0.3.0"
 shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
-
+# hyper="1.6.0"
+multipart="0.18.0"
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!

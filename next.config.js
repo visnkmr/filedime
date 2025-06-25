@@ -28,7 +28,7 @@ const nextConfig =
   // withPWA,
   // withOptimizedImages,
   experimental: {
-    reactCompiler:true,
+    // reactCompiler:true,
     // appDir: true,
     // optimizeCss: true,
     esmExternals: true,
