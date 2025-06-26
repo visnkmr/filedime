@@ -103,7 +103,7 @@ export default function FiledimeSettings(){
     },[])
     return (
     <>
-    <div className="w-full h-full flex flex-col items-center overflow-scroll p-4 gap-2">
+    <div className="w-full h-full flex flex-col items-center overflow-auto p-4 gap-2">
     <Toaster />
         <div className="flex flex-row font-semibold items-center gap-2">
 

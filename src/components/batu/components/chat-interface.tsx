@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { HoverCard,HoverCardContent,HoverCardTrigger } from "../components/ui/hover-card"
 import type { Chat, Message, BranchPoint, FileItem } from "../lib/types"
-import { SendIcon, Loader2, MenuIcon, Bot, FileIcon, ArrowDownAZ, MoveDown, Scroll, FileCheck, FileMinus, FileClock, BookX, File, FileStack } from "lucide-react"
+import { SendIcon, Loader2, MenuIcon, Bot, FileIcon, ArrowDownAZ, MoveDown, Scroll, FileCheck, FileMinus, FileClock, BookX, File, FileStack, FilePlus } from "lucide-react"
 import { ScrollArea } from "../components/ui/scroll-area"
 import {setcolorpertheme} from "../../greet"
 import MessageItem from "../components/message-item"
@@ -297,6 +297,7 @@ export default function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null)
   const [contextUsage, setContextUsage] = useState(0)
+  const [answerfromfile, setanswerfromfile] = useState(0)
 
   // Calculate context usage effect
   useEffect(() => {
@@ -415,12 +416,13 @@ export default function ChatInterface({
             }));
              const stored_lm_model_name = localStorage.getItem("lmstudio_model_name")
             let accumulatedContent = "";
-            const context=await invoke("queryfile",{question:JSON.stringify(messagesToSend[messagesToSend.length-1].content),
+            
+            const context=answerfromfile?(await invoke("queryfile",{question:JSON.stringify(messagesToSend[messagesToSend.length-1].content),
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
              path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
-            }).catch(e=>console.log(e)) as string; 
+            }).catch(e=>console.log(e)) as string):""; 
             console.log(`----------context: ${context}`)
 
               for await (const contentChunk of sendMessageStream({
@@ -814,7 +816,22 @@ export default function ChatInterface({
             {searchcurrent?"Search current file":"Search all the files"}
           </HoverCardContent>
         </HoverCard>):null}
-       
+       {(answerfromfile)?( <HoverCard>
+          <HoverCardTrigger>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={()=>setanswerfromfile(cv=>!cv)} 
+              className="rounded-full shadow-md bg-gray-100 dark:bg-gray-800"
+              // title="Search which files"
+            >
+              {answerfromfile?(<FilePlus className="h-4 w-4" />):(<FileMinus className="h-4 w-4"/>)}
+          </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
+            {answerfromfile?"answer from file":"Answer without context"}
+          </HoverCardContent>
+        </HoverCard>):null}
         </div>
         </div>
       </div>

@@ -779,7 +779,7 @@ export default function Greet() {
   
           <div className=" ">
   
-  {!is_dir
+    {!is_dir
               // &&
               // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
               // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
@@ -1166,9 +1166,9 @@ export default function Greet() {
     }
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
-        <ResizablePanel defaultSize={size.a}>
+        <ResizablePanel defaultSize={size.a} className="min-w-64">
         {/* {lastcalledtime.current} */}
-        <div className="flex h-full flex-col gap-2">
+        <div className="flex h-full flex-col gap-2 ">
           <div className="flex p-3  border-b">
             
             <div className="flex flex-row p-2 items-center">
@@ -1974,7 +1974,8 @@ export default function Greet() {
        
         {
           layout==="detail" ?
-          (<span className={`overflow-${scrollorauto} ${(fileslist.length>0)}`}>
+          (<span className={`overflow-${scrollorauto} `}>
+            {/* ${(fileslist.length>0)} */}
         
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>):null}
