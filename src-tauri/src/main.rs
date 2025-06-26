@@ -272,8 +272,8 @@ fn filegptendpoint(endpoint: String) -> Result<String, String> {
     if (endpoint == "") {
         Ok(getcustom(
             "filedime",
-            "gpt/filegpt.endpoint",
-            "http://localhost:8694",
+            "storevals/ollamaurl.set",
+            "http://localhost:11434",
         ))
     } else {
         savecustom("filedime", "gpt/filegpt.endpoint", endpoint.clone());

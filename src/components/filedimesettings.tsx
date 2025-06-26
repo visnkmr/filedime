@@ -59,7 +59,7 @@ export default function FiledimeSettings(){
                     <div className="flex flex-row items-center gap-2 "><p className="font-semibold">FiledimeGPT server IP</p>
                         <Input value={filedimegptendpoint}
                     type="text"
-                    placeholder="FiledimeGPT server IP"
+                    placeholder="Ollama server IP"
                     onChange={(event) =>
                     {
                         let pp=(event.target.value);
