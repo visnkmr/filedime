@@ -101,9 +101,9 @@ use crate::{dirsize, sizeunit};
 impl AppStateStore {
     pub fn new(expiration: u64) -> Self {
         // let (tx, rx) = mpsc::channel::<String>();
-        let ollama = Ollama::default();
-        let embedding_model = "nomic-embed-text".to_string(); // Ensure this model is available
-        let llm_model = "qwen2.5:3b".to_string(); // Ensure this model is available
+        let ollama = Ollama::from_url(tauri::Url::parse(&getcustom("filedime", "storevals/ollamaurl.set", "http://127.0.0.1:11434")).unwrap());
+        // let embedding_model = "nomic-embed-text".to_string(); // Ensure this model is available
+        // let llm_model = "qwen2.5:3b".to_string(); // Ensure this model is available
 
         // Initialize CacheDB
         let mut db = CacheDB::new();
@@ -187,9 +187,9 @@ impl AppStateStore {
                 }
                 buttonnames
             },
-            ollama,
             db: Arc::new(RwLock::new(db)),
-            filelist: RwLock::new(vec![])
+            filelist: RwLock::new(vec![]),
+            ollama:ollama
             // embedding_model_name: embedding_model,
             // llm_model_name: llm_model,
         }
@@ -200,6 +200,8 @@ impl AppStateStore {
         Ok(true)
     }
     pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<bool>{
+        // let ollama = Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
+
         println!("Path {}  exists? {}",path,Path::new(&path).exists());
         {
             let mut filelist=self.filelist.read().unwrap();
