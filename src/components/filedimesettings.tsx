@@ -56,10 +56,11 @@ export default function FiledimeSettings(){
                     <p className="font-semibold">Config files are stored @ {stateinf.cfpath} ({stateinf.cfpathsize})</p>
                     {/* add control option to stop and start filedimegpt control server */}
                     {/* add textbox to set custom filedimegpt endpoint */}
-                    <div className="flex flex-row items-center gap-2 "><p className="font-semibold">FiledimeGPT server IP</p>
+                    <p className="font-semibold">Currently only local models based file embedding is supported. If you need file embedding support via openrouter,etc; Please raise an issue in the github repo.</p>
+                    <div className="flex flex-row items-center gap-2 "><p className="font-semibold">Local LLM server IP</p>
                         <Input value={filedimegptendpoint}
                     type="text"
-                    placeholder="Ollama server IP"
+                    placeholder="Local server IP"
                     onChange={(event) =>
                     {
                         let pp=(event.target.value);
@@ -67,6 +68,7 @@ export default function FiledimeSettings(){
                         setfge(pp)
                     }
                     }/>
+                    
                     <Button className="font-semibold" variant={"outline"} onClick={()=>{
                         invoke("filegptendpoint",{
                             endpoint:filedimegptendpoint
@@ -95,29 +97,22 @@ export default function FiledimeSettings(){
             setlocalip(
                 <>
                     <p className="font-semibold">Ollama should be running @ http://{e}:11434.</p>
-                    <p className="font-semibold"><Link target="_blank" href="https://github.com/visnkmr/filegpt-filedime">FiledimeGPT python server</Link> if installed should be running @ http://{e}:8694.</p>
-                    <p className="font-semibold">FiledimeGPT LAN local instance is accessible @ http://{e}:8477 for any device on your connected network.</p>
+                    {/* <p className="font-semibold"><Link target="_blank" href="https://github.com/visnkmr/filegpt-filedime">FiledimeGPT python server</Link> if installed should be running @ http://{e}:8694.</p> */}
+                    <p className="font-semibold">Filechat UI is accessible @ http://{e}:8477 for any device on your connected network.</p>
                 </>
         );
         })
     },[])
     return (
     <>
-    <div className="w-full h-full flex flex-col items-center overflow-auto p-4 gap-2">
-    <Toaster />
-        <div className="flex flex-row font-semibold items-center gap-2">
+    <div className="h-full place-items-center place-content-center flex flex-col overflow-auto p-4 gap-2">
+        <div className="flex flex-col gap-y-5">
+    
+        <div className="flex flex-row font-semibold gap-2 place-items-center">
 
     <FolderIcon className="h-6 w-6" />
-              <span className="">Filedime</span>
-        </div>
-        {datafromstngs}
-        {lcoalip}
-        <div className="font-bold text-center">
-            Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
-        </div>
-        <div>
-        <Button className={`${releaseavailable?"":"hidden"}`} variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>
-        <Button className={`${releaseavailable?"hidden":""}`} variant={"outline"} onClick={()=>{
+              <span className="font-bold">Filedime v{currentversion}</span>
+              <Button className={`${releaseavailable?"hidden":""}`} variant={"outline"} onClick={()=>{
                 invoke("checker",{}).then((r)=>{
                     console.log(r);
                     // useEffect(()=>{
@@ -142,11 +137,19 @@ export default function FiledimeSettings(){
                     // },[])
                   })
             }}>{updatebuttontext}</Button>
+        </div>
+        {datafromstngs}
+        {lcoalip}
+        <div className="font-bold">
+            Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
+        </div>
+        <div>
+        <Button className={`${releaseavailable?"":"hidden"}`} variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>
+        
 
         </div>
-        <div className="font-bold text-center">
-           Filedime v{currentversion}
         </div>
+        <Toaster/>
     </div>
     </>
     );

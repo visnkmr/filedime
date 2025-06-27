@@ -54,12 +54,11 @@ when building on nixos use the shell.nix file provided if necessary
 currently the code may contains lots of comments in rust it will be cleared up in the future.
 
 ## Server guide for the complete stack for reference
-Ollama- http://localhost:11434/
-FiledimeGPT (Python)- http://localhost:8694/
-FiledimeGPT LAN url - http://<pclanipaddress>:8477
+Ollama should be installed and running and ip address should be configured in settings, if ollama is running on a remote machine.
+Filechat UI LAN url can be found in settings.
 
 ## Chat self reference
-Chatting normally should query ollama endpoint from ts, if contextless or if FiledimeGPT server is not running, else if FiledimeGPT server is running, to specifically run query on ollama endpoint include "o2c" (abbrevation for outside of current context) at the begging of the chat.You can also start with generally to run on ollama endpoint via FiledimeGPT server.
-From LAN FiledimeGPT you can use ollama only if ollama is set to accept requests from 0.0.0.0/ if FiledimeGPT Python server is running
+The filechat is accessible via its own repo as well @ https://github.com/visnkmr/batu, however filequerying will not work there.
+For LAN access from a remote machine you can use ollama only if ollama is set to accept requests from 0.0.0.0
 
 Thanks to all the maintainers of the libraries listed in the frontenddepslist.txt and depslist.txt files in the repo.

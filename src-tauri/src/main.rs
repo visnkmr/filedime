@@ -172,6 +172,8 @@ async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_,
 async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,path:String, state: State<'_, AppStateStore>) -> Result<String, String> {
         let mut doclist;
         let mut retrieved_context=String::new();
+        // let ollama = ollama_rs::Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
+
         // let path="ALL";
         if(usecompletefile){
             if(path=="ALL")
@@ -276,7 +278,7 @@ fn filegptendpoint(endpoint: String) -> Result<String, String> {
             "http://localhost:11434",
         ))
     } else {
-        savecustom("filedime", "gpt/filegpt.endpoint", endpoint.clone());
+        savecustom("filedime", "storevals/ollamaurl.set", endpoint.clone());
         Ok(endpoint)
     }
 }
@@ -339,21 +341,68 @@ async fn check_if_installed(appname: &str) -> Result<bool, String> {
 
     Ok(output.status.success())
 }
+#[derive(Debug, Deserialize, Serialize)]
+struct CommandEntry {
+    os: String,      // The operating system name (e.g., "macOS", "Linux", "Windows").
+    command: String, // The actual command string to execute.
+}
+
+// Define a struct that mirrors the overall JSON structure.
+#[derive(Debug, Deserialize, Serialize)]
+struct AppConfig {
+    icon: String,           // The icon string.
+    name: String,           // The name string.
+    command: Vec<CommandEntry>, // A vector (array) of CommandEntry structs.
+}
+use std::env::consts::OS;
+fn parse_config(json_str: &str, target_os: &str) -> Result<(String, String, Option<String>), String> {
+    // Attempt to deserialize the JSON string into our AppConfig struct.
+    // The `?` operator is used for error propagation, returning an `Err` if deserialization fails.
+    let config: AppConfig = serde_json::from_str(json_str)
+        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
+    // Find the command specific to the target_os.
+    // `find()` returns an `Option<&CommandEntry>`, which will be `Some` if found, `None` otherwise.
+    let command_for_os = config.command.iter()
+        .find(|entry| entry.os.eq_ignore_ascii_case(target_os)) // Case-insensitive comparison for OS.
+        .map(|entry| entry.command.clone()); // If found, clone the command string.
+
+    // Return the extracted data wrapped in an `Ok` variant.
+    Ok((config.icon, config.name, command_for_os))
+}
 fn startup(window: &AppHandle) -> Result<(), ()> {
+    let defaultopenterm=json!({
+        "icon": "Terminal",
+        "name": "Open Terminal",
+        "command": [
+            {
+            "os": "macos",
+            "command": "open -a Terminal %f"
+            },
+            {
+            "os": "linux",
+            "command": "exo-open --working-directory %f --launch TerminalEmulator"
+            },
+            {
+            "os": "windows",
+            "command": "cmd /C start cmd /K cd /d %f"
+            }
+        ]
+        });
     //define format for adding custom button as extensions to ui
-    if cfg!(target_os = "linux") {
-        // getcustom(
-        //     "filedime",
-        //     "custom_scripts/terminal_open.fds",
-        //     "exo-open --working-directory %f --launch TerminalEmulator",
-        // );
-    } else if cfg!(target_os = "windows") {
+    // if cfg!(target_os = "linux") {
+    //     // getcustom(
+    //     //     "filedime",
+    //     //     "custom_scripts/terminal_open.fds",
+    //     //     "exo-open --working-directory %f --launch TerminalEmulator",
+    //     // );
+    // } else if cfg!(target_os = "windows") {
         getcustom(
             "filedime",
             "custom_scripts/terminal_open.fds",
-            "cmd /k cd %f",
+            serde_json::to_string(&defaultopenterm).unwrap(),
         );
-    }
+    // }
 
     let mut buttonnames = Vec::new();
     // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
@@ -368,16 +417,53 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
 #[tauri::command]
 async fn otb(bname: String, path: String, state: State<'_, AppStateStore>) -> Result<(), ()> {
     // state.getactivepath(path);
-    println!("{}", path);
+     let current_os = OS;
+
+    println!("{}--{}",bname, path);
 
     if (!Path::new(&path).is_dir()) {
         return Err(());
     }
-    let mut args = state
+    let mut json_data = state
         .buttonnames
         .get(&bname.replace(" ", "_"))
         .unwrap()
         .clone();
+    println!("Detected operating system: {}", current_os);
+    let mut args="".to_string();
+    // Parse the configuration for the current operating system.
+    match parse_config(&json_data, current_os) {
+        Ok((icon, name, command)) => {
+            println!("--- For Current OS ({}) ---", current_os);
+            println!("Icon: {}", icon);
+            println!("Name: {}", name);
+            if let Some(cmd) = command {
+                args=cmd.clone();
+                println!("Command: {}", cmd);
+            } else {
+                println!("Command for {} not found.", current_os);
+            }
+        },
+        Err(e) => eprintln!("Error parsing config: {}", e),
+    }
+
+    println!();
+
+    // Test with malformed JSON (kept for error handling demonstration)
+    // let malformed_json = r#"{"icon": "❌", "name": "Broken", "command": ["oops"}"#;
+    // match parse_config(malformed_json, current_os) {
+    //     Ok((icon, name, command)) => {
+    //         println!("--- For Malformed JSON ---");
+    //         println!("Icon: {}", icon);
+    //         println!("Name: {}", name);
+    //         if let Some(cmd) = command {
+    //             println!("Command: {}", cmd);
+    //         } else {
+    //             println!("Command not found.");
+    //         }
+    //     },
+    //     Err(e) => eprintln!("--- For Malformed JSON Error --- \nError: {}", e),
+    // }
     args = args.replace("%f", &path);
     let args: Vec<_> = args.split(" ").collect();
     println!("{:?}", args);
