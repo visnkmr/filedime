@@ -4,8 +4,10 @@
 import React from 'react'
 import Greet from '../components/greet'
 import GPTchatinterface from '../components/gptchatinterface'
+import { zoomsetup } from '../components/filedimesettings'
 
 export default function Home() {
+  zoomsetup();
   // let url=typeof window !== 'undefined' ? window.location.hostname : '/'
   //     console.log(url)
   //     return <GPTchatinterface fgptendpoint={url} setasollama={true}/>

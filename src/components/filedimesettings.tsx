@@ -30,13 +30,50 @@ function reloadsize(togglewhat="size"){
     console.log("loading size js----->2")
   }
 
+export function zoomsetup(){
+    const [zoomLevel, setZoomLevel] = useState(1);
+    useEffect(()=>{
+        const handleWheel = (event: WheelEvent) => {
+            if (event.ctrlKey) {
+                event.preventDefault();
+                setZoomLevel(prevZoom => {
+                    const newZoom = prevZoom - event.deltaY * 0.001;
+                    return Math.max(0.5, Math.min(newZoom, 2)); // Clamp zoom level
+                });
+            }
+        };
 
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.ctrlKey && (event.key === '=' || event.key === '+')) {
+                event.preventDefault();
+                setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
+            } else if (event.ctrlKey && event.key === '-') {
+                event.preventDefault();
+                setZoomLevel(prevZoom => Math.max(0.5, prevZoom - 0.1));
+            }
+        };
+
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+    useEffect(()=>{
+        invoke("zoom_window", {scaleFactor:zoomLevel});
+
+
+    },[zoomLevel])
+}
 export default function FiledimeSettings(){
     const [filedimegptendpoint,setfge]=useState("http://localhost:8694")
+    zoomsetup();
     useEffect(()=>{
         invoke("filegptendpoint",{
         endpoint:""
-      }).then((e)=>{
+      }).then((e: any)=>{
         // console.log(e)
         setfge(e)
       })
@@ -44,7 +81,7 @@ export default function FiledimeSettings(){
     // const { theme, setTheme } = useTheme()
     const [datafromstngs,setdfs]=useState<React.JSX.Element>()
     useEffect(()=>{
-        invoke("configfolpath",{}).then((e)=>{
+        invoke("configfolpath",{}).then((e: any)=>{
             console.log(e)
             let stateinf=JSON.parse(e) as stateinfo;
             setdfs(<>
@@ -92,7 +129,7 @@ export default function FiledimeSettings(){
     const [currentversion,setcv]=useState("")
     const [lcoalip,setlocalip]=useState<React.JSX.Element>()
     useEffect(()=>{
-        invoke("getlocalip",{}).then((e)=>{
+        invoke("getlocalip",{}).then((e: any)=>{
             console.log(e)
             setlocalip(
                 <>
@@ -104,53 +141,72 @@ export default function FiledimeSettings(){
         })
     },[])
     return (
-    <>
-    <div className="h-full place-items-center place-content-center flex flex-col overflow-auto p-4 gap-2">
-        <div className="flex flex-col gap-y-5">
-    
-        <div className="flex flex-row font-semibold gap-2 place-items-center">
-
-    <FolderIcon className="h-6 w-6" />
-              <span className="font-bold">Filedime v{currentversion}</span>
-              <Button className={`${releaseavailable?"hidden":""}`} variant={"outline"} onClick={()=>{
-                invoke("checker",{}).then((r)=>{
-                    console.log(r);
-                    // useEffect(()=>{
-                        let currentversionasync=async ()=>{
-
-                            const cv = await(await import('@tauri-apps/api/app')).getVersion()
-                            
-                            if( r!==cv){
-                                setra(true)
-                              toast({
-                                // duration:2000,
-                                variant:"destructive",
-                                title: "Update available",
-                                description: `v${r} is available fordownload`,
-                                action: <Button variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>,
-                              })
-                    
-                            }
-                            else{setubt("no updates available")}
-                        }
-                        currentversionasync();
-                    // },[])
-                  })
-            }}>{updatebuttontext}</Button>
-        </div>
-        {datafromstngs}
-        {lcoalip}
-        <div className="font-bold">
-            Make the app better, just submit Pull Request after making changes.<br/> Source code available <Link target="_blank" className="text-blue-600" href={"https://github.com/visnkmr/wfmossfrontend"}>here</Link>
-        </div>
-        <div>
-        <Button className={`${releaseavailable?"":"hidden"}`} variant={"outline"}><Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">Update</Link></Button>
-        
-
-        </div>
-        </div>
-        <Toaster/>
-    </div>
-    </>
+        <>
+            <div className="h-full place-items-center place-content-center flex flex-col p-4 gap-2">
+                <div
+                    // style={{
+                    //     transform: `scale(${zoomLevel})`,
+                    //     transformOrigin: 'top left',
+                    // }}
+                    className="p-4"
+                >
+                    <div className="flex flex-col gap-y-5">
+                        <div className="flex flex-row font-semibold gap-2 place-items-center">
+                            <FolderIcon className="h-6 w-6" />
+                            <span className="font-bold">Filedime v{currentversion}</span>
+                            <Button
+                                className={`${releaseavailable ? 'hidden' : ''}`}
+                                variant={'outline'}
+                                onClick={() => {
+                                    invoke('checker', {}).then((r: any) => {
+                                        console.log(r);
+                                        let currentversionasync = async () => {
+                                            const cv = await (await import('@tauri-apps/api/app')).getVersion();
+                                            if (r !== cv) {
+                                                setra(true);
+                                                toast({
+                                                    variant: 'destructive',
+                                                    title: 'Update available',
+                                                    description: `v${r} is available fordownload`,
+                                                    action: (
+                                                        <Button variant={'outline'}>
+                                                            <Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">
+                                                                Update
+                                                            </Link>
+                                                        </Button>
+                                                    ),
+                                                });
+                                            } else {
+                                                setubt('no updates available');
+                                            }
+                                        };
+                                        currentversionasync();
+                                    });
+                                }}
+                            >
+                                {updatebuttontext}
+                            </Button>
+                        </div>
+                        {datafromstngs}
+                        {lcoalip}
+                        <div className="font-bold">
+                            Make the app better, just submit Pull Request after making changes.
+                            <br /> Source code available{' '}
+                            <Link target="_blank" className="text-blue-600" href={'https://github.com/visnkmr/filedime'}>
+                                here
+                            </Link>
+                        </div>
+                        <div>
+                            <Button className={`${releaseavailable ? '' : 'hidden'}`} variant={'outline'}>
+                                <Link target="_blank" href="https://github.com/visnkmr/filedime/releases/latest">
+                                    Update
+                                </Link>
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <Toaster />
+        </>
     );
 }
