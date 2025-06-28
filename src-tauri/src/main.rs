@@ -20,6 +20,7 @@ mod filltrie;
 mod lastmodcalc;
 mod navtimeline;
 mod sendtofrontend;
+mod installed_apps;
 use chrono::{DateTime, Local, Utc};
 use local_ip_address::local_ip;
 // use get_size::GetSize;
@@ -65,7 +66,7 @@ mod markdown;
 // mod partialratio;
 use crate::{
     bookmarks::*, filechangewatcher::*, filltrie::populate_try, listfiles::*, markdown::*,
-    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*,
+    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*, installed_apps::*,
 };
 use lastmodcalc::lastmodified;
 // mod r  esync;
@@ -509,6 +510,12 @@ async fn get_timestamp() -> String {
     let timestamp = format!("{}", chrono::Utc::now().timestamp_millis());
     // println!("{}",timestamp);
     timestamp
+}
+
+#[tauri::command]
+async fn get_installed_apps_command() -> Result<String, String> {
+    let apps = get_installed_apps()?;
+    serde_json::to_string(&apps).map_err(|e| e.to_string())
 }
 #[tauri::command]
 async fn nosize(
@@ -969,6 +976,7 @@ fn main() {
             embedfile,
             queryfile,
             fileslist,
+            get_installed_apps_command,
             // whattoload,
             // get_window_label
         ])

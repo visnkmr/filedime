@@ -203,6 +203,18 @@ export default function FiledimeSettings(){
                                 </Link>
                             </Button>
                         </div>
+                        <div>
+                            <Button variant={'outline'} onClick={() => {
+                                invoke('get_installed_apps_command', {}).then((r: any) => {
+                                    toast({
+                                        title: 'Installed Apps',
+                                        description: r,
+                                    });
+                                });
+                            }}>
+                                Show Installed Apps
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
