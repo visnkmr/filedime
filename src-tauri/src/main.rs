@@ -977,6 +977,7 @@ fn main() {
             queryfile,
             fileslist,
             get_installed_apps_command,
+            launch_app_command,
             // whattoload,
             // get_window_label
         ])

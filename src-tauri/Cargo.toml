@@ -93,6 +93,9 @@ text-splitter = { version = "0.27.0" } # Or "tiktoken-rs"
 shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
 # hyper="1.6.0"
 multipart="0.18.0"
+walkdir = "2.3.3"
+winreg = "0.52.0"
+lnk = "0.4.1"
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
