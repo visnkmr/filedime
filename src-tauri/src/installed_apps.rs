@@ -19,7 +19,7 @@ fn testmod(){
     for app in get_installed_apps().unwrap(){
         // if app.name.to_lowercase().contains("notepad") 
         {
-            println!("{:?}", app.name);
+            println!("{:?}", app.command);
             // println!("{}", app.fromwhere);
         }
     }
@@ -368,16 +368,16 @@ fn query_uwp_apps(app_list: &mut Vec<App>, processed_apps: &mut std::collections
                 // println!("{:?}",apps);
 
                 for app in apps {
-                    // if app.as_str().unwrap().contains("notepad") 
+                    if app["Name"].as_str().unwrap().to_lowercase().contains("notepad") 
                     {
-                        // println!("{:?}", app);
+                        println!("{:?}", app);
                         // println!("{}", app.fromwhere);
                     }
                     if let (Some(name), Some(_location)) = (app["Name"].as_str(), app["PackageFamilyName"].as_str()) {
                         if !name.is_empty() && !processed_apps.contains(name) {
                             let app_list_entry = App {
                                 name: name.to_string(),
-                                command: format!("explorer.exe shell:AppsFolder\\{}", _location),
+                                command: format!("explorer.exe shell:AppsFolder\\{}!App", _location),
                                 icon: "".to_string(),
                                 fromwhere: "Windows Appstore".to_string(),
                             };
@@ -483,15 +483,51 @@ fn parse_desktop_files(app_list: &mut Vec<App>, processed_apps: &mut std::collec
 pub fn get_installed_apps() -> Result<Vec<App>, String> {
     Err("Unsupported OS".to_string())
 }
-
-#[tauri::command]
+#[test]
+pub fn testopen(){
+    launch_app_command("explorer.exe shell:AppsFolder\\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App".to_string());
+    // launch_app_command("V:\\installs\\TablePlus\\TablePlus.exe".to_string());
+}
+// #[tauri::command]
 pub fn launch_app_command(command: String) {
     #[cfg(target_os = "windows")]
     {
-        use std::process::Command;
-        let _ = Command::new("cmd")
-            .args(&["/C", "start", "", &command])
-            .spawn();
+        let parts: Vec<&str> = command.splitn(2, ' ').collect();
+        let program = parts[0];
+        let args_str_opt = parts.get(1); 
+
+        if program.eq_ignore_ascii_case("explorer.exe") {
+            // For explorer.exe, we launch explorer.exe directly
+            // and pass the rest of the string as a single argument.
+            if let Some(args) = args_str_opt {
+                let _ = Command::new("explorer.exe")
+                    .arg(args) // This is the "shell:AppsFolder..." part
+                    .spawn();
+            } else {
+                // Handle case where it's just "explorer.exe" without arguments
+                eprintln!("Warning: 'explorer.exe' command issued without arguments.");
+                let _ = Command::new("explorer.exe").spawn(); // Launch explorer normally
+            }
+        } else {
+            // For other commands, we use `cmd /C start`
+            // `start` helps to detach the process and handle paths with spaces.
+            let mut cmd = Command::new("cmd");
+            cmd.arg("/C").arg("start").arg(""); // "/C start \"\"" (the empty string is for the title)
+
+            // Add the program itself
+            cmd.arg(program);
+
+            // If there are arguments, add them
+            if let Some(args_str) = args_str_opt {
+                // Split arguments string by space and add them as separate args to `start`
+                for arg_part in args_str.split(' ') {
+                    if !arg_part.is_empty() { // Avoid adding empty strings if multiple spaces
+                        cmd.arg(arg_part);
+                    }
+                }
+            }
+            let _ = cmd.spawn();
+        }
     }
 
     #[cfg(target_os = "macos")]
