@@ -17,6 +17,7 @@ import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { Toaster } from "./ui/toaster";
 import { Input } from "./ui/input";
+import { set } from "lodash";
 
 function reloadsize(togglewhat="size"){
     console.log("loading size js---->1");
@@ -69,15 +70,27 @@ export function zoomsetup(){
 }
 export default function FiledimeSettings(){
     const [filedimegptendpoint,setfge]=useState("http://localhost:8694")
+    const [embeddingmodel,setem]=useState("nomic-embed-text")
     zoomsetup();
     useEffect(()=>{
         invoke("filegptendpoint",{
-        endpoint:""
+        endpoint:"",
+        whichvar:"ollamaurl",
+        defaultval:"http://localhost:11434"
       }).then((e: any)=>{
         // console.log(e)
         setfge(e)
       })
+      invoke("filegptendpoint",{
+        endpoint:"",
+        whichvar:"embedding_model",
+        defaultval:"nomic-embed-text"
+      }).then((e: any)=>{
+        // console.log(e)
+        setem(e)
+      })
     },[])
+
     // const { theme, setTheme } = useTheme()
     const [datafromstngs,setdfs]=useState<React.JSX.Element>()
     useEffect(()=>{
@@ -108,8 +121,30 @@ export default function FiledimeSettings(){
                     
                     <Button className="font-semibold" variant={"outline"} onClick={()=>{
                         invoke("filegptendpoint",{
-                            endpoint:filedimegptendpoint
+                            endpoint:filedimegptendpoint,
+                            whichvar:"ollamaurl",
+                            defaultval:"http://localhost:11434"
                           }).catch((e)=>console.log("Failed to update FiledimeGPT server IP."))
+                    }}><div className="flex flex-row items-center gap-2"><Save className="h-4 w-4"/><p>(Save)</p></div></Button>
+                        </div> 
+                        <div className="flex flex-row items-center gap-2 "><p className="font-semibold">Embedding model to use</p>
+                        <Input value={embeddingmodel}
+                    type="text"
+                    placeholder="Embedding Model"
+                    onChange={(event) =>
+                    {
+                        let pp=(event.target.value);
+                        
+                        setem(pp)
+                    }
+                    }/>
+                    
+                    <Button className="font-semibold" variant={"outline"} onClick={()=>{
+                        invoke("filegptendpoint",{
+                            endpoint:filedimegptendpoint,
+                            whichvar:"embedding_model",
+                            defaultval:"nomic-embed-text"
+                          }).catch((e)=>console.log("Failed to update config."))
                     }}><div className="flex flex-row items-center gap-2"><Save className="h-4 w-4"/><p>(Save)</p></div></Button>
                         </div>
                 </>)

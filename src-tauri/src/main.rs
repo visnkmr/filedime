@@ -271,15 +271,15 @@ async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     }
 }
 #[tauri::command]
-fn filegptendpoint(endpoint: String) -> Result<String, String> {
+fn filegptendpoint(endpoint: String,whichvar:String,defaultval:String) -> Result<String, String> {
     if (endpoint == "") {
         Ok(getcustom(
             "filedime",
-            "storevals/ollamaurl.set",
-            "http://localhost:11434",
+            format!("storevals/{}.set",whichvar),
+            defaultval,
         ))
     } else {
-        savecustom("filedime", "storevals/ollamaurl.set", endpoint.clone());
+        savecustom("filedime", format!("storevals/{}.set",whichvar ), endpoint.clone());
         Ok(endpoint)
     }
 }
@@ -599,7 +599,7 @@ async fn newspecwindow(
         .build()
         .unwrap();
         if (labelwin.starts_with("chatui")) {
-                println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],"nomic-embed-text".to_string(), state).await.unwrap());
+                println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],state.embedding_model_name.clone(), state).await.unwrap());
                 tauri::WindowBuilder::new(
                     &window.app_handle(),
                     labelwin,
