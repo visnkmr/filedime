@@ -61,7 +61,7 @@ pub struct AppStateStore {
     pub ollama: Ollama,
     pub db: Arc<RwLock<CacheDB>>,
     pub filelist:RwLock<Vec<String>>,
-    // pub embedding_model_name: String,
+    pub embedding_model_name: String,
     // pub llm_model_name: String,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
@@ -102,7 +102,7 @@ impl AppStateStore {
     pub fn new(expiration: u64) -> Self {
         // let (tx, rx) = mpsc::channel::<String>();
         let ollama = Ollama::from_url(tauri::Url::parse(&getcustom("filedime", "storevals/ollamaurl.set", "http://127.0.0.1:11434")).unwrap());
-        // let embedding_model = "nomic-embed-text".to_string(); // Ensure this model is available
+        let embedding_model = &getcustom("filedime", "storevals/embedding_model.set", "nomic-embed-text"); // Ensure this model is available
         // let llm_model = "qwen2.5:3b".to_string(); // Ensure this model is available
 
         // Initialize CacheDB
@@ -189,8 +189,8 @@ impl AppStateStore {
             },
             db: Arc::new(RwLock::new(db)),
             filelist: RwLock::new(vec![]),
-            ollama:ollama
-            // embedding_model_name: embedding_model,
+            ollama:ollama,
+            embedding_model_name: embedding_model.to_string(),
             // llm_model_name: llm_model,
         }
     }

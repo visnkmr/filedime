@@ -488,7 +488,7 @@ pub fn testopen(){
     launch_app_command("explorer.exe shell:AppsFolder\\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App".to_string());
     // launch_app_command("V:\\installs\\TablePlus\\TablePlus.exe".to_string());
 }
-// #[tauri::command]
+#[tauri::command]
 pub fn launch_app_command(command: String) {
     #[cfg(target_os = "windows")]
     {

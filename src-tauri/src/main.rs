@@ -423,6 +423,7 @@ fn zoom_window(window: tauri::Window, scale_factor: f64) {
           // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
           // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
           use webkit2gtk::traits::WebViewExt;
+          
           webview.inner().set_zoom_level(scale_factor);
         }
 
@@ -585,40 +586,43 @@ async fn newspecwindow(
     window: Window,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
-    println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
-    if (winlabel == "settings") {
+    // println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
+    let labelwin=winlabel;
+    let namewin=name;
+    if (labelwin == "settings" || labelwin == "installed-apps" || labelwin == "chatui") {
         tauri::WindowBuilder::new(
             &window.app_handle(),
-            winlabel,
-            tauri::WindowUrl::App("settings".into()),
+            labelwin.clone(),
+            tauri::WindowUrl::App(labelwin.clone().into()),
         )
-        .title(name)
+        .title(namewin.clone())
         .build()
         .unwrap();
-    } else if (winlabel.starts_with("chatui")) {
-        println!("{:?}",embedfile(vec![name.replace("FileGPT: ","")],"nomic-embed-text".to_string(), state).await.unwrap());
-        tauri::WindowBuilder::new(
-            &window.app_handle(),
-            winlabel,
-            tauri::WindowUrl::App("chatui".into()),
-        )
-        .title(name.clone())
-        .build()
-        .unwrap();
-    window.app_handle()
-        .emit_all(
-            // label,
-            "dialogshow",
-            serde_json::to_string(&json!({
-              "title":name.replace("FileGPT: ",""),
-              "content":"Sucessfully embeded",
-              // "arguments":arguments
-            }))
-            .unwrap(),
-        )
-        .unwrap();
+        if (labelwin.starts_with("chatui")) {
+                println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],"nomic-embed-text".to_string(), state).await.unwrap());
+                tauri::WindowBuilder::new(
+                    &window.app_handle(),
+                    labelwin,
+                    tauri::WindowUrl::App("chatui".into()),
+                )
+                .title(namewin.clone())
+                .build()
+                .unwrap();
+            window.app_handle()
+                .emit_all(
+                    // label,
+                    "dialogshow",
+                    serde_json::to_string(&json!({
+                    "title":namewin.replace("FileGPT: ",""),
+                    "content":"Sucessfully embeded",
+                    // "arguments":arguments
+                    }))
+                    .unwrap(),
+                )
+                .unwrap();
+        }
     } else {
-        opennewwindow(&window.app_handle(), &name, &winlabel);
+        opennewwindow(&window.app_handle(), &namewin, &labelwin);
     }
     Ok(())
 }
