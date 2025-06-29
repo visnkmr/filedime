@@ -17,15 +17,15 @@ pub struct App {
 #[test]
 fn testmod(){
     for app in get_installed_apps().unwrap(){
-        if app.fromwhere.to_lowercase().contains("hklm") 
+        // if app.name.to_lowercase().contains("notepad") 
         {
-            println!("{:?}", app);
+            println!("{:?}", app.name);
             // println!("{}", app.fromwhere);
         }
     }
     println!("{:?}", get_installed_apps().unwrap().len());
 }
-fn collect_unique(items: Vec<App>) -> Vec<App> {
+fn collect_unique_by_path(items: Vec<App>) -> Vec<App> {
     // We use a HashMap where the key is the name and the value is the MyStruct itself.
     // This allows us to easily retrieve and update the stored item.
     let mut unique_items_map: HashMap<String, App> = HashMap::new();
@@ -36,55 +36,55 @@ fn collect_unique(items: Vec<App>) -> Vec<App> {
         // but `item.name` might still be needed within `item` itself if it's inserted.
         let mut final_exepath = PathBuf::new(); // Initialize with an empty path as a default
 
-    let current_path = Path::new(&item.command); // Borrow the command string as a Path slice
+        let current_path = Path::new(&item.command); // Borrow the command string as a Path slice
 
-    if let Some(ext) = current_path.extension().and_then(|s| s.to_str()) {
-        if ["exe", "com", "bat"].contains(&ext) {
-            // If it's already an executable, clone it to own the path data.
-            final_exepath = current_path.to_path_buf();
-        } else {
-            // If it's not an executable by extension, check if it's a directory
-            if current_path.is_dir() {
-                // We need a flag to know if we found an executable in the directory.
-                // If not, final_exepath remains empty (or whatever default you set).
-                let mut found_in_dir = false;
+        if let Some(ext) = current_path.extension().and_then(|s| s.to_str()) {
+            if ["exe", "com", "bat"].contains(&ext) {
+                // If it's already an executable, clone it to own the path data.
+                final_exepath = current_path.to_path_buf();
+            } else {
+                // If it's not an executable by extension, check if it's a directory
+                if current_path.is_dir() {
+                    // We need a flag to know if we found an executable in the directory.
+                    // If not, final_exepath remains empty (or whatever default you set).
+                    let mut found_in_dir = false;
 
-                // Use `current_path` (the borrowed Path) for WalkDir, it's fine.
-                for temp_entry in WalkDir::new(current_path)
-                    .max_depth(1)
-                    .into_iter()
-                    .filter_map(|e| e.ok())
-                {
-                    if temp_entry.file_type().is_file() {
-                        if let Some(ext) = temp_entry.path().extension().and_then(|s| s.to_str()) {
-                            if ["exe", "com", "bat"].contains(&ext) {
-                                // Get the path as a string and convert to lowercase for checks
-                                let filepath = temp_entry.path().to_string_lossy().to_string().to_lowercase();
+                    // Use `current_path` (the borrowed Path) for WalkDir, it's fine.
+                    for temp_entry in WalkDir::new(current_path)
+                        .max_depth(1)
+                        .into_iter()
+                        .filter_map(|e| e.ok())
+                    {
+                        if temp_entry.file_type().is_file() {
+                            if let Some(ext) = temp_entry.path().extension().and_then(|s| s.to_str()) {
+                                if ["exe", "com", "bat"].contains(&ext) {
+                                    // Get the path as a string and convert to lowercase for checks
+                                    let filepath = temp_entry.path().to_string_lossy().to_string().to_lowercase();
 
-                                // Check for "uninstall" or "unins" and non-empty path
-                                if !(filepath.contains("uninstall") || filepath.contains("unins") || filepath.is_empty()) {
-                                    // THIS IS THE FIX: Convert the borrowed Path from DirEntry
-                                    // into an owned PathBuf and assign it.
-                                    final_exepath = temp_entry.path().to_path_buf();
-                                    found_in_dir = true;
-                                    break; // Found the first suitable exe, no need to search further
+                                    // Check for "uninstall" or "unins" and non-empty path
+                                    if !(filepath.contains("uninstall") || filepath.contains("unins") || filepath.is_empty()) {
+                                        // THIS IS THE FIX: Convert the borrowed Path from DirEntry
+                                        // into an owned PathBuf and assign it.
+                                        final_exepath = temp_entry.path().to_path_buf();
+                                        found_in_dir = true;
+                                        break; // Found the first suitable exe, no need to search further
+                                    }
                                 }
                             }
                         }
                     }
+                    // If the loop finished and nothing was found, final_exepath remains the default empty path.
+                } else {
+                    // If it's not a directory and not an executable by extension,
+                    // final_exepath remains the default empty path.
                 }
-                // If the loop finished and nothing was found, final_exepath remains the default empty path.
-            } else {
-                // If it's not a directory and not an executable by extension,
-                // final_exepath remains the default empty path.
             }
         }
-    }
-    // If current_path doesn't have an extension, final_exepath remains the default empty path.
+        // If current_path doesn't have an extension, final_exepath remains the default empty path.
 
-    let path=final_exepath; // Return the determined PathBuf
-        
-        if(!item.command.trim().is_empty() && path.parent().is_some() && !item.command.to_lowercase().contains("package cache")){
+        let path: PathBuf=final_exepath; // Return the determined PathBuf
+            
+        if((!item.command.trim().is_empty() && path.parent().is_some() && !item.command.to_lowercase().contains("package cache"))){
             // println!("{:?}",path);
             match unique_items_map.entry(path.parent().unwrap().to_string_lossy().to_string().clone()) {
                 // Case 1: Name is new, simply insert the item
@@ -111,28 +111,80 @@ fn collect_unique(items: Vec<App>) -> Vec<App> {
     // Convert the HashMap values back into a Vec
     unique_items_map.into_values().collect()
 }
+fn collect_unique_by_name(items: Vec<App>) -> Vec<App> {
+    // We use a HashMap where the key is the name and the value is the MyStruct itself.
+    // This allows us to easily retrieve and update the stored item.
+    let mut unique_items_map: HashMap<String, App> = HashMap::new();
+
+    for item in items {
+        let name=item.name.clone();
+        // The `entry()` API is efficient for checking existence and inserting/modifying.
+        // `item.name.clone()` is needed because `entry()` takes an owned key,
+        // but `item.name` might still be needed within `item` itself if it's inserted.
+        if((!item.command.trim().is_empty()  && !item.command.to_lowercase().contains("package cache"))){
+            // println!("{:?}",path);
+            match unique_items_map.entry(name) {
+                // Case 1: Name is new, simply insert the item
+                std::collections::hash_map::Entry::Vacant(entry) => {
+                    
+                    entry.insert(item);
+                }
+                // Case 2: Name already exists, apply the age logic
+                std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    let existing_item = entry.get_mut(); // Get a mutable reference to the stored item
+    
+                    // Check if the existing item's age is None
+                    if existing_item.command.is_empty() {
+                        // If the existing one has no age, replace it with the new item
+                        // `item` is consumed here by being moved into the map
+                        *existing_item = item;
+                    }
+                    // Else (if existing_item.age is Some), do nothing, keep the existing item.
+                    // The 'item' from the loop is dropped here if not moved.
+                }
+            }
+        }
+    }
+
+    // Convert the HashMap values back into a Vec
+    unique_items_map.into_values().collect()
+}
 
 #[cfg(target_os = "windows")]
 pub fn get_installed_apps() -> Result<Vec<App>, String> {
     let mut app_list: Vec<App> = Vec::new();
+    let mut app_list2: Vec<App> = Vec::new();
     let mut processed_apps: std::collections::HashSet<String> = std::collections::HashSet::new();
 
     // 1. Query Uninstall Registry Keys
-    query_uninstall_registry(&mut app_list, &mut processed_apps);
+    // query_uninstall_registry(&mut app_list2, &mut processed_apps);
 
     // 2. Query App Paths Registry Key
-    query_app_paths_registry(&mut app_list, &mut processed_apps);
+    // query_app_paths_registry(&mut app_list2, &mut processed_apps);
 
     // 3. Search Start Menu folders
     search_start_menu(&mut app_list, &mut processed_apps);
+    app_list=collect_unique_by_path(app_list);
     
     // 4. Search PATH environment variable
-    search_path_variable(&mut app_list, &mut processed_apps);
+    // search_path_variable(&mut app_list2, &mut processed_apps);
 
     // 5. Query for Microsoft Store apps (UWP)
     query_uwp_apps(&mut app_list, &mut processed_apps);
-
-    Ok(collect_unique(app_list))
+    app_list=collect_unique_by_name(app_list);
+//     let mut retlist=vec![];
+//    for ea in app_list2{
+//     let mut found=false;
+//     for eap in app_list.clone(){
+//         if ea.name==eap.name{
+//             found=true
+//         }
+//     }
+//     if !found{
+//         retlist.push(ea);
+//     }
+//    }
+    Ok((app_list))
 }
 
 #[cfg(target_os = "windows")]
@@ -305,7 +357,7 @@ fn query_uwp_apps(app_list: &mut Vec<App>, processed_apps: &mut std::collections
     let uwp_output = Command::new("powershell")
         .args(&[
             "-Command",
-            "Get-AppxPackage | Select-Object Name, InstallLocation | ConvertTo-Json"
+            "Get-AppxPackage | Select-Object Name, PackageFamilyName | ConvertTo-Json"
         ])
         .output();
 
@@ -313,12 +365,19 @@ fn query_uwp_apps(app_list: &mut Vec<App>, processed_apps: &mut std::collections
         if output.status.success() {
             let result_str = String::from_utf8_lossy(&output.stdout);
             if let Ok(apps) = serde_json::from_str::<Vec<serde_json::Value>>(&result_str) {
+                // println!("{:?}",apps);
+
                 for app in apps {
-                    if let (Some(name), Some(_location)) = (app["Name"].as_str(), app["InstallLocation"].as_str()) {
+                    // if app.as_str().unwrap().contains("notepad") 
+                    {
+                        // println!("{:?}", app);
+                        // println!("{}", app.fromwhere);
+                    }
+                    if let (Some(name), Some(_location)) = (app["Name"].as_str(), app["PackageFamilyName"].as_str()) {
                         if !name.is_empty() && !processed_apps.contains(name) {
                             let app_list_entry = App {
                                 name: name.to_string(),
-                                command: format!("explorer.exe shell:appsFolder\\{}", name),
+                                command: format!("explorer.exe shell:AppsFolder\\{}", _location),
                                 icon: "".to_string(),
                                 fromwhere: "Windows Appstore".to_string(),
                             };
