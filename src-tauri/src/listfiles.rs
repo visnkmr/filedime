@@ -20,7 +20,7 @@ use tauri::{Manager, State, Window};
 
 use crate::{
     appstate::{get_enum_value, set_enum_value, wThread, AppStateStore},
-    drivelist::{get_disks, get_drives},
+    // drivelist::{get_disks, get_drives},
     // loadjs::loadjs
     fileitem::populatefileitem,
     filltrie::populate_try,
