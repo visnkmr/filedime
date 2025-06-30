@@ -105,6 +105,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
       # - name: Uninstall Homebrew
       #   run: |
       #     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
