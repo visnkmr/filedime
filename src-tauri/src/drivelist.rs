@@ -36,6 +36,9 @@ use self::linux as platform;
 #[cfg(target_os = "macos")]
 use self::macos as platform;
 
+#[cfg(target_os = "windows")]
+use self::linux as platform;
+
 //====================================================================================//
 //                           Public API Functions (Dispatchers)                       //
 //====================================================================================//
@@ -104,7 +107,7 @@ mod macos {
     }
 
 
-    pub fn get_drives_macos() -> Option<Vec<DriveItem>> {
+    pub fn get_drives() -> Option<Vec<DriveItem>> {
         let output = match Command::new("diskutil").args(["list", "-plist"]).output() {
             Ok(output) if output.status.success() => output.stdout,
             _ => return None, // diskutil command failed
