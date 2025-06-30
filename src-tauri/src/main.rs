@@ -433,10 +433,10 @@ fn zoom_window(window: tauri::Window, scale_factor: f64) {
           webview.controller().SetZoomFactor(scale_factor).unwrap();
         }
 
-        #[cfg(target_os = "macos")]
-        unsafe {
-          let () = msg_send![webview.inner(), setPageZoom: scale_factor];
-        }
+        // #[cfg(target_os = "macos")]
+        // unsafe {
+        //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
+        // }
       });
 }
 #[tauri::command]
