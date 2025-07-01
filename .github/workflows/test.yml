@@ -3,7 +3,8 @@ on:
   push:
     branches:
       # - 'main'
-      - '*'
+      # - '*'
+      -'nextrelease'
       # - 'v*'
 
 jobs:
@@ -51,17 +52,17 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          # - host: macos-latest
-          #   target: x86_64-apple-darwin
-          #   os: darwin
-          #   arch: amd64
-          # - host: macos-latest
-          #   target: aarch64-apple-darwin
-          #   os: darwin
-          #   arch: arm64
-          # - host: windows-latest
-          #   target: x86_64-pc-windows-msvc
-          #   arch: amd64
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            os: darwin
+            arch: amd64
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            os: darwin
+            arch: arm64
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            arch: amd64
           - host: windows-latest
             target: aarch64-pc-windows-msvc
             arch: arm64
@@ -69,18 +70,18 @@ jobs:
             target: x86_64-unknown-linux-gnu
             os: linux
             arch: amd64
-          - host: ubuntu-22.04
-            target: aarch64-unknown-linux-gnu
-            os: linux
-            arch: arm64
+          # - host: ubuntu-22.04
+          #   target: aarch64-unknown-linux-gnu
+          #   os: linux
+          #   arch: arm64
           # - host: ubuntu-latest
           #   target: x86_64-unknown-linux-musl
           #   os: linux
           #   arch: x86_64
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            os: linux
-            arch: arm64
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   os: linux
+          #   arch: arm64
           
           # - host: ubuntu-latest
           #   target: aarch64-unknown-linux-gnu
@@ -113,7 +114,7 @@ jobs:
         if: contains(matrix.settings.host, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup2.4-dev javascriptcoregtk-4.0
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup2.4-dev javascriptcoregtk-4.0 webkit2gtk-4.0
 
       # - name: Setup Bun
       #   uses: oven-sh/setup-bun@v1
