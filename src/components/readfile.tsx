@@ -11,7 +11,7 @@ import {
 } from "./ui/hover-card"
 import { FileItem,DriveItem } from "../shared/types"
 
-import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import { invoke,convertFileSrc } from '@tauri-apps/api/core'
 export const MARKDOWN_TYPES = ['md', 'markdown', 'mdown', 'mkd', 'mkdown', 'mdwn', 'mdtxt', 'mdtext', 'text'];
 export const IMAGE_TYPES = ['jpg', 'png', 'gif', 'bmp', 'jpeg', 'jpe', 'jif', 'jfif', 'jfi', 'webp', 'tiff', 'tif', 'ico', 'svg', 'webp'];
 export const VIDEO_TYPES = ['mp4', 'webm', 'mpg', 'mp2', 'mpeg', 'mpe', 'mpv', 'ocg', 'm4p', 'm4v', 'avi', 'wmv', 'mov', 'qt', 'flv', 'swf'];
@@ -30,7 +30,7 @@ interface rfcprops {
 export default function ReadFileComp({message}:rfcprops){
   const { theme, setTheme } = useTheme()
     async function setupAppWindow() {
-    const appWindow = (await import('@tauri-apps/api/window')).appWindow
+    const appWindow = (await import('@tauri-apps/api/webviewWindow')).getCurrentWebviewWindow()
     console.log("windowname top---------->"+appWindow.label)
 
     setAppWindow(appWindow)

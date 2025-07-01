@@ -1,4 +1,4 @@
-use tauri::{Manager, Window};
+use tauri::{Manager, WebviewWindow, Window};
 
 use crate::{
     drivelist::{self, populatedrivelist},
@@ -6,7 +6,8 @@ use crate::{
 };
 
 #[tauri::command]
-pub async fn senddriveslist(windowname: String, window: Window) {
+pub async fn senddriveslist(windowname: String, window: WebviewWindow) {
+    println!("{:?}",populatedrivelist());
     driveslist(
         &windowname.clone(),
         &window.app_handle(),

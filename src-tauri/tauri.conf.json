@@ -32,11 +32,28 @@
     ],
     "security": {
       "csp": {
-        "default-src": ["'self'"],
-        "img-src": ["'self'", "asset:", "https://asset.localhost"],
-        "media-src": ["'self'", "asset:", "https://asset.localhost"],
-        "connect-src": ["'self'", "asset:", "https://asset.localhost"],
-        "style-src": ["'self'", "'unsafe-inline'"]
+        "default-src": [
+          "'self'"
+        ],
+        "img-src": [
+          "'self'",
+          "asset:",
+          "https://asset.localhost"
+        ],
+        "media-src": [
+          "'self'",
+          "asset:",
+          "https://asset.localhost"
+        ],
+        "connect-src": [
+          "'self'",
+          "asset:",
+          "https://asset.localhost"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ]
       },
       "assetProtocol": {
         "enable": true,

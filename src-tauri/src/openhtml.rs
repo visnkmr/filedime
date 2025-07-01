@@ -1,6 +1,6 @@
 use std::{io::Read, path::PathBuf};
 
-use tauri::{Manager, State, Window};
+use tauri::{Emitter, Manager, State, Window};
 
 use crate::{
     appstate::AppStateStore,

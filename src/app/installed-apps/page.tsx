@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 // In a real Tauri app, you would use this invoke function.
 // For this example, we'll simulate it.
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { Search } from "lucide-react";
 import {cn} from "../../lib/utils"
 // --- Mock invoke function for demonstration purposes ---

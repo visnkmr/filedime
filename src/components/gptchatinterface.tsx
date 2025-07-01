@@ -8,7 +8,7 @@ import axios from "axios";
 import FileUploadComponent from "./FIleuploadfromremote";
 import { useRouter } from 'next/router';
 import {Textarea} from "./ui/textarea"
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import {fetchEventSource} from '@microsoft/fetch-event-source';
 import { Checkbox } from "./ui/checkbox";
 import { Markdown } from "./markdown";

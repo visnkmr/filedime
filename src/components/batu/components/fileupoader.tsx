@@ -3,7 +3,7 @@ import { Button } from "../components/ui/button"
 import { Paperclip, File as FileIcon } from "lucide-react"
 import { HoverCard,HoverCardContent,HoverCardTrigger } from "./ui/hover-card"
 import {setcolorpertheme} from "../../greet"
-import { invoke } from "@tauri-apps/api/tauri"  // Import invoke
+import { invoke } from "@tauri-apps/api/core"  // Import invoke
 export function FileUploader() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [files, setFiles] = useState<File[]>([]);

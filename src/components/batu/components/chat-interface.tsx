@@ -14,7 +14,7 @@ import MessageItem from "../components/message-item"
 import { Progress } from "../components/ui/progress"
 import LMStudioURL from "./lmstudio-url"
 import axios from "axios"
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { Label } from "./ui/label"
 import { FileUploader } from "./fileupoader"
 // --- Type Definitions ---
@@ -421,7 +421,7 @@ export default function ChatInterface({
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
-             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
+             path: searchcurrent?(await(await import('@tauri-apps/api/webviewWindow')).getCurrentWebviewWindow().title()).replace("FileGPT: ",""):"ALL"
             }).catch(e=>console.log(e)) as string):""; 
             console.log(`----------context: ${context}`)
 
@@ -472,7 +472,7 @@ export default function ChatInterface({
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
-             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
+             path: searchcurrent?(await(await import('@tauri-apps/api/webviewWindow')).getCurrentWebviewWindow().title()).replace("FileGPT: ",""):"ALL"
             }).then((e)=>{
             // console.log(e)
              // Update the last message (assistant's) with new content

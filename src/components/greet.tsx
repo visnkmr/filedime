@@ -2,7 +2,7 @@
 
 import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import { invoke,convertFileSrc } from '@tauri-apps/api/core'
 import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid} from "lucide-react"
 import { Badge } from "./ui/badge"
@@ -105,10 +105,10 @@ export let supportedfiles = [
 ]
 // import { appWindow } from '@tauri-apps/api/window';
 // import {  WebviewWindow } from '@tauri-apps/api/window';
-const windowExists = async (label: string) => {
-  const win = (await import('@tauri-apps/api/window')).WebviewWindow.getByLabel(label);
-  return win !== null;
-};
+// const windowExists = async (label: string) => {
+//   const win = (await import('@tauri-apps/api/window')).WebviewWindow.getByLabel(label);
+//   return win !== null;
+// };
 export default function Greet() {
   
 
@@ -118,12 +118,12 @@ export default function Greet() {
     
     async function setupAppWindow() {
       console.log(Math.random());
-      const appWindow = (await import('@tauri-apps/api/window')).appWindow
+      const appWindow = (await import('@tauri-apps/api/webviewWindow')).getCurrentWebviewWindow()
       setTimeout(async () => await invoke('show_main_window'), 100)
       console.log("windowname top---------->"+appWindow.label)
   
       setAppWindow(appWindow)
-      const pl = await(await import('@tauri-apps/api/os')).platform()
+      const pl = await(await import('@tauri-apps/plugin-os')).arch()
       console.log(pl)
       console.log("windowname top---------->"+appWindow.label)
       setp(pl)

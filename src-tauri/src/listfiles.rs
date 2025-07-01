@@ -15,7 +15,7 @@ use ignore::WalkBuilder;
 use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
-use tauri::{Manager, State, Window};
+use tauri::{Manager, State, WebviewWindow};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{
@@ -52,17 +52,17 @@ pub async fn list_files(
     oid: String,
     mut path: String,
     ff: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), String> {
-    startup(&window.app_handle());
+    startup(&window.clone().app_handle());
     println!("lfiles");
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
     if (path == "drives://") {
         match (dirs::home_dir()) {
             Some(spath) => {
                 path = spath.to_string_lossy().to_string();
-                sendparentloc(&windowname, &window.app_handle(), path.to_string(), &oid)?;
+                sendparentloc(&windowname, &window.clone().app_handle(), path.to_string(), &oid)?;
             }
             None => return Err("home not found".to_string()),
         };
@@ -71,7 +71,7 @@ pub async fn list_files(
         match (dirs::download_dir()) {
             Some(spath) => {
                 path = spath.to_string_lossy().to_string();
-                sendparentloc(&windowname, &window.app_handle(), path.to_string(), &oid)?;
+                sendparentloc(&windowname, &window.clone().app_handle(), path.to_string(), &oid)?;
             }
             None => return Err("home not found".to_string()),
         };
@@ -81,7 +81,7 @@ pub async fn list_files(
         match (dirs::document_dir()) {
             Some(spath) => {
                 path = spath.to_string_lossy().to_string();
-                sendparentloc(&windowname, &window.app_handle(), path.to_string(), &oid)?;
+                sendparentloc(&windowname, &window.clone().app_handle(), path.to_string(), &oid)?;
             }
             None => return Err("home not found".to_string()),
         };
@@ -94,13 +94,13 @@ pub async fn list_files(
     //           })
     //       );
 
-    lct(&windowname, &window.app_handle(), starttime.clone());
+    lct(&windowname, &window.clone().app_handle(), starttime.clone());
     let wname = windowname.clone();
     let testpath = PathBuf::from(path.clone());
 
     if (!testpath.exists() && path != "drives://") {
         opendialogwindow(
-            &window.app_handle(),
+            &window.clone().app_handle(),
             "Error #404: File not found",
             "File not found.",
             &windowname,
@@ -126,14 +126,14 @@ pub async fn list_files(
 
     if (!testpath.is_dir()) {
         opendialogwindow(
-            &window.app_handle(),
+            &window.clone().app_handle(),
             "Error #400: Unknown file type",
             "unknown file type",
             &windowname,
         );
         return Ok(());
     }
-    window.emit_to(&wname, "reloadlist", "resettable").unwrap();
+    tauri::Emitter::emit_to(&window.clone(), &wname, "reloadlist", "resettable").unwrap();
 
     let orig = *state.process_count.lock().unwrap();
 
@@ -141,7 +141,7 @@ pub async fn list_files(
     // //empty existing filesetcollection
     // sendfilesetcollection(
     //     &wname,
-    //     &window.app_handle(),
+    //     &window.clone().app_handle(),
     //     &serde_json::to_string(&*state.filesetcollection.read().unwrap()).unwrap(),
     // );
 
@@ -159,10 +159,10 @@ pub async fn list_files(
     let parent = testpath.clone();
 
     // get the app handle from the window
-    let app_handle = window.app_handle();
+    // let app_handle = window.clone().app_handle();
     sendparentloc(
         &windowname,
-        &app_handle,
+        &window.clone().app_handle(),
         parent.to_string_lossy().to_string(),
         &oid,
     )?;
@@ -172,7 +172,7 @@ pub async fn list_files(
     let startime = duration.as_secs();
     println!("{:?}----{}", parent, startime);
 
-    starttimer(&windowname, &app_handle)?;
+    starttimer(&windowname, &window.clone().app_handle())?;
     println!("start timer");
     let threads = (num_cpus::get() as f64 * 0.75).round() as usize;
 
@@ -207,7 +207,7 @@ pub async fn list_files(
 
     println!("read dir done on path");
 
-    folcount(&windowname, &app_handle, fcount)?;
+    folcount(&windowname, &window.clone().app_handle(), fcount)?;
     println!("folcount sent");
 
     // if let Some(granloc)=parent.parent(){
@@ -240,7 +240,7 @@ pub async fn list_files(
 
                 folsize(
                     &windowname.clone(),
-                    &app_handle,
+                    &window2.clone().app_handle(),
                     serde_json::to_string(&json!({
                       "caller":startime,
                       "size":sizeunit::size(*tfsize.lock().unwrap(),true)
@@ -268,7 +268,7 @@ pub async fn list_files(
                     //       })
                     //   );
                     // handle.abort();
-                    // stoptimer(&windowname, &window.app_handle());
+                    // stoptimer(&windowname, &window.clone().app_handle());
                     break;
                 }
                 // lock the mutex and get a reference to the vector
@@ -283,7 +283,9 @@ pub async fn list_files(
     let walker = par_walker3
         .into_par_iter()
         .filter_map(|e| e.ok())
-        .for_each(|e| {
+        .for_each(|e|
+            
+             {
             if (!e.path().to_string_lossy().to_string().eq(&path)) {
                 let fsc_clone = Arc::clone(&fsc);
                 // thread::sleep(Duration::from_millis(1000));
@@ -303,7 +305,7 @@ pub async fn list_files(
                 files.push(file.clone()); // push a clone of the file to the vector
                 fileslist(
                     &windowname2.clone(),
-                    &window.app_handle(),
+                    &window.clone().app_handle(),
                     &serde_json::to_string(&json!({
                       "caller":starttime,
                       "files":&serde_json::to_string(&file.clone()).unwrap(),
@@ -321,7 +323,7 @@ pub async fn list_files(
     // wait for the printing thread to finish
     handle.join().unwrap();
 
-    let app_handle = window.clone().app_handle();
+    let app_handle = window.app_handle();
 
     folsize(
         &wname,
@@ -410,7 +412,7 @@ pub async fn files_list_for_miller_col(
                 files.push(file.clone()); // push a clone of the file to the vector
                                           // fileslist(
                                           //     &windowname2.clone(),
-                                          //     &window.app_handle(),
+                                          //     &window.clone().app_handle(),
                                           //     &serde_json::to_string(&json!({
                                           //       "caller":starttime,
                                           //       "files":&serde_json::to_string(&file.clone()).unwrap(),

@@ -9,7 +9,7 @@
 //display system info using os api
 import React, { useEffect, useState } from "react";
 import EachSetting from "./switchsettingseach"
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { FolderIcon, Save } from "lucide-react";
 import { stateinfo } from "../shared/tstypes";
 import Link from "next/link";

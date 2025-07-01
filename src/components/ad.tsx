@@ -3,7 +3,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescripti
 import { setcolorpertheme } from "./greet";
 
 import { Checkbox } from "./ui/checkbox";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { operationfileinfo } from "../shared/tstypes";
 export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,reloadlist}){
     // console.log("srclist-----"+srclist)

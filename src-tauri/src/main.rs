@@ -39,10 +39,7 @@ use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tauri::{
-    api::{file::read_string, shell},
-    http::ResponseBuilder,
-    window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, PathResolver, Runtime,
-    State, Submenu, WindowEvent,
+  Emitter, Manager, State, WebviewWindowBuilder, WindowEvent
 };
 
 // use walkdir::WalkDir;
@@ -94,7 +91,7 @@ use std::io::{self, Seek, SeekFrom, Write};
 #[tauri::command]
 async fn searchload(
     path: String,
-    window: Window,
+    window: tauri::WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), String> {
     populate_try(path.clone(), &window, &state).await;
@@ -102,14 +99,24 @@ async fn searchload(
 }
 #[tauri::command]
 async fn mirror(functionname: String, arguments: Vec<String>, window: Window) {
-    window.get_focused_window().unwrap().emit(
-        "mirror",
-        serde_json::to_string(&json!({
-          "functionname":functionname,
-          "arguments":arguments
-        }))
-        .unwrap(),
-    );
+    window.clone().on_window_event(move|event|{
+        match(event){
+
+            WindowEvent::Focused(true)=>{
+                window
+                .emit(
+            "mirror",
+            serde_json::to_string(&json!({
+              "functionname":functionname,
+              "arguments":arguments
+            }))
+            .unwrap());
+        },
+            _=>{
+
+            }
+        }
+        });
 }
 
 #[derive(Serialize)]
@@ -415,29 +422,30 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
     sendbuttonnames(&window.app_handle(), &buttonnames).unwrap();
     Ok(())
 }
+use tauri::webview;
 #[tauri::command]
 fn zoom_window(window: tauri::Window, scale_factor: f64) {
-    let _ = window.with_webview(move |webview| {
-        #[cfg(target_os = "linux")]
-        {
-          // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
-          // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-          use webkit2gtk::traits::WebViewExt;
+    // let _ = window.with_webview(move |webview| {
+    //     #[cfg(target_os = "linux")]
+    //     {
+    //       // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+    //       // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+    //       use webkit2gtk::traits::WebViewExt;
           
-          webview.inner().set_zoom_level(scale_factor);
-        }
+    //       webview.inner().set_zoom_level(scale_factor);
+    //     }
 
-        #[cfg(windows)]
-        unsafe {
-          // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
-          webview.controller().SetZoomFactor(scale_factor).unwrap();
-        }
+    //     #[cfg(windows)]
+    //     unsafe {
+    //       // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+    //       webview.controller().SetZoomFactor(scale_factor).unwrap();
+    //     }
 
-        // #[cfg(target_os = "macos")]
-        // unsafe {
-        //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
-        // }
-      });
+    //     // #[cfg(target_os = "macos")]
+    //     // unsafe {
+    //     //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
+    //     // }
+    //   });
 }
 #[tauri::command]
 async fn otb(bname: String, path: String, state: State<'_, AppStateStore>) -> Result<(), ()> {
@@ -590,26 +598,26 @@ async fn newspecwindow(
     let labelwin=winlabel;
     let namewin=name;
     if (labelwin == "settings" || labelwin == "installed-apps" || labelwin == "chatui") {
-        tauri::WindowBuilder::new(
-            &window.app_handle(),
+        tauri::WebviewWindowBuilder::new(
+            window.app_handle(),
             labelwin.clone(),
-            tauri::WindowUrl::App(labelwin.clone().into()),
+            tauri::WebviewUrl::App(labelwin.clone().into()),
         )
         .title(namewin.clone())
         .build()
         .unwrap();
         if (labelwin.starts_with("chatui")) {
                 println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],state.embedding_model_name.clone(), state).await.unwrap());
-                tauri::WindowBuilder::new(
-                    &window.app_handle(),
+                tauri::WebviewWindowBuilder::new(
+                    window.app_handle(),
                     labelwin,
-                    tauri::WindowUrl::App("chatui".into()),
+                    tauri::WebviewUrl::App("chatui".into()),
                 )
                 .title(namewin.clone())
                 .build()
                 .unwrap();
             window.app_handle()
-                .emit_all(
+                .emit(
                     // label,
                     "dialogshow",
                     serde_json::to_string(&json!({
@@ -683,7 +691,7 @@ async fn loadsearchlist(
     windowname: &str,
     id: String,
     path: String,
-    window: Window,
+    window: tauri::WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     // state.togglelsl();
@@ -913,6 +921,9 @@ fn main() {
 
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_os::init())
         .setup(|app| {
             let app_handle = app.handle();
             // let resource_path = app_handle.path_resolver();
@@ -1004,20 +1015,28 @@ fn main() {
         _ => {}
     });
 }
-fn on_window_event(event: GlobalWindowEvent) {
-    if let WindowEvent::CloseRequested {
-        #[cfg(not(target_os = "linux"))]
-        api,
-        ..
-    } = event.event()
-    {
+fn on_window_event(window: &Window, _event: &WindowEvent){
+        // Get a handle to the app so we can get the global state.
+    let app_handle = window.app_handle();
+    // if let WindowEvent::CloseRequested {}
+    // let state = app_handle.state::<Mutex<AppState>>();
+
+    // Lock the mutex to mutably access the state.
+    // let mut state = state.lock().unwrap();
+    // state.counter += 1;
+// }
+    //     #[cfg(not(target_os = "linux"))]
+    //     api,
+    //     ..
+    // } = event
+    // {
 
         // #[cfg(target_os = "macos")]
         // {
         //     app.hide().unwrap();
         //     api.prevent_close();
         // }
-    }
+    // }
 }
 //for testing to prevent the window from autoclosing
 // fn hide(app: AppHandle) {
@@ -1069,12 +1088,12 @@ async fn get_path_options(
     Ok(options)
 }
 
-pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> Window {
+pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> tauri::WebviewWindow {
     println!("{:?}", getwindowlist(app_handle));
-    tauri::WindowBuilder::new(
+    tauri::WebviewWindowBuilder::new(
         app_handle,
         label,
-        tauri::WindowUrl::App("index.html".into()),
+        tauri::WebviewUrl::App("index.html".into()),
     )
     // .initialization_script(&INIT_SCRIPT)
     .title(title)
@@ -1084,7 +1103,7 @@ pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> Window
 
 pub fn opendialogwindow(app_handle: &AppHandle, title: &str, content: &str, label: &str) {
     app_handle
-        .emit_all(
+        .emit(
             // label,
             "dialogshow",
             serde_json::to_string(&json!({
@@ -1097,9 +1116,9 @@ pub fn opendialogwindow(app_handle: &AppHandle, title: &str, content: &str, labe
         .unwrap();
 }
 pub fn getwindowlist(app_handle: &AppHandle) -> Vec<String> {
-    match (app_handle.get_window("main")) {
+    match (app_handle.get_webview_window("main")) {
         Some(iop) => {
-            iop.windows()
+            iop.webview_windows()
                 .iter()
                 .map(|e| {
                     // println!("{}--",e.0);

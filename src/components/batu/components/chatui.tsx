@@ -429,7 +429,7 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
   }, []);
 
   useEffect(() => {
-    // (async ()=>createNewChat((await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ","")))()
+    // (async ()=>createNewChat((await(await import('@tauri-apps/api/webviewWindow')).appWindow.title()).replace("FileGPT: ","")))()
     createNewChat();
     if (typeof window !== 'undefined' && !window.isSecureContext) {
       // In a real Next.js app, you might use next/router here

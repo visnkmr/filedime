@@ -40,10 +40,17 @@ fs_extra= {path="../fs_extra/"} #"1.3.0"
 syntect= {version="5.2.0",features= ["default-fancy"] }
 # prefstore= {path="../../../rust/prefstore/prefstore"}
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
-tauri = { version = "2.6.2", features = ["protocol-asset"] }
-tauri-plugin-os = "2.3.0"
+tauri= { version = "2.6.2", features = ["protocol-asset", "tracing"] }
 tauri-plugin-shell = "2.3.0"
+tauri-plugin-http = "2.5.0"
+tauri-plugin-dialog = "2.3.0"
+tauri-plugin-os = "2.3.0"
 tauri-plugin-fs = "2.4.0"
+tauri-plugin-process = "2.3.0"
+tauri-plugin-clipboard-manager = "2.3.0"
+tauri-plugin-deep-link = "2.4.0"
+tauri-plugin-devtools = "2.0.0"
+tauri-plugin-window-state = "2.3.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rayon="1.7.0"
@@ -99,11 +106,11 @@ shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "js
 multipart="0.18.0"
 walkdir = "2.3.3"
 lnk = "0.4.1"
-[target.x86_64-unknown-linux-gnu.dependencies]
-webkit2gtk = "0.18.2"
+# [target.x86_64-unknown-linux-gnu.dependencies]
+# webkit2gtk = "0.18.2"
 
-[target.aarch64-unknown-linux-gnu.dependencies]
-webkit2gtk = "0.18.2"
+# [target.aarch64-unknown-linux-gnu.dependencies]
+# webkit2gtk = "0.18.2"
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52.0"
 [features]

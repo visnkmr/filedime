@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 use crate::FileItem;
 

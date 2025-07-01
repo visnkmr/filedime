@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import { invoke,convertFileSrc } from '@tauri-apps/api/core'
 export const VideoComponent = ({ path, hoverplay }) => {
  const videoRef = useRef();
 
