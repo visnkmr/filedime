@@ -87,7 +87,8 @@ regex="1.10.2"
 include_dir = "0.7.3"
 ollama-rs = "0.3" # Or the latest version from crates.io
 anyhow = "1.0.98" # Good for simple error handling
-memvdb = "0.1.1" 
+memvdb = "0.1.1"
+plist="1.7.2" 
 text-splitter = { version = "0.27.0" } # Or "tiktoken-rs"
 # extractous ="0.3.0"
 shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
