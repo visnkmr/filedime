@@ -109,68 +109,7 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
             })
             .collect::<Vec<DriveItem>>();
         return Some(rt)
-    }
-    else if(cfg!(target_os = "macos")){
-        let output = match Command::new("diskutil").args(["list", "-plist"]).output() {
-            Ok(output) if output.status.success() => output.stdout,
-            _ => return None,
-        };
-        #[derive(Deserialize, Debug)]
-        #[serde(rename_all = "PascalCase")]
-        struct DiskutilPlist {
-            #[serde(rename = "AllDisksAndPartitions")]
-            all_disks_and_partitions: Vec<DiskInfo>,
-        }
-        #[derive(Deserialize, Debug, Clone)]
-        #[serde(rename_all = "PascalCase")]
-        struct DiskInfo {
-            device_identifier: String,
-            mount_point: Option<String>,
-            volume_name: Option<String>,
-            size: u64,
-            content: String,
-            #[serde(default)]
-            volume_uuid: Option<String>,
-            #[serde(default)]
-            removable: bool,
-            #[serde(default)]
-            solid_state: bool,
-        }
-        let plist_data: DiskutilPlist = match plist::from_bytes(&output) {
-            Ok(data) => data,
-            Err(_) => return None,
-        };
-        
-        let mut sys = System::new_with_specifics(RefreshKind::new().with_disks_list());
-
-        let drive_items = plist_data.all_disks_and_partitions.into_iter()
-            .filter_map(|disk| {
-                if disk.mount_point.is_some() && disk.volume_name.is_some() {
-                    let mount_str = disk.mount_point.as_deref().unwrap_or("");
-                    let free_space = sys.disks().iter()
-                        .find(|d| d.mount_point().to_str() == Some(mount_str))
-                        .map_or(0, |d| d.available_space());
-                    
-                    Some(DriveItem {
-                        name: disk.volume_name.unwrap_or_default(),
-                        mount_point: mount_str.to_string(),
-                        total: sizeunit::size(disk.size, true),
-                        free: sizeunit::size(free_space, true),
-                        is_removable: disk.removable,
-                        disk_type: if disk.solid_state { "SSD".to_string() } else { "HDD".to_string() },
-                        file_system: disk.content,
-                        uuid: disk.volume_uuid.unwrap_or_default(),
-                        vendormodel: "".to_string(),
-                    })
-                } else {
-                    None
-                }
-            })
-            .collect();
-            
-        return Some(drive_items)
-    }
-    else
+    }else
     {
         println!("no disks found using lsblk method");
         //for windows
