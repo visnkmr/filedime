@@ -4,7 +4,7 @@ on:
     branches:
       # - 'main'
       # - '*'
-      -'nextrelease'
+      -'tauriv2'
       # - 'v*'
 
 jobs:
@@ -98,10 +98,10 @@ jobs:
         with:
           targets: ${{ matrix.settings.target }}
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./desktop/src-tauri -> target"
+      # - name: Rust cache
+      #   uses: swatinem/rust-cache@v2
+      #   with:
+      #     workspaces: "./desktop/src-tauri -> target"
       - name: setup node
         uses: actions/setup-node@v4
         with:
@@ -120,7 +120,7 @@ jobs:
       #   uses: oven-sh/setup-bun@v1
       - name: install frontend dependencies
         run: yarn install # change this to npm or pnpm depending on which one you use
-      - uses: tauri-apps/tauri-action@dev
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
