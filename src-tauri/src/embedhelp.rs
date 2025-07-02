@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs, path::Path};
 
 use memvdb::{CacheDB, Distance, Embedding};
-use ollama_rs::{generation::embeddings::request::GenerateEmbeddingsRequest, Ollama};
+use ollama_rs::{generation::{completion::request::GenerationRequest, embeddings::request::GenerateEmbeddingsRequest}, Ollama};
 use prefstore::getcustom;
 use shiva::core::{bytes::Bytes, Element, TransformerTrait};
 use anyhow::anyhow;
@@ -147,7 +147,7 @@ async fn embedtest() {
     use std::collections::HashMap;
     use std::path::Path;
 
-    let question = "hello".to_string();
+    let question = "what are the contents of the file".to_string();
     let path = "/home/roger/Downloads/cancel4617713584.pdf".to_string();
 
     // Confirm if file exists
@@ -203,5 +203,16 @@ async fn embedtest() {
     }
 
     println!("Retrieved context:\n{}", retrieved_context);
+
+    let prompt = format!("Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext: ${}\n\nQuestion: ${}", retrieved_context.trim(), question);
+
+    let llm_model="qwen2.5:3b";
+    let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
+    let llm_response = ollama.generate(llm_request).await.unwrap();
+    println!("\n--- LLM Response ---");
+    println!("{}", llm_response.response);
+    println!("--------------------");
+
+
 }
 
