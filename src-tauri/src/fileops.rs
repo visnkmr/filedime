@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, TryRecvError};
 use std::time::Duration;
 use std::{fs, thread, time};
-use tauri::{Manager, Window};
+use tauri::{Manager, WebviewWindow};
 trait PathExt {
     fn exists_case_insensitive(&self) -> bool;
 }
@@ -171,7 +171,7 @@ fn checkindir(
 }
 
 #[tauri::command]
-pub async fn new(dest: String, isdir: bool, name: String, window: Window) -> Result<(), String> {
+pub async fn new(dest: String, isdir: bool, name: String, window: WebviewWindow) -> Result<(), String> {
     // Create the directory
     let dest_path = Path::new(&dest);
     fs::create_dir_all(&dest).map_err(|e| {

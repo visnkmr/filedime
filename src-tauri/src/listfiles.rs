@@ -303,9 +303,9 @@ pub async fn list_files(
 
                 //send each file to frontend
                 files.push(file.clone()); // push a clone of the file to the vector
-                fileslist(
+                let _ = fileslist(
                     &windowname2.clone(),
-                    &window.clone().app_handle(),
+                    &window.clone(),
                     &serde_json::to_string(&json!({
                       "caller":starttime,
                       "files":&serde_json::to_string(&file.clone()).unwrap(),

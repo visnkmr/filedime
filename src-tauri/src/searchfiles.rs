@@ -17,7 +17,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
 // use rust_search::similarity_sort;
-use tauri::{Emitter, Manager, State, WebviewWindow, Window};
+use tauri::{Emitter, Manager, State, WebviewWindow};
 // use walkdir::WalkDir;
 
 use crate::{
@@ -298,7 +298,7 @@ pub async fn search_try(
         files.push(file.clone());
         fileslist(
             &windowname2.clone(),
-            &window.app_handle(),
+            &window.clone(),
             &serde_json::to_string(&json!({
               "caller":starttime,
               "files":&serde_json::to_string(&file.clone()).unwrap(),

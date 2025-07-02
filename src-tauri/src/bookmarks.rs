@@ -1,5 +1,5 @@
 use serde::Serialize;
-use tauri::{Manager, State, Window};
+use tauri::{Manager, State, WebviewWindow};
 
 use crate::{appstate::AppStateStore, sendtofrontend::loadmarks};
 
@@ -15,7 +15,7 @@ pub async fn removemark(
     windowname: &str,
     path: String,
     id: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     state.removemark(path, id);
@@ -33,7 +33,7 @@ pub async fn addmark(
     windowname: &str,
     path: String,
     id: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     state.addmark(path, id);

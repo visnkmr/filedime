@@ -16,7 +16,7 @@ use std::os::windows::fs::OpenOptionsExt;
 // use image::{GenericImageView, io::Reader};
 use rayon::prelude::*;
 use serde_json::json;
-use tauri::{ Manager, State, Window};
+use tauri::{ Manager, State};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{

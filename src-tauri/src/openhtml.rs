@@ -1,6 +1,6 @@
 use std::{io::Read, path::PathBuf};
 
-use tauri::{Emitter, Manager, State, Window};
+use tauri::{Emitter, Manager, State, WebviewWindow};
 
 use crate::{
     appstate::AppStateStore,
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[tauri::command]
-pub fn loadfromhtml(windowname: &str, name: String, window: Window, g: State<AppStateStore>) {
+pub fn loadfromhtml(windowname: &str, name: String, window: WebviewWindow, g: State<AppStateStore>) {
     let mut content = String::new();
     let app_handle = window.app_handle();
     let path = PathBuf::from(name.clone());

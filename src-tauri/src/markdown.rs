@@ -1,8 +1,6 @@
 use std::{io::Read, path::PathBuf};
 
 use comrak::{markdown_to_html, ComrakOptions};
-use serde_json::json;
-use tauri::{Manager, State, Window};
 
 use crate::{
     appstate::AppStateStore,

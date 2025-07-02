@@ -55,6 +55,31 @@
           "'unsafe-inline'"
         ]
       },
+       "capabilities": [
+        {
+          "identifier": "main-capability",
+          "description": "Main window capabilities",
+          "windows": [
+            "main"
+          ],
+          "permissions": [
+            "core:event:allow-listen",
+            "core:event:allow-unlisten",
+            "core:event:allow-emit",
+            "core:window:allow-show",
+            "core:window:allow-hide",
+            "core:window:allow-close",
+            "core:window:allow-minimize",
+            "core:window:allow-set-focus",
+            "core:window:allow-set-always-on-top",
+            "core:webview:allow-set-webview-focus",
+            "core:webview:allow-webview-position",
+            "core:webview:allow-webview-size",
+            "shell:allow-open"
+
+          ]
+        }
+      ],
       "assetProtocol": {
         "enable": true,
         "scope": [

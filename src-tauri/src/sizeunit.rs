@@ -6,7 +6,7 @@ use std::{
 
 use filesize::PathExt;
 use serde_json::json;
-use tauri::{State, Window};
+use tauri::{State};
 
 use crate::{
     appstate::{cachestore, AppStateStore},

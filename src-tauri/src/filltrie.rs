@@ -16,7 +16,7 @@ use ignore::{Walk, WalkBuilder, WalkState};
 use libc::stat;
 use rayon::prelude::*;
 use serde_json::json;
-use tauri::{Emitter, Manager, State, WebviewWindow, Window};
+use tauri::{Emitter, Manager, State, WebviewWindow};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{

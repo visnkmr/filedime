@@ -39,14 +39,14 @@ use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tauri::{
-  Emitter, Manager, State, WebviewWindowBuilder, WindowEvent
+  Emitter, Manager, State, WebviewWindow, WebviewWindowBuilder, WindowEvent
 };
 
 // use walkdir::WalkDir;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{AppHandle, Window};
+use tauri::{AppHandle};
 mod appstate;
 use appstate::*;
 mod filechangewatcher;
@@ -98,7 +98,7 @@ async fn searchload(
     Ok(())
 }
 #[tauri::command]
-async fn mirror(functionname: String, arguments: Vec<String>, window: Window) {
+async fn mirror(functionname: String, arguments: Vec<String>, window: WebviewWindow) {
     window.clone().on_window_event(move|event|{
         match(event){
 
@@ -133,7 +133,7 @@ mod driveops;
 mod fileops;
 
 // #[tauri::command]
-// async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) ->
+// async fn defaulttoopen(name:String,window: WebviewWindow, state: State<'_, AppStateStore>) ->
 //   Result<String, String>
 //   {
 //     match(dirs::home_dir()){
@@ -530,7 +530,7 @@ async fn get_installed_apps_command() -> Result<String, String> {
 async fn nosize(
     windowname: String,
     togglewhat: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     // println!("loading toggle rust---->1");
@@ -573,7 +573,7 @@ async fn nosize(
 async fn newwindow(
     path: String,
     ff: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     let absolute_date = getuniquewindowlabel();
@@ -591,7 +591,7 @@ async fn newwindow(
 async fn newspecwindow(
     winlabel: String,
     name: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     // println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
@@ -636,7 +636,7 @@ async fn newspecwindow(
 }
 
 #[tauri::command]
-fn configfolpath(window: Window, state: State<'_, AppStateStore>) -> String {
+fn configfolpath(window: WebviewWindow, state: State<'_, AppStateStore>) -> String {
     serde_json::to_string(&json!({
       "excludehidden":state.excludehidden.read().unwrap().clone(),
       "sessionstore":({
@@ -680,7 +680,7 @@ fn tabname(path: String) -> String {
 #[tauri::command]
 async fn foldersize(
     path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<String, ()> {
     let sizetosend = dirsize::dir_size(&path.to_string(), &state);
@@ -1015,7 +1015,7 @@ fn main() {
         _ => {}
     });
 }
-fn on_window_event(window: &Window, _event: &WindowEvent){
+fn on_window_event(window: &tauri::Window, _event: &WindowEvent){
         // Get a handle to the app so we can get the global state.
     let app_handle = window.app_handle();
     // if let WindowEvent::CloseRequested {}
@@ -1053,7 +1053,7 @@ fn on_window_event(window: &Window, _event: &WindowEvent){
 #[tauri::command]
 async fn getparentpath(
     mut path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<String, ()> {
     match (PathBuf::from(&path).parent()) {
@@ -1064,7 +1064,7 @@ async fn getparentpath(
 #[tauri::command]
 async fn get_path_options(
     mut path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<Vec<String>, ()> {
     let mut options = Vec::new();

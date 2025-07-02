@@ -62,3 +62,8 @@ The filechat is accessible via its own repo as well @ https://github.com/visnkmr
 For LAN access from a remote machine you can use ollama only if ollama is set to accept requests from 0.0.0.0
 
 Thanks to all the maintainers of the libraries listed in the frontenddepslist.txt and depslist.txt files in the repo.
+
+<!-- ,
+            // "updater:allow-check",
+            // "updater:allow-download",
+            // "updater:allow-install" -->
