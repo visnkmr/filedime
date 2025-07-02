@@ -10,6 +10,16 @@ edition = "2021"
 # [build]
 # target-dir="H:\\rust_deps\\"
 
+# [profile.dev]
+# # opt-level = 1
+# debug = 1
+# incremental = true
+# debug-assertions = false
+# overflow-checks = false
+# # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+# [profile.dev.package."*"]
+# # opt-level = 3
+
 [profile.release]
 # strip = true  # Automatically strip symbols from the binary.
 # opt-level = "z"
@@ -21,16 +31,26 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.1", features = [] }
+tauri-build = { version = "2.3.0", features = [] }
 
 [dependencies]
 local-ip-address="0.6.1"
 # fs_extra= {git="https://github.com/visnkmr/fs_extra.git"} #"1.3.0"
 fs_extra= {path="../fs_extra/"} #"1.3.0"
-syntect="5.1.0"
+syntect= {version="5.2.0",features= ["default-fancy"] }
 # prefstore= {path="../../../rust/prefstore/prefstore"}
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
-tauri = { version = "1.5.4", features = ["devtools", "fs-read-file", "os-all", "path-all", "protocol-all", "shell-open"] }
+tauri= { version = "2.6.2", features = ["protocol-asset", "tracing"] }
+tauri-plugin-shell = "2.3.0"
+tauri-plugin-http = "2.5.0"
+tauri-plugin-dialog = "2.3.0"
+tauri-plugin-os = "2.3.0"
+tauri-plugin-fs = "2.4.0"
+tauri-plugin-process = "2.3.0"
+tauri-plugin-clipboard-manager = "2.3.0"
+tauri-plugin-deep-link = "2.4.0"
+tauri-plugin-devtools = "2.0.0"
+tauri-plugin-window-state = "2.3.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 rayon="1.7.0"
@@ -54,7 +74,7 @@ imagesize="0.12.0"
 # dirscan="1.4.1"
 # markdown= {git="https://github.com/wooorm/markdown-rs.git"}
 opener="0.6.1"
-comrak="0.18.0"
+comrak="0.39.1"
 # contrie="0.1.4"
 chrono="0.4.24"
 # strsim="0.10.0"
@@ -75,7 +95,24 @@ regex="1.10.2"
 # ollama-rs = {version="0.1.7",features= ["stream"] }
 # warp="0.3.6"
 include_dir = "0.7.3"
+ollama-rs = "0.3" # Or the latest version from crates.io
+anyhow = "1.0.98" # Good for simple error handling
+memvdb = "0.1.1"
+plist="1.7.2" 
+text-splitter = { version = "0.27.0" } # Or "tiktoken-rs"
+# extractous ="0.3.0"
+shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
+# hyper="1.6.0"
+multipart="0.18.0"
+walkdir = "2.3.3"
+lnk = "0.4.1"
+# [target.x86_64-unknown-linux-gnu.dependencies]
+# webkit2gtk = "0.18.2"
 
+# [target.aarch64-unknown-linux-gnu.dependencies]
+# webkit2gtk = "0.18.2"
+[target.'cfg(windows)'.dependencies]
+winreg = "0.52.0"
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!

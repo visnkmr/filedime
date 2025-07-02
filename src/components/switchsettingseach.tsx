@@ -7,10 +7,7 @@ export default function EachSetting({name,callback,currentstatus=false}){
     return (
 
     <div className="flex flex-row ">
-        <div className="items-center flex font-bold">
-            {name}
-        </div>
-        <div className="p-2">
+        <div className="pr-4">
 
         <Switch 
         checked={isSelected}
@@ -20,6 +17,10 @@ export default function EachSetting({name,callback,currentstatus=false}){
             }
         } />
         </div>
+        <div className="items-center flex font-bold">
+            {name}
+        </div>
+        
         <div className="ps-2 items-center flex">
 
         {isSelected ? 'Enabled' : 'Disabled'}

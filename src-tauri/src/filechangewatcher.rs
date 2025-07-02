@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs, path::PathBuf, thread, time::SystemTime};
 
 use filetime::FileTime;
-use tauri::{Manager, State, Window};
+use tauri::{Manager, State, WebviewWindow};
 
 use crate::{appstate::AppStateStore, listfiles::list_files, sendtofrontend::notifychange};
 
@@ -53,7 +53,7 @@ pub async fn stopserver(path: String, state: State<'_, AppStateStore>) -> Result
 pub async fn startserver(
     windowname: String,
     pathstr: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     println!("start server command recieved");

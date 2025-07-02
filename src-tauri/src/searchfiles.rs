@@ -17,7 +17,7 @@ use rayon::prelude::*;
 use serde::Serialize;
 use serde_json::json;
 // use rust_search::similarity_sort;
-use tauri::{Manager, State, Window};
+use tauri::{Emitter, Manager, State, WebviewWindow};
 // use walkdir::WalkDir;
 
 use crate::{
@@ -42,7 +42,7 @@ pub async fn search_try(
     mut starttime: i64,
     windowname: String,
     mut string: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), String>
 //  -> Vec<String>
@@ -108,8 +108,8 @@ pub async fn search_try(
     let mut nootimes = 0;
     let tfsize_clone = tfsize.clone();
     // let (tx, rx) = mpsc::channel();
+    let app_handle = window.app_handle().clone();
     let window2 = window.clone();
-    let app_handle = window.app_handle();
     let string2 = string.clone();
 
     let windowname2 = windowname.clone();
@@ -298,7 +298,7 @@ pub async fn search_try(
         files.push(file.clone());
         fileslist(
             &windowname2.clone(),
-            &window.app_handle(),
+            &window.clone(),
             &serde_json::to_string(&json!({
               "caller":starttime,
               "files":&serde_json::to_string(&file.clone()).unwrap(),

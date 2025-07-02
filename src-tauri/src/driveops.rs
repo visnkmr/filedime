@@ -1,4 +1,4 @@
-use tauri::{Manager, Window};
+use tauri::{Manager, WebviewWindow};
 
 use crate::{
     drivelist::{self, populatedrivelist},
@@ -6,7 +6,8 @@ use crate::{
 };
 
 #[tauri::command]
-pub async fn senddriveslist(windowname: String, window: Window) {
+pub async fn senddriveslist(windowname: String, window: WebviewWindow) {
+    println!("{:?}",populatedrivelist());
     driveslist(
         &windowname.clone(),
         &window.app_handle(),
@@ -19,7 +20,7 @@ pub async fn mountdrive(
     windowname: String,
     uuid: String,
     mountpoint: String,
-    window: Window,
+    window: WebviewWindow,
 ) -> Result<String, String> {
     let mut returnid = "".to_string();
     println!("trying to mount drive {}", mountpoint);
@@ -45,7 +46,7 @@ pub async fn unmountdrive(
     windowname: String,
     uuid: String,
     mountpoint: String,
-    window: Window,
+    window: WebviewWindow,
 ) -> Result<String, String> {
     println!("trying to unmount drive {}", uuid);
     if (drivelist::unmountdrive(uuid.clone(), uuid.clone())) {

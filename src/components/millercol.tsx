@@ -2,7 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { pathsplit } from "../shared/tstypes";
 
 import FRc from "./findsizecomp"
-import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { FileItem } from "../shared/types";
 import EachFromGrid from "./grideach";

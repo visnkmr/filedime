@@ -1,3 +1,10 @@
+//fn arch
+// populatedrivelist--->get_disks->get_lsblk_devices(->parse)->get_lsblk_output(->get_command_output)->flattened/get_drives
+// deserialize_fsavail
+// mountdrive
+// unmountdrive
+
+// structs DriveItem DriveInformation Drives LsBlkDeviceWithChildren LsBlkOutput LsBlkDevice
 use chrono::format::format;
 use regex::Regex;
 use serde::{de, Deserialize, Deserializer, Serialize};
@@ -42,7 +49,17 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
         "/usr",   // Secondary hierarchy for read-only user data
         "/var",   // Variable data
     ];
-    if (get_disks().is_ok()) {
+    //for linux
+    // if cfg!(target_os = "linux") {
+    //     println!("Running on Linux");
+    // } else if cfg!(target_os = "macos") {
+    //     println!("Running on macOS");
+    // } else if cfg!(target_os = "windows") {
+    //     println!("Running on Windows");
+    // } else {
+    //     println!("Unsupported OS");
+    // }
+    if (cfg!(target_os = "linux") && get_disks().is_ok()) {
         rt = get_disks()
             .unwrap()
             .0
@@ -91,9 +108,11 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
                 };
             })
             .collect::<Vec<DriveItem>>();
-    } else {
+        return Some(rt)
+    }else
+    {
         println!("no disks found using lsblk method");
-
+        //for windows
         rt = get_drives()
             .unwrap()
             .array_of_drives
@@ -112,9 +131,10 @@ pub fn populatedrivelist() -> Option<Vec<DriveItem>> {
                 };
             })
             .collect::<Vec<DriveItem>>();
+        return Some(rt)
     }
 
-    Some(rt)
+    return None;
 }
 
 use crate::sizeunit;
@@ -285,23 +305,35 @@ pub fn get_lsblk_devices() -> Result<Vec<LsBlkDevice>, ()> {
     Ok(flattened(parsed))
 }
 pub fn get_disks() -> Result<(Vec<LsBlkDevice>, Vec<LsBlkDevice>), ()> {
-    // fn get_disks() -> Result<Vec<PathBuf>,()> {
-    if (get_lsblk_devices().is_err()) {
-        return Err(());
-    }
-    let devices = get_lsblk_devices().expect("Unable to get block devices");
     let mut disks = Vec::new();
     let mut uddisks = Vec::new();
-    for device in devices {
-        if (device.uuid.is_some() && device.label.is_some()) {
-            disks.push(device.clone());
-        } else if device.fstype.is_some() {
-            disks.push(device.clone());
-        } else {
-            uddisks.push(device.clone());
+    if cfg!(target_os = "linux"){
+
+        // fn get_disks() -> Result<Vec<PathBuf>,()> {
+        if (get_lsblk_devices().is_err()) {
+            return Err(());
         }
+        let devices = get_lsblk_devices().expect("Unable to get block devices");
+        
+        for device in devices {
+            if (device.uuid.is_some() && device.label.is_some()) {
+                disks.push(device.clone());
+            } else if device.fstype.is_some() {
+                disks.push(device.clone());
+            } else {
+                uddisks.push(device.clone());
+            }
+        }
+        return Ok((disks, uddisks))
     }
-    Ok((disks, uddisks))
+    else if cfg!(target_os = "macos") {
+        println!("Running on macOS");
+    } else if cfg!(target_os = "windows") {
+        println!("Running on Windows");
+    } else {
+        println!("Unsupported OS");
+    }
+     return Err(())
 }
 
 #[test]
@@ -350,22 +382,52 @@ pub fn get_drives() -> Result<Drives, String> {
 }
 
 pub fn mountdrive(uuid: String, mount_point: String) -> bool {
-    let mount_cmd = Command::new("udisksctl")
+    if cfg!(target_os = "linux") {
+    
+    Command::new("udisksctl")
         .arg("mount")
         .arg("--block-device")
         .arg(&mount_point)
         .status()
-        .expect(&format!("failed to run udisksctl"));
-    (mount_cmd.success())
+        .expect(&format!("failed to run udisksctl")).success()
+    //     println!("Running on Linux");
+} else if cfg!(target_os = "macos") {
+        Command::new("diskutil")
+                .arg("mount")
+                .arg(&mount_point)
+                .status()
+                .map_or(false, |s| s.success())
+    //     println!("Running on macOS");
+    // } else if cfg!(target_os = "windows") {
+    //     println!("Running on Windows");
+    // } else {
+    //     println!("Unsupported OS");
+    }
+    else{
+        false
+    }
 }
 pub fn unmountdrive(uuid: String, mount_point: String) -> bool {
-    let mount_cmd = Command::new("udisksctl")
-        .arg("unmount")
-        .arg("--block-device")
-        .arg(&mount_point)
-        .status()
-        .expect(&format!("failed to run udisksctl"));
-    (mount_cmd.success())
+     if cfg!(target_os = "linux") {
+            Command::new("udisksctl")
+                    .arg("unmount")
+                    .arg("--block-device")
+                    .arg(&mount_point)
+                    .status()
+                    .expect(&format!("failed to run udisksctl"))
+                    .success()
+     }
+    else if cfg!(target_os = "macos"){
+        Command::new("diskutil")
+            .arg("unmount")
+            .arg(&mount_point)
+            .status()
+            .map_or(false, |s| s.success())
+
+    }
+    else{
+        false
+    }
 }
 #[test]
 fn test_result() {

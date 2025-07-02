@@ -1,6 +1,14 @@
 #![warn(clippy::disallowed_types)]
+use anyhow::anyhow;
 use filesize::PathExt;
+use memvdb::{CacheDB, Distance, Embedding};
+use ollama_rs::generation::completion::request::GenerationRequest;
+use ollama_rs::generation::embeddings::request::GenerateEmbeddingsRequest;
+use ollama_rs::Ollama;
 use prefstore::{clearall, clearcustom, getallcustomwithin, getcustom, savecustom};
+use shiva::core::bytes::Bytes;
+use shiva::core::{Element, TransformerTrait};
+use text_splitter::TextSplitter;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::mem::{self};
@@ -20,7 +28,10 @@ pub struct cachestore {
     pub size: u64,
     pub expirytime: u64,
 }
-
+pub struct ExtractedDocument {
+        pub content: String,
+        pub metadata: HashMap<String, String>,
+    }
 #[derive(Debug)]
 pub struct AppStateStore {
     // pub filegptendpoint:String,
@@ -47,6 +58,11 @@ pub struct AppStateStore {
     pub stl: Arc<Mutex<FxHashMap<String, HashSet<String>>>>,
     pub process_count: Arc<Mutex<i32>>,
     pub buttonnames: HashMap<String, String>,
+    pub ollama: Ollama,
+    pub db: Arc<RwLock<CacheDB>>,
+    pub filelist:RwLock<Vec<String>>,
+    pub embedding_model_name: String,
+    // pub llm_model_name: String,
     // tx: Mutex<Option<Sender<String>>>,
     // rx: Mutex<Option<Receiver<String>>>,
     // tx:(RwLock<Sender<String>>),
@@ -85,7 +101,12 @@ use crate::{dirsize, sizeunit};
 impl AppStateStore {
     pub fn new(expiration: u64) -> Self {
         // let (tx, rx) = mpsc::channel::<String>();
+        let ollama = Ollama::from_url(tauri::Url::parse(&getcustom("filedime", "storevals/ollamaurl.set", "http://127.0.0.1:11434")).unwrap());
+        let embedding_model = &getcustom("filedime", "storevals/embedding_model.set", "nomic-embed-text"); // Ensure this model is available
+        // let llm_model = "qwen2.5:3b".to_string(); // Ensure this model is available
 
+        // Initialize CacheDB
+        let mut db = CacheDB::new();
         Self {
             // filegptendpoint:getcustom("filedime", "gpt/filegpt.endpoint", "http://localhost:8694"),
             // Wrap the cache in a RwLock
@@ -166,8 +187,284 @@ impl AppStateStore {
                 }
                 buttonnames
             },
+            db: Arc::new(RwLock::new(db)),
+            filelist: RwLock::new(vec![]),
+            ollama:ollama,
+            embedding_model_name: embedding_model.to_string(),
+            // llm_model_name: llm_model,
         }
     }
+    pub async fn removeembed(&self,path:String)->anyhow::Result<(bool)>{
+        let mut db=self.db.write().unwrap();
+            db.delete_collection(&path)?;
+        Ok(true)
+    }
+    pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<bool>{
+        // let ollama = Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
+
+        println!("Path {}  exists? {}",path,Path::new(&path).exists());
+        {
+            let mut filelist=self.filelist.read().unwrap();
+            if(filelist.contains(&path)){
+                return Ok(true)
+            }
+        }
+        if(!Path::new(&path).exists()){
+            return Ok(false)
+        }
+        let input_vec = self.load_document_and_extract_text(Path::new(&path)).await.unwrap();
+        let texts_to_embed=input_vec.content;
+        let splitter = TextSplitter::new(256);
+        let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).collect();
+        let filetexts=texts_to_embed.clone();
+        let request = GenerateEmbeddingsRequest::new(
+            embedding_model_name, // The model name
+            texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
+        );
+        let response = self.ollama.generate_embeddings(request).await.unwrap();
+        let (embeddings) = response.embeddings;
+    //  {
+        println!("Successfully generated {} embeddings.", embeddings.len());
+        let mut db=self.db.write().unwrap();
+        db.create_collection(path.clone(), 768, Distance::Cosine).unwrap(); // 768 is common for nomic-embed-text
+            
+        for (i, embedding) in embeddings.iter().enumerate() {
+            // println!("Embedding for text {}: [{}, {}, ..., {}] (Dimension: {})",
+            //          i,
+            //          embedding[0],
+            //          embedding[1],
+            //          embedding[embedding.len() - 1],
+            //          embedding.len()
+            // );
+
+
+            // Example embeddings (these would come from your Ollama calls)
+            let embedding1 = Embedding {
+                id: HashMap::from([((format!("title")), format!("{}",filetexts[i]))]),
+                vector: embedding.to_owned(),
+                metadata: Some(input_vec.metadata.clone()),
+            };
+
+            
+            db.insert_into_collection(&path, embedding1).unwrap();
+
+
+
+            // Here, you would store `embedding` (Vec<f32>) along with
+            // `texts_to_embed[i]` (the original content) in your chosen vector database.
+            // Remember to use `embedding.len()` as the dimension when creating your
+            // vector database collection.
+        }
+        let mut filelist=self.filelist.write().unwrap();
+        filelist.push(path.clone());
+        Ok(true)
+    }
+    // pub async fn retieve_from_file_and_generate(&self,query:String)->anyhow::Result<String>{
+    //     let splitter = TextSplitter::new(256);
+    //     let texts_to_embed: Vec<&str> = splitter.chunks(&query).collect();
+
+    //     // println!("Generating embeddings for {:?} texts using model: {}", texts_to_embed, self.embedding_model_name);
+
+    //     // 4. Create the embedding request
+    //     // You can send a single string or a Vec<String> for batch embedding
+    //     let queryreq = GenerateEmbeddingsRequest::new(
+    //         self.embedding_model_name.clone(), // The model name
+    //         texts_to_embed.clone().into(), // The text(s) to embed. Use .into() for Vec<String>
+    //     );
+
+    //     // 5. Send the request to Ollama and get the embeddings
+    //     let queryreq = self.ollama.generate_embeddings(queryreq).await?;
+    //     // for (i, embedding) in queryreq.embeddings.iter().enumerate() {
+    //     //         println!("Embedding for querytext {}: [{}, {}, ..., {}] (Dimension: {})",
+    //     //                 i,
+    //     //                 embedding[0],
+    //     //                 embedding[1],
+    //     //                 embedding[embedding.len() - 1],
+    //     //                 embedding.len()
+    //     //         );
+    //     // }
+    //     let collection = self.db.read().unwrap();
+    //     let collection=collection.get_collection("documents").unwrap();
+    //     let mut retrieved_context=String::new();
+    //     for (_, embedding) in queryreq.embeddings.iter().enumerate() {
+    //         for similar_result_found in collection.get_similarity(&embedding, 3){
+
+    //             let eachtext=(similar_result_found.embedding.id.get("title").unwrap()).to_string(); // Get top 5 similar
+    //             retrieved_context.push_str(&eachtext);
+    //         }
+    //     }
+    //     print!("Retrieved Content: {}",retrieved_context);
+
+    //     let prompt = format!(
+    //         "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+    //         retrieved_context.trim(),
+    //         query
+    //     );
+    //     self.db.clear_poison();
+    //     let llm_model="qwen2.5:3b";
+    //     // --- 8. Generate Result from LLM ---
+    //     // println!("\nGenerating response from LLM (Model: {})...", llm_model);
+    //     let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
+    //     if let llm_response = self.ollama.generate(llm_request).await?{
+    //         return Ok(llm_response.response)
+    //     }
+    //     Ok("no response generated".to_string())
+
+    //     // println!("\n--- LLM Response ---");
+    //     // println!("{}", llm_response.response);
+    //     // println!("--------------------");
+        
+    //     // Ok(retrieved_context)
+    // }
+    // pub async fn generatefromlocal(&self,retrieved_context:String,querystr:String)->anyhow::Result<String>{
+    //     let prompt = format!(
+    //         "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+    //         retrieved_context.trim(),
+    //         querystr
+    //     );
+    //     let llm_model="qwen2.5:3b";
+    //     // --- 8. Generate Result from LLM ---
+    //     // println!("\nGenerating response from LLM (Model: {})...", llm_model);
+    //     let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
+    //     let llm_response = self.ollama.generate(llm_request).await?;
+
+    //     // println!("\n--- LLM Response ---");
+    //     // println!("{}", llm_response.response);
+    //     // println!("--------------------");
+    //     Ok(llm_response.response)
+    // }
+    // Recursively collects text from Shiva's Document Elements.
+
+    fn collect_text_from_elements(&self,elements: &Vec<&Element>, collected_text: &mut String) {
+         for element in elements {
+            match element {
+                Element::Text{text,size} => {
+                    collected_text.push_str(&text);
+                }
+                Element::Paragraph{elements} => {
+                    // Paragraph contains a vector of Elements, often Text, Link etc.
+                    for items in elements.iter(){
+                        self.collect_text_from_elements(&vec![items], collected_text);
+                    }
+                    
+                    collected_text.push_str("\n\n"); // Add paragraph break
+                }
+                Element::Header{text,level} => {
+                    // Header also contains a vector of Elements
+                    collected_text.push_str(&text); // Add markdown-like header prefix
+                    collected_text.push(' ');
+                    // collect_text_from_elements(&h.elements, collected_text);
+                    // collected_text.push_str("\n\n");
+                }
+                Element::List{elements,..} => {
+                    for (i, item) in elements.iter().enumerate() {
+                    //     collected_text.push_str(&format!("{} ", if list.ordered { format!("{}. ", i + 1) } else { "- ".to_string() }));
+                        self.collect_text_from_elements(&vec![&item.element], collected_text);
+                        collected_text.push('\n');
+                    }
+                    collected_text.push('\n'); // Add blank line after list
+                }
+                Element::Table { headers, rows } => {
+                    for row in rows {
+                        for cell in &row.cells {
+                            self.collect_text_from_elements(&vec![&cell.element], collected_text);
+                            collected_text.push('\t'); // Tab-separated cells
+                        }
+                        collected_text.push('\n'); // Newline for each row
+                    }
+                    collected_text.push('\n'); // Add blank line after table
+                }
+                Element::Image(img) => {
+                    // Image might have alt text or caption
+                    // if let Some(alt_text) = &img.alt {
+                        collected_text.push_str(&format!("[Image: {}]", img.alt()));
+                    // } else {
+                        // collected_text.push_str("[Image]");
+                    // }
+                    collected_text.push(' ');
+                }
+                Element::Hyperlink { title, url, alt, size }=>{
+                    // Link has elements (the display text) and a URL
+                    // collect_text_from_elements(&link.elements, collected_text);
+                    // if let Some(url) = &link.url {
+                        collected_text.push_str(&format!("{}", title));
+                        collected_text.push_str(&format!(" ({})", url));
+                    // }
+                    collected_text.push(' ');
+                }
+                // Add more as needed:
+                // Element::Equation(eq) => collected_text.push_str(&format!("[Equation: {}]", eq.value)),
+                // Element::Divider => collected_text.push_str("---\n"),
+                // Element::Video(vid) => collected_text.push_str(&format!("[Video: {}]", vid.url.as_deref().unwrap_or(""), vid.title.as_deref().unwrap_or(""))),
+                // Element::Audio(aud) => collected_text.push_str(&format!("[Audio: {}]", aud.url.as_deref().unwrap_or(""), aud.title.as_deref().unwrap_or(""))),
+                // _ => {
+                //     // This catches any new or unhandled element types.
+                //     // You might log a warning here if you want to be aware of missed content.
+                //     // println!("Unhandled element type: {:?}", element);
+                // }
+            }
+        }
+    }
+    /// Helper function to get the document type from a file extension.
+    fn get_document_type(&self,path: &Path) -> Option<&'static str> {
+        path.extension().and_then(|ext| ext.to_str()).map(|s| match s {
+            "txt" => "text",
+            "md" => "markdown",
+            "html" | "htm" => "html",
+            "pdf" => "pdf",
+            "json" => "json",
+            "csv" => "csv",
+            "rtf" => "rtf",
+            "docx" => "docx",
+            "xml" => "xml",
+            "xls" => "xls",
+            "xlsx" => "xlsx",
+            "ods" => "ods",
+            "typst" => "typst",
+            _ => "unknown", // Handle unknown types
+        })
+    }
+    /// Represents the extracted content and metadata of a document.
+    
+    pub async fn load_document_and_extract_text(&self,file_path: &Path) -> anyhow::Result<ExtractedDocument> {
+    let file_bytes = fs::read(file_path)?;
+    let input_bytes = Bytes::from(file_bytes);
+
+    let doc_type = self.get_document_type(file_path)
+        .ok_or_else(|| anyhow!("Could not determine document type for {:?}", file_path))?;
+
+    let document: shiva::core::Document = match doc_type {
+        "text" => shiva::text::Transformer::parse(&input_bytes)?,
+        "markdown" => shiva::markdown::Transformer::parse(&input_bytes)?,
+        "html" => shiva::html::Transformer::parse(&input_bytes)?,
+        "pdf" => shiva::pdf::Transformer::parse(&input_bytes)?,
+        "json" => shiva::json::Transformer::parse(&input_bytes)?,
+        "csv" => shiva::csv::Transformer::parse(&input_bytes)?,
+        "rtf" => shiva::rtf::Transformer::parse(&input_bytes)?,
+        "docx" => shiva::docx::Transformer::parse(&input_bytes)?,
+        "xml" => shiva::xml::Transformer::parse(&input_bytes)?,
+        "xls" => shiva::xls::Transformer::parse(&input_bytes)?,
+        "xlsx" => shiva::xlsx::Transformer::parse(&input_bytes)?,
+        "ods" => shiva::ods::Transformer::parse(&input_bytes)?,
+        "typst" => shiva::typst::Transformer::parse(&input_bytes)?,
+        _ => return Err(anyhow!("Unsupported document type: {}", doc_type)),
+    };
+
+    let mut collected_text = String::new();
+    self.collect_text_from_elements(&document.get_all_elements(), &mut collected_text);
+
+    let mut metadata = HashMap::new();
+    metadata.insert("file_name".to_string(), file_path.file_name().unwrap_or_default().to_string_lossy().into_owned());
+    metadata.insert("file_path".to_string(), file_path.to_string_lossy().into_owned());
+    // Shiva's Document model might have direct metadata fields you can extract.
+    // E.g., `document.metadata` if it exists and is populated by the parser.
+    // For now, we're just adding basic file metadata.
+
+    Ok(ExtractedDocument {
+        content: collected_text.trim().to_string(), // Trim whitespace
+        metadata,
+    })
+}
     pub fn addmark(&self, path: String, id: String) {
         savecustom("filedime", format!("bookmarks/{}.mark", id), path.clone());
         let pof = path.clone();
@@ -306,6 +603,7 @@ impl AppStateStore {
             now.duration_since(instant) < self.expiration
         });
     }
+
     // Add a method to print the total size of the cache
     pub fn print_cache_size(&self) -> i32
 //   ->(u64,u64)

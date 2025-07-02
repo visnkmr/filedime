@@ -5,7 +5,7 @@ use std::{
     fs,
     path::{Path, PathBuf},
 };
-use tauri::{State, Window};
+use tauri::{State, WebviewWindow};
 
 use crate::{appstate::AppStateStore, sizeunit::find_size};
 

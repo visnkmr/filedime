@@ -48,6 +48,7 @@ export function DataTable<TData, TValue,String>({
   searchstring,
   filetype
 }: DataTableProps<TData, TValue,String>) {
+  console.log(data.length)
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -159,7 +160,7 @@ export function DataTable<TData, TValue,String>({
           Next
         </Button>
       </div>
-      <p className='ms-3 pt-4'>Total {table.getPageCount()} pages.</p>
+      <p className='ms-3 flex place-items-center'>Total {table.getPageCount()} pages.({data.length} items found)</p>
       
         
           </div>

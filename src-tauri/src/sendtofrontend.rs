@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 
 use crate::FileItem;
 
@@ -114,8 +114,8 @@ pub fn folcount(windowname: &str, ah: &AppHandle, fcount: usize) -> Result<(), S
     Ok(())
 }
 
-pub fn fileslist(windowname: &str, ah: &AppHandle, fl: &String) -> Result<(), String> {
-    // println!("{}",fl);
+pub fn fileslist(windowname: &str, ah: &WebviewWindow, fl: &String) -> Result<(), String> {
+    println!("{}",fl);
     ah.emit_to(windowname, "list-files", fl)
         .map_err(|e| e.to_string())?;
     Ok(())

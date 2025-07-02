@@ -16,7 +16,7 @@ use ignore::{Walk, WalkBuilder, WalkState};
 use libc::stat;
 use rayon::prelude::*;
 use serde_json::json;
-use tauri::{Manager, State, Window};
+use tauri::{Emitter, Manager, State, WebviewWindow};
 // use walkdir::{WalkDir, DirEntry};
 
 use crate::{
@@ -35,7 +35,7 @@ use crate::{
 #[tauri::command]
 pub async fn populate_try(
     mut path: String,
-    window: &Window,
+    window: &WebviewWindow,
     state: &State<'_, AppStateStore>,
 ) -> Result<(), String> {
     let ignorehiddenfiles = *state.excludehidden.read().unwrap();
@@ -65,9 +65,7 @@ pub async fn populate_try(
         };
         // return Ok(())
     }
-    window
-        .app_handle()
-        .emit_all("start-timer", "")
+    window.emit_to(window.label(),"start-timer", "")
         .map_err(|e| e.to_string())?;
     opendialogwindow(
         &window.app_handle(),
@@ -124,8 +122,7 @@ pub async fn populate_try(
             })
         });
     window
-        .app_handle()
-        .emit_all("stop-timer", "")
+        .emit_to(window.label(),"stop-timer", "")
         .map_err(|e| e.to_string())?;
     opendialogwindow(
         &window.app_handle(),

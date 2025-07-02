@@ -20,10 +20,13 @@ mod filltrie;
 mod lastmodcalc;
 mod navtimeline;
 mod sendtofrontend;
+mod installed_apps;
 use chrono::{DateTime, Local, Utc};
 use local_ip_address::local_ip;
 // use get_size::GetSize;
 use navtimeline::{BrowserHistory, Page};
+use ollama_rs::generation::{completion::request::GenerationRequest, embeddings::request::GenerateEmbeddingsRequest};
+use text_splitter::TextSplitter;
 // use filesize::PathExt;
 
 use crate::driveops::*;
@@ -36,17 +39,14 @@ use sendtofrontend::{driveslist, lfat, sendbuttonnames, sendprogress};
 use serde_json::json;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 use tauri::{
-    api::{file::read_string, shell},
-    http::ResponseBuilder,
-    window, CustomMenuItem, GlobalWindowEvent, Manager, Menu, MenuItem, PathResolver, Runtime,
-    State, Submenu, WindowEvent,
+  Emitter, Manager, State, WebviewWindow, WebviewWindowBuilder, WindowEvent
 };
 
 // use walkdir::WalkDir;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{AppHandle, Window};
+use tauri::{AppHandle};
 mod appstate;
 use appstate::*;
 mod filechangewatcher;
@@ -63,7 +63,7 @@ mod markdown;
 // mod partialratio;
 use crate::{
     bookmarks::*, filechangewatcher::*, filltrie::populate_try, listfiles::*, markdown::*,
-    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*,
+    openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*, installed_apps::*,
 };
 use lastmodcalc::lastmodified;
 // mod r  esync;
@@ -91,22 +91,32 @@ use std::io::{self, Seek, SeekFrom, Write};
 #[tauri::command]
 async fn searchload(
     path: String,
-    window: Window,
+    window: tauri::WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), String> {
     populate_try(path.clone(), &window, &state).await;
     Ok(())
 }
 #[tauri::command]
-async fn mirror(functionname: String, arguments: Vec<String>, window: Window) {
-    window.get_focused_window().unwrap().emit(
-        "mirror",
-        serde_json::to_string(&json!({
-          "functionname":functionname,
-          "arguments":arguments
-        }))
-        .unwrap(),
-    );
+async fn mirror(functionname: String, arguments: Vec<String>, window: WebviewWindow) {
+    window.clone().on_window_event(move|event|{
+        match(event){
+
+            WindowEvent::Focused(true)=>{
+                window
+                .emit(
+            "mirror",
+            serde_json::to_string(&json!({
+              "functionname":functionname,
+              "arguments":arguments
+            }))
+            .unwrap());
+        },
+            _=>{
+
+            }
+        }
+        });
 }
 
 #[derive(Serialize)]
@@ -123,7 +133,7 @@ mod driveops;
 mod fileops;
 
 // #[tauri::command]
-// async fn defaulttoopen(name:String,window: Window, state: State<'_, AppStateStore>) ->
+// async fn defaulttoopen(name:String,window: WebviewWindow, state: State<'_, AppStateStore>) ->
 //   Result<String, String>
 //   {
 //     match(dirs::home_dir()){
@@ -141,6 +151,112 @@ mod fileops;
 async fn getlocalip() -> Result<String, String> {
     println!("{}", local_ip().unwrap().to_string());
     Ok(local_ip().unwrap().to_string())
+}
+#[tauri::command]
+async fn fileslist(state: State<'_, AppStateStore>) -> Result<Vec<String>, String> {
+    let filelist=state.filelist.read().unwrap();
+    Ok(filelist.clone())
+}
+#[tauri::command]
+async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_, AppStateStore>) -> Result<(serde_json::Value), String> {
+    println!("{:?}",path);
+    let mut successcount=0;
+    let mut failcount=0;
+    for eachfile in path{
+        if let Ok(res)=state.embedfile(eachfile,embeddingmodelname.clone()).await{
+            successcount+=1
+        }
+        else{
+            failcount+=1
+        }
+    }
+    if(successcount>=1)
+    {
+        return Ok(json!({"successcount":successcount,"failcount":failcount}))
+    }
+    Err("Could not embed file type not supported".to_string())
+}
+#[tauri::command]
+async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,path:String, state: State<'_, AppStateStore>) -> Result<String, String> {
+        let mut doclist;
+        let mut retrieved_context=String::new();
+        // let ollama = ollama_rs::Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
+
+        // let path="ALL";
+        if(usecompletefile){
+            if(path=="ALL")
+            {
+                let rwdoclist=state.filelist.read().unwrap();
+                doclist =rwdoclist.clone();
+                drop(rwdoclist);
+            }
+            else{
+                doclist=vec![path.to_string()]
+            }
+            for path in doclist{
+                let input_vec = state.load_document_and_extract_text(Path::new(&path)).await.unwrap();
+                let texts_to_embed=input_vec.content;
+                retrieved_context.push_str(texts_to_embed.as_str());
+            }
+        }
+        else{
+
+            let splitter = TextSplitter::new(256);
+            let texts_to_embed: Vec<&str> = splitter.chunks(&question).collect();
+        
+            // Create the embedding request for the user's question
+            let query_req = GenerateEmbeddingsRequest::new(
+                embeddingmodelname.clone(),
+                texts_to_embed.clone().into(),
+            );
+        
+            // 1. AWAIT: Generate embeddings for the question. No locks are held here.
+            let embeddings_response = state.ollama.generate_embeddings(query_req).await.unwrap();
+        
+            // This string will hold the data we retrieve from the database.
+            // let mut retrieved_context = String::new();
+        
+            // --- Start of the critical section ---
+            // Use a block to strictly limit the lifetime of the RwLockReadGuard.
+            {
+                let db = Arc::clone(&state.db);
+                // The read guard 'collections_guard' is created here.
+                let collections_guard = db.read().unwrap(); 
+                let collection = collections_guard.get_collection(&path).unwrap();
+        
+                for embedding in embeddings_response.embeddings.iter() {
+                    // Perform the similarity search while the lock is held.
+                    for similar_result_found in collection.get_similarity(embedding, 10) {
+                        // Assuming the 'title' is what you want to retrieve.
+                        // Using .get() and handling the Option is safer.
+                        if let Some(title_value) = similar_result_found.embedding.id.get("title") {
+                            // Convert the value to a string slice and push it.
+                                retrieved_context.push_str(title_value.as_str());
+                                retrieved_context.push_str("\n"); // Add a separator for clarity
+                        }
+                    }
+                }
+            } // <-- The 'collections_guard' is dropped here, and the read lock is released.
+              // We are now safe to .await again.
+        
+            }
+    println!("Retrieved Content: {}", retrieved_context);
+    Ok(retrieved_context)
+
+    // let prompt = format!(
+    //     "Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext:\n{}\n\nQuestion: {}",
+    //     retrieved_context.trim(),
+    //     question
+    // );
+
+    // let llm_request = GenerationRequest::new(model, prompt);
+
+    // // 2. AWAIT: Generate the final response from the LLM.
+    // if let Ok(llm_response) = state.ollama.generate(llm_request).await {
+    //     return Ok(llm_response.response);
+    // }
+
+    // Ok("no response generated".to_string())
 }
 
 #[tauri::command]
@@ -162,15 +278,15 @@ async fn highlightfile(path: String, theme: String) -> Result<String, String> {
     }
 }
 #[tauri::command]
-fn filegptendpoint(endpoint: String) -> Result<String, String> {
+fn filegptendpoint(endpoint: String,whichvar:String,defaultval:String) -> Result<String, String> {
     if (endpoint == "") {
         Ok(getcustom(
             "filedime",
-            "gpt/filegpt.endpoint",
-            "http://localhost:8694",
+            format!("storevals/{}.set",whichvar),
+            defaultval,
         ))
     } else {
-        savecustom("filedime", "gpt/filegpt.endpoint", endpoint.clone());
+        savecustom("filedime", format!("storevals/{}.set",whichvar ), endpoint.clone());
         Ok(endpoint)
     }
 }
@@ -233,21 +349,68 @@ async fn check_if_installed(appname: &str) -> Result<bool, String> {
 
     Ok(output.status.success())
 }
+#[derive(Debug, Deserialize, Serialize)]
+struct CommandEntry {
+    os: String,      // The operating system name (e.g., "macOS", "Linux", "Windows").
+    command: String, // The actual command string to execute.
+}
+
+// Define a struct that mirrors the overall JSON structure.
+#[derive(Debug, Deserialize, Serialize)]
+struct AppConfig {
+    icon: String,           // The icon string.
+    name: String,           // The name string.
+    command: Vec<CommandEntry>, // A vector (array) of CommandEntry structs.
+}
+use std::env::consts::OS;
+fn parse_config(json_str: &str, target_os: &str) -> Result<(String, String, Option<String>), String> {
+    // Attempt to deserialize the JSON string into our AppConfig struct.
+    // The `?` operator is used for error propagation, returning an `Err` if deserialization fails.
+    let config: AppConfig = serde_json::from_str(json_str)
+        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
+    // Find the command specific to the target_os.
+    // `find()` returns an `Option<&CommandEntry>`, which will be `Some` if found, `None` otherwise.
+    let command_for_os = config.command.iter()
+        .find(|entry| entry.os.eq_ignore_ascii_case(target_os)) // Case-insensitive comparison for OS.
+        .map(|entry| entry.command.clone()); // If found, clone the command string.
+
+    // Return the extracted data wrapped in an `Ok` variant.
+    Ok((config.icon, config.name, command_for_os))
+}
 fn startup(window: &AppHandle) -> Result<(), ()> {
+    let defaultopenterm=json!({
+        "icon": "Terminal",
+        "name": "Open Terminal",
+        "command": [
+            {
+            "os": "macos",
+            "command": "open -a Terminal %f"
+            },
+            {
+            "os": "linux",
+            "command": "exo-open --working-directory %f --launch TerminalEmulator"
+            },
+            {
+            "os": "windows",
+            "command": "cmd /C start cmd /K cd /d %f"
+            }
+        ]
+        });
     //define format for adding custom button as extensions to ui
-    if cfg!(target_os = "linux") {
-        // getcustom(
-        //     "filedime",
-        //     "custom_scripts/terminal_open.fds",
-        //     "exo-open --working-directory %f --launch TerminalEmulator",
-        // );
-    } else if cfg!(target_os = "windows") {
+    // if cfg!(target_os = "linux") {
+    //     // getcustom(
+    //     //     "filedime",
+    //     //     "custom_scripts/terminal_open.fds",
+    //     //     "exo-open --working-directory %f --launch TerminalEmulator",
+    //     // );
+    // } else if cfg!(target_os = "windows") {
         getcustom(
             "filedime",
             "custom_scripts/terminal_open.fds",
-            "cmd /k cd %f",
+            serde_json::to_string(&defaultopenterm).unwrap(),
         );
-    }
+    // }
 
     let mut buttonnames = Vec::new();
     // println!("{:?}",getallcustomwithin("filedime", "custom_scripts","fds"));
@@ -259,19 +422,81 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
     sendbuttonnames(&window.app_handle(), &buttonnames).unwrap();
     Ok(())
 }
+use tauri::webview;
+#[tauri::command]
+fn zoom_window(window: tauri::Window, scale_factor: f64) {
+    // let _ = window.with_webview(move |webview| {
+    //     #[cfg(target_os = "linux")]
+    //     {
+    //       // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+    //       // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+    //       use webkit2gtk::traits::WebViewExt;
+          
+    //       webview.inner().set_zoom_level(scale_factor);
+    //     }
+
+    //     #[cfg(windows)]
+    //     unsafe {
+    //       // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+    //       webview.controller().SetZoomFactor(scale_factor).unwrap();
+    //     }
+
+    //     // #[cfg(target_os = "macos")]
+    //     // unsafe {
+    //     //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
+    //     // }
+    //   });
+}
 #[tauri::command]
 async fn otb(bname: String, path: String, state: State<'_, AppStateStore>) -> Result<(), ()> {
     // state.getactivepath(path);
-    println!("{}", path);
+     let current_os = OS;
+
+    println!("{}--{}",bname, path);
 
     if (!Path::new(&path).is_dir()) {
         return Err(());
     }
-    let mut args = state
+    let mut json_data = state
         .buttonnames
         .get(&bname.replace(" ", "_"))
         .unwrap()
         .clone();
+    println!("Detected operating system: {}", current_os);
+    let mut args="".to_string();
+    // Parse the configuration for the current operating system.
+    match parse_config(&json_data, current_os) {
+        Ok((icon, name, command)) => {
+            println!("--- For Current OS ({}) ---", current_os);
+            println!("Icon: {}", icon);
+            println!("Name: {}", name);
+            if let Some(cmd) = command {
+                args=cmd.clone();
+                println!("Command: {}", cmd);
+            } else {
+                println!("Command for {} not found.", current_os);
+            }
+        },
+        Err(e) => eprintln!("Error parsing config: {}", e),
+    }
+
+    println!();
+
+    // Test with malformed JSON (kept for error handling demonstration)
+    // let malformed_json = r#"{"icon": "❌", "name": "Broken", "command": ["oops"}"#;
+    // match parse_config(malformed_json, current_os) {
+    //     Ok((icon, name, command)) => {
+    //         println!("--- For Malformed JSON ---");
+    //         println!("Icon: {}", icon);
+    //         println!("Name: {}", name);
+    //         if let Some(cmd) = command {
+    //             println!("Command: {}", cmd);
+    //         } else {
+    //             println!("Command not found.");
+    //         }
+    //     },
+    //     Err(e) => eprintln!("--- For Malformed JSON Error --- \nError: {}", e),
+    // }
     args = args.replace("%f", &path);
     let args: Vec<_> = args.split(" ").collect();
     println!("{:?}", args);
@@ -295,11 +520,17 @@ async fn get_timestamp() -> String {
     // println!("{}",timestamp);
     timestamp
 }
+
+#[tauri::command]
+async fn get_installed_apps_command() -> Result<String, String> {
+    let apps = get_installed_apps()?;
+    serde_json::to_string(&apps).map_err(|e| e.to_string())
+}
 #[tauri::command]
 async fn nosize(
     windowname: String,
     togglewhat: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     // println!("loading toggle rust---->1");
@@ -342,7 +573,7 @@ async fn nosize(
 async fn newwindow(
     path: String,
     ff: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     let absolute_date = getuniquewindowlabel();
@@ -360,26 +591,52 @@ async fn newwindow(
 async fn newspecwindow(
     winlabel: String,
     name: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
-    if (winlabel == "settings") {
-        tauri::WindowBuilder::new(
-            &window.app_handle(),
-            winlabel,
-            tauri::WindowUrl::App("settings.html".into()),
+    // println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
+    let labelwin=winlabel;
+    let namewin=name;
+    if (labelwin == "settings" || labelwin == "installed-apps" || labelwin == "chatui") {
+        tauri::WebviewWindowBuilder::new(
+            window.app_handle(),
+            labelwin.clone(),
+            tauri::WebviewUrl::App(labelwin.clone().into()),
         )
-        .title(name)
+        .title(namewin.clone())
         .build()
         .unwrap();
+        if (labelwin.starts_with("chatui")) {
+                println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],state.embedding_model_name.clone(), state).await.unwrap());
+                tauri::WebviewWindowBuilder::new(
+                    window.app_handle(),
+                    labelwin,
+                    tauri::WebviewUrl::App("chatui".into()),
+                )
+                .title(namewin.clone())
+                .build()
+                .unwrap();
+            window.app_handle()
+                .emit(
+                    // label,
+                    "dialogshow",
+                    serde_json::to_string(&json!({
+                    "title":namewin.replace("FileGPT: ",""),
+                    "content":"Sucessfully embeded",
+                    // "arguments":arguments
+                    }))
+                    .unwrap(),
+                )
+                .unwrap();
+        }
     } else {
-        opennewwindow(&window.app_handle(), &name, &winlabel);
+        opennewwindow(&window.app_handle(), &namewin, &labelwin);
     }
     Ok(())
 }
 
 #[tauri::command]
-fn configfolpath(window: Window, state: State<'_, AppStateStore>) -> String {
+fn configfolpath(window: WebviewWindow, state: State<'_, AppStateStore>) -> String {
     serde_json::to_string(&json!({
       "excludehidden":state.excludehidden.read().unwrap().clone(),
       "sessionstore":({
@@ -423,7 +680,7 @@ fn tabname(path: String) -> String {
 #[tauri::command]
 async fn foldersize(
     path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<String, ()> {
     let sizetosend = dirsize::dir_size(&path.to_string(), &state);
@@ -434,7 +691,7 @@ async fn loadsearchlist(
     windowname: &str,
     id: String,
     path: String,
-    window: Window,
+    window: tauri::WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     // state.togglelsl();
@@ -456,7 +713,7 @@ async fn loadsearchlist(
 // }
 #[tauri::command]
 async fn checker() -> Result<String, String> {
-    let url = "https://cdn.jsdelivr.net/gh/vishnunkmr/quickupdates/filedimeversion.txt";
+    let url = "https://cdn.jsdelivr.net/gh/visnkmr/filedime@nextrelease/version.txt";
     match (reqwest::get(url).await) {
         Ok(response) => {
             // Ensure the response is successful
@@ -473,14 +730,131 @@ async fn checker() -> Result<String, String> {
         Err(_) => Err("Could not check for updates".to_string()),
     }
 }
-fn handle_connection(mut stream: TcpStream) {
+
+fn get_boundary(request: &str) -> Option<String> {
+    // Look for "Content-Type: multipart/form-data; boundary=----WebKitFormBoundary"
+    if let Some(pos) = request.find("Content-Type: multipart/form-data;") {
+        let content_type = &request[pos..];
+        if let Some(boundary_pos) = content_type.find("boundary=") {
+            let boundary_start = boundary_pos + "boundary=".len();
+            let boundary_end = content_type[boundary_start..].find("\r\n").unwrap_or(content_type.len());
+            return Some(content_type[boundary_start..boundary_start + boundary_end].to_string());
+        }
+    }
+    None
+}
+
+fn get_body(request: &str) -> Option<String> {
+    // The body starts after the headers, which are separated by a double newline (CRLF)
+    if let Some(pos) = request.find("\r\n\r\n") {
+        let body = &request[pos + 4..];
+        return Some(body.to_string());
+    }
+    None
+}
+
+fn parse_multipart_form_data(body: &str, boundary: &str) -> Vec<(String, String)> {
+    let mut form_data = Vec::new();
+    let boundarystring=format!("--{}", boundary);
+    let mut parts = body.split(&boundarystring); // Split by the boundary
+
+    for part in parts {
+        if part.is_empty() {
+            continue;
+        }
+
+        // Find the headers in the part
+        if let Some(pos) = part.find("\r\n\r\n") {
+            let headers = &part[..pos];
+            let content = &part[pos + 4..]; // After the headers is the content
+
+            // Check for the content-disposition header for form fields
+            if let Some(disposition_pos) = headers.find("Content-Disposition: form-data;") {
+                let header = &headers[disposition_pos..];
+                if let Some(name_pos) = header.find("name=\"") {
+                    let name_start = name_pos + "name=\"".len();
+                    let name_end = header[name_start..].find("\"").unwrap_or(header.len());
+                    let name = &header[name_start..name_start + name_end];
+
+                    // Capture the content of the field
+                    form_data.push((name.to_string(), content.to_string()));
+                }
+            }
+        }
+    }
+
+    form_data
+}
+fn handle_connection(mut stream: TcpStream)->anyhow::Result<()> {
     let mut buffer = [0; 1024];
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
     println!("Request: {}", request);
-    // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
+
+     // Handle CORS preflight (OPTIONS) requests
+    if request.starts_with("OPTIONS") {
+        let response = "HTTP/1.1 200 OK\r\n\
+                        Access-Control-Allow-Origin: *\r\n\
+                        Access-Control-Allow-Methods: POST, OPTIONS\r\n\
+                        Access-Control-Allow-Headers: Content-Type\r\n\
+                        Content-Length: 0\r\n\r\n";
+        stream.write(response.as_bytes())?;
+        stream.flush()?;
+        return Ok(());
+    }
+
+
+     // Check if the request is a POST request
+    if request.starts_with("POST") {
+        // Find the boundary from the Content-Type header
+        if let Some(boundary) = get_boundary(&request) {
+            println!("Boundary: {}", boundary);
+
+            if let Some(body) = get_body(&request) {
+                // Use multipart crate to parse the body
+                let mut multipart = multipart::server::Multipart::with_body(body.as_bytes(), boundary);
+                
+                while let Some(mut field) = multipart.read_entry()? {
+                    // let name = field.name().unwrap_or("unknown");
+                    // let filename = field.filename().unwrap_or("unknown");
+                    let mut file_content = Vec::new();
+
+                    // Read the content of the file
+                    field.data.read_to_end(&mut file_content)?;
+
+                    // println!("Field name: {}", name);
+                    // println!("File name: {}", filename);
+                    println!("File content: {:?}", str::from_utf8(&file_content)?);
+                }
+
+                // Send a response back with CORS headers and ensure it's properly flushed
+                let response = "HTTP/1.1 200 OK\r\n\
+                                Access-Control-Allow-Origin: *\r\n\
+                                Content-Length: 13\r\n\r\n\
+                                Hello, World!";
+                stream.write_all(response.as_bytes())?;
+                stream.flush()?;
+            } else {
+                println!("No body content found.");
+            }
+        } else {
+            println!("No boundary found in Content-Type.");
+        }
+        let retjson=serde_json::to_string(&json!({"ok":"ok"}))?;
+        // Send a response back with CORS headers
+        let response = format!("HTTP/1.1 200 OK\r\n\
+                        Access-Control-Allow-Origin: *\r\n\
+                        Content-Length: 13\r\n\r\n\
+                        {}",retjson);
+        stream.write(response.as_bytes())?;
+        stream.flush()?;
+    }
+    else{
+         // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
     let mut filename = request.split_whitespace().nth(1).unwrap_or("/");
     filename = filename.trim_start_matches('/');
+
+
     // println!("---->{}----",filename);
     if (filename.is_empty()) {
         filename = ("filegpt.html");
@@ -501,6 +875,8 @@ fn handle_connection(mut stream: TcpStream) {
         stream.write(response.as_bytes()).unwrap();
         stream.flush().unwrap();
     }
+    }
+    Ok(())
 }
 use include_dir::{include_dir, Dir};
 
@@ -545,6 +921,9 @@ fn main() {
 
     let mut g = AppStateStore::new(CACHE_EXPIRY);
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_os::init())
         .setup(|app| {
             let app_handle = app.handle();
             // let resource_path = app_handle.path_resolver();
@@ -596,6 +975,7 @@ fn main() {
             highlightfile,
             doespathexist,
             otb,
+            zoom_window,
             removemark,
             // populate_try,
             search_try,
@@ -608,6 +988,11 @@ fn main() {
             addtotabhistory,
             mountdrive,
             unmountdrive,
+            embedfile,
+            queryfile,
+            fileslist,
+            get_installed_apps_command,
+            launch_app_command,
             // whattoload,
             // get_window_label
         ])
@@ -630,20 +1015,28 @@ fn main() {
         _ => {}
     });
 }
-fn on_window_event(event: GlobalWindowEvent) {
-    if let WindowEvent::CloseRequested {
-        #[cfg(not(target_os = "linux"))]
-        api,
-        ..
-    } = event.event()
-    {
+fn on_window_event(window: &tauri::Window, _event: &WindowEvent){
+        // Get a handle to the app so we can get the global state.
+    let app_handle = window.app_handle();
+    // if let WindowEvent::CloseRequested {}
+    // let state = app_handle.state::<Mutex<AppState>>();
+
+    // Lock the mutex to mutably access the state.
+    // let mut state = state.lock().unwrap();
+    // state.counter += 1;
+// }
+    //     #[cfg(not(target_os = "linux"))]
+    //     api,
+    //     ..
+    // } = event
+    // {
 
         // #[cfg(target_os = "macos")]
         // {
         //     app.hide().unwrap();
         //     api.prevent_close();
         // }
-    }
+    // }
 }
 //for testing to prevent the window from autoclosing
 // fn hide(app: AppHandle) {
@@ -660,7 +1053,7 @@ fn on_window_event(event: GlobalWindowEvent) {
 #[tauri::command]
 async fn getparentpath(
     mut path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<String, ()> {
     match (PathBuf::from(&path).parent()) {
@@ -671,7 +1064,7 @@ async fn getparentpath(
 #[tauri::command]
 async fn get_path_options(
     mut path: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<Vec<String>, ()> {
     let mut options = Vec::new();
@@ -695,12 +1088,12 @@ async fn get_path_options(
     Ok(options)
 }
 
-pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> Window {
+pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> tauri::WebviewWindow {
     println!("{:?}", getwindowlist(app_handle));
-    tauri::WindowBuilder::new(
+    tauri::WebviewWindowBuilder::new(
         app_handle,
         label,
-        tauri::WindowUrl::App("index.html".into()),
+        tauri::WebviewUrl::App("index.html".into()),
     )
     // .initialization_script(&INIT_SCRIPT)
     .title(title)
@@ -710,7 +1103,7 @@ pub fn opennewwindow(app_handle: &AppHandle, title: &str, label: &str) -> Window
 
 pub fn opendialogwindow(app_handle: &AppHandle, title: &str, content: &str, label: &str) {
     app_handle
-        .emit_all(
+        .emit(
             // label,
             "dialogshow",
             serde_json::to_string(&json!({
@@ -723,9 +1116,9 @@ pub fn opendialogwindow(app_handle: &AppHandle, title: &str, content: &str, labe
         .unwrap();
 }
 pub fn getwindowlist(app_handle: &AppHandle) -> Vec<String> {
-    match (app_handle.get_window("main")) {
+    match (app_handle.get_webview_window("main")) {
         Some(iop) => {
-            iop.windows()
+            iop.webview_windows()
                 .iter()
                 .map(|e| {
                     // println!("{}--",e.0);

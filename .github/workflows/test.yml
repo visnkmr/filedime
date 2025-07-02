@@ -1,0 +1,222 @@
+name: Release
+on:
+  push:
+    branches:
+      # - 'main'
+      # - '*'
+      - 'nextrelease'
+      # - 'v*'
+
+jobs:
+  # create-release:
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     release_id: ${{ steps.create-release.outputs.result }}
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: setup node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #     - name: get version
+  #       run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+  #     - name: create release
+  #       id: create-release
+  #       uses: actions/github-script@v7
+  #       with:
+  #         script: |
+  #           const currentDate = new Date();
+  #           let isoDate = currentDate.toISOString(); // "2023-08-27T12:34:56.789Z"
+  #           let tagDate = isoDate.substring(0, 10); // "2023-08-27"
+  #           let tagTime = isoDate.substring(11, 19).replace(/:/g, ''); // "123456"
+  #           let githubTag = `${tagDate}-${tagTime}`; 
+  #           const { data } = await github.rest.repos.createRelease({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             tag_name: githubTag,
+  #             name: `Filedime v${process.env.PACKAGE_VERSION}`,
+  #             body: 'Checkout commit for detailed changelog on what has changed.',
+  #             draft: false,
+  #             prerelease: false
+  #           })
+  #           return data.id
+
+  build-tauri:
+    # needs: create-release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            os: darwin
+            arch: amd64
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            os: darwin
+            arch: arm64
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            arch: amd64
+          - host: windows-latest
+            target: aarch64-pc-windows-msvc
+            arch: arm64
+          - host: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            os: linux
+            arch: amd64
+          # - host: ubuntu-22.04
+          #   target: aarch64-unknown-linux-gnu
+          #   os: linux
+          #   arch: arm64
+          # - host: ubuntu-latest
+          #   target: x86_64-unknown-linux-musl
+          #   os: linux
+          #   arch: x86_64
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-musl
+          #   os: linux
+          #   arch: arm64
+          
+          # - host: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu
+          #   os: linux
+          #   arch: arm64
+
+    name: ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.target }}
+
+      # - name: Rust cache
+      #   uses: swatinem/rust-cache@v2
+      #   with:
+      #     workspaces: "./desktop/src-tauri -> target"
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # - name: Uninstall Homebrew
+      #   run: |
+      #     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+
+      - name: install dependencies (ubuntu only)
+        if: contains(matrix.settings.host, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup2.4-dev javascriptcoregtk-4.0 webkit2gtk-4.0
+
+      # - name: Setup Bun
+      #   uses: oven-sh/setup-bun@v1
+      - name: install frontend dependencies
+        run: yarn install # change this to npm or pnpm depending on which one you use
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "--target ${{ matrix.settings.target }}"
+          # tagName: ${{ env.TAG }} 
+          # the action automatically replaces \_\_VERSION\_\_ with the app version
+          releaseName: 'App v__VERSION__'
+          # releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          # prerelease: false
+          # releaseId: ${{ needs.create-release.outputs.release_id }}
+  # release-arm:
+  #   needs: create-release
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: pguyot/arm-runner-action@v2.5.2
+  #       with:
+  #         base_image:  raspios_lite:latest
+  #         cpu: cortex-a7
+  #         bind_mount_repository: true
+  #         image_additional_mb: 10240
+  #         optimize_image: false
+  #         commands: |
+  #           # Rust complains (rightly) that $HOME doesn't match eid home
+  #           export HOME=/root
+  #           # Workaround to CI worker being stuck on Updating crates.io index
+  #           export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+  #           # Install setup prerequisites
+  #           apt update -y --allow-releaseinfo-change
+  #           apt upgrade -y
+  #           apt autoremove -y
+  #           apt install -y curl file
+  #           curl https://sh.rustup.rs -sSf | sh -s -- -y
+  #           . "$HOME/.cargo/env"
+  #           curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash
+  #           # Install framework specific packages
+  #           apt-get install -y nodejs
+  #           npm install --global yarn
+  #           yarn add next@latest react@latest react-dom@latest eslint-config-next@latest
+  #           # Install build tools and tauri-cli requirements
+  #           apt install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+            
+  #           cargo install tauri-cli
+  #           # Install frontend dependencies
+  #           yarn 
+  #           # Build the application
+  #           cargo tauri build --verbose
+  #     - uses: AButler/upload-release-assets@v3.0
+  #       with:
+  #         files: "${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb;${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage"
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
+  #         release-id: ${{ needs.create-release.outputs.release_id }}
+  #     # - name: Upload Release Asset
+  #     #     id: upload-release-asset
+  #     #   uses: actions/upload-release-asset@v1
+  #     #    env:
+  #     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     #   with:
+  #     #     upload_url: ${{ needs.steps.create-release.outputs.upload_url }}
+  #     #     asset_path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+  #     #     asset_name: your-artifact-name
+  #     #     asset_content_type: application/octet-stream
+  #     - name: Upload deb bundle
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Debian Bundle
+  #         path:  ${{ github.workspace }}/src-tauri/target/release/bundle/deb/*.deb
+  #     - name: Upload appimage bundle
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: Appimage Bundle
+  #         path:  ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/*.AppImage
+
+  # publish-release:
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   needs: [create-release, build-tauri]
+
+  #   steps:
+  #     - name: publish release
+  #       id: publish-release
+  #       uses: actions/github-script@v7
+  #       env:
+  #         release_id: ${{ needs.create-release.outputs.release_id }}
+  #       with:
+  #         script: |
+  #           github.rest.repos.updateRelease({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             release_id: process.env.release_id,
+  #             draft: false,
+  #             prerelease: false
+  #           })
+
+

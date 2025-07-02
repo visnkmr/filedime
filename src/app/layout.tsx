@@ -12,8 +12,8 @@ import {Metadata} from 'next'
 
 
 export const metadata:Metadata = {
-  title: 'FileGPT-Filedime',
-  description: 'Query your files.',
+  title: 'Filedime',
+  description: 'Fast file explorer with fancy UI.',
 }
 
 
@@ -25,8 +25,12 @@ export default function RootLayout({
 
   // const [showon, setshow] = useLocalStorage("dark",true);
   return (
-    <html suppressHydrationWarning className="h-full" lang="en">
-      <body className="h-full flex flex-col dark:bg-gray-900">
+    <html suppressHydrationWarning lang="en">
+      <head>
+         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"/>
+      <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+      </head>
+      <body>
         <Providers>
 
         {/* <Thedarkhtml> */}

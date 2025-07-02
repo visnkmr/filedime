@@ -22,14 +22,17 @@ const nextConfig =
 // withPWA(
   // withBundleAnalyzer(
     {
+      
       reactStrictMode: false,
+      
   // withPWA,
   // withOptimizedImages,
   experimental: {
+    // reactCompiler:true,
     // appDir: true,
     // optimizeCss: true,
     esmExternals: true,
-    forceSwcTransforms: true,
+    // forceSwcTransforms: true,
     scrollRestoration: true,
     legacyBrowsers: false,
   },
@@ -72,6 +75,7 @@ const nextConfig =
     
       config.resolve.fallback = {
         fs: false,
+        ssr:false,
         net: false,
         tls: false
       };
@@ -94,8 +98,8 @@ const nextConfig =
                 wrap_iife: true,
               },
               compress: {
-                drop_console: true,
-                drop_debugger: true,
+                // drop_console: true,
+                // drop_debugger: true,
                 hoist_funs: true,
                 hoist_props: true,
                 hoist_vars: true,

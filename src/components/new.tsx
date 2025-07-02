@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction,AlertDialogHeader, AlertDialogFooter } from "./ui/alertdialog";
 import {  setcolorpertheme } from "./greet";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { Input } from "./ui/input";
 export default function NewLeaf({dest,isdir,showad,setshowad}){
     

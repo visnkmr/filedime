@@ -1,6 +1,6 @@
 use prefstore::clearall;
 use serde::Serialize;
-use tauri::{Manager, State, Window};
+use tauri::{Manager, State, WebviewWindow};
 
 use crate::{appstate::AppStateStore, list_files, sendtofrontend::loadmarks};
 
@@ -24,7 +24,7 @@ pub struct tab {
 pub async fn closetab(
     windowname: &str,
     id: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     state.removetab(id, windowname.to_string());
@@ -36,7 +36,7 @@ pub async fn newtab(
     oid: String,
     path: String,
     ff: String,
-    window: Window,
+    window: WebviewWindow,
     state: State<'_, AppStateStore>,
 ) -> Result<(), ()> {
     state.addtab(

@@ -2,9 +2,9 @@
 
 import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import { invoke,convertFileSrc } from '@tauri-apps/api/core'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -17,7 +17,7 @@ import NewLeaf from "./new"
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
 import { useMouseShortcut } from "./mouseshortcuts";
-import { listen } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 import FiledimeSettings from "./filedimesettings"
 import {
   ResizableHandle,
@@ -64,7 +64,6 @@ export function converttstodt(ts){
   return utcTime
  }
 
-
 import {  ColumnDef } from '@tanstack/react-table';
 import {  ArrowUpDown } from 'lucide-react';
 
@@ -84,7 +83,7 @@ import { Progress } from "./ui/progress"
 import { ToastAction } from "./ui/toast";
 import Link from "next/link";
 import MillerCol from "./millercol";
-import GPTchatinterface from "./gptchatinterface";
+// import GPTchatinterface from "./gptchatinterface";
 import EachFromGrid from "./grideach";
 export let supportedfiles = [
   "csv",
@@ -104,20 +103,27 @@ export let supportedfiles = [
   "pptx",
   "txt",
 ]
+// import { appWindow } from '@tauri-apps/api/window';
+// import {  WebviewWindow } from '@tauri-apps/api/window';
+// const windowExists = async (label: string) => {
+//   const win = (await import('@tauri-apps/api/window')).WebviewWindow.getByLabel(label);
+//   return win !== null;
+// };
 export default function Greet() {
   
+
   const { theme, setTheme } = useTheme()
   // if(activewindow.label!=="settings"){
     const { toast } = useToast()
     
     async function setupAppWindow() {
       console.log(Math.random());
-      const appWindow = (await import('@tauri-apps/api/window')).appWindow
+      const appWindow = (await import('@tauri-apps/api/webviewWindow')).getCurrentWebviewWindow()
       setTimeout(async () => await invoke('show_main_window'), 100)
       console.log("windowname top---------->"+appWindow.label)
   
       setAppWindow(appWindow)
-      const pl = await(await import('@tauri-apps/api/os')).platform()
+      const pl = await(await import('@tauri-apps/plugin-os')).arch()
       console.log(pl)
       console.log("windowname top---------->"+appWindow.label)
       setp(pl)
@@ -141,6 +147,7 @@ export default function Greet() {
   
     useEffect(() => {
       setupAppWindow()
+      
     }, []) 
     const filesobjinit:FileItem[]=[]
     const objinit:string[]=[]
@@ -422,6 +429,9 @@ export default function Greet() {
     
       // console.log(data.payload.toString())
     });
+     const unlisten2=listen('intercomm', event => {
+  console.log('Received:', event.payload);
+});
     // let unlisten: (() => void) | undefined = undefined
     const unlisten1=listen('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
@@ -451,9 +461,11 @@ export default function Greet() {
           }
         // console.log("loading files---->"+event.payload);
     })
+
     return () => {
         unlisten.then(f => f());
         unlisten1.then(f => f());
+        unlisten2.then(f => f());
     }
   //   return () => {
   //     unlisten?.()
@@ -767,7 +779,7 @@ export default function Greet() {
   
           <div className=" ">
   
-  {!is_dir
+    {!is_dir
               // &&
               // [...MARKDOWN_TYPES,...PLAIN_TEXT,...IMAGE_TYPES,...].some(type => message.path.includes(type))
               // &&(message.name.includes(".pdf")||IMAGE_TYPES.some(type => message.name.includes(type))||HTML_TYPE.some(type => message.name.includes(type))||AUDIO_TYPES.some(type => message.name.includes(type)))
@@ -806,39 +818,39 @@ export default function Greet() {
               
             </SheetContent>
           </Sheet>
-          {(supportedfiles.includes(ftype))?(<Sheet modal={false}>
-          <SheetTrigger className="h-full px-3 p-4  focus:bg-gray-200 focus:dark:bg-gray-700">
-            <HoverCard>
+          {(supportedfiles.includes(ftype))?(
+            <Button className="ml-2" variant={"outline"} onClick={()=>{
+              // const timestamp = Date.now();
+              const timestamp=""
+              invoke("newspecwindow",{
+                winlabel:`${"chatui"}`,
+                name:"FileGPT: "+`${row.original.path}`
+              })
+              
+            //   const intervalId = setInterval(async () => {
+            //   const exists = await windowExists(`${"chatui"+timestamp}`);
+            //   // console.log("Window exists?", exists);
+            //   if (exists) {
+            //     // sendCommand();
+            //     console.log("checked for "+`${"chatui"+timestamp}`)
+            //     emit('chatui', { myData: row.original });
+            //     clearInterval(intervalId); // Stop checking after first success
+            //   }
+            // }, 2000);
+              // });
+              console.log("clicked")
+
+            
+
+            }}><HoverCard>
               <HoverCardTrigger>
                 <BotIcon className="h-4 w-4 "/>
                 </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
               Ask queries about this file
               </HoverCardContent>
-            </HoverCard>
-            </SheetTrigger>
-            <SheetContent 
-              // style={{ width: `${width}px` }}
-              // onMouseDown={handleMouseDown}
-              // onMouseMove={handleMouseMove}
-              // onMouseUp={handleMouseUp}
-              // onMouseLeave={handleMouseUp}
-              className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                <ResizablePanel/>
-                <ResizableHandle />
-                <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                 
-        
-                <GPTchatinterface message={row.original} setasollama={true}/>
-                {/* </ResizablePanel>
-              </ResizablePanelGroup> */}
-                
-          
-                {/* <SheetDescription></SheetDescription> */}
-              
-            </SheetContent>
-          </Sheet>):(null)}
+            </HoverCard></Button>
+            ):(null)}
           
                   </div>
           ):(
@@ -1154,9 +1166,9 @@ export default function Greet() {
     }
     return (
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
-        <ResizablePanel defaultSize={size.a}>
+        <ResizablePanel defaultSize={size.a} className="min-w-64">
         {/* {lastcalledtime.current} */}
-        <div className="flex h-full flex-col gap-2">
+        <div className="flex h-full flex-col gap-2 ">
           <div className="flex p-3  border-b">
             
             <div className="flex flex-row p-2 items-center">
@@ -1178,6 +1190,12 @@ export default function Greet() {
                 name:"Settings"
               })
             }}>Settings</Button>
+            <Button className="ml-2" variant={"outline"} onClick={()=>{
+              invoke("newspecwindow",{
+                winlabel:"installed-apps",
+                name:"Installed Apps"
+              })
+            }}><Grid className="h-4 w-4"/></Button>
             </div>
             
             {/* <div className="grid items-start px-4 text-sm font-medium"> */}
@@ -1962,7 +1980,8 @@ export default function Greet() {
        
         {
           layout==="detail" ?
-          (<span className={`overflow-${scrollorauto} ${(fileslist.length>0)}`}>
+          (<span className={`overflow-${scrollorauto} `}>
+            {/* ${(fileslist.length>0)} */}
         
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>):null}
