@@ -79,13 +79,15 @@ libc="0.2.144"
 sysinfo="0.29.0"
 ignore="0.4.20"
 dirs="5.0.1"
+futures = "0.3"
+
 regex="1.10.2"
 # gtk = "0.15.5"
 # gio = "0.18.4"
 # ollama-rs = {version="0.1.7",features= ["stream"] }
 # warp="0.3.6"
 include_dir = "0.7.3"
-ollama-rs = "0.3" # Or the latest version from crates.io
+ollama-rs = {version = "0.3", features = ["stream"]} # Or the latest version from crates.io
 anyhow = "1.0.98" # Good for simple error handling
 memvdb = "0.1.1"
 plist="1.7.2" 

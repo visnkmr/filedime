@@ -6,6 +6,8 @@ use prefstore::getcustom;
 use shiva::core::{bytes::Bytes, Element, TransformerTrait};
 use anyhow::anyhow;
 use text_splitter::TextSplitter;
+use futures::StreamExt;
+use tokio::io::AsyncWriteExt;
 pub struct ExtractedDocument {
     pub content: String,
     pub metadata: HashMap<String, String>,
@@ -202,17 +204,57 @@ async fn embedtest() {
         }
     }
 
-    println!("Retrieved context:\n{}", retrieved_context);
+    // println!("Retrieved context:\n{}", retrieved_context);
 
-    let prompt = format!("Given the following context, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext: ${}\n\nQuestion: ${}", retrieved_context.trim(), question);
+    let prompt = format!("Given the following context which are contents of a file, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext: ${}\n\nQuestion: ${}", retrieved_context.trim(), question);
 
     let llm_model="qwen2.5:3b";
     let llm_request = GenerationRequest::new(llm_model.to_string(), prompt);
-    let llm_response = ollama.generate(llm_request).await.unwrap();
-    println!("\n--- LLM Response ---");
-    println!("{}", llm_response.response);
-    println!("--------------------");
+    // let llm_response = ollama.generate(llm_request).await.unwrap();
+    // println!("\n--- LLM Response ---");
+    // println!("{}", llm_response.response);
+    // println!("--------------------");
 
+    let mut stream = ollama.generate_stream(llm_request).await.unwrap();
+
+		let mut stdout = tokio::io::stdout();
+		let mut char_count = 0;
+
+		let mut final_data_responses = Vec::new();
+
+		while let Some(res) = stream.next().await {
+			// NOTE: For now, we just flatten this result list since it will most likely be a vec of one.
+			//       However, if res.length > 1, we might want to split the output, as those might be for different responses.
+			let res_list = res.unwrap();
+
+			for res in res_list {
+				let bytes = res.response.as_bytes();
+
+				// Poor man's wrapping
+				char_count += bytes.len();
+				if char_count > 80 {
+					stdout.write_all(b"\n").await.unwrap();
+					char_count = 0;
+				}
+
+				// Write output
+				stdout.write_all(bytes).await.unwrap();
+				stdout.flush().await.unwrap();
+
+				if res.done {
+					stdout.write_all(b"\n").await.unwrap();
+					stdout.flush().await.unwrap();
+					final_data_responses.push(res.response.clone());
+                    stdout.write_all(b"\n").await.unwrap();
+                    stdout.write_all(res.response.as_bytes()).await.unwrap();
+                    stdout.flush().await.unwrap();
+					break;
+				}
+			}
+		}
+
+		stdout.write_all(b"\n").await.unwrap();
+		stdout.flush().await.unwrap();
 
 }
 
