@@ -172,6 +172,7 @@ async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_,
 }
 #[tauri::command]
 async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,path:String, state: State<'_, AppStateStore>) -> Result<String, String> {
+    println!("querying file with question {} with embedding model {} and path {} and usecompletefile {}",question,embeddingmodelname,path,usecompletefile);
         let mut doclist;
         let mut retrieved_context=String::new();
         // let ollama = ollama_rs::Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
@@ -896,6 +897,20 @@ async fn show_main_window(window: tauri::Window) {
     window.set_decorations(true).unwrap();
     window.maximize().unwrap();
     window.show().unwrap();
+}
+#[test]
+fn chatuitest(){
+
+        const HOST: &str = "0.0.0.0";
+        const PORT: &str = "8477";
+        let end_point: String = format!("{}:{}", HOST, PORT);
+        let listener = TcpListener::bind(end_point).unwrap();
+        println!("Web server is listening at port {}", PORT);
+    
+        for stream in listener.incoming() {
+            let _stream = stream.unwrap();
+            handle_connection(_stream);
+        }
 }
 fn main() {
     // println!("{:?}",findsize(&PROJECT_DIR));
