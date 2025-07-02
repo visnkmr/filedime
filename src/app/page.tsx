@@ -13,7 +13,7 @@ export default function Home() {
   //     return <GPTchatinterface fgptendpoint={url} setasollama={true}/>
 
   return (
-    <main className="overflow-hidden h-full">
+    <main className="absolute overflow-hidden h-full">
       <Greet />
     </main>
           )

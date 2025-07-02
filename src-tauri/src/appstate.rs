@@ -7,20 +7,22 @@ use ollama_rs::generation::embeddings::request::GenerateEmbeddingsRequest;
 use ollama_rs::Ollama;
 use prefstore::{clearall, clearcustom, getallcustomwithin, getcustom, savecustom};
 use shiva::core::bytes::Bytes;
-use shiva::core::{Element, TransformerTrait};
+
 use text_splitter::TextSplitter;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::mem::{self};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI16, AtomicI64, AtomicI8, Ordering};
+use crate::embedhelp::load_document_and_extract_text;
 // use std::sync::mpsc::{Sender, Receiver};
-use crate::bookmarks::*;
+use crate::{bookmarks::*, embedfile};
 use crate::navtimeline::BrowserHistory;
 use crate::tabinfo::*;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
 #[derive(Clone, Debug)]
 // Use the gio crate
 // use gio::prelude::*;
@@ -28,10 +30,7 @@ pub struct cachestore {
     pub size: u64,
     pub expirytime: u64,
 }
-pub struct ExtractedDocument {
-        pub content: String,
-        pub metadata: HashMap<String, String>,
-    }
+
 #[derive(Debug)]
 pub struct AppStateStore {
     // pub filegptendpoint:String,
@@ -199,6 +198,7 @@ impl AppStateStore {
             db.delete_collection(&path)?;
         Ok(true)
     }
+    
     pub async fn embedfile(&self,path:String,embedding_model_name:String)->anyhow::Result<bool>{
         // let ollama = Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
 
@@ -212,7 +212,7 @@ impl AppStateStore {
         if(!Path::new(&path).exists()){
             return Ok(false)
         }
-        let input_vec = self.load_document_and_extract_text(Path::new(&path)).await.unwrap();
+        let input_vec = load_document_and_extract_text(Path::new(&path)).unwrap();
         let texts_to_embed=input_vec.content;
         let splitter = TextSplitter::new(256);
         let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).collect();
@@ -335,136 +335,7 @@ impl AppStateStore {
     // }
     // Recursively collects text from Shiva's Document Elements.
 
-    fn collect_text_from_elements(&self,elements: &Vec<&Element>, collected_text: &mut String) {
-         for element in elements {
-            match element {
-                Element::Text{text,size} => {
-                    collected_text.push_str(&text);
-                }
-                Element::Paragraph{elements} => {
-                    // Paragraph contains a vector of Elements, often Text, Link etc.
-                    for items in elements.iter(){
-                        self.collect_text_from_elements(&vec![items], collected_text);
-                    }
-                    
-                    collected_text.push_str("\n\n"); // Add paragraph break
-                }
-                Element::Header{text,level} => {
-                    // Header also contains a vector of Elements
-                    collected_text.push_str(&text); // Add markdown-like header prefix
-                    collected_text.push(' ');
-                    // collect_text_from_elements(&h.elements, collected_text);
-                    // collected_text.push_str("\n\n");
-                }
-                Element::List{elements,..} => {
-                    for (i, item) in elements.iter().enumerate() {
-                    //     collected_text.push_str(&format!("{} ", if list.ordered { format!("{}. ", i + 1) } else { "- ".to_string() }));
-                        self.collect_text_from_elements(&vec![&item.element], collected_text);
-                        collected_text.push('\n');
-                    }
-                    collected_text.push('\n'); // Add blank line after list
-                }
-                Element::Table { headers, rows } => {
-                    for row in rows {
-                        for cell in &row.cells {
-                            self.collect_text_from_elements(&vec![&cell.element], collected_text);
-                            collected_text.push('\t'); // Tab-separated cells
-                        }
-                        collected_text.push('\n'); // Newline for each row
-                    }
-                    collected_text.push('\n'); // Add blank line after table
-                }
-                Element::Image(img) => {
-                    // Image might have alt text or caption
-                    // if let Some(alt_text) = &img.alt {
-                        collected_text.push_str(&format!("[Image: {}]", img.alt()));
-                    // } else {
-                        // collected_text.push_str("[Image]");
-                    // }
-                    collected_text.push(' ');
-                }
-                Element::Hyperlink { title, url, alt, size }=>{
-                    // Link has elements (the display text) and a URL
-                    // collect_text_from_elements(&link.elements, collected_text);
-                    // if let Some(url) = &link.url {
-                        collected_text.push_str(&format!("{}", title));
-                        collected_text.push_str(&format!(" ({})", url));
-                    // }
-                    collected_text.push(' ');
-                }
-                // Add more as needed:
-                // Element::Equation(eq) => collected_text.push_str(&format!("[Equation: {}]", eq.value)),
-                // Element::Divider => collected_text.push_str("---\n"),
-                // Element::Video(vid) => collected_text.push_str(&format!("[Video: {}]", vid.url.as_deref().unwrap_or(""), vid.title.as_deref().unwrap_or(""))),
-                // Element::Audio(aud) => collected_text.push_str(&format!("[Audio: {}]", aud.url.as_deref().unwrap_or(""), aud.title.as_deref().unwrap_or(""))),
-                // _ => {
-                //     // This catches any new or unhandled element types.
-                //     // You might log a warning here if you want to be aware of missed content.
-                //     // println!("Unhandled element type: {:?}", element);
-                // }
-            }
-        }
-    }
-    /// Helper function to get the document type from a file extension.
-    fn get_document_type(&self,path: &Path) -> Option<&'static str> {
-        path.extension().and_then(|ext| ext.to_str()).map(|s| match s {
-            "txt" => "text",
-            "md" => "markdown",
-            "html" | "htm" => "html",
-            "pdf" => "pdf",
-            "json" => "json",
-            "csv" => "csv",
-            "rtf" => "rtf",
-            "docx" => "docx",
-            "xml" => "xml",
-            "xls" => "xls",
-            "xlsx" => "xlsx",
-            "ods" => "ods",
-            "typst" => "typst",
-            _ => "unknown", // Handle unknown types
-        })
-    }
-    /// Represents the extracted content and metadata of a document.
     
-    pub async fn load_document_and_extract_text(&self,file_path: &Path) -> anyhow::Result<ExtractedDocument> {
-    let file_bytes = fs::read(file_path)?;
-    let input_bytes = Bytes::from(file_bytes);
-
-    let doc_type = self.get_document_type(file_path)
-        .ok_or_else(|| anyhow!("Could not determine document type for {:?}", file_path))?;
-
-    let document: shiva::core::Document = match doc_type {
-        "text" => shiva::text::Transformer::parse(&input_bytes)?,
-        "markdown" => shiva::markdown::Transformer::parse(&input_bytes)?,
-        "html" => shiva::html::Transformer::parse(&input_bytes)?,
-        "pdf" => shiva::pdf::Transformer::parse(&input_bytes)?,
-        "json" => shiva::json::Transformer::parse(&input_bytes)?,
-        "csv" => shiva::csv::Transformer::parse(&input_bytes)?,
-        "rtf" => shiva::rtf::Transformer::parse(&input_bytes)?,
-        "docx" => shiva::docx::Transformer::parse(&input_bytes)?,
-        "xml" => shiva::xml::Transformer::parse(&input_bytes)?,
-        "xls" => shiva::xls::Transformer::parse(&input_bytes)?,
-        "xlsx" => shiva::xlsx::Transformer::parse(&input_bytes)?,
-        "ods" => shiva::ods::Transformer::parse(&input_bytes)?,
-        "typst" => shiva::typst::Transformer::parse(&input_bytes)?,
-        _ => return Err(anyhow!("Unsupported document type: {}", doc_type)),
-    };
-
-    let mut collected_text = String::new();
-    self.collect_text_from_elements(&document.get_all_elements(), &mut collected_text);
-
-    let mut metadata = HashMap::new();
-    metadata.insert("file_name".to_string(), file_path.file_name().unwrap_or_default().to_string_lossy().into_owned());
-    metadata.insert("file_path".to_string(), file_path.to_string_lossy().into_owned());
-    // Shiva's Document model might have direct metadata fields you can extract.
-    // E.g., `document.metadata` if it exists and is populated by the parser.
-    // For now, we're just adding basic file metadata.
-
-    Ok(ExtractedDocument {
-        content: collected_text.trim().to_string(), // Trim whitespace
-        metadata,
-    })
-}
     pub fn addmark(&self, path: String, id: String) {
         savecustom("filedime", format!("bookmarks/{}.mark", id), path.clone());
         let pof = path.clone();

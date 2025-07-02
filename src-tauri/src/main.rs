@@ -16,6 +16,7 @@ use std::{
 mod dirsize;
 mod drivelist;
 mod fileitem;
+mod embedhelp;
 mod filltrie;
 mod lastmodcalc;
 mod navtimeline;
@@ -29,7 +30,7 @@ use ollama_rs::generation::{completion::request::GenerationRequest, embeddings::
 use text_splitter::TextSplitter;
 // use filesize::PathExt;
 
-use crate::driveops::*;
+use crate::{driveops::*, embedhelp::load_document_and_extract_text};
 use crate::fileops::*;
 use ignore::WalkBuilder;
 use prefstore::*;
@@ -187,7 +188,7 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String,use
                 doclist=vec![path.to_string()]
             }
             for path in doclist{
-                let input_vec = state.load_document_and_extract_text(Path::new(&path)).await.unwrap();
+                let input_vec = load_document_and_extract_text(Path::new(&path)).unwrap();
                 let texts_to_embed=input_vec.content;
                 retrieved_context.push_str(texts_to_embed.as_str());
             }
