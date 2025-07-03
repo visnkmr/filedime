@@ -16,7 +16,7 @@
   "author": "visnkmr",
   "license": "MIT",
   "devDependencies": {
-     "@hookform/resolvers": "^3.9.1",
+    "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -60,8 +60,6 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
-
-    
     "@radix-ui/react-popover": "1.0.7",
     "@swc/core": "^1.11.29",
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -80,7 +78,7 @@
     "@types/react-virtualized": "^9.22.2",
     "@types/simple-peer": "^9.11.8",
     "autoprefixer": "^10.4.21",
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "classnames": "^2.5.1",
     "clean-css": "^5.3.3",
     "clsx": "^2.1.1",

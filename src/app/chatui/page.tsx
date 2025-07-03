@@ -84,7 +84,7 @@ export default function chatui(){
 //      
 // },[])
     return (<>
-    <ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={3} />
+    <ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={1} />
     <Toaster />
        </>)
 }

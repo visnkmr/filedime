@@ -85,8 +85,10 @@ import Link from "next/link";
 import MillerCol from "./millercol";
 // import GPTchatinterface from "./gptchatinterface";
 import EachFromGrid from "./grideach";
+import InstalledAppsPage from "./InstalledApps";
 export let supportedfiles = [
   "csv",
+  "rs",
   "xlsx",
   "xls",
   "odt",
@@ -1948,6 +1950,7 @@ export default function Greet() {
         })}
         </div>
         </div>
+        
         {
           layout==="detail" || layout==="grid"?(
             <div className="">
@@ -1980,9 +1983,12 @@ export default function Greet() {
        
         {
           layout==="detail" ?
-          (<span className={`overflow-${scrollorauto} `}>
+          (<span className={`flex flex-col overflow-${scrollorauto} `}>
             {/* ${(fileslist.length>0)} */}
-        
+        <div className="flex ">
+          <InstalledAppsPage rows={1}/>
+
+        </div>
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>):null}
         {

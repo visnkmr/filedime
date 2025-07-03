@@ -171,10 +171,14 @@ async fn embedfile(path: Vec<String>,embeddingmodelname:String, state: State<'_,
     Err("Could not embed file type not supported".to_string())
 }
 #[tauri::command]
-async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,path:String, state: State<'_, AppStateStore>) -> Result<String, String> {
-    println!("querying file with question {} with embedding model {} and path {} and usecompletefile {}",question,embeddingmodelname,path,usecompletefile);
+async fn queryfile(question: String, model: String,embeddingmodelname:String,usecompletefile:bool,pathstr:String, state: State<'_, AppStateStore>) -> Result<String, String> {
         let mut doclist;
         let mut retrieved_context=String::new();
+        let mut pathfile=Path::new(&pathstr);
+        let path=pathfile.display().to_string();
+        // println!("{}",path);
+    println!("querying file with question {} with embedding model {} and path {} and usecompletefile {}",question,embeddingmodelname,path,usecompletefile);
+
         // let ollama = ollama_rs::Ollama::from_url(tauri::Url::parse(&ollamaurl).unwrap());
 
         // let path="ALL";
@@ -194,10 +198,12 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String,use
                 retrieved_context.push_str(texts_to_embed.as_str());
             }
         }
-        else{
+        else
+        {
 
             let splitter = TextSplitter::new(256);
-            let texts_to_embed: Vec<&str> = splitter.chunks(&question).collect();
+            let mut seen = std::collections::HashSet::new();
+    let texts_to_embed: Vec<&str> = splitter.chunks(&question).filter(|c| seen.insert(*c)).collect();
         
             // Create the embedding request for the user's question
             let query_req = GenerateEmbeddingsRequest::new(
@@ -219,12 +225,13 @@ async fn queryfile(question: String, model: String,embeddingmodelname:String,use
                 let collections_guard = db.read().unwrap(); 
                 let collection = collections_guard.get_collection(&path).unwrap();
         
-                for embedding in embeddings_response.embeddings.iter() {
+                for (i,embedding) in embeddings_response.embeddings.iter().enumerate() {
                     // Perform the similarity search while the lock is held.
                     for similar_result_found in collection.get_similarity(embedding, 10) {
+                        // println!("{:?}",similar_result_found.embedding.id);
                         // Assuming the 'title' is what you want to retrieve.
                         // Using .get() and handling the Option is safer.
-                        if let Some(title_value) = similar_result_found.embedding.id.get("title") {
+                        if let Some(title_value) = similar_result_found.embedding.id.get(&format!("title")) {
                             // Convert the value to a string slice and push it.
                                 retrieved_context.push_str(title_value.as_str());
                                 retrieved_context.push_str("\n"); // Add a separator for clarity
@@ -602,14 +609,14 @@ async fn newspecwindow(
         .unwrap();
         if (labelwin.starts_with("chatui")) {
                 println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],state.embedding_model_name.clone(), state).await.unwrap());
-                tauri::WindowBuilder::new(
-                    &window.app_handle(),
-                    labelwin,
-                    tauri::WindowUrl::App("chatui".into()),
-                )
-                .title(namewin.clone())
-                .build()
-                .unwrap();
+                // tauri::WindowBuilder::new(
+                //     &window.app_handle(),
+                //     labelwin,
+                //     tauri::WindowUrl::App("chatui".into()),
+                // )
+                // .title(namewin.clone())
+                // .build()
+                // .unwrap();
             window.app_handle()
                 .emit_all(
                     // label,

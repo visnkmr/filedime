@@ -17,7 +17,7 @@ pub struct App {
 #[test]
 fn testmod(){
     for app in get_installed_apps().unwrap(){
-        // if app.name.to_lowercase().contains("notepad") 
+        if app.name.to_lowercase().contains("chrome") 
         {
             println!("{:?}", app.command);
             // println!("{}", app.fromwhere);
@@ -485,14 +485,16 @@ pub fn get_installed_apps() -> Result<Vec<App>, String> {
 }
 #[test]
 pub fn testopen(){
-    launch_app_command("explorer.exe shell:AppsFolder\\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App".to_string());
+    // launch_app_command("explorer.exe shell:AppsFolder\\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App".to_string());
     // launch_app_command("V:\\installs\\TablePlus\\TablePlus.exe".to_string());
+    // launch_app_command("C:\\Program Files\\Google\\Chrome\\Application\\chrome_proxy.exe".to_string());
 }
 #[tauri::command]
 pub fn launch_app_command(command: String) {
     #[cfg(target_os = "windows")]
     {
         let parts: Vec<&str> = command.splitn(2, ' ').collect();
+        println!("{:?}",parts);
         let program = parts[0];
         let args_str_opt = parts.get(1); 
 
@@ -513,16 +515,24 @@ pub fn launch_app_command(command: String) {
             // `start` helps to detach the process and handle paths with spaces.
             let mut cmd = Command::new("cmd");
             cmd.arg("/C").arg("start").arg(""); // "/C start \"\"" (the empty string is for the title)
+            let c1=command.clone();
+            let checkcommand=Path::new(&c1);
+            if checkcommand.exists(){
 
-            // Add the program itself
-            cmd.arg(program);
+                cmd.arg(command.clone());
+            }
+            else{
+                cmd.arg(program);
+            
+                // Add the program itself
 
-            // If there are arguments, add them
-            if let Some(args_str) = args_str_opt {
-                // Split arguments string by space and add them as separate args to `start`
-                for arg_part in args_str.split(' ') {
-                    if !arg_part.is_empty() { // Avoid adding empty strings if multiple spaces
-                        cmd.arg(arg_part);
+                // If there are arguments, add them
+                if let Some(args_str) = args_str_opt {
+                    // Split arguments string by space and add them as separate args to `start`
+                    for arg_part in args_str.split(' ') {
+                        if !arg_part.is_empty() { // Avoid adding empty strings if multiple spaces
+                            cmd.arg(arg_part);
+                        }
                     }
                 }
             }
@@ -558,3 +568,4 @@ pub fn launch_app_command(command: String) {
         eprintln!("launch_app is not implemented for this OS");
     }
 }
+

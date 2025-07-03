@@ -93,7 +93,7 @@ memvdb = "0.1.1"
 plist="1.7.2" 
 text-splitter = { version = "0.27.0" } # Or "tiktoken-rs"
 # extractous ="0.3.0"
-shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
+shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "typst-pdf", "json", "csv", "rtf", "docx", "xml", "xls", "xlsx", "ods", "typst"] }
 # hyper="1.6.0"
 multipart="0.18.0"
 walkdir = "2.3.3"

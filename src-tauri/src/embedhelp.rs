@@ -86,6 +86,7 @@ fn collect_text_from_elements(elements: &Vec<&Element>, collected_text: &mut Str
 fn get_document_type(path: &Path) -> Option<&'static str> {
    path.extension().and_then(|ext| ext.to_str()).map(|s| match s {
        "txt" => "text",
+       "rs" => "text",
        "md" => "markdown",
        "html" | "htm" => "html",
        "pdf" => "pdf",
@@ -149,8 +150,10 @@ async fn embedtest() {
     use std::collections::HashMap;
     use std::path::Path;
 
-    let question = "what are the contents of the file".to_string();
-    let path = "/home/roger/Downloads/cancel4617713584.pdf".to_string();
+    let question = "hi".to_string();
+    let path = "C:\\Users\\wkramer\\DeclarationandAuthorization_FILLED.pdf".to_string();
+    // let path = "V:\\Github\\filedime\\src-tauri\\src\\bookmarks.rs".to_string();
+    // let path = "C:\\Users\\wkramer\\Downloads\\Data_Sheet_D2Pro_EN.pdf".to_string();
 
     // Confirm if file exists
     println!("Path {} exists? {}", path, Path::new(&path).exists());
@@ -163,8 +166,10 @@ async fn embedtest() {
 
     // Load and chunk document
     let input_vec = load_document_and_extract_text(Path::new(&path)).unwrap();
+    // println!("{}",input_vec.content);
     let splitter = TextSplitter::new(256);
-    let chunks: Vec<&str> = splitter.chunks(&input_vec.content).collect();
+    let mut seen = std::collections::HashSet::new();
+    let chunks: Vec<&str> = splitter.chunks(&input_vec.content).filter(|c| seen.insert(*c)).collect();
 
     // Generate embeddings
     let embed_req = GenerateEmbeddingsRequest::new(embedding_model_name.clone(), chunks.clone().into());
@@ -179,7 +184,7 @@ async fn embedtest() {
 
     for (i, embedding) in embeddings.iter().enumerate() {
         let embedding_data = Embedding {
-            id: HashMap::from([("title".to_string(), chunks[i].to_string())]),
+            id: HashMap::from([(format!("title"), chunks[i].to_string())]),
             vector: embedding.clone(),
             metadata: Some(input_vec.metadata.clone()),
         };
@@ -188,23 +193,27 @@ async fn embedtest() {
     }
 
     // Generate embeddings for the question
-    let question_chunks: Vec<&str> = splitter.chunks(&question).collect();
+    let mut seen = std::collections::HashSet::new();
+    let question_chunks: Vec<&str> = splitter.chunks(&input_vec.content).filter(|c| seen.insert(*c)).collect();
+
     let query_req = GenerateEmbeddingsRequest::new(embedding_model_name, question_chunks.clone().into());
     let query_response = ollama.generate_embeddings(query_req).await.unwrap();
 
     let collection = db.get_collection(&path).unwrap();
     let mut retrieved_context = String::new();
 
-    for embedding in query_response.embeddings.iter() {
-        for result in collection.get_similarity(embedding, 10) {
-            if let Some(title) = result.embedding.id.get("title") {
+    for (i,embedding) in query_response.embeddings.iter().enumerate() {
+        for result in collection.get_similarity(embedding, 2) {
+                        // println!("{:?}",result.embedding.id);
+
+            if let Some(title) = result.embedding.id.get(&format!("title")) {
                 retrieved_context.push_str(title);
                 retrieved_context.push_str("\n");
             }
         }
     }
 
-    // println!("Retrieved context:\n{}", retrieved_context);
+    println!("Retrieved context:\n{}", retrieved_context);
 
     let prompt = format!("Given the following context which are contents of a file, answer the question accurately and concisely. If the answer is not in the context, state that you cannot answer from the provided information.\n\nContext: ${}\n\nQuestion: ${}", retrieved_context.trim(), question);
 

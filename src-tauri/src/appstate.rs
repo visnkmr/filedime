@@ -215,7 +215,8 @@ impl AppStateStore {
         let input_vec = load_document_and_extract_text(Path::new(&path)).unwrap();
         let texts_to_embed=input_vec.content;
         let splitter = TextSplitter::new(256);
-        let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).collect();
+        let mut seen = std::collections::HashSet::new();
+    let texts_to_embed: Vec<&str> = splitter.chunks(&texts_to_embed).filter(|c| seen.insert(*c)).collect();
         let filetexts=texts_to_embed.clone();
         let request = GenerateEmbeddingsRequest::new(
             embedding_model_name, // The model name

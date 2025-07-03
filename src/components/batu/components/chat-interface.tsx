@@ -297,7 +297,7 @@ export default function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null)
   const [contextUsage, setContextUsage] = useState(0)
-  const [answerfromfile, setanswerfromfile] = useState(0)
+  const [answerfromfile, setanswerfromfile] = useState(true)
 
   // Calculate context usage effect
   useEffect(() => {
@@ -421,7 +421,7 @@ export default function ChatInterface({
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
-             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
+             pathstr: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
             }).catch(e=>console.log(e)) as string):""; 
             console.log(`----------context: ${context}`)
 
@@ -432,7 +432,7 @@ export default function ChatInterface({
                   model: modelToSend,
                   messages: sendwithhistory?messagesToSend:[messagesToSend[messagesToSend.length-1]],
                   lmstudio_url:lmstudio_url,
-                  context:context?context:""
+                  context:answerfromfile?context:""
               })) {
                   accumulatedContent += contentChunk;
       
@@ -472,7 +472,7 @@ export default function ChatInterface({
              model:stored_lm_model_name?stored_lm_model_name:"qwen2.5:3b",
              embeddingmodelname:"nomic-embed-text",
              usecompletefile:fullfileascontext,
-             path: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
+             pathstr: searchcurrent?(await(await import('@tauri-apps/api/window')).appWindow.title()).replace("FileGPT: ",""):"ALL"
             }).then((e)=>{
             // console.log(e)
              // Update the last message (assistant's) with new content
@@ -768,7 +768,7 @@ export default function ChatInterface({
         >
           <Scroll className="h-4 w-4" />
         </Button>
-        <HoverCard>
+        {answerfromfile?(<HoverCard>
           <HoverCardTrigger>
             <Button 
               variant="outline" 
@@ -783,7 +783,7 @@ export default function ChatInterface({
           <HoverCardContent className={`flex flex-col ${setcolorpertheme}`}>
             {fullfileascontext?"Full file contents will be passed as context":"Embeddings will be passed as context"}
           </HoverCardContent>
-        </HoverCard>
+        </HoverCard>):null}
         <HoverCard>
           <HoverCardTrigger>
             <Button 
@@ -816,7 +816,7 @@ export default function ChatInterface({
             {searchcurrent?"Search current file":"Search all the files"}
           </HoverCardContent>
         </HoverCard>):null}
-       {(answerfromfile)?( <HoverCard>
+       {(true)?( <HoverCard>
           <HoverCardTrigger>
             <Button 
               variant="outline" 
