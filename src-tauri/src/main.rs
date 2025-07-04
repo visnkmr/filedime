@@ -431,9 +431,9 @@ fn zoom_window(window: tauri::Window, scale_factor: f64) {
         {
           // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
           // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-          use webkit2gtk::traits::WebViewExt;
+        //   use webkit2gtk::traits::WebViewExt;
           
-          webview.inner().set_zoom_level(scale_factor);
+        //   webview.inner().set_zoom_level(scale_factor);
         }
 
         #[cfg(windows)]

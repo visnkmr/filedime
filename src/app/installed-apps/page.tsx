@@ -5,6 +5,7 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Search } from "lucide-react";
 import {cn} from "../../lib/utils"
+import { ZoomableContent } from "../../components/ZoomableContent";
 // --- Mock invoke function for demonstration purposes ---
 // In your actual Tauri app, you would remove this and use the official API.
 // const invoke = (command: string, args: any): Promise<string> => {
@@ -114,6 +115,8 @@ export default function InstalledAppsPage() {
   };
 
   return (
+    <ZoomableContent>
+
     <div className="flex flex-col h-screen bg-gray-900 text-white font-sans duration-1000 ease-in-out place-items-center items-center">
       {/* Header and Search Bar with dynamic classes */}
      
@@ -177,5 +180,6 @@ export default function InstalledAppsPage() {
         )}
       </main>
     </div>
+    </ZoomableContent>
   );
 }

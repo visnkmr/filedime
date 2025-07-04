@@ -1630,7 +1630,6 @@ dependencies = [
  "text-splitter",
  "tokio",
  "walkdir",
- "webkit2gtk",
  "winreg 0.52.0",
 ]
 

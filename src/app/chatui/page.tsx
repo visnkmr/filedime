@@ -5,7 +5,9 @@ import ChatUI from "../../components/batu/components/chatui"
 import { useEffect, useState } from "react";
 import { useToast } from "../../components/ui/use-toast"
 import { Toaster } from "../../components/ui/toaster"
-import { zoomsetup } from "../../components/filedimesettings";
+// import { zoomsetup } from "../../components/filedimesettings";
+import { ZoomableContent } from "../../components/ZoomableContent";
+import React from "react";
 // import { appWindow } from "@tauri-apps/api/window";
 // import '../styles/globals.css'
 // async function getCurrentWindowLabel() {
@@ -19,7 +21,7 @@ import { zoomsetup } from "../../components/filedimesettings";
 //   }
 // }
 export default function chatui(){
-  zoomsetup();
+  // zoomsetup();
       const { toast } = useToast()
   
   // const [path,setpath]=useState("")
@@ -83,8 +85,5 @@ export default function chatui(){
 // useEffect(()=>{
 //      
 // },[])
-    return (<>
-    <ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={1} />
-    <Toaster />
-       </>)
+    return (<ZoomableContent><ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={1} /><Toaster /></ZoomableContent>)
 }

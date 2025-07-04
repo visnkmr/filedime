@@ -31,47 +31,47 @@ function reloadsize(togglewhat="size"){
     console.log("loading size js----->2")
   }
 
-export function zoomsetup(){
-    const [zoomLevel, setZoomLevel] = useState(1);
-    useEffect(()=>{
-        const handleWheel = (event: WheelEvent) => {
-            if (event.ctrlKey) {
-                event.preventDefault();
-                setZoomLevel(prevZoom => {
-                    const newZoom = prevZoom - event.deltaY * 0.001;
-                    return Math.max(0.5, Math.min(newZoom, 2)); // Clamp zoom level
-                });
-            }
-        };
+// export function zoomsetup(){
+//     const [zoomLevel, setZoomLevel] = useState(1);
+//     useEffect(()=>{
+//         const handleWheel = (event: WheelEvent) => {
+//             if (event.ctrlKey) {
+//                 event.preventDefault();
+//                 setZoomLevel(prevZoom => {
+//                     const newZoom = prevZoom - event.deltaY * 0.001;
+//                     return Math.max(0.5, Math.min(newZoom, 2)); // Clamp zoom level
+//                 });
+//             }
+//         };
 
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.ctrlKey && (event.key === '=' || event.key === '+')) {
-                event.preventDefault();
-                setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
-            } else if (event.ctrlKey && event.key === '-') {
-                event.preventDefault();
-                setZoomLevel(prevZoom => Math.max(0.5, prevZoom - 0.1));
-            }
-        };
+//         const handleKeyDown = (event: KeyboardEvent) => {
+//             if (event.ctrlKey && (event.key === '=' || event.key === '+')) {
+//                 event.preventDefault();
+//                 setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
+//             } else if (event.ctrlKey && event.key === '-') {
+//                 event.preventDefault();
+//                 setZoomLevel(prevZoom => Math.max(0.5, prevZoom - 0.1));
+//             }
+//         };
 
-        window.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('keydown', handleKeyDown);
+//         window.addEventListener('wheel', handleWheel, { passive: false });
+//         window.addEventListener('keydown', handleKeyDown);
 
-        return () => {
-            window.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
-    useEffect(()=>{
-        invoke("zoom_window", {scaleFactor:zoomLevel});
+//         return () => {
+//             window.removeEventListener('wheel', handleWheel);
+//             window.removeEventListener('keydown', handleKeyDown);
+//         };
+//     }, []);
+//     useEffect(()=>{
+//         invoke("zoom_window", {scaleFactor:zoomLevel});
 
 
-    },[zoomLevel])
-}
+//     },[zoomLevel])
+// }
 export default function FiledimeSettings(){
     const [filedimegptendpoint,setfge]=useState("http://localhost:8694")
     const [embeddingmodel,setem]=useState("nomic-embed-text")
-    zoomsetup();
+    // zoomsetup();
     useEffect(()=>{
         invoke("filegptendpoint",{
         endpoint:"",
