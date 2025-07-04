@@ -9,6 +9,7 @@ interface App {
   name: string;
   command: string;
   icon: string; // Base64 encoded icon or a URL
+  fromwhere:string;
 }
 
 export default function InstalledAppsPage({rows}) {
@@ -65,14 +66,14 @@ export default function InstalledAppsPage({rows}) {
                 onClick={() => handleAppClick(app.command)}
                 title={`Launch ${app.name}`}
               >
-                <span className="mt-2 text-sm text-gray-300 group-hover:text-white break-words line-clamp-1 w-full px-1">
+                <span className="text-sm text-gray-300 group-hover:text-white break-words line-clamp-1 w-full ps-1">
                   {app.name}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-           <div className="text-center text-gray-500 mt-16">
+           <div className="text-center text-gray-500 ps-4">
             <p className="text-lg">No applications found.</p>
             <p>Try refining your search.</p>
           </div>

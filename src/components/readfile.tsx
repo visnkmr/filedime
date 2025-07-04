@@ -172,7 +172,7 @@ export default function ReadFileComp({message}:rfcprops){
               </HoverCardContent>
             </HoverCard>
         </div>
-        <Button className="ml-4 text-white" variant={"outline"} onClick={()=>{
+        {/* <Button className="ml-4 text-white" variant={"outline"} onClick={()=>{
               const requestBody = {
                 "text": `${selectedtext}`.toString(),
                 "comments":"something here"
@@ -189,7 +189,7 @@ export default function ReadFileComp({message}:rfcprops){
                 })
               .catch(error => {
                 console.error('Error reading stream:', error)});  
-            }}>Listen to selection</Button>
+            }}>Listen to selection</Button> */}
         </div>
             <div onMouseUp={()=>{
               const selectedT = window.getSelection().toString();

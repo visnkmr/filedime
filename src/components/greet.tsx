@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -86,6 +86,7 @@ import MillerCol from "./millercol";
 // import GPTchatinterface from "./gptchatinterface";
 import EachFromGrid from "./grideach";
 import InstalledAppsPage from "./InstalledApps";
+import InstalledAppsForSidebar from "./InstalledAppsforSidebar";
 export let supportedfiles = [
   "csv",
   "rs",
@@ -1377,9 +1378,7 @@ export default function Greet() {
               {bookmarks && bookmarks.length>0 ?(<>
           <span className='h-8'/>
               <h1 className='p-2'>Bookmarks</h1>
-              {
-                
-               bookmarks.map((mark, index) => (
+              {bookmarks.map((mark, index) => (
                 <ContextMenu>
                   <ContextMenuTrigger>
                 <button key={index}
@@ -1417,9 +1416,7 @@ export default function Greet() {
                     }}>Remove bookmark</ContextMenuItem>
                   </ContextMenuContent>
                 </ContextMenu>
-                ))
-
-              }
+                ))}
               </>):(null)}
               
               {tablist?(<>
@@ -1498,7 +1495,7 @@ export default function Greet() {
               </div>
               </>):(null)}
               
-              { driveslist && driveslist.length>0 ?(<>
+              {driveslist && driveslist.length>0 ?(<>
        <h1 className='pt-8 p-2'>Drives ({driveslist.length})</h1>
        {
          
@@ -1641,8 +1638,8 @@ export default function Greet() {
          ))
  
        }
-       </>):(null)
- }
+       </>):(null)}
+              <InstalledAppsForSidebar/>
           </div>
           </div>
           {/* <div className=" w-full flex"> */}
@@ -1687,6 +1684,15 @@ export default function Greet() {
             </HoverCard>
           {/* </Button> */}
   </div>
+  {/* <div>
+
+  <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
+              reset(pathitype)
+              listfiles(activetabid,pathitype)
+            }}>
+              <FolderRootIcon className="w-4 h-4 m-4"/>
+            </Button>
+  </div> */}
   <div>
 
 
@@ -1873,8 +1879,9 @@ export default function Greet() {
               />
               
             {/* </div> */}
+            
             <div>
-
+            
             <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
               reset(pathitype)
               listfiles(activetabid,pathitype)
@@ -1924,8 +1931,13 @@ export default function Greet() {
               </div>
           </div>
         </div>
-        <div>
-
+        <div className="flex flex-row">
+        {/* <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
+              reset(pathitype)
+              listfiles(activetabid,pathitype)
+            }}> */}
+              <FolderRootIcon className="w-4 h-4 m-4"/>
+            {/* </Button> */}
         <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}>
           {pathsplitlist
           // .filter(function (el) {
@@ -1950,6 +1962,10 @@ export default function Greet() {
         })}
         </div>
         </div>
+        {/* <div className="flex ">
+          <InstalledAppsPage rows={1}/>
+
+        </div> */}
         
         {
           layout==="detail" || layout==="grid"?(
@@ -1985,10 +2001,7 @@ export default function Greet() {
           layout==="detail" ?
           (<span className={`flex flex-col overflow-${scrollorauto} `}>
             {/* ${(fileslist.length>0)} */}
-        <div className="flex ">
-          <InstalledAppsPage rows={1}/>
-
-        </div>
+        
           <DataTable columns={columns} data={filestoshow} searchstring={searchstring} filetype={sftype}/>
         </span>):null}
         {
