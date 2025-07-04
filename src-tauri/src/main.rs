@@ -424,30 +424,30 @@ fn startup(window: &AppHandle) -> Result<(), ()> {
     sendbuttonnames(&window.app_handle(), &buttonnames).unwrap();
     Ok(())
 }
-#[tauri::command]
-fn zoom_window(window: tauri::Window, scale_factor: f64) {
-    let _ = window.with_webview(move |webview| {
-        #[cfg(target_os = "linux")]
-        {
-          // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
-          // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-        //   use webkit2gtk::traits::WebViewExt;
+// #[tauri::command]
+// fn zoom_window(window: tauri::Window, scale_factor: f64) {
+//     let _ = window.with_webview(move |webview| {
+//         #[cfg(target_os = "linux")]
+//         {
+//           // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+//           // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+//         //   use webkit2gtk::traits::WebViewExt;
           
-        //   webview.inner().set_zoom_level(scale_factor);
-        }
+//         //   webview.inner().set_zoom_level(scale_factor);
+//         }
 
-        #[cfg(windows)]
-        unsafe {
-          // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
-          webview.controller().SetZoomFactor(scale_factor).unwrap();
-        }
+//         #[cfg(windows)]
+//         unsafe {
+//           // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+//           webview.controller().SetZoomFactor(scale_factor).unwrap();
+//         }
 
-        // #[cfg(target_os = "macos")]
-        // unsafe {
-        //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
-        // }
-      });
-}
+//         // #[cfg(target_os = "macos")]
+//         // unsafe {
+//         //   let () = msg_send![webview.inner(), setPageZoom: scale_factor];
+//         // }
+//       });
+// }
 #[tauri::command]
 async fn otb(bname: String, path: String, state: State<'_, AppStateStore>) -> Result<(), ()> {
     // state.getactivepath(path);
@@ -987,7 +987,7 @@ fn main() {
             highlightfile,
             doespathexist,
             otb,
-            zoom_window,
+            // zoom_window,
             removemark,
             // populate_try,
             search_try,
