@@ -85,5 +85,9 @@ export default function chatui(){
 // useEffect(()=>{
 //      
 // },[])
-    return (<ZoomableContent><ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={1} /><Toaster /></ZoomableContent>)
+    return (<>
+    <ZoomableContent setclass={false}>
+      <ChatUI fgptendpoint="localhost" setasollama={false} message={fileinfo} whichgpt={1} /><Toaster />
+      </ZoomableContent>
+    </>)
 }

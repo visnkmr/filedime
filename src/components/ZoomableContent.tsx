@@ -9,6 +9,7 @@ interface ZoomableContentProps {
   minZoom?: number;
   maxZoom?: number;
   zoomStep?: number;
+  setclass?: boolean
 }
 
 export function ZoomableContent({
@@ -17,6 +18,7 @@ export function ZoomableContent({
   minZoom = 0.5,
   maxZoom = 2.0,
   zoomStep = 0.1,
+  setclass = true
 }: ZoomableContentProps) {
   const [zoomLevel, setZoomLevel] = useState(initialZoom);
 
@@ -91,7 +93,7 @@ export function ZoomableContent({
 
   return (<div
         ref={contentRef} 
-        className="flex-grow overflow-auto "
+        className={`${setclass?"flex-grow overflow-auto":""}`}
         // p-4 transition-transform duration-200 ease-out
         style={{
           transform: `scale(${zoomLevel})`,

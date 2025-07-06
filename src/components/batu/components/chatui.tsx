@@ -518,13 +518,13 @@ export default function ChatUI({message,fgptendpoint="localhost",setasollama=fal
             </div> */}
 
       {/* Main content */}
-      <div  style={{ height: 'var(--100vh, 100vh)' }} className={cn("absolute bottom-0 z-10 w-full px-2 bg-gray-50 dark:bg-gray-900 overflow-hidden")} onClick={()=>{setCollapsed(true)}} >
+      <div  style={{ height: 'var(--100vh, 100vh)' }} className={cn("absolute bottom-0 z-10 w-full bg-gray-50 dark:bg-gray-900 overflow-hidden")} onClick={()=>{setCollapsed(true)}} >
         {/* <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           {!sidebarVisible?(<Button variant="ghost" size="icon" onClick={() => setSidebarVisible(!sidebarVisible)}>
             {<MenuIcon size={20} />}
           </Button>):null}
         </div> */}
-
+        
         {currentChat && (
           <ChatInterface
           // fileloader={fileloader}
