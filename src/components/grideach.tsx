@@ -24,11 +24,11 @@ interface argprops{
     addmark:(path: string) => void;
     showthumbnail?,
     setfos?,
-    
+    setFileOpType?,
 
 }
 
-export default function EachFromGrid({message,goto,newtab,populatesearchlist,showthumbnail,setfos,addmark}:argprops){
+export default function EachFromGrid({message,goto,newtab,populatesearchlist,showthumbnail,setfos,setFileOpType,addmark}:argprops){
     return(<Button size={"none"} variant={"outline"} className="relative m-0 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700">
 
     <ContextMenu >
@@ -135,7 +135,12 @@ export default function EachFromGrid({message,goto,newtab,populatesearchlist,sho
       >Copy path to clipboard</ContextMenuItem>
       <ContextMenuItem onSelect={(e)=>{
         setfos((old)=>[...old,message.path])
+        setFileOpType("copy")
       }}>Copy</ContextMenuItem>
+      <ContextMenuItem onSelect={(e)=>{
+        setfos((old)=>[...old,message.path])
+        setFileOpType("cut")
+      }}>Cut</ContextMenuItem>
     </ContextMenuContent>
   </ContextMenu>
   <div className="absolute end-0 ">

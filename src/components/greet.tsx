@@ -178,6 +178,7 @@ export default function Greet() {
     const [pathitype, setpit] = useState("drives://");
     const [searchstring,setss] = useState("");
     const [fileopsrc,setfos] = useState(objinit);
+    const [fileOpType,setFileOpType] = useState("copy"); // "copy" or "cut"
     let srclist=JSON.stringify(fileopsrc);
     const [fileopdest,setfod] = useState("");
     const [parentsize,setps] = useState("");
@@ -287,9 +288,18 @@ export default function Greet() {
     });
     useKeyboardShortcut(()=>{
       setfos((old)=>[...old,path])
+      setFileOpType("copy")
     }, {
       ctrlKey: true,
       code: "KeyC", 
+    });
+
+    useKeyboardShortcut(()=>{
+      setfos((old)=>[...old,path])
+      setFileOpType("cut")
+    }, {
+      ctrlKey: true,
+      code: "KeyX", 
     });
     
     useKeyboardShortcut(()=>{
@@ -774,7 +784,12 @@ export default function Greet() {
               >Copy path to clipboard</ContextMenuItem>
               <ContextMenuItem onSelect={(e)=>{
                 setfos((old)=>[...old,path])
+                setFileOpType("copy")
               }}>Copy</ContextMenuItem>
+              <ContextMenuItem onSelect={(e)=>{
+                setfos((old)=>[...old,path])
+                setFileOpType("cut")
+              }}>Cut</ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
            </div>
@@ -1238,7 +1253,7 @@ export default function Greet() {
           
               {/* </div> */}
          
-              <Dupelist dst={dest} srclist={JSON.stringify(fileopsrc)} dupes={dupes} showad={showalertdialog} setshowad={setsal} setfos={setfos} reloadlist={reloadlist}/>
+              <Dupelist dst={dest} srclist={JSON.stringify(fileopsrc)} dupes={dupes} showad={showalertdialog} setshowad={setsal} setfos={setfos} fileOpType={fileOpType} setFileOpType={setFileOpType} reloadlist={reloadlist}/>
           {fileopsrc.length>0?( 
           <div className='flex items-center gap-2 font-semibold border-b h-[60px] px-2'>
                  <HoverCard>
@@ -1260,13 +1275,15 @@ export default function Greet() {
                     console.log(typeof listofdupes[0])
                     if(listofdupes.length===0)
                     {
-                      invoke('fileop', { 
+                      const operation = fileOpType === "cut" ? "moveop" : "fileop";
+                      invoke(operation, { 
                         srclist:JSON.stringify(fileopsrc),
                         dst:path,
                         dlastore:JSON.stringify([])
                     })
                     console.log("done");
                     setfos([])
+                    setFileOpType("copy")
                     setfod("")
                     }
                     else{
@@ -1279,13 +1296,14 @@ export default function Greet() {
                     console.log("error")
                     console.log("done");
                     setfos([])
+                    setFileOpType("copy")
                     setfod("")
                   })
                     
                   }
               }>
               {/* <CardDescription className="flex items-center space-x-2 p-2"> */}
-              Paste ({fileopsrc.length})
+              {fileOpType === "cut" ? "Move" : "Paste"} ({fileopsrc.length})
                 
               {/* </CardDescription> */}
             </Button>
@@ -2118,7 +2136,7 @@ export default function Greet() {
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
-                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} showthumbnail={showthumbnail} addmark={addmark}/>
+                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
                         </div>
         
         ))}

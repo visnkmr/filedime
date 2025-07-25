@@ -960,6 +960,7 @@ fn main() {
             mirror,
             addmark,
             fileop,
+            moveop,
             getlocalip,
             checkiffile,
             checkforconflicts,

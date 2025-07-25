@@ -5,7 +5,7 @@ import { setcolorpertheme } from "./greet";
 import { Checkbox } from "./ui/checkbox";
 import { invoke } from "@tauri-apps/api/tauri";
 import { operationfileinfo } from "../shared/tstypes";
-export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,reloadlist}){
+export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,fileOpType,setFileOpType,reloadlist}){
     // console.log("srclist-----"+srclist)
     // console.log("dst-----"+dst)
     let [dlastore,setdlastore]=useState([] as operationfileinfo[])
@@ -100,12 +100,14 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,relo
                 //    }))];
                    console.log(srclist)
                    console.log(typeof srclist)
-                invoke('fileop', { 
+                const operation = fileOpType === "cut" ? "moveop" : "fileop";
+                invoke(operation, { 
                     srclist:srclist,
                     dst:dst,
                     dlastore:JSON.stringify(newArray)
                 }).then((a)=>{
                     setfos([])
+                    setFileOpType("copy")
                     reloadlist();
                 
                 })

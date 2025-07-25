@@ -274,6 +274,71 @@ struct dlads {
 }
 
 #[tauri::command]
+pub async fn moveop(srclist: String, dst: String, dlastore: String) -> Result<bool, String> {
+    println!("{}--{}--{}", srclist, dst, dlastore);
+    match serde_json::from_str(&srclist) {
+        Ok(list) => {
+            let src: Vec<String> = list;
+            println!("moving started");
+            let mut options = dir::CopyOptions::new();
+            
+            let handle = |process_info: TransitProcess| {
+                match serde_json::from_str(&dlastore) {
+                    Ok(a) => {
+                        let dlas: Vec<dlads> = a;
+
+                        if (process_info.state == TransitState::Exists) {
+                            let exists = dlas
+                                .iter()
+                                .find(|dlad| dlad.destpath == process_info.file_name)
+                                .map(|dlad| dlad.replace);
+                            match exists {
+                                Some(a) => {
+                                    if (a) {
+                                        println!("Overwrite {:?}", process_info);
+                                        return fs_extra::dir::TransitProcessResult::Overwrite;
+                                    } else {
+                                        println!("Skip {:?}", process_info);
+                                        return fs_extra::dir::TransitProcessResult::Skip;
+                                    }
+                                }
+                                None => {
+                                    println!("Unknown {:?}", process_info);
+                                    return fs_extra::dir::TransitProcessResult::ContinueOrAbort;
+                                }
+                            }
+                        } else {
+                            println!("Unknown2 {}", process_info.file_name);
+                            thread::sleep(time::Duration::from_millis(500));
+                            return fs_extra::dir::TransitProcessResult::ContinueOrAbort;
+                        }
+                    }
+                    Err(i) => {
+                        println!("Error {} @ {}", i, process_info.file_name);
+                        fs_extra::dir::TransitProcessResult::Abort
+                    }
+                }
+            };
+            
+            match (fs_extra::move_items_with_progress(&src, dst, &options, handle)) {
+                Ok(_) => {
+                    println!("move executed successfully");
+                    return Ok(true);
+                }
+                Err(e) => {
+                    println!("move error {}", e.to_string());
+                    return Err(e.to_string());
+                }
+            }
+        }
+        Err(e) => {
+            println!("cannot parse data");
+            return Err(format!("{}", e));
+        }
+    }
+}
+
+#[tauri::command]
 pub async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bool, String> {
     println!("{}--{}--{}", srclist, dst, dlastore);
     match serde_json::from_str(&srclist) {
@@ -355,6 +420,101 @@ pub async fn fileop(srclist: String, dst: String, dlastore: String) -> Result<bo
 // wite tests with below code to test functions
 
 #[tokio::test]
+async fn test_copy_cut_paste_operations() {
+    use std::fs;
+    use std::path::Path;
+    
+    // Setup test directories and files
+    let test_base = "/tmp/fileops_test";
+    let src_dir = format!("{}/src", test_base);
+    let dest_dir = format!("{}/dest", test_base);
+    let move_dest_dir = format!("{}/move_dest", test_base);
+    
+    // Clean up any existing test directories
+    let _ = fs::remove_dir_all(test_base);
+    
+    // Create test structure
+    fs::create_dir_all(&src_dir).expect("Failed to create src directory");
+    fs::create_dir_all(&dest_dir).expect("Failed to create dest directory");
+    fs::create_dir_all(&move_dest_dir).expect("Failed to create move_dest directory");
+    
+    // Create test files and directories
+    let test_file1 = format!("{}/test1.txt", src_dir);
+    let test_file2 = format!("{}/test2.txt", src_dir);
+    let test_subdir = format!("{}/subdir", src_dir);
+    let test_file3 = format!("{}/subdir/test3.txt", src_dir);
+    
+    fs::write(&test_file1, "Content of test1.txt").expect("Failed to create test1.txt");
+    fs::write(&test_file2, "Content of test2.txt").expect("Failed to create test2.txt");
+    fs::create_dir_all(&test_subdir).expect("Failed to create subdir");
+    fs::write(&test_file3, "Content of test3.txt").expect("Failed to create test3.txt");
+    
+    println!("=== Testing Copy Operation ===");
+    
+    // Test copy operation
+    let copy_result = fileop(
+        serde_json::to_string(&[test_file1.clone(), test_subdir.clone()]).unwrap(),
+        dest_dir.clone(),
+        "[]".to_string()
+    ).await;
+    
+    match copy_result {
+        Ok(success) => {
+            println!("Copy operation successful: {}", success);
+            // Verify files were copied
+            assert!(Path::new(&format!("{}/test1.txt", dest_dir)).exists(), "test1.txt should be copied");
+            assert!(Path::new(&format!("{}/subdir/test3.txt", dest_dir)).exists(), "subdir/test3.txt should be copied");
+            // Verify original files still exist
+            assert!(Path::new(&test_file1).exists(), "Original test1.txt should still exist after copy");
+            assert!(Path::new(&test_subdir).exists(), "Original subdir should still exist after copy");
+        }
+        Err(e) => panic!("Copy operation failed: {}", e),
+    }
+    
+    println!("=== Testing Move Operation (Cut) ===");
+    
+    // Test move operation (cut)
+    let move_result = moveop(
+        serde_json::to_string(&[test_file2.clone()]).unwrap(),
+        move_dest_dir.clone(),
+        "[]".to_string()
+    ).await;
+    
+    match move_result {
+        Ok(success) => {
+            println!("Move operation successful: {}", success);
+            // Verify file was moved
+            assert!(Path::new(&format!("{}/test2.txt", move_dest_dir)).exists(), "test2.txt should be moved to destination");
+            // Verify original file no longer exists
+            assert!(!Path::new(&test_file2).exists(), "Original test2.txt should not exist after move");
+        }
+        Err(e) => panic!("Move operation failed: {}", e),
+    }
+    
+    println!("=== Testing Conflict Detection ===");
+    
+    // Test conflict detection
+    let conflict_result = checkforconflicts(
+        serde_json::to_string(&[format!("{}/test1.txt", dest_dir)]).unwrap(),
+        dest_dir.clone()
+    ).await;
+    
+    match conflict_result {
+        Ok(conflicts) => {
+            println!("Conflict detection result: {}", conflicts);
+            let parsed_conflicts: Vec<serde_json::Value> = serde_json::from_str(&conflicts).unwrap();
+            assert!(parsed_conflicts.len() > 0, "Should detect conflict for existing file");
+        }
+        Err(e) => panic!("Conflict detection failed: {}", e),
+    }
+    
+    println!("=== All Tests Passed! ===");
+    
+    // Clean up
+    let _ = fs::remove_dir_all(test_base);
+}
+
+#[tokio::test]
 async fn createfilestotest() {
     // Create directories
     // fs::create_dir_all("/tmp/new/est/a").expect("Failed to create directory 'a'");
@@ -366,7 +526,7 @@ async fn createfilestotest() {
     // fs::write("/tmp/new/est/a/b.txt", "").expect("Failed to create file 'b.txt'");
     // fs::write("/tmp/new/est/c/d/e.txt", "").expect("Failed to create file 'e.txt'");
     // fs::write("/tmp/new/est/f.txt", "").expect("Failed to create file 'f.txt'");
-    fileop(serde_json::to_string(&["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/f.txt"]).unwrap(), "/tmp/new/est/dest/".to_string(),r#"[{"sourcepath":"/tmp/new/est/a/b.txt","destpath":"/tmp/new/est/dest/a/b.txt","replace":false},{"sourcepath":"/tmp/new/est/f.txt","destpath":"/tmp/new/est/dest/f.txt","replace":false}]"#.to_string()).await;
+    let _ = fileop(serde_json::to_string(&["/tmp/new/est/a","/tmp/new/est/c","/tmp/new/est/f.txt"]).unwrap(), "/tmp/new/est/dest/".to_string(),r#"[{"sourcepath":"/tmp/new/est/a/b.txt","destpath":"/tmp/new/est/dest/a/b.txt","replace":false},{"sourcepath":"/tmp/new/est/f.txt","destpath":"/tmp/new/est/dest/f.txt","replace":false}]"#.to_string()).await;
     // let mut options = dir::CopyOptions::new().buffer_size(1).skip_exist(true);
     // let handler=|process_info|{
     //   println!("{:?}",process_info);
