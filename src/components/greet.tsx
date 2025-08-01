@@ -13,6 +13,7 @@ import '../styles/globals.css'
 import ReadFileComp, { IMAGE_TYPES, MARKDOWN_TYPES, PLAIN_TEXT, VIDEO_TYPES } from "./readfile"
 import Dupelist from "./ad"
 import NewLeaf from "./new"
+import FileOperationProgress from "./FileOperationProgress"
 // import {appWindow as activewindow} from "@tauri-apps/api/window"
 import React from 'react';
 import { useKeyboardShortcut } from "./keyboardshortcuts";
@@ -181,6 +182,8 @@ export default function Greet() {
     const [fileOpType,setFileOpType] = useState("copy"); // "copy" or "cut"
     let srclist=JSON.stringify(fileopsrc);
     const [fileopdest,setfod] = useState("");
+    const [activeOperationId, setActiveOperationId] = useState<string | null>(null);
+    const [showProgress, setShowProgress] = useState(false);
     const [parentsize,setps] = useState("");
     const [sampletext,sst]=useState("")
     const [filesetcollectionlist,setfscl]=useState(objinit)
@@ -735,7 +738,7 @@ export default function Greet() {
   
               
             </ContextMenuTrigger>
-            <ContextMenuContent className=''>
+            <ContextMenuContent className={`${setcolorpertheme}`}>
               <ContextMenuLabel className='text-sm'>{path}</ContextMenuLabel>
               <ContextMenuItem onSelect={(e)=>{
                 invoke("newwindow",
@@ -1275,16 +1278,29 @@ export default function Greet() {
                     console.log(typeof listofdupes[0])
                     if(listofdupes.length===0)
                     {
-                      const operation = fileOpType === "cut" ? "moveop" : "fileop";
-                      invoke(operation, { 
-                        srclist:JSON.stringify(fileopsrc),
-                        dst:path,
-                        dlastore:JSON.stringify([])
-                    })
-                    console.log("done");
-                    setfos([])
-                    setFileOpType("copy")
-                    setfod("")
+                      const operationId = `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                      const operationType = fileOpType === "cut" ? "move" : "copy";
+                      
+                      setActiveOperationId(operationId);
+                      setShowProgress(true);
+                      
+                      invoke('start_file_operation', { 
+                        operationId,
+                        srclist: JSON.stringify(fileopsrc),
+                        dst: path,
+                        operationType,
+                        dlastore: JSON.stringify([])
+                      }).then(() => {
+                        console.log("Operation started");
+                      }).catch((error) => {
+                        console.error("Failed to start operation:", error);
+                        setShowProgress(false);
+                        setActiveOperationId(null);
+                      });
+                      
+                      setfos([])
+                      setFileOpType("copy")
+                      setfod("")
                     }
                     else{
                       setdest(path)
@@ -1421,7 +1437,7 @@ export default function Greet() {
                 </button>
                     
                   </ContextMenuTrigger>
-                  <ContextMenuContent>
+                  <ContextMenuContent className={`${setcolorpertheme}`}>
                     <ContextMenuItem onSelect={()=>{
                       invoke(
                         "removemark",
@@ -1603,7 +1619,7 @@ export default function Greet() {
         </HoverCardContent>
       </HoverCard>
            </ContextMenuTrigger>
-           <ContextMenuContent>
+           <ContextMenuContent className={`${setcolorpertheme}`}>
            <ContextMenuItem onSelect={(e)=>{
                    invoke("newwindow",
                    {
@@ -2176,9 +2192,28 @@ export default function Greet() {
         </div>
          </> ):null
         }
-        
+        {/* File Operation Progress Dialog */}
+      {showProgress && activeOperationId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <FileOperationProgress
+            operationId={activeOperationId}
+            onComplete={() => {
+              setShowProgress(false);
+              setActiveOperationId(null);
+              reloadlist(); // Refresh the file list
+            }}
+            onCancel={() => {
+              setShowProgress(false);
+              setActiveOperationId(null);
+            }}
+          />
+        </div>
+      )}
+      
         </ResizablePanel>
       </ResizablePanelGroup>
+      
+      
     )
   // }
   

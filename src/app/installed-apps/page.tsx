@@ -135,7 +135,7 @@ export default function InstalledAppsPage() {
             <input
               type="text"
               placeholder="Search for an app..."
-              className="w-full transition-all duration-1000 ease-in-out bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-full py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 "
+              className="w-full transition-all duration-1000 ease-in-out dark:bg-gray-800 dark:text-white placeholder-gray-400 border border-gray-700 rounded-full py-4 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 "
               onChange={(e) => setSearchTerm(e.target.value)}
               value={searchTerm}
             />

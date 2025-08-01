@@ -72,7 +72,7 @@ export default function InstalledAppsForSidebar() {
           <input
             type="text"
             placeholder="Search for an app..."
-            className="bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-full pl-4 p-2"
+            className="dark:bg-gray-800 dark:text-white placeholder-gray-400 border border-gray-700 rounded-full pl-4 p-2"
             onChange={(e) => setSearchTerm(e.target.value)}
             value={searchTerm}
           />

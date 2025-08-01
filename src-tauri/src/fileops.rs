@@ -1,15 +1,15 @@
 use crate::lastmodcalc::lastmodified;
 use crate::{existingfileinfo, opendialogwindow, sizeunit};
-use chrono::format::format;
 use fs_extra::dir;
 use fs_extra::{dir::TransitState, TransitProcess};
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{self, TryRecvError};
-use std::time::Duration;
+use std::sync::{Arc, Mutex};
 use std::{fs, thread, time};
 use tauri::{Manager, Window};
+use std::collections::HashMap;
+
 trait PathExt {
     fn exists_case_insensitive(&self) -> bool;
 }
@@ -273,6 +273,389 @@ struct dlads {
     replace: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FileOpProgress {
+    pub current_file: String,
+    pub files_completed: usize,
+    pub total_files: usize,
+    pub bytes_copied: u64,
+    pub total_bytes: u64,
+    pub current_file_progress: f64,
+    pub overall_progress: f64,
+    pub operation_type: String, // "copy" or "move"
+    pub status: String, // "running", "paused", "completed", "error"
+    pub error_message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FileOpState {
+    pub operation_id: String,
+    pub files_remaining: Vec<String>,
+    pub files_completed: Vec<String>,
+    pub destination: String,
+    pub operation_type: String,
+    pub conflicts_resolved: HashMap<String, bool>, // path -> should_replace
+}
+
+// Global state for tracking operations
+lazy_static::lazy_static! {
+    static ref ACTIVE_OPERATIONS: Arc<Mutex<HashMap<String, FileOpState>>> = Arc::new(Mutex::new(HashMap::new()));
+}
+
+#[tauri::command]
+pub async fn start_file_operation(
+    operation_id: String,
+    srclist: String,
+    dst: String,
+    operation_type: String,
+    dlastore: String,
+    window: Window,
+) -> Result<String, String> {
+    let src_files: Vec<String> = serde_json::from_str(&srclist)
+        .map_err(|e| format!("Failed to parse source list: {}", e))?;
+    
+    let conflicts_resolved: HashMap<String, bool> = if !dlastore.is_empty() && dlastore != "[]" {
+        let dlas: Vec<dlads> = serde_json::from_str(&dlastore)
+            .map_err(|e| format!("Failed to parse conflicts: {}", e))?;
+        dlas.into_iter()
+            .map(|d| (d.destpath, d.replace))
+            .collect()
+    } else {
+        HashMap::new()
+    };
+
+    // Store operation state
+    {
+        let mut operations = ACTIVE_OPERATIONS.lock().unwrap();
+        operations.insert(operation_id.clone(), FileOpState {
+            operation_id: operation_id.clone(),
+            files_remaining: src_files.clone(),
+            files_completed: Vec::new(),
+            destination: dst.clone(),
+            operation_type: operation_type.clone(),
+            conflicts_resolved,
+        });
+    }
+
+    // Start operation in background
+    let op_id = operation_id.clone();
+    let window_clone = window.clone();
+    tokio::spawn(async move {
+        let window_for_op = window_clone.clone();
+        let result = if operation_type == "move" {
+            execute_move_operation(op_id.clone(), window_for_op).await
+        } else {
+            execute_copy_operation(op_id.clone(), window_for_op).await
+        };
+
+        // Clean up operation state on completion
+        {
+            let mut operations = ACTIVE_OPERATIONS.lock().unwrap();
+            operations.remove(&op_id);
+        }
+
+        // Send completion event
+        let _ = window_clone.emit("file_operation_complete", result);
+    });
+
+    Ok(operation_id)
+}
+
+#[tauri::command]
+pub async fn pause_file_operation(operation_id: String) -> Result<bool, String> {
+    // Implementation for pausing operations
+    // This would require more complex state management
+    Ok(true)
+}
+
+#[tauri::command]
+pub async fn resume_file_operation(operation_id: String, window: Window) -> Result<bool, String> {
+    let operation_exists = {
+        let operations = ACTIVE_OPERATIONS.lock().unwrap();
+        operations.contains_key(&operation_id)
+    };
+
+    if !operation_exists {
+        return Err("Operation not found".to_string());
+    }
+
+    // Resume operation
+    let op_id = operation_id.clone();
+    let window_clone = window.clone();
+    tokio::spawn(async move {
+        let operation_type = {
+            let operations = ACTIVE_OPERATIONS.lock().unwrap();
+            operations.get(&op_id).map(|op| op.operation_type.clone())
+        };
+
+        if let Some(op_type) = operation_type {
+            let window_for_op = window_clone.clone();
+            let result = if op_type == "move" {
+                execute_move_operation(op_id.clone(), window_for_op).await
+            } else {
+                execute_copy_operation(op_id.clone(), window_for_op).await
+            };
+
+            let _ = window_clone.emit("file_operation_complete", result);
+        }
+    });
+
+    Ok(true)
+}
+
+async fn execute_copy_operation(operation_id: String, window: Window) -> Result<bool, String> {
+    let (src_files, dst, conflicts_resolved) = {
+        let operations = ACTIVE_OPERATIONS.lock().unwrap();
+        let operation = operations.get(&operation_id)
+            .ok_or_else(|| "Operation not found".to_string())?;
+        (
+            operation.files_remaining.clone(),
+            operation.destination.clone(),
+            operation.conflicts_resolved.clone(),
+        )
+    };
+
+    let total_files = src_files.len();
+    let mut total_bytes = 0u64;
+
+    // Calculate total size
+    for file_path in &src_files {
+        if let Ok(metadata) = fs::metadata(file_path) {
+            total_bytes += if metadata.is_dir() {
+                calculate_dir_size(file_path)
+            } else {
+                metadata.len()
+            };
+        }
+    }
+
+    let options = dir::CopyOptions::new();
+    let bytes_copied = Arc::new(Mutex::new(0u64));
+    let files_completed = Arc::new(Mutex::new(0usize));
+    
+    let window_clone = window.clone();
+    let bytes_copied_clone = bytes_copied.clone();
+    let files_completed_clone = files_completed.clone();
+    let handle = move |process_info: TransitProcess| {
+        *bytes_copied_clone.lock().unwrap() = process_info.copied_bytes;
+        let current_bytes_copied = *bytes_copied_clone.lock().unwrap();
+        let current_files_completed = *files_completed_clone.lock().unwrap();
+        
+        let progress = FileOpProgress {
+            current_file: process_info.file_name.clone(),
+            files_completed: current_files_completed,
+            total_files,
+            bytes_copied: current_bytes_copied,
+            total_bytes,
+            current_file_progress: if process_info.file_total_bytes > 0 {
+                (process_info.file_bytes_copied as f64 / process_info.file_total_bytes as f64) * 100.0
+            } else {
+                0.0
+            },
+            overall_progress: if total_bytes > 0 {
+                (current_bytes_copied as f64 / total_bytes as f64) * 100.0
+            } else {
+                0.0
+            },
+            operation_type: "copy".to_string(),
+            status: "running".to_string(),
+            error_message: None,
+        };
+
+        let _ = window_clone.emit("file_operation_progress", &progress);
+
+        if process_info.state == TransitState::Exists {
+            if let Some(&should_replace) = conflicts_resolved.get(&process_info.file_name) {
+                if should_replace {
+                    return fs_extra::dir::TransitProcessResult::Overwrite;
+                } else {
+                    return fs_extra::dir::TransitProcessResult::Skip;
+                }
+            }
+        }
+
+        thread::sleep(time::Duration::from_millis(100)); // Throttle updates
+        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    };
+
+    match fs_extra::copy_items_with_progress(&src_files, &dst, &options, handle) {
+        Ok(_) => {
+            let final_files_completed = total_files;
+            let final_progress = FileOpProgress {
+                current_file: "".to_string(),
+                files_completed: final_files_completed,
+                total_files,
+                bytes_copied: total_bytes,
+                total_bytes,
+                current_file_progress: 100.0,
+                overall_progress: 100.0,
+                operation_type: "copy".to_string(),
+                status: "completed".to_string(),
+                error_message: None,
+            };
+            let _ = window.emit("file_operation_progress", &final_progress);
+            Ok(true)
+        }
+        Err(e) => {
+            let current_bytes_copied = *bytes_copied.lock().unwrap();
+            let current_files_completed = *files_completed.lock().unwrap();
+            let error_progress = FileOpProgress {
+                current_file: "".to_string(),
+                files_completed: current_files_completed,
+                total_files,
+                bytes_copied: current_bytes_copied,
+                total_bytes,
+                current_file_progress: 0.0,
+                overall_progress: if total_bytes > 0 {
+                    (current_bytes_copied as f64 / total_bytes as f64) * 100.0
+                } else {
+                    0.0
+                },
+                operation_type: "copy".to_string(),
+                status: "error".to_string(),
+                error_message: Some(e.to_string()),
+            };
+            let _ = window.emit("file_operation_progress", &error_progress);
+            Err(e.to_string())
+        }
+    }
+}
+
+async fn execute_move_operation(operation_id: String, window: Window) -> Result<bool, String> {
+    let (src_files, dst, conflicts_resolved) = {
+        let operations = ACTIVE_OPERATIONS.lock().unwrap();
+        let operation = operations.get(&operation_id)
+            .ok_or_else(|| "Operation not found".to_string())?;
+        (
+            operation.files_remaining.clone(),
+            operation.destination.clone(),
+            operation.conflicts_resolved.clone(),
+        )
+    };
+
+    let total_files = src_files.len();
+    let mut total_bytes = 0u64;
+
+    // Calculate total size
+    for file_path in &src_files {
+        if let Ok(metadata) = fs::metadata(file_path) {
+            total_bytes += if metadata.is_dir() {
+                calculate_dir_size(file_path)
+            } else {
+                metadata.len()
+            };
+        }
+    }
+
+    let options = dir::CopyOptions::new();
+    let bytes_copied = Arc::new(Mutex::new(0u64));
+    let files_completed = Arc::new(Mutex::new(0usize));
+    
+    let window_clone = window.clone();
+    let bytes_copied_clone = bytes_copied.clone();
+    let files_completed_clone = files_completed.clone();
+    let handle = move |process_info: TransitProcess| {
+        *bytes_copied_clone.lock().unwrap() = process_info.copied_bytes;
+        let current_bytes_copied = *bytes_copied_clone.lock().unwrap();
+        let current_files_completed = *files_completed_clone.lock().unwrap();
+        
+        let progress = FileOpProgress {
+            current_file: process_info.file_name.clone(),
+            files_completed: current_files_completed,
+            total_files,
+            bytes_copied: current_bytes_copied,
+            total_bytes,
+            current_file_progress: if process_info.file_total_bytes > 0 {
+                (process_info.file_bytes_copied as f64 / process_info.file_total_bytes as f64) * 100.0
+            } else {
+                0.0
+            },
+            overall_progress: if total_bytes > 0 {
+                (current_bytes_copied as f64 / total_bytes as f64) * 100.0
+            } else {
+                0.0
+            },
+            operation_type: "move".to_string(),
+            status: "running".to_string(),
+            error_message: None,
+        };
+
+        let _ = window_clone.emit("file_operation_progress", &progress);
+
+        if process_info.state == TransitState::Exists {
+            if let Some(&should_replace) = conflicts_resolved.get(&process_info.file_name) {
+                if should_replace {
+                    return fs_extra::dir::TransitProcessResult::Overwrite;
+                } else {
+                    return fs_extra::dir::TransitProcessResult::Skip;
+                }
+            }
+        }
+
+        thread::sleep(time::Duration::from_millis(100)); // Throttle updates
+        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    };
+
+    match fs_extra::move_items_with_progress(&src_files, &dst, &options, handle) {
+        Ok(_) => {
+            let final_files_completed = total_files;
+            let final_progress = FileOpProgress {
+                current_file: "".to_string(),
+                files_completed: final_files_completed,
+                total_files,
+                bytes_copied: total_bytes,
+                total_bytes,
+                current_file_progress: 100.0,
+                overall_progress: 100.0,
+                operation_type: "move".to_string(),
+                status: "completed".to_string(),
+                error_message: None,
+            };
+            let _ = window.emit("file_operation_progress", &final_progress);
+            Ok(true)
+        }
+        Err(e) => {
+            let current_bytes_copied = *bytes_copied.lock().unwrap();
+            let current_files_completed = *files_completed.lock().unwrap();
+            let error_progress = FileOpProgress {
+                current_file: "".to_string(),
+                files_completed: current_files_completed,
+                total_files,
+                bytes_copied: current_bytes_copied,
+                total_bytes,
+                current_file_progress: 0.0,
+                overall_progress: if total_bytes > 0 {
+                    (current_bytes_copied as f64 / total_bytes as f64) * 100.0
+                } else {
+                    0.0
+                },
+                operation_type: "move".to_string(),
+                status: "error".to_string(),
+                error_message: Some(e.to_string()),
+            };
+            let _ = window.emit("file_operation_progress", &error_progress);
+            Err(e.to_string())
+        }
+    }
+}
+
+fn calculate_dir_size(path: &str) -> u64 {
+    let mut total_size = 0u64;
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            if let Ok(metadata) = entry.metadata() {
+                if metadata.is_dir() {
+                    total_size += calculate_dir_size(&entry.path().to_string_lossy());
+                } else {
+                    total_size += metadata.len();
+                }
+            }
+        }
+    }
+    total_size
+}
+
+// Legacy functions for backward compatibility
 #[tauri::command]
 pub async fn moveop(srclist: String, dst: String, dlastore: String) -> Result<bool, String> {
     println!("{}--{}--{}", srclist, dst, dlastore);

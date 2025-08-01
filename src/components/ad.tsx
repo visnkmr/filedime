@@ -100,6 +100,11 @@ export default function Dupelist({dst,srclist,dupes,showad,setshowad,setfos,file
                 //    }))];
                    console.log(srclist)
                    console.log(typeof srclist)
+                const operationId = `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const operationType = fileOpType === "cut" ? "move" : "copy";
+                
+                // You'll need to pass these functions from the parent component
+                // For now, using the legacy system
                 const operation = fileOpType === "cut" ? "moveop" : "fileop";
                 invoke(operation, { 
                     srclist:srclist,
