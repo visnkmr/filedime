@@ -1,10 +1,30 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/tauri";
-import { appWindow } from "@tauri-apps/api/window";
-import { open } from "@tauri-apps/api/dialog";
+
+// Avoid any top-level window or Tauri API references during prerender/static export.
+// We lazy-import Tauri APIs inside effects/callbacks on the client.
+let listen: typeof import("@tauri-apps/api/event").listen | undefined;
+let invoke: typeof import("@tauri-apps/api/tauri").invoke | undefined;
+let appWindow: import("@tauri-apps/api/window").WebviewWindow | undefined;
+let open: typeof import("@tauri-apps/api/dialog").open | undefined;
+
+const ensureTauri = async () => {
+  if (typeof window === "undefined") return;
+  if (!listen || !invoke || !appWindow || !open) {
+    const [{ listen: _listen }, { invoke: _invoke }, { appWindow: _appWindow }, { open: _open }] = await Promise.all([
+      import("@tauri-apps/api/event"),
+      import("@tauri-apps/api/tauri"),
+      import("@tauri-apps/api/window"),
+      import("@tauri-apps/api/dialog"),
+    ]);
+    listen = _listen;
+    invoke = _invoke;
+    appWindow = _appWindow;
+    open = _open;
+  }
+};
+
 import { ZoomableContent } from "../../components/ZoomableContent";
 
 type PaneChunk = {
@@ -42,13 +62,19 @@ export default function DiffViewPage() {
   const windowLabelRef = useRef<string>("");
 
   const requestChunk = useCallback(async () => {
-    if (!windowLabelRef.current) return;
+    if (typeof window === "undefined") return;
+    await ensureTauri();
+    if (!windowLabelRef.current || !invoke) return;
+    // Safe: invoke only exists on client after ensureTauri
     await invoke("dual_request", {
       args: { window_label: windowLabelRef.current },
     });
   }, []);
 
   const chooseFile = useCallback(async (setter: (p: string) => void) => {
+    if (typeof window === "undefined") return;
+    await ensureTauri();
+    if (!open) return;
     const res = await open({
       multiple: false,
       directory: false,
@@ -63,8 +89,10 @@ export default function DiffViewPage() {
   }, []);
 
   const tryOpenIfReady = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    await ensureTauri();
     if (!f1 || !f2) return;
-    if (!windowLabelRef.current) return;
+    if (!windowLabelRef.current || !invoke) return;
     await invoke("dual_open", {
       args: {
         window_label: windowLabelRef.current,
@@ -85,9 +113,12 @@ export default function DiffViewPage() {
       if (typeof window === "undefined") {
         return;
       }
+      await ensureTauri();
+      if (!appWindow) return;
       const label = appWindow.label;
       windowLabelRef.current = label;
 
+      if (!listen) return;
       const unlistenChunk = await listen("dual_chunk", (e) => {
         const payload = e.payload as unknown as DualChunkPayload;
         if (payload.window_label !== windowLabelRef.current) return;
@@ -95,6 +126,7 @@ export default function DiffViewPage() {
         setRightHtml(payload.f2.html);
       });
 
+      if (!listen) return;
       const unlistenState = await listen("dual_state", (e) => {
         const payload = e.payload as unknown as DualStatePayload;
         if (payload.window_label !== windowLabelRef.current) return;
@@ -105,7 +137,9 @@ export default function DiffViewPage() {
       });
 
       const unmount = async () => {
-        await invoke("dual_close", { args: { window_label: windowLabelRef.current } }).catch(() => {});
+        if (invoke) {
+          await invoke("dual_close", { args: { window_label: windowLabelRef.current } }).catch(() => {});
+        }
         unlistenChunk();
         unlistenState();
       };
@@ -134,7 +168,8 @@ export default function DiffViewPage() {
     // Guard against SSR/prerender contexts
     if (typeof window === "undefined") return;
     const onKey = async (ev: KeyboardEvent) => {
-      if (!windowLabelRef.current) return;
+      await ensureTauri();
+      if (!windowLabelRef.current || !invoke) return;
 
       switch (ev.key) {
         case "ArrowDown":

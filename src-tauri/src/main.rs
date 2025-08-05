@@ -781,22 +781,117 @@ fn parse_multipart_form_data(body: &str, boundary: &str) -> Vec<(String, String)
 mod api_server;
 fn handle_connection(stream: TcpStream) -> anyhow::Result<()> {
     // Delegate HTTP handling to centralized router.
-    #[cfg(feature = "embed-frontend")]
+    // #[cfg(feature = "embed-frontend")]
     {
         crate::api_server::route_connection(stream, &PROJECT_DIR)?;
         return Ok(());
     }
-    #[cfg(not(feature = "embed-frontend"))]
-    {
-        // Use current directory as an empty include_dir to allow API routing; static files will 404.
-        static EMPTY_DIR: include_dir::Dir = include_dir::include_dir!(".");
-        crate::api_server::route_connection(stream, &EMPTY_DIR)?;
-        return Ok(());
-    }
+    // #[cfg(not(feature = "embed-frontend"))]
+    // {
+    //     // Use current directory as an empty include_dir to allow API routing; static files will 404.
+    //     static EMPTY_DIR: include_dir::Dir = include_dir::include_dir!(".");
+    //     crate::api_server::route_connection(stream, &EMPTY_DIR)?;
+    //     return Ok(());
+    // }
 }
 use include_dir::{include_dir, Dir};
 
-#[cfg(feature = "embed-frontend")]
+// #[cfg(feature = "embed-frontend")]
+// fn handle_connection(mut stream: TcpStream) -> anyhow::Result<()> {
+//     let mut buffer = [0; 1024];
+//     stream.read(&mut buffer).unwrap();
+//     let request = String::from_utf8_lossy(&buffer[..]);
+//     println!("Request: {}", request);
+
+//      // Handle CORS preflight (OPTIONS) requests
+//     if request.starts_with("OPTIONS") {
+//         let response = "HTTP/1.1 200 OK\r\n\
+//                         Access-Control-Allow-Origin: *\r\n\
+//                         Access-Control-Allow-Methods: POST, OPTIONS\r\n\
+//                         Access-Control-Allow-Headers: Content-Type\r\n\
+//                         Content-Length: 0\r\n\r\n";
+//         stream.write(response.as_bytes())?;
+//         stream.flush()?;
+//         return Ok(());
+//     }
+
+
+//      // Check if the request is a POST request
+//     if request.starts_with("POST") {
+//         // Find the boundary from the Content-Type header
+//         if let Some(boundary) = get_boundary(&request) {
+//             println!("Boundary: {}", boundary);
+
+//             if let Some(body) = get_body(&request) {
+//                 // Use multipart crate to parse the body
+//                 let mut multipart = multipart::server::Multipart::with_body(body.as_bytes(), boundary);
+                
+//                 while let Some(mut field) = multipart.read_entry()? {
+//                     // let name = field.name().unwrap_or("unknown");
+//                     // let filename = field.filename().unwrap_or("unknown");
+//                     let mut file_content = Vec::new();
+
+//                     // Read the content of the file
+//                     field.data.read_to_end(&mut file_content)?;
+
+//                     // println!("Field name: {}", name);
+//                     // println!("File name: {}", filename);
+//                     println!("File content: {:?}", str::from_utf8(&file_content)?);
+//                 }
+
+//                 // Send a response back with CORS headers and ensure it's properly flushed
+//                 let response = "HTTP/1.1 200 OK\r\n\
+//                                 Access-Control-Allow-Origin: *\r\n\
+//                                 Content-Length: 13\r\n\r\n\
+//                                 Hello, World!";
+//                 stream.write_all(response.as_bytes())?;
+//                 stream.flush()?;
+//             } else {
+//                 println!("No body content found.");
+//             }
+//         } else {
+//             println!("No boundary found in Content-Type.");
+//         }
+//         let retjson=serde_json::to_string(&json!({"ok":"ok"}))?;
+//         // Send a response back with CORS headers
+//         let response = format!("HTTP/1.1 200 OK\r\n\
+//                         Access-Control-Allow-Origin: *\r\n\
+//                         Content-Length: 13\r\n\r\n\
+//                         {}",retjson);
+//         stream.write(response.as_bytes())?;
+//         stream.flush()?;
+//     }
+//     else{
+//          // Assuming the request format is "GET /filename HTTP/1.1\r\n", extract filename
+//     let mut filename = request.split_whitespace().nth(1).unwrap_or("/");
+//     filename = filename.trim_start_matches('/');
+
+
+//     // println!("---->{}----",filename);
+//     if (filename.is_empty()) {
+//         filename = ("filegpt.html");
+//     }
+
+//     // Check if the file exists and is readable
+//     if PROJECT_DIR.contains(filename) {
+//         let contents = PROJECT_DIR.get_file(filename).unwrap();
+//         let response = format!(
+//             "HTTP/1.1  200 OK\r\nContent-Length: {}\r\n\r\n{}",
+//             contents.contents().len(),
+//             contents.contents_utf8().unwrap()
+//         );
+//         stream.write(response.as_bytes()).unwrap();
+//         stream.flush().unwrap();
+//     } else {
+//         let response = "HTTP/1.1  404 NOT FOUND\r\n\r\n";
+//         stream.write(response.as_bytes()).unwrap();
+//         stream.flush().unwrap();
+//     }
+//     }
+//     Ok(())
+// }
+// use include_dir::{include_dir, Dir};
+
 static PROJECT_DIR: Dir = include_dir!("../out/");
 // fn findsize(tf:&include_dir::Dir)->usize{
 //     let mut total_size=0;
