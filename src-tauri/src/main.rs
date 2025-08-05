@@ -22,6 +22,7 @@ mod lastmodcalc;
 mod navtimeline;
 mod sendtofrontend;
 mod installed_apps;
+mod dual_viewer;
 use chrono::{DateTime, Local, Utc};
 use local_ip_address::local_ip;
 // use get_size::GetSize;
@@ -68,6 +69,7 @@ mod markdown;
 use crate::{
     bookmarks::*, filechangewatcher::*, filltrie::populate_try, listfiles::*, markdown::*,
     openhtml::*, searchfiles::*, sendtofrontend::loadmarks, tabinfo::*, installed_apps::*,
+    dual_viewer::*,
 };
 use lastmodcalc::lastmodified;
 // mod r  esync;
@@ -598,7 +600,7 @@ async fn newspecwindow(
     // println!("{}",tauri::WindowUrl::App("settings.html".into()).to_string());
     let labelwin=winlabel;
     let namewin=name;
-    if (labelwin == "settings" || labelwin == "installed-apps" || labelwin == "chatui") {
+    if (labelwin == "settings" || labelwin == "installed-apps" || labelwin == "chatui" || labelwin == "diffview") {
         tauri::WindowBuilder::new(
             &window.app_handle(),
             labelwin.clone(),
@@ -609,22 +611,12 @@ async fn newspecwindow(
         .unwrap();
         if (labelwin.starts_with("chatui")) {
                 println!("{:?}",embedfile(vec![namewin.replace("FileGPT: ","")],state.embedding_model_name.clone(), state).await.unwrap());
-                // tauri::WindowBuilder::new(
-                //     &window.app_handle(),
-                //     labelwin,
-                //     tauri::WindowUrl::App("chatui".into()),
-                // )
-                // .title(namewin.clone())
-                // .build()
-                // .unwrap();
             window.app_handle()
                 .emit_all(
-                    // label,
                     "dialogshow",
                     serde_json::to_string(&json!({
                     "title":namewin.replace("FileGPT: ",""),
                     "content":"Sucessfully embeded",
-                    // "arguments":arguments
                     }))
                     .unwrap(),
                 )
@@ -949,6 +941,8 @@ fn main() {
         })
         .on_window_event(on_window_event)
         .manage(g)
+        // Manage DualViewerStore so dual_* commands can access it via State<DualViewerStore>
+        .manage(dual_viewer::DualViewerStore::default())
         .invoke_handler(tauri::generate_handler![
             // getpathfromid,
             filegptendpoint,
@@ -1009,6 +1003,13 @@ fn main() {
             fileslist,
             get_installed_apps_command,
             launch_app_command,
+            // dual viewer commands
+            dual_open,
+            dual_request,
+            dual_scroll_sync,
+            dual_scroll_f1,
+            dual_scroll_f2,
+            dual_close,
             // whattoload,
             // get_window_label
         ])

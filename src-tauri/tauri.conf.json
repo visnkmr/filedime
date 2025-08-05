@@ -29,8 +29,12 @@
       },
       "fs": {
         "scope": ["**"],
-        "all": false, 
+        "all": false,
         "readFile": true
+      },
+      "dialog": {
+        "all": false,
+        "open": true
       }
     },
     

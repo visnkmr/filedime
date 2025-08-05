@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -1152,6 +1152,16 @@ export default function Greet() {
                           listfiles(newtabid,gotopath);
                         });
     }
+    async function openDiffView(){
+    try{
+      await invoke('newspecwindow',{
+        winlabel:'diffview',
+        name:'Dual File Viewer',
+      })
+    }catch(e){
+      console.error(e)
+    }
+  }
     function reloadsize(togglewhat="size"){
       reset(path)
       if(appWindow){
@@ -1742,6 +1752,21 @@ export default function Greet() {
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Reload
+              </HoverCardContent>
+            </HoverCard>
+  </div>
+  <div>
+     <HoverCard>
+              <HoverCardTrigger>
+    <Button
+            onClick={openDiffView}
+            className="rounded-lg border bg-card text-card-foreground shadow-sm"
+          >
+            <SplitSquareHorizontalIcon className="h-4 w-4"/>
+          </Button>
+          </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               Open Dual File Viewer
               </HoverCardContent>
             </HoverCard>
   </div>
