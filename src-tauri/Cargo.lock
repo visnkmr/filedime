@@ -1615,6 +1615,7 @@ dependencies = [
  "num_cpus",
  "ollama-rs",
  "opener",
+ "percent-encoding 2.3.1",
  "plist",
  "prefstore",
  "rayon",

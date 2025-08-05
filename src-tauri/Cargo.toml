@@ -99,6 +99,7 @@ shiva = {  version = "1.4.9", features = ["html", "markdown", "text", "typst-pdf
 multipart="0.18.0"
 walkdir = "2.3.3"
 lnk = "0.4.1"
+percent-encoding = "2.3.1"
 # [target.x86_64-unknown-linux-gnu.dependencies]
 # webkit2gtk = "0.18.2"
 

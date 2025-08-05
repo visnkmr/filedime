@@ -3,6 +3,7 @@
 import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
+import api from "../shared/apiClient"
 import {VideoComponent} from "./videoplaycomp"
 import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
@@ -57,7 +58,7 @@ import {
 import { Button } from "./ui/button"
 import { FileItem,DriveItem } from "../shared/types"
 import { DataTable, focuscolor, hovercolor } from '../src/components/data-table';
-export function converttstodt(ts){
+export function converttstodt(ts: number){
 
   const dateTime = DateTime.fromMillis(ts * 1000); // Convert timestamp to DateTime object
   const utcDateTime = dateTime.toUTC(); // Convert DateTime object to UTC time
@@ -113,6 +114,7 @@ const windowExists = async (label: string) => {
   const win = (await import('@tauri-apps/api/window')).WebviewWindow.getByLabel(label);
   return win !== null;
 };
+type TW = Awaited<ReturnType<typeof import('@tauri-apps/api/window').WebviewWindow['getByLabel']>> extends null ? any : any;
 export default function Greet() {
   
 
@@ -168,7 +170,7 @@ export default function Greet() {
     const [noofpages,setnop]=useState(1);
     const [currentpage,setpageno]=useState(0)
     const [perpage,setperpage]=useState(15)
-    const lastcalledtime=useRef()
+    const lastcalledtime=useRef<number | string | undefined>()
     useMemo(()=>{
       setnop(Math.ceil(filecount/perpage))
     },[filecount])
@@ -189,7 +191,7 @@ export default function Greet() {
     const [filesetcollectionlist,setfscl]=useState(objinit)
     const [custombuttonlist,setcbl]=useState(objinit)
     const [pathsuggestlist,setpsl]=useState(objinit)
-    const [appWindow, setAppWindow] = useState()
+    const [appWindow, setAppWindow] = useState<any>()
     const [fileslist, setfileslist] = useState(filesobjinit);
     const [sftype,setsftype]=useState("all")
     const [filestoshow,setfts]=useState(filesobjinit)
@@ -227,13 +229,13 @@ export default function Greet() {
           console.log("reset done")
       })
     }
-    function listfiles(oid,path){
+    function listfiles(oid: number | string, path: string){
       let lct=new Date().getTime().toString();
       
-      lastcalledtime.current=lct
+      lastcalledtime.current = lct
       invoke('list_files', { 
         starttime:lct,
-        windowname:appWindow?.label,
+        windowname:(appWindow as any)?.label,
         oid: oid.toString(),
         path: path,
         ff: "" 
@@ -280,7 +282,7 @@ export default function Greet() {
       invoke(
         "addmark",
         {
-      windowname:appWindow?.label,
+      windowname:(appWindow as any)?.label,
           path: path,
           id: new Date().getTime().toString()
         }
@@ -337,7 +339,7 @@ export default function Greet() {
         console.log(ei)
         // addTofwdHistory(activetabid.toString(),path)
         // addTofwdHistory(activetabid.toString())
-        let pathtogoto=ei
+        let pathtogoto = ei as unknown as string
         if(pathtogoto){
           
           reset(pathtogoto)
@@ -359,7 +361,7 @@ export default function Greet() {
         dir:false
       }).then((ei)=>{
         console.log(ei)
-        let pathtogoto=ei
+        let pathtogoto = ei as unknown as string
         if(pathtogoto ){
   
           reset(pathtogoto)
@@ -382,7 +384,7 @@ export default function Greet() {
         console.log(ei)
         // addTofwdHistory(activetabid.toString(),path)
         // addTofwdHistory(activetabid.toString())
-        let pathtogoto=ei
+        let pathtogoto = ei as unknown as string
         if(pathtogoto){
           reset(pathtogoto)
           updatetabs(pathtogoto)
@@ -420,7 +422,7 @@ export default function Greet() {
       }).then(()=>sethf(false)
       ).catch(()=>sethf(true))
     },[path])
-      const addToTabHistory = (tabId, item=path) => {
+      const addToTabHistory = (tabId: number | string, item: string = path) => {
         invoke("checkiffile",{
           path:p
         }).catch((e)=>{
@@ -437,7 +439,7 @@ export default function Greet() {
     reset() 
     // let printtxt=Math.random(); //to check if listen is being called only once
     const unlisten=listen("folder-size", (event) => {
-      let returned=JSON.parse(event.payload);
+      let returned=JSON.parse(event.payload as unknown as string);
       if(returned.caller===lastcalledtime.current){
         console.log("foldersize")
         setps(returned.size)
@@ -451,7 +453,7 @@ export default function Greet() {
     // let unlisten: (() => void) | undefined = undefined
     const unlisten1=listen('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
-      let returned=JSON.parse(event.payload);
+      let returned=JSON.parse(event.payload as unknown as string);
       // console.log(returned.caller)
       // setlct((returned.caller))
       // console.log(lastcalledtime+"-------"+returned.caller)
@@ -511,7 +513,9 @@ export default function Greet() {
 
     useEffect(() => {
       listen("folder-count",(data: { payload: string }) => {
-        progresstotal.current=(data.payload)
+        // store as any to avoid undefined-only ref type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (progresstotal as any).current = (data.payload as unknown as string)
       }) 
       listen("start-timer",() => {
         setlv(true)
@@ -525,7 +529,7 @@ export default function Greet() {
       // });
       
       listen('dialogshow', (pl) => {
-        let recieved=JSON.parse(pl.payload);
+        let recieved=JSON.parse(pl.payload as unknown as string);
         let content=(recieved.content)
         let title=(recieved.title)
         toast({
@@ -583,7 +587,7 @@ export default function Greet() {
       });
       listen('list-drives', (event) => {
           // console.log("loading drives---->"+event.payload);
-          setdriveslist(JSON.parse(event.payload));
+          setdriveslist(JSON.parse(event.payload as unknown as string));
       });
       
       listen("load-marks", (data: { payload:string }) => {
@@ -597,13 +601,13 @@ export default function Greet() {
         return
         if(!startstopfilewatch){
           invoke('senddriveslist', { 
-            windowname:appWindow?.label,
+            windowname:(appWindow as any)?.label,
         })
         reloadsize("loadmarks")
         invoke("listtabs",{})
         .then((e)=>{
           console.log("onopen---->"+e)
-          let tabslist=JSON.parse(e) as string[];
+          let tabslist=JSON.parse(e as unknown as string) as string[];
           for (const [index,ei] of tabslist.entries()){
             reset(ei)
             setpath(ei)
@@ -754,7 +758,7 @@ export default function Greet() {
                 invoke(
                   "newtab",
                   {
-                    windowname:appWindow?.label,
+                    windowname:(appWindow as any)?.label,
                     oid: activetabid.toString(),
                     path: path,
                     ff: ""
@@ -765,7 +769,7 @@ export default function Greet() {
                 invoke(
                   "addmark",
                   {
-                windowname:appWindow?.label,
+                windowname:(appWindow as any)?.label,
                     path: path,
                     id: new Date().getTime().toString()
                   }
@@ -817,32 +821,19 @@ export default function Greet() {
               </HoverCardContent>
             </HoverCard>
             </SheetTrigger>
-            <SheetContent 
-              // style={{ width: `${width}px` }}
-              // onMouseDown={handleMouseDown}
-              // onMouseMove={handleMouseMove}
-              // onMouseUp={handleMouseUp}
-              // onMouseLeave={handleMouseUp}
+            <SheetContent
               className={`${setcolorpertheme} h-[90%] overflow-hidden`} side={"right"} onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
-                {/* <ResizablePanelGroup direction="horizontal" className="pointer-events-none">
-                <ResizablePanel/>
-                <ResizableHandle />
-                <ResizablePanel className={"bg-white dark:bg-gray-800"}> */}
-                 
-        
-                <ReadFileComp message={row.original}/>
-                {/* </ResizablePanel>
-              </ResizablePanelGroup> */}
-                
-          
-                {/* <SheetDescription></SheetDescription> */}
-              
+                <ReadFileComp message={row.original} />
             </SheetContent>
           </Sheet>
           {(supportedfiles.includes(ftype))?(
-            <Button className="ml-2" variant={"outline"} onClick={()=>{
-              // const timestamp = Date.now();
-              const timestamp=""
+            <Button className="ml-2" variant={"outline"} onClick={async ()=>{
+              // Switch FileGPT window open action to HTTP ping first to ensure server reachable
+              try {
+                await api.ping();
+              } catch (e) {
+                console.error("API server not reachable on 8477:", e);
+              }
               invoke("newspecwindow",{
                 winlabel:`${"chatui"}`,
                 name:"FileGPT: "+`${row.original.path}`
@@ -879,7 +870,7 @@ export default function Greet() {
             <HoverCard>
   
             <HoverCardTrigger>
-            <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+            <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" onClick={()=>{
   populatesearchlist(path)
   }}><ScanSearchIcon className="h-4 w-4"/></button>
   </HoverCardTrigger>
@@ -1018,7 +1009,7 @@ export default function Greet() {
     invoke(
       "addmark",
       {
-    windowname:appWindow?.label,
+    windowname:(appWindow as any)?.label,
         path: path,
         id:new Date().getTime().toString()
       }
@@ -1031,7 +1022,7 @@ export default function Greet() {
         // invoke the list_files command from the backend with the path as argument
         listfiles(activetabid,path)
   }
-  function populatesearchlist(spath){
+  function populatesearchlist(spath: string){
     invoke(
       "searchload", {
         path:spath
@@ -1045,12 +1036,12 @@ export default function Greet() {
       console.log("recent");
       invoke(
       "recent_files", {
-        windowname:appWindow?.label,
+        windowname:(appWindow as any)?.label,
         string: "",
     })
   }
    
-  function updatetabs(tabpath){
+  function updatetabs(tabpath: string){
     invoke("checkiffile",{
       path:p
     }).catch((e)=>{
@@ -1060,8 +1051,9 @@ export default function Greet() {
       {
         path:tabpath,
       }
-    ).then((returned:string)=>{
-      sst(returned)
+    ).then((returned: unknown)=>{
+      const ret = returned as string;
+      sst(ret)
       console.log("preupdate tablist--->"+JSON.stringify(tablist))
        if(tablist && tablist.length>0){
   
@@ -1070,7 +1062,7 @@ export default function Greet() {
       if(objIndex !== -1){
   
         tempstoreoldtablist![objIndex!].path = tabpath;
-        tempstoreoldtablist![objIndex!].tabname = returned;
+        tempstoreoldtablist![objIndex!].tabname = ret;
         settbl(tempstoreoldtablist!);
       }
       console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
@@ -1082,9 +1074,9 @@ export default function Greet() {
     })
     
   }
-  function closetab(closeid){
+  function closetab(closeid: number | string){
     invoke("closetab",{
-      windowname:appWindow?.label,
+      windowname:(appWindow as any)?.label,
       id: closeid.toString(),
     }
     )
@@ -1115,12 +1107,13 @@ export default function Greet() {
                           {
                             path:gotopath,
                           }
-                        ).then((returned:string)=>{
+                        ).then((returned: unknown)=>{
+                          const ret = returned as string;
                           console.log("what was returned....."+returned)
                           invoke(
                             "newtab",
                             {
-                              windowname:appWindow?.label,
+                              windowname:(appWindow as any)?.label,
                               oid: newtabid.toString(),
                               path: gotopath,
                               ff: ""
@@ -1128,28 +1121,22 @@ export default function Greet() {
                           );
                           
                           settbl((old)=>{
-                            return (old && old?.length>0)?
-                            [...old,{
-                              id:newtabid,
-                              path:gotopath,
-                              ff:"",
-                              tabname:returned,
-                              history:[]
-                            } as tabinfo]:
-                            [{
-                              id:newtabid,
-                              path:gotopath,
-                              ff:"",
-                              tabname:returned,
-                              history:[]
-                            } as tabinfo]
-                          
+                            const base = {
+                              id: Number(newtabid),
+                              path: (gotopath as string) ?? "",
+                              ff: "",
+                              tabname: ret,
+                              history: [] as string[]
+                            } as unknown as tabinfo;
+                            return (old && old?.length>0)
+                              ? [...old, base]
+                              : [base];
                           })
         // console.log("opened tab now tablist is "+JSON.stringify(tablist))
   
                           addToTabHistory(newtabid.toString(),gotopath)
-                          setactivetabid(newtabid)
-                          listfiles(newtabid,gotopath);
+                          setactivetabid(Number(newtabid))
+                          listfiles(Number(newtabid), (gotopath as string) ?? "");
                         });
     }
     async function openDiffView(){
@@ -1166,7 +1153,7 @@ export default function Greet() {
       reset(path)
       if(appWindow){
         const thensobj={
-        windowname: appWindow?.label,
+        windowname: (appWindow as any)?.label,
         togglewhat:togglewhat
       };
       // console.log(appWindow?.label+"------>"+JSON.stringify(thensobj))
@@ -1280,7 +1267,7 @@ export default function Greet() {
                       dst:path,
                   }).then((a)=>{
                     console.log(a)
-                    let listofdupes:existingfileinfo[]=JSON.parse(a);
+                    let listofdupes:existingfileinfo[]=JSON.parse(a as unknown as string);
                     let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
                       ...item,
                       replace: false
@@ -1452,7 +1439,7 @@ export default function Greet() {
                       invoke(
                         "removemark",
                         {
-                      windowname:appWindow?.label,
+                      windowname:(appWindow as any)?.label,
                           path: mark.path,
                           id:mark.id,
                         }
@@ -1567,12 +1554,12 @@ export default function Greet() {
               if(p==="linux" && message.mount_point.trim().length<1)
               {
                 invoke("mountdrive",{
-                  windowname:appWindow?.label,
+                  windowname:(appWindow as any)?.label,
                   uuid:message.uuid,
                   mountpoint:message.uuid
                 })
                 .then((e)=>{
-                  reset(e)
+                  reset(e as unknown as string)
                   updatetabs(e)
                   // setpath()
                   // setpsplitl(splitpath(pathtogoto))
@@ -1646,7 +1633,7 @@ export default function Greet() {
                   //   closetab(activetabid)
                   // }
                        invoke("unmountdrive",{
-                        windowname:appWindow?.label,
+                        windowname:(appWindow as any)?.label,
                         uuid:message.uuid,
                         mountpoint:message.mount_point
                       })
@@ -1657,7 +1644,7 @@ export default function Greet() {
                           invoke("listtabs",{})
                           .then((e)=>{
                             console.log("onopen---->"+e)
-                            let tabslist=JSON.parse(e) as string[];
+                            let tabslist=JSON.parse(e as unknown as string) as string[];
                             for (const [index,ei] of tabslist.entries()){
                               reset(ei)
                               setpath(ei)
@@ -1851,9 +1838,9 @@ export default function Greet() {
                   let pathtogoto=ei
                   if(pathtogoto){
                     
-                    reset(pathtogoto)
-                    updatetabs(pathtogoto)
-                      listfiles(activetabid,pathtogoto);
+                    reset(pathtogoto as unknown as string)
+                    updatetabs(pathtogoto as string)
+                    listfiles(activetabid,pathtogoto as string);
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowLeft className="h-4 w-4"
@@ -1868,9 +1855,9 @@ export default function Greet() {
                   console.log(ei)
                   let pathtogoto=ei
                   if(pathtogoto){
-                    reset(pathtogoto)
-                    updatetabs(pathtogoto)
-                      listfiles(activetabid,pathtogoto);
+                    reset(pathtogoto as unknown as string)
+                    updatetabs(pathtogoto as string)
+                    listfiles(activetabid,pathtogoto as string);
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowUp className="h-4 w-4"
@@ -1887,9 +1874,9 @@ export default function Greet() {
                 let pathtogoto=ei
                 if(pathtogoto ){
 
-                  reset(pathtogoto)
-                  updatetabs(pathtogoto)
-                    listfiles(activetabid,pathtogoto);
+                  reset(pathtogoto as unknown as string)
+                  updatetabs(pathtogoto as string)
+                  listfiles(activetabid,pathtogoto as string);
                 }
               }).catch((e)=>console.error(e))
               }}>
@@ -1915,24 +1902,23 @@ export default function Greet() {
                               path: event.target.value
                           })
                             .then(result => {
-                              setvalid(result)
+                              setvalid(result as unknown as boolean)
                           })
                             .catch(console.error)
                     invoke(
                       "get_path_options", 
                       {
-                        windowname:appWindow?.label,
+                        windowname:(appWindow as any)?.label,
                         path: event.target.value,
                       })
-                      .then((options:string[]) => {
-                        // console.log(options)
-                        if (options !== null) {
-                          setpsl(options)
-                        }
+                      .then((opt: unknown) => {
+                        try {
+                          const o = (opt as string[]) || [];
+                          setpsl(o);
+                        } catch {}
                       })
-                      .catch((error:string) => {
-                        console.error(error);
-                      });
+                      .catch((_e: unknown) => {})
+                      ;
                   }
                 }
               />
@@ -1969,12 +1955,12 @@ export default function Greet() {
                 reset()
                 let lct=new Date().getTime();
 
-                lastcalledtime.current=lct
+                lastcalledtime.current=lct as number
                 
                     invoke(
                     "search_try", {
                       starttime:lct,
-                      windowname:appWindow?.label,
+                      windowname:(appWindow as any)?.label,
                       string: searchstring
                     }).catch((e)=>console.error(e))
                   
@@ -2035,7 +2021,7 @@ export default function Greet() {
           {
           Object.entries(filesetcollectionlist)
           // .filter
-          .sort((a, b) => b[1] - a[1])
+          .sort((a, b) => (b[1] as unknown as number) - (a[1] as unknown as number))
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
           // })
@@ -2177,7 +2163,7 @@ export default function Greet() {
                     .slice(currentpage*perpage,((currentpage)+1)*perpage)
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
-                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
+                      <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist as unknown as (path: String) => void} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
                         </div>
         
         ))}
@@ -2207,7 +2193,7 @@ export default function Greet() {
             if(eachif.pathtofol.trim().length>0){
 
               return <div className={`flex ms-2`}>
-              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist} goto={goto} newtab={newtab} addmark={addmark} searchstring={searchstring} sftype={sftype} showthumbnail={showthumbnail}/>
+              <MillerCol eachif={eachif} populatesearchlist={populatesearchlist as unknown as (path: String) => void} goto={goto} newtab={newtab} addmark={addmark} searchstring={searchstring} sftype={sftype} showthumbnail={showthumbnail}/>
               </div>
               
             }

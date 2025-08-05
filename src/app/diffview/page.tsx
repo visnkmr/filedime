@@ -81,6 +81,10 @@ export default function DiffViewPage() {
     inittedRef.current = true;
 
     async function init() {
+      // Guard against SSR/prerender contexts
+      if (typeof window === "undefined") {
+        return;
+      }
       const label = appWindow.label;
       windowLabelRef.current = label;
 
@@ -105,9 +109,13 @@ export default function DiffViewPage() {
         unlistenChunk();
         unlistenState();
       };
-      window.addEventListener("beforeunload", unmount);
+      if (typeof window !== "undefined") {
+        window.addEventListener("beforeunload", unmount);
+      }
       return () => {
-        window.removeEventListener("beforeunload", unmount);
+        if (typeof window !== "undefined") {
+          window.removeEventListener("beforeunload", unmount);
+        }
         unmount();
       };
     }
@@ -116,11 +124,15 @@ export default function DiffViewPage() {
   }, []);
 
   useEffect(() => {
+    // Guard against SSR/prerender contexts
+    if (typeof window === "undefined") return;
     tryOpenIfReady();
   }, [tryOpenIfReady, f1, f2]);
 
   // Key handlers
   useEffect(() => {
+    // Guard against SSR/prerender contexts
+    if (typeof window === "undefined") return;
     const onKey = async (ev: KeyboardEvent) => {
       if (!windowLabelRef.current) return;
 
@@ -155,8 +167,14 @@ export default function DiffViewPage() {
           break;
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", onKey);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("keydown", onKey);
+      }
+    };
   }, []);
 
   return (
