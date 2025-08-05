@@ -301,6 +301,7 @@ pub fn route_connection(mut stream: TcpStream, project_dir: &Dir) -> anyhow::Res
         if project_dir.contains(&candidate[1..]) {
             path_only = candidate;
         } else {
+            // Always serve index.html for SPA routes (so /diffview, /settings, etc. work in browser)
             path_only = "/index.html".to_string();
         }
     }
