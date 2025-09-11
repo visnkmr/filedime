@@ -9,6 +9,7 @@ import Topthread from "../src/components/topthread"
 import '../styles/globals.css'
 import DarkButton from "../components/but"
 import {Metadata} from 'next'
+import ThemeColorUpdater from '../components/ThemeColorUpdater'
 
 
 export const metadata:Metadata = {
@@ -27,12 +28,13 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <head>
-         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"/>
-      <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"/>
+          <meta name="theme-color" content="#ffffff" />
+       <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
       </head>
       <body>
         <Providers>
-
+        <ThemeColorUpdater />
         {/* <Thedarkhtml> */}
         {/* <Topthread/> */}
         {/* <DarkButton/> */}

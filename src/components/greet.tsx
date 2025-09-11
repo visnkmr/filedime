@@ -4,7 +4,7 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon, AppWindowIcon} from "lucide-react"
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -88,6 +88,7 @@ import MillerCol from "./millercol";
 import EachFromGrid from "./grideach";
 import InstalledAppsPage from "./InstalledApps";
 import InstalledAppsForSidebar from "./InstalledAppsforSidebar";
+import WindowsEachFromGrid from "./windowsgrid";
 export let supportedfiles = [
   "csv",
   "rs",
@@ -168,6 +169,13 @@ export default function Greet() {
     const [noofpages,setnop]=useState(1);
     const [currentpage,setpageno]=useState(0)
     const [perpage,setperpage]=useState(15)
+    useEffect(() => {
+      if (layout === "windows") {
+        setperpage(40)
+      } else {
+        setperpage(15)
+      }
+    }, [layout])
     const lastcalledtime=useRef()
     useMemo(()=>{
       setnop(Math.ceil(filecount/perpage))
@@ -1709,6 +1717,7 @@ export default function Greet() {
           {layout==="grid"?<LayoutGrid className="h-4 w-4"/>:(null)}
           {layout==="detail"?<LayoutList className="h-4 w-4"/>:(null)}
           {layout==="miller"?<Columns className="h-4 w-4"/>:(null)}
+          {layout==="windows"?<AppWindowIcon className="h-4 w-4"/>:(null)}
             </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-gray-100 dark:bg-gray-800">
@@ -1718,6 +1727,7 @@ export default function Greet() {
           <DropdownMenuRadioItem value="grid"><LayoutGrid className="h-4 w-4 mr-2"/>Grid</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="detail"><LayoutList className="h-4 w-4 mr-2"/>Detail</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="miller"><Columns className="h-4 w-4 mr-2"/>Mac OS Style</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="windows"><Columns className="h-4 w-4 mr-2"/>Windows Style</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -2027,7 +2037,7 @@ export default function Greet() {
         </div> */}
         
         {
-          layout==="detail" || layout==="grid"?(
+          layout==="detail" || layout==="grid" || layout==="windows"?(
             <div className="">
 
         <div className='grid grid-flow-col justify-start overflow-x-auto'> 
@@ -2069,15 +2079,15 @@ export default function Greet() {
             <div className={`flex flex-row}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
 
-<DropdownMenu>
-<DropdownMenuTrigger className="p-4" asChild>
-  <Button 
-    variant='outline' 
-    className='whitespace-nowrap overflow-hidden mr-2'>
-    Sort by {currentchoice}
-  </Button>
-</DropdownMenuTrigger>
-<DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
+        <DropdownMenu>
+        <DropdownMenuTrigger className="p-4" asChild>
+          <Button 
+            variant='outline' 
+            className='whitespace-nowrap overflow-hidden mr-2'>
+            Sort by {currentchoice}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
   
         <DropdownMenuItem
           className='capitalize text-black dark:text-white'
@@ -2140,9 +2150,9 @@ export default function Greet() {
           Date
         </DropdownMenuItem>
       
-</DropdownMenuContent>
-</DropdownMenu>
-{/* </div> */}
+        </DropdownMenuContent>
+        </DropdownMenu>
+        {/* </div> */}
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> 
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <HoverCard>
@@ -2178,6 +2188,128 @@ export default function Greet() {
                     .map((message, index) => (
                       <div key={index} className="m-3 flex flex-row">
                       <EachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
+                        </div>
+        
+        ))}
+        </div>
+            </>):null
+
+        }
+        {
+          layout==="windows"?(
+          <>
+            <div className={`flex flex-row}`}>
+        {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
+
+        <DropdownMenu>
+        <DropdownMenuTrigger className="p-4" asChild>
+          <Button 
+            variant='outline' 
+            className='whitespace-nowrap overflow-hidden mr-2'>
+            Sort by {currentchoice}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
+  
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Size")
+            filestoshow.sort((b, a) => a.rawfs - b.rawfs);
+          }}
+        >
+          Size
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Name")
+            filestoshow.sort((a, b) => {
+              if (a.name < b.name) {
+                  return -1;
+              }
+              if (a.name > b.name) {
+                  return 1;
+              }
+              return 0;
+          });
+          }}
+        >
+          Name
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Type")
+            filestoshow.sort((a, b) => {
+              if (a.ftype < b.ftype) {
+                  return -1;
+              }
+              if (a.ftype > b.ftype) {
+                  return 1;
+              }
+              return 0;
+          });
+          }}
+        >
+          Type
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className='capitalize text-black dark:text-white'
+          // checked={issize}
+          // onCheckedChange={(value:boolean) => {}}
+          onClick={()=>{
+            changechoiceto("Date")
+            filestoshow.sort((b, a) => a.timestamp - b.timestamp);
+          }}
+        >
+          Date
+        </DropdownMenuItem>
+      
+        </DropdownMenuContent>
+        </DropdownMenu>
+        {/* </div> */}
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> 
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <HoverCard>
+                <HoverCardTrigger>
+                <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
+                </HoverCardTrigger>
+              <HoverCardContent  className={`${setcolorpertheme}`}>
+               Show Thumbnails
+              </HoverCardContent>
+            </HoverCard>
+                <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({filestoshow.length})</p>
+                
+                <div className="ms-2 flex whitespace-nowrap overflow-hidden">
+
+                <Input value={perpage}
+                className="w-16"
+                type="number"
+                placeholder="Per Page Count"
+                onChange={(event) =>
+                  {
+                    let pp=Number(event.target.value);
+                    setperpage(pp)
+                  }
+                }/>
+                </div>
+        </div>
+        <div className={`grid sm:grid-cols-2 lg:grid-cols-5 mt-6 overflow-${scrollorauto}`}>
+
+        
+        {
+        filestoshow
+                    .slice(currentpage*perpage,((currentpage)+1)*perpage)
+                    .map((message, index) => (
+                      <div key={index} className="m-3 flex flex-row">
+                      <WindowsEachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
                         </div>
         
         ))}

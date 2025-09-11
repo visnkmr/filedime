@@ -105,10 +105,10 @@ export default function DiffViewPage() {
         unlistenChunk();
         unlistenState();
       };
-      window.addEventListener("beforeunload", unmount);
+      const awaitunload=await listen("beforeunload", unmount);
       return () => {
-        window.removeEventListener("beforeunload", unmount);
-        unmount();
+        awaitunload();
+        // unmount();
       };
     }
 
