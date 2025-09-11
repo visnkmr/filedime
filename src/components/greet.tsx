@@ -273,8 +273,9 @@ export default function Greet() {
     }, [layout, screenWidth, zoomLevel])
     const lastcalledtime=useRef()
     useMemo(()=>{
+      console.log("recompute nop")
       setnop(Math.ceil(filecount/perpage))
-    },[filecount])
+    },[filecount,layout])
     
     const [tablist,settbl]=useState<tabinfo[]>()
     const [bookmarks,setbms]=useState<mark[]>()
@@ -298,21 +299,47 @@ export default function Greet() {
     const [filestoshow,setfts]=useState(filesobjinit)
     //reflect update per page item count in ui
     useMemo(()=>{
+      
       let filestocount=filestoshow.length;
-      !!filestocount && perpage && setnop(Math.ceil(filestocount/perpage))
+      !!filestocount && perpage 
       setpageno((old)=>{
         console.error(old+"---"+noofpages)
        return old>noofpages?(noofpages-1):(old)
       })
     },[perpage,sftype,filestoshow])
-    
+    useEffect(()=>{
+      const currentPageFiles = filestoshow;
+
+            // Separate files into categories
+            const mediaFiles = currentPageFiles.filter((message) =>
+              
+              IMAGE_TYPES.some(type => message.name.includes(type)) ||
+              VIDEO_TYPES.some(type => message.name.includes(type))
+            );
+
+            const otherFiles = currentPageFiles.filter((message) =>
+              !IMAGE_TYPES.some(type => message.name.includes(type)) &&
+              !VIDEO_TYPES.some(type => message.name.includes(type))
+            );
+            var nof = mediaFiles.length>otherFiles.length?mediaFiles.length:otherFiles.length;
+            let fc=layout==="windows"?nof:fileslist.length;
+        // let fc=fl.length
+        // console.log("===============================================")
+        // console.log("===============================================")
+        // console.log("===============================================")
+        // console.log("===============================================")
+        // console.log("==============================================="+fc)
+        // console.log("===============================================")
+        setfc(fc)
+    },[layout,fileslist,filestoshow])
     useEffect(()=>{
       setfts(fileslist.filter(function (el) {
         return (searchstring.trim().length>0?
           el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.path.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()):((sftype.trim().length>0?
           (el.ftype===sftype || sftype ==="all"):(true))))
        }))
-    },[perpage,sftype,fileslist])
+       
+    },[perpage,sftype,fileslist,searchstring])
     const [isSheetOpen, setiso] = useState(false);
     function reset(p?:string){
       invoke("checkiffile",{
@@ -611,7 +638,7 @@ export default function Greet() {
       ul1.then(f => f());
   }
   },[]);
-
+  
     useEffect(() => {
       listen("folder-count",(data: { payload: string }) => {
         progresstotal.current=(data.payload)
@@ -682,7 +709,7 @@ export default function Greet() {
         sst("Search Results")
         // console.log("Found----->"+fl.length)
         setfileslist(fl)
-        setfc(fl.length)
+        
       });
       listen('list-drives', (event) => {
           // console.log("loading drives---->"+event.payload);
@@ -2250,7 +2277,7 @@ export default function Greet() {
         </DropdownMenu>
         {/* </div> */}
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> 
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>{return old<noofpages-1?old+1:0})}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
                 <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
@@ -2372,7 +2399,19 @@ export default function Greet() {
         </DropdownMenu>
         {/* </div> */}
                 <Button variant={"outline"} className="mr-2 overflow-hidden"  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button>
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>{
+                  
+                  // console.log("================================")
+                  // console.log("================================")
+                  // console.log("================================")
+                  // console.log("================================")
+                  // console.log(noofpages)
+                  // console.log(filecount)
+                  // console.log("================================")
+                  // console.log("================================")
+                  // console.log("================================")
+
+                  return old<noofpages-1?old+1:0})}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
                 <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
@@ -2417,7 +2456,6 @@ export default function Greet() {
             ).slice(currentpage*perpage,((currentpage)+1)*perpage);
 
             const otherFiles = currentPageFiles.filter((message) =>
-              message.is_dir &&
               !IMAGE_TYPES.some(type => message.name.includes(type)) &&
               !VIDEO_TYPES.some(type => message.name.includes(type))
             ).slice(currentpage*perpage,((currentpage)+1)*perpage);
@@ -2427,7 +2465,7 @@ export default function Greet() {
                 {mediaFiles.length > 0 && (
                   <AccordionItem value="media">
                     <AccordionTrigger className="px-4">
-                      <span className="text-lg font-semibold">Folders & Media ({mediaFiles.length})</span>
+                      <span className="text-lg font-semibold">Media ({mediaFiles.length})</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className={`grid ${gridColumns} overflow-${scrollorauto} p-4`}>
