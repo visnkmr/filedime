@@ -175,13 +175,102 @@ export default function Greet() {
     const [noofpages,setnop]=useState(1);
     const [currentpage,setpageno]=useState(0)
     const [perpage,setperpage]=useState(15)
+    const [screenWidth, setScreenWidth] = useState(0)
+    const [zoomLevel, setZoomLevel] = useState(1)
+    const [gridColumns, setGridColumns] = useState('grid-cols-4')
+
+    // Detect screen size and zoom level changes
     useEffect(() => {
-      if (layout === "windows") {
-        setperpage(40)
-      } else {
-        setperpage(15)
+      const updateScreenMetrics = () => {
+        setScreenWidth(window.innerWidth)
+        setZoomLevel(window.devicePixelRatio || 1)
       }
-    }, [layout])
+
+      const handleResize = () => {
+        updateScreenMetrics()
+      }
+
+      // Initial values
+      updateScreenMetrics()
+
+      // Listen for resize and zoom changes
+      window.addEventListener('resize', handleResize)
+
+      // Also listen for device pixel ratio changes (some browsers)
+      if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(resolution: 1dppx)')
+        mediaQuery.addEventListener('change', updateScreenMetrics)
+      }
+
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        if (window.matchMedia) {
+          const mediaQuery = window.matchMedia('(resolution: 1dppx)')
+          mediaQuery.removeEventListener('change', updateScreenMetrics)
+        }
+      }
+    }, [])
+
+    // Calculate optimal grid configuration based on screen size and zoom level
+    useEffect(() => {
+      const calculateGridConfiguration = () => {
+        // Base calculations for perpage
+        let basePerPage = 15
+
+        // Adjust for screen size
+        if (screenWidth >= 1920) {
+          basePerPage = 30 // Large screens
+        } else if (screenWidth >= 1440) {
+          basePerPage = 24 // Desktop
+        } else if (screenWidth >= 1024) {
+          basePerPage = 20 // Laptop
+        } else if (screenWidth >= 768) {
+          basePerPage = 16 // Tablet
+        } else {
+          basePerPage = 12 // Mobile
+        }
+
+        // Calculate grid columns based on zoom level
+        let columnsClass = 'grid-cols-4' // Default
+
+        if (zoomLevel <= 0.7) {
+          // Very low zoom - more columns, smaller items
+          columnsClass = screenWidth >= 1440 ? 'grid-cols-6' : screenWidth >= 1024 ? 'grid-cols-5' : 'grid-cols-4'
+          basePerPage = Math.floor(basePerPage * 1.5)
+        } else if (zoomLevel <= 0.85) {
+          // Low zoom - slightly more columns
+          columnsClass = screenWidth >= 1440 ? 'grid-cols-5' : 'grid-cols-4'
+          basePerPage = Math.floor(basePerPage * 1.2)
+        } else if (zoomLevel >= 1.3 && zoomLevel < 1.6) {
+          // Medium-high zoom - fewer columns, larger items
+          columnsClass = screenWidth >= 1440 ? 'grid-cols-3' : screenWidth >= 1024 ? 'grid-cols-3' : 'grid-cols-2'
+          basePerPage = Math.max(8, Math.floor(basePerPage * 0.8))
+        } else if (zoomLevel >= 1.6) {
+          // High zoom - even fewer columns, much larger items
+          columnsClass = screenWidth >= 1024 ? 'grid-cols-2' : 'grid-cols-1'
+          basePerPage = Math.max(6, Math.floor(basePerPage * 0.6))
+        }
+        // Normal zoom (0.85 - 1.3) keeps default grid-cols-4
+
+        // Special handling for Windows layout
+        if (layout === "windows") {
+          basePerPage = Math.floor(basePerPage * 1.5)
+          // Adjust columns for Windows layout
+          if (zoomLevel >= 1.3) {
+            columnsClass = screenWidth >= 1440 ? 'grid-cols-4' : screenWidth >= 1024 ? 'grid-cols-3' : 'grid-cols-2'
+          }
+        }
+
+        // Ensure minimum and maximum bounds
+        basePerPage = Math.max(6, Math.min(50, basePerPage))
+
+        return { perPage: basePerPage, columns: columnsClass }
+      }
+
+      const { perPage: optimalPerPage, columns: optimalColumns } = calculateGridConfiguration()
+      setperpage(optimalPerPage)
+      setGridColumns(optimalColumns)
+    }, [layout, screenWidth, zoomLevel])
     const lastcalledtime=useRef()
     useMemo(()=>{
       setnop(Math.ceil(filecount/perpage))
@@ -2186,7 +2275,7 @@ export default function Greet() {
                 }/>
                 </div>
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-4 mt-6 overflow-${scrollorauto}`}>
+        <div className={`grid ${gridColumns} mt-6 overflow-${scrollorauto}`}>
 
         
         {
@@ -2282,7 +2371,7 @@ export default function Greet() {
         </DropdownMenuContent>
         </DropdownMenu>
         {/* </div> */}
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button>
+                <Button variant={"outline"} className="mr-2 overflow-hidden"  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button>
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
@@ -2341,7 +2430,7 @@ export default function Greet() {
                       <span className="text-lg font-semibold">Folders & Media ({mediaFiles.length})</span>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className={`grid sm:grid-cols-2 lg:grid-cols-4 overflow-${scrollorauto} p-4`}>
+                      <div className={`grid ${gridColumns} overflow-${scrollorauto} p-4`}>
                         {mediaFiles.map((message, index) => (
                           <div key={`media-${index}`} className="m-3 flex flex-row">
                             <WindowsEachFromGrid message={message} goto={goto} populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
@@ -2358,7 +2447,7 @@ export default function Greet() {
                       <span className="text-lg font-semibold">Documents & Files ({otherFiles.length})</span>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className={`grid sm:grid-cols-2 lg:grid-cols-4 overflow-${scrollorauto} p-4`}>
+                      <div className={`grid ${gridColumns} overflow-${scrollorauto} p-4`}>
                         {otherFiles.map((message, index) => (
                           <div key={`other-${index}`} className="m-3 flex flex-row">
                             <EachFromGrid message={message} goto={goto} populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>

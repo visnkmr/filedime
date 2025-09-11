@@ -11,9 +11,9 @@ export default function Home() {
 
   return (
     <main className="absolute overflow-hidden h-full w-full">
-      <ZoomableContent>
+      {/* <ZoomableContent> */}
         <Greet />
-      </ZoomableContent>
+      {/* </ZoomableContent> */}
     </main>
   )
 }
