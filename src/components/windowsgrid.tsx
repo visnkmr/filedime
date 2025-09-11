@@ -29,7 +29,7 @@ interface argprops{
 
 export default function WindowsEachFromGrid({message,goto,newtab,populatesearchlist,showthumbnail,setfos,setFileOpType,addmark}:argprops){
      return(<Button size={"none"} variant={"outline"} className="relative m-1 h-full w-full flex justify-start overflow-hidden focus:bg-gray-200 focus:dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-
+      {/* Preview */}
     <ContextMenu >
     <ContextMenuTrigger className="h-full w-full overflow-hidden">
       <HoverCard >

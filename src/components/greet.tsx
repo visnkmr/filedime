@@ -41,6 +41,12 @@ import {
   ContextMenuTrigger,
 } from "./ui/context-menu"
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./batu/components/ui/accordion"
+import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
@@ -621,6 +627,7 @@ export default function Greet() {
         }
     },[appWindow])
     const [showthumbnail,setst]=useState(false)
+    const [accordionValue, setAccordionValue] = useState("media")
   
   const columns: ColumnDef<FileItem>[] = [
     {
@@ -2197,20 +2204,20 @@ export default function Greet() {
         }
         {
           layout==="windows"?(
-          <>
+          <div className="h-full w-full overflow-auto">
             <div className={`flex flex-row}`}>
         {/* <div className={`${isgrid?"mb-3 mt-3":"hidden"}`}> */}
 
         <DropdownMenu>
         <DropdownMenuTrigger className="p-4" asChild>
-          <Button 
-            variant='outline' 
+          <Button
+            variant='outline'
             className='whitespace-nowrap overflow-hidden mr-2'>
             Sort by {currentchoice}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='bg-white dark:bg-gray-900'>
-  
+
         <DropdownMenuItem
           className='capitalize text-black dark:text-white'
           // checked={issize}
@@ -2271,22 +2278,22 @@ export default function Greet() {
         >
           Date
         </DropdownMenuItem>
-      
+
         </DropdownMenuContent>
         </DropdownMenu>
         {/* </div> */}
-                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button> 
+                <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old>0 && old<noofpages?old-1:noofpages-1)}>Previous</Button>
                 <Button variant={"outline"} className="mr-2 "  onClick={()=>setpageno((old)=>old<noofpages-1?old+1:0)}>Next</Button>
                 <HoverCard>
                 <HoverCardTrigger>
                 <Button variant={"outline"}  onClick={()=>setst((old)=>!old)}><GalleryThumbnailsIcon className="h-4 w-4"/></Button>
                 </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
-               Show Thumbnails
+                Show Thumbnails
               </HoverCardContent>
             </HoverCard>
                 <p className='ms-3 flex items-center'>Page {currentpage+1} / {noofpages} pages ({filestoshow.length})</p>
-                
+
                 <div className="ms-2 flex whitespace-nowrap overflow-hidden">
 
                 <Input value={perpage}
@@ -2301,20 +2308,71 @@ export default function Greet() {
                 }/>
                 </div>
         </div>
-        <div className={`grid sm:grid-cols-2 lg:grid-cols-5 mt-6 overflow-${scrollorauto}`}>
 
-        
-        {
-        filestoshow
-                    .slice(currentpage*perpage,((currentpage)+1)*perpage)
-                    .map((message, index) => (
-                      <div key={index} className="m-3 flex flex-row">
-                      <WindowsEachFromGrid message={message} goto={goto}  populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
-                        </div>
-        
-        ))}
-        </div>
-            </>):null
+        {/* Folders and Media Files Accordion */}
+        <Accordion
+          type="single"
+          collapsible
+          value={accordionValue}
+          onValueChange={setAccordionValue}
+          className="w-full mt-6"
+        >
+          {(() => {
+            const currentPageFiles = filestoshow;
+
+            // Separate files into categories
+            const mediaFiles = currentPageFiles.filter((message) =>
+              
+              IMAGE_TYPES.some(type => message.name.includes(type)) ||
+              VIDEO_TYPES.some(type => message.name.includes(type))
+            ).slice(currentpage*perpage,((currentpage)+1)*perpage);
+
+            const otherFiles = currentPageFiles.filter((message) =>
+              message.is_dir &&
+              !IMAGE_TYPES.some(type => message.name.includes(type)) &&
+              !VIDEO_TYPES.some(type => message.name.includes(type))
+            ).slice(currentpage*perpage,((currentpage)+1)*perpage);
+
+            return (
+              <>
+                {mediaFiles.length > 0 && (
+                  <AccordionItem value="media">
+                    <AccordionTrigger className="px-4">
+                      <span className="text-lg font-semibold">Folders & Media ({mediaFiles.length})</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className={`grid sm:grid-cols-2 lg:grid-cols-4 overflow-${scrollorauto} p-4`}>
+                        {mediaFiles.map((message, index) => (
+                          <div key={`media-${index}`} className="m-3 flex flex-row">
+                            <WindowsEachFromGrid message={message} goto={goto} populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {otherFiles.length > 0 && (
+                  <AccordionItem value="documents">
+                    <AccordionTrigger className="px-4">
+                      <span className="text-lg font-semibold">Documents & Files ({otherFiles.length})</span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className={`grid sm:grid-cols-2 lg:grid-cols-4 overflow-${scrollorauto} p-4`}>
+                        {otherFiles.map((message, index) => (
+                          <div key={`other-${index}`} className="m-3 flex flex-row">
+                            <EachFromGrid message={message} goto={goto} populatesearchlist={populatesearchlist} newtab={newtab} setfos={setfos} setFileOpType={setFileOpType} showthumbnail={showthumbnail} addmark={addmark}/>
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+              </>
+            );
+          })()}
+        </Accordion>
+            </div>):null
 
         }
         
