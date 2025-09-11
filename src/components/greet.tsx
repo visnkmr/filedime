@@ -296,6 +296,8 @@ export default function Greet() {
     const [appWindow, setAppWindow] = useState()
     const [fileslist, setfileslist] = useState(filesobjinit);
     const [sftype,setsftype]=useState("all")
+    const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["all"])
+    const [fileTypeSearch, setFileTypeSearch] = useState("")
     const [filestoshow,setfts]=useState(filesobjinit)
     //reflect update per page item count in ui
     useMemo(()=>{
@@ -1861,6 +1863,107 @@ export default function Greet() {
             </HoverCard>
           {/* </Button> */}
   </div>
+  <div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2">
+          <span>Filter Types</span>
+          <span className="text-xs text-gray-500">
+            ({selectedFileTypes.includes("all") ? "All" : selectedFileTypes.length})
+          </span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-80" align="start">
+        <div className="p-2">
+          <Input
+            placeholder="Search file types..."
+            value={fileTypeSearch}
+            onChange={(e) => setFileTypeSearch(e.target.value)}
+            className="mb-2"
+          />
+        </div>
+        <DropdownMenuItem
+          onClick={() => {
+            if (selectedFileTypes.includes("all")) {
+              setSelectedFileTypes([])
+              setsftype("all")
+            } else {
+              setSelectedFileTypes(["all"])
+              setsftype("all")
+            }
+          }}
+          className="cursor-pointer"
+        >
+          <Checkbox
+            checked={selectedFileTypes.includes("all")}
+            className="mr-2"
+          />
+          <span className="font-medium">All Types</span>
+        </DropdownMenuItem>
+        {Object.entries(filesetcollectionlist)
+          .filter(([key]) =>
+            key.toLowerCase().includes(fileTypeSearch.toLowerCase())
+          )
+          .sort((a, b) => Number(b[1]) - Number(a[1]))
+          .map(([key, value]) => (
+            <DropdownMenuItem
+              key={key}
+              onClick={() => {
+                const newSelected = [...selectedFileTypes]
+                if (newSelected.includes("all")) {
+                  newSelected.splice(newSelected.indexOf("all"), 1)
+                }
+
+                if (newSelected.includes(key)) {
+                  newSelected.splice(newSelected.indexOf(key), 1)
+                } else {
+                  newSelected.push(key)
+                }
+
+                if (newSelected.length === 0) {
+                  newSelected.push("all")
+                  setsftype("all")
+                } else {
+                  setsftype(newSelected.join(","))
+                }
+
+                setSelectedFileTypes(newSelected)
+              }}
+              className="cursor-pointer"
+            >
+              <Checkbox
+                checked={selectedFileTypes.includes(key) || selectedFileTypes.includes("all")}
+                className="mr-2"
+              />
+              <span>{key}</span>
+              <Badge variant="secondary" className="ml-auto text-xs">
+                {value}
+              </Badge>
+            </DropdownMenuItem>
+          ))}
+        {Object.keys(filesetcollectionlist).filter(key =>
+          key.toLowerCase().includes(fileTypeSearch.toLowerCase())
+        ).length === 0 && fileTypeSearch && (
+          <div className="p-2 text-sm text-gray-500 text-center">
+            No file types found
+          </div>
+        )}
+        <DropdownMenuSeparator />
+        <div className="p-2">
+          <Button
+            onClick={() => {
+              // Apply button functionality - selections are already applied on click
+              // This could be used for additional logic if needed
+              console.log("Applied file type filters:", selectedFileTypes)
+            }}
+            className="w-full"
+          >
+            Apply Filters
+          </Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
   {/* <div>
 
   <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
@@ -2162,30 +2265,8 @@ export default function Greet() {
         {
           layout==="detail" || layout==="grid" || layout==="windows"?(
             <div className="">
-
-        <div className='grid grid-flow-col justify-start overflow-x-auto'> 
-        <Button onClick={()=>setsftype("all")} className="m-2 p-[-5px] whitespace-nowrap min-w-min" variant="ghost" key="all"><Badge variant={"outline"}>all</Badge></Button>
-          {
-          Object.entries(filesetcollectionlist)
-          // .filter
-          .sort((a, b) => b[1] - a[1])
-          // .filter(function (el) {
-          //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
-          // })
-          .map(([key, value],index)  => (
-            <Button 
-            onClick={()=>setsftype((old)=>old===key?"all":key)} 
-            className="m-2 p-[-5px] whitespace-nowrap min-w-min" 
-            variant="ghost" 
-            key={index}>
-              <Badge variant={"outline"}>
-                {key}({value})
-                </Badge>
-              </Button>
-          ))}
-        </div>
-        </div>
-          ):(null) 
+            </div>
+          ):(null)
         }
         
        
