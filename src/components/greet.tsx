@@ -4,7 +4,9 @@ import FRc from "./findsizecomp"
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke,convertFileSrc } from '@tauri-apps/api/tauri'
 import {VideoComponent} from "./videoplaycomp"
-import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, PlusIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon, FileIcon, TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon, DownloadIcon, FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus, Folder, Home, Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon, AppWindowIcon} from "lucide-react"
+import {ForwardIcon, ArrowLeft, SearchIcon, ArrowRightIcon, XIcon, LayoutGrid, LayoutList, RefreshCcwIcon, HardDriveIcon, RulerIcon, FolderTreeIcon, FolderClockIcon, LogInIcon, EyeIcon,  TerminalIcon, CodeIcon, BookIcon, TreesIcon, ScanSearchIcon, GalleryThumbnailsIcon, MoonIcon, SunIcon, EyeOffIcon,  FileTextIcon, ArrowUp, ArrowRight, FolderPlus, FilePlus,   Loader2, Plug, Columns, BotIcon, Grid, FolderRootIcon, SplitSquareHorizontalIcon, AppWindowIcon, Menu, MoreHorizontal,PlusIcon, ChevronRight} from "lucide-react"
+import { FcFolder as Folder, FcFile as FileIcon } from "react-icons/fc";
+
 import { Badge } from "./ui/badge"
 import {Checkbox} from "./ui/checkbox"
 // import { arch, platform, type, version } from '@tauri-apps/api/os';
@@ -63,7 +65,7 @@ import {
 import { Button } from "./ui/button"
 import { FileItem,DriveItem } from "../shared/types"
 import { DataTable, focuscolor, hovercolor } from '../src/components/data-table';
-export function converttstodt(ts){
+export function converttstodt(ts: number){
 
   const dateTime = DateTime.fromMillis(ts * 1000); // Convert timestamp to DateTime object
   const utcDateTime = dateTime.toUTC(); // Convert DateTime object to UTC time
@@ -83,7 +85,7 @@ import { Input } from "./ui/input";
 import { useTheme } from "next-themes";
 
 export let scrollorauto="auto";
-export let setcolorpertheme="bg-white dark:bg-gray-800"
+export let setcolorpertheme=""
 import { useToast } from "./ui/use-toast"
 import { Toaster } from "./ui/toaster"
 import { Progress } from "./ui/progress"
@@ -253,7 +255,7 @@ export default function Greet() {
         // Normal zoom (0.85 - 1.3) keeps default grid-cols-4
 
         // Special handling for Windows layout
-        if (layout === "windows") {
+        if (layout === "windows" ) {
           basePerPage = Math.floor(basePerPage * 1.5)
           // Adjust columns for Windows layout
           if (zoomLevel >= 1.3) {
@@ -271,7 +273,7 @@ export default function Greet() {
       setperpage(optimalPerPage)
       setGridColumns(optimalColumns)
     }, [layout, screenWidth, zoomLevel])
-    const lastcalledtime=useRef()
+    const lastcalledtime=useRef<string>()
     useMemo(()=>{
       console.log("recompute nop")
       setnop(Math.ceil(filecount/perpage))
@@ -293,7 +295,7 @@ export default function Greet() {
     const [filesetcollectionlist,setfscl]=useState(objinit)
     const [custombuttonlist,setcbl]=useState(objinit)
     const [pathsuggestlist,setpsl]=useState(objinit)
-    const [appWindow, setAppWindow] = useState()
+    const [appWindow, setAppWindow] = useState<any>()
     const [fileslist, setfileslist] = useState(filesobjinit);
     const [sftype,setsftype]=useState("all")
     const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["all"])
@@ -324,7 +326,7 @@ export default function Greet() {
               !VIDEO_TYPES.some(type => message.name.includes(type))
             );
             var nof = mediaFiles.length>otherFiles.length?mediaFiles.length:otherFiles.length;
-            let fc=layout==="windows"?nof:fileslist.length;
+            let fc=(layout==="windows" )?nof:fileslist.length;
         // let fc=fl.length
         // console.log("===============================================")
         // console.log("===============================================")
@@ -359,10 +361,10 @@ export default function Greet() {
           console.log("reset done")
       })
     }
-    function listfiles(oid,path){
+    function listfiles(oid: number, path: string){
       let lct=new Date().getTime().toString();
       
-      lastcalledtime.current=lct
+      lastcalledtime.current=lct as any
       invoke('list_files', { 
         starttime:lct,
         windowname:appWindow?.label,
@@ -469,7 +471,7 @@ export default function Greet() {
         console.log(ei)
         // addTofwdHistory(activetabid.toString(),path)
         // addTofwdHistory(activetabid.toString())
-        let pathtogoto=ei
+        let pathtogoto=ei as string
         if(pathtogoto){
           
           reset(pathtogoto)
@@ -491,7 +493,7 @@ export default function Greet() {
         dir:false
       }).then((ei)=>{
         console.log(ei)
-        let pathtogoto=ei
+        let pathtogoto=ei as string
         if(pathtogoto ){
   
           reset(pathtogoto)
@@ -514,7 +516,7 @@ export default function Greet() {
         console.log(ei)
         // addTofwdHistory(activetabid.toString(),path)
         // addTofwdHistory(activetabid.toString())
-        let pathtogoto=ei
+        let pathtogoto=ei as string
         if(pathtogoto){
           reset(pathtogoto)
           updatetabs(pathtogoto)
@@ -552,7 +554,7 @@ export default function Greet() {
       }).then(()=>sethf(false)
       ).catch(()=>sethf(true))
     },[path])
-      const addToTabHistory = (tabId, item=path) => {
+      const addToTabHistory = (tabId: string, item=path) => {
         invoke("checkiffile",{
           path:p
         }).catch((e)=>{
@@ -569,7 +571,7 @@ export default function Greet() {
     reset() 
     // let printtxt=Math.random(); //to check if listen is being called only once
     const unlisten=listen("folder-size", (event) => {
-      let returned=JSON.parse(event.payload);
+      let returned=JSON.parse(event.payload as string);
       if(returned.caller===lastcalledtime.current){
         console.log("foldersize")
         setps(returned.size)
@@ -583,7 +585,7 @@ export default function Greet() {
     // let unlisten: (() => void) | undefined = undefined
     const unlisten1=listen('list-files', (event) => {
       // console.log(printtxt+"------->"+lastcalledtime.current+"------->"+event)
-      let returned=JSON.parse(event.payload);
+      let returned=JSON.parse(event.payload as string);
       // console.log(returned.caller)
       // setlct((returned.caller))
       // console.log(lastcalledtime+"-------"+returned.caller)
@@ -643,7 +645,7 @@ export default function Greet() {
   
     useEffect(() => {
       listen("folder-count",(data: { payload: string }) => {
-        progresstotal.current=(data.payload)
+        progresstotal.current=(data.payload as any)
       }) 
       listen("start-timer",() => {
         setlv(true)
@@ -657,7 +659,7 @@ export default function Greet() {
       // });
       
       listen('dialogshow', (pl) => {
-        let recieved=JSON.parse(pl.payload);
+        let recieved=JSON.parse(pl.payload as string);
         let content=(recieved.content)
         let title=(recieved.title)
         toast({
@@ -715,7 +717,7 @@ export default function Greet() {
       });
       listen('list-drives', (event) => {
           // console.log("loading drives---->"+event.payload);
-          setdriveslist(JSON.parse(event.payload));
+          setdriveslist(JSON.parse(event.payload as string));
       });
       
       listen("load-marks", (data: { payload:string }) => {
@@ -735,7 +737,7 @@ export default function Greet() {
         invoke("listtabs",{})
         .then((e)=>{
           console.log("onopen---->"+e)
-          let tabslist=JSON.parse(e) as string[];
+          let tabslist=JSON.parse(e as string) as string[];
           for (const [index,ei] of tabslist.entries()){
             reset(ei)
             setpath(ei)
@@ -746,6 +748,7 @@ export default function Greet() {
     },[appWindow])
     const [showthumbnail,setst]=useState(false)
     const [accordionValue, setAccordionValue] = useState("media")
+    const [selectedItem, setSelectedItem] = useState<string>("")
   
   const columns: ColumnDef<FileItem>[] = [
     {
@@ -1012,7 +1015,7 @@ export default function Greet() {
             <HoverCard>
   
             <HoverCardTrigger>
-            <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" size={"none"} variant={"ghost"}  onClick={()=>{
+            <button className="h-full p-4 px-3 focus:bg-gray-200 focus:dark:bg-gray-700" onClick={()=>{
   populatesearchlist(path)
   }}><ScanSearchIcon className="h-4 w-4"/></button>
   </HoverCardTrigger>
@@ -1164,7 +1167,7 @@ export default function Greet() {
         // invoke the list_files command from the backend with the path as argument
         listfiles(activetabid,path)
   }
-  function populatesearchlist(spath){
+  function populatesearchlist(spath: string){
     invoke(
       "searchload", {
         path:spath
@@ -1183,7 +1186,7 @@ export default function Greet() {
     })
   }
    
-  function updatetabs(tabpath){
+  function updatetabs(tabpath: string){
     invoke("checkiffile",{
       path:p
     }).catch((e)=>{
@@ -1193,8 +1196,8 @@ export default function Greet() {
       {
         path:tabpath,
       }
-    ).then((returned:string)=>{
-      sst(returned)
+    ).then((returned)=>{
+      sst(returned as string)
       console.log("preupdate tablist--->"+JSON.stringify(tablist))
        if(tablist && tablist.length>0){
   
@@ -1203,7 +1206,7 @@ export default function Greet() {
       if(objIndex !== -1){
   
         tempstoreoldtablist![objIndex!].path = tabpath;
-        tempstoreoldtablist![objIndex!].tabname = returned;
+        tempstoreoldtablist![objIndex!].tabname = returned as string;
         settbl(tempstoreoldtablist!);
       }
       console.log("udpated tabs---->"+JSON.stringify(tempstoreoldtablist))
@@ -1215,7 +1218,7 @@ export default function Greet() {
     })
     
   }
-  function closetab(closeid){
+  function closetab(closeid: number){
     invoke("closetab",{
       windowname:appWindow?.label,
       id: closeid.toString(),
@@ -1241,15 +1244,15 @@ export default function Greet() {
     function newtab(gotopath?:string,salt=""){
       reset()
       // console.error(gotopath)
-      let newtabid=`${new Date().getTime()}${salt}`;
+      let newtabid=new Date().getTime();
   
                         invoke(
                           "tabname",
                           {
                             path:gotopath,
                           }
-                        ).then((returned:string)=>{
-                          console.log("what was returned....."+returned)
+                        ).then((returned)=>{
+                          console.log("what was returned....."+(returned as string))
                           invoke(
                             "newtab",
                             {
@@ -1266,23 +1269,23 @@ export default function Greet() {
                               id:newtabid,
                               path:gotopath,
                               ff:"",
-                              tabname:returned,
+                              tabname:returned as string,
                               history:[]
-                            } as tabinfo]:
+                            } as any]:
                             [{
                               id:newtabid,
                               path:gotopath,
                               ff:"",
-                              tabname:returned,
+                              tabname:returned as string,
                               history:[]
-                            } as tabinfo]
+                            } as any]
                           
                           })
         // console.log("opened tab now tablist is "+JSON.stringify(tablist))
   
                           addToTabHistory(newtabid.toString(),gotopath)
-                          setactivetabid(newtabid)
-                          listfiles(newtabid,gotopath);
+                          setactivetabid(newtabid as any)
+                          listfiles(newtabid as any,gotopath || "");
                         });
     }
     async function openDiffView(){
@@ -1332,7 +1335,7 @@ export default function Greet() {
       <ResizablePanelGroup direction="horizontal" className="overflow-hidden">
         <ResizablePanel defaultSize={size.a} className="min-w-64">
         {/* {lastcalledtime.current} */}
-        <div className="flex h-full flex-col gap-2 ">
+        <div className="flex h-full flex-col gap-2 bg-gray-800 ">
           <div className="flex p-3  border-b">
             
             <div className="flex flex-row p-2 items-center">
@@ -1360,6 +1363,9 @@ export default function Greet() {
                 name:"Installed Apps"
               })
             }}><Grid className="h-4 w-4"/></Button>
+            <Button className="ml-2" variant={"outline"} onClick={()=>{
+              window.open('/file-explorer', '_blank');
+            }}>Windows Explorer</Button>
             </div>
             
             {/* <div className="grid items-start px-4 text-sm font-medium"> */}
@@ -1413,7 +1419,7 @@ export default function Greet() {
                       dst:path,
                   }).then((a)=>{
                     console.log(a)
-                    let listofdupes:existingfileinfo[]=JSON.parse(a);
+                    let listofdupes:existingfileinfo[]=JSON.parse(a as string);
                     let newArray: operationfileinfo[] = listofdupes.map((item): operationfileinfo => ({
                       ...item,
                       replace: false
@@ -1495,7 +1501,7 @@ export default function Greet() {
               >
                <div>
 
-                <Home className="h-4 w-4" />
+                🖥️
                </div>
                 Home
               </button>
@@ -1512,7 +1518,7 @@ export default function Greet() {
               >
                 <div>
 
-                <DownloadIcon className="h-4 w-4" />
+                ⬇️
                 </div>
                 Downloads
               </button>
@@ -1529,7 +1535,7 @@ export default function Greet() {
               >
                 <div>
 
-                <FileTextIcon className="h-4 w-4" />
+                📄
                 </div>
                 Documents
               </button>
@@ -1705,13 +1711,13 @@ export default function Greet() {
                   mountpoint:message.uuid
                 })
                 .then((e)=>{
-                  reset(e)
-                  updatetabs(e)
+                  reset(e as string)
+                  updatetabs(e as string)
                   // setpath()
                   // setpsplitl(splitpath(pathtogoto))
                   // sst("")
                   // useEffect(() => {
-                    listfiles(activetabid,e);
+                    listfiles(activetabid,e as string);
                 })
                 .catch((e)=>{
                   toast({
@@ -1790,7 +1796,7 @@ export default function Greet() {
                           invoke("listtabs",{})
                           .then((e)=>{
                             console.log("onopen---->"+e)
-                            let tabslist=JSON.parse(e) as string[];
+                            let tabslist=JSON.parse(e as string) as string[];
                             for (const [index,ei] of tabslist.entries()){
                               reset(ei)
                               setpath(ei)
@@ -1823,11 +1829,12 @@ export default function Greet() {
         </div>
         </ResizablePanel>
         <ResizableHandle className="bg-gray-100" />
-        <ResizablePanel defaultSize={size.b} className="flex flex-col pt-3 ps-3">
+        <ResizablePanel defaultSize={size.b} className="flex flex-col ">
         <div className="mb-4">
         <Toaster />
+        <div className="flex flex-col pt-3 ps-5 p-1 bg-gray-800 gap-2">
 <div 
-  className={`flex flex-row overflow-${scrollorauto} p-1 gap-2`}
+  className={`h-9 flex flex-row overflow-${scrollorauto} gap-2 `}
   // className={`flex flex-row hover:${checkifwithinbounds()?"":"overflow-scroll"} p-1`}
 >
   <div>
@@ -1838,12 +1845,13 @@ export default function Greet() {
               <HoverCardTrigger>
               <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <button className="h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer">
           {layout==="grid"?<LayoutGrid className="h-4 w-4"/>:(null)}
           {layout==="detail"?<LayoutList className="h-4 w-4"/>:(null)}
           {layout==="miller"?<Columns className="h-4 w-4"/>:(null)}
           {layout==="windows"?<AppWindowIcon className="h-4 w-4"/>:(null)}
-            </Button>
+         
+            </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-gray-100 dark:bg-gray-800">
         <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
@@ -1853,6 +1861,7 @@ export default function Greet() {
           <DropdownMenuRadioItem value="detail"><LayoutList className="h-4 w-4 mr-2"/>Detail</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="miller"><Columns className="h-4 w-4 mr-2"/>Mac OS Style</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="windows"><Columns className="h-4 w-4 mr-2"/>Windows Style</DropdownMenuRadioItem>
+          
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -1866,12 +1875,12 @@ export default function Greet() {
   <div>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <button className="h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer">
           <span>Filter Types</span>
           <span className="text-xs text-gray-500">
             ({selectedFileTypes.includes("all") ? "All" : selectedFileTypes.length})
           </span>
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="start">
         <div className="p-2">
@@ -1978,13 +1987,13 @@ export default function Greet() {
 
             <HoverCard>
               <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+          <button className='h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer'onClick={
                 ()=>{
                   reloadlist()
                 }
             }>
             <RefreshCcwIcon className="h-4 w-4"/>
-          </Button>
+          </button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Reload
@@ -1994,12 +2003,12 @@ export default function Greet() {
   <div>
      <HoverCard>
               <HoverCardTrigger>
-    <Button
+    <button
             onClick={openDiffView}
-            className="rounded-lg border bg-card text-card-foreground shadow-sm"
+            className="h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer"
           >
             <SplitSquareHorizontalIcon className="h-4 w-4"/>
-          </Button>
+          </button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                Open Dual File Viewer
@@ -2011,7 +2020,7 @@ export default function Greet() {
 
             <HoverCard>
               <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+          <button className='h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer'onClick={
                 ()=>{
                   setdest(path)
                   setild(true);
@@ -2019,7 +2028,7 @@ export default function Greet() {
                 }
             }>
             <FolderPlus className="h-4 w-4"/>
-          </Button>
+          </button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                New Folder
@@ -2031,7 +2040,7 @@ export default function Greet() {
 
             <HoverCard>
               <HoverCardTrigger>
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm'onClick={
+          <button className='h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer'onClick={
                 ()=>{
                   setdest(path)
                   setild(false);
@@ -2040,7 +2049,7 @@ export default function Greet() {
             }>
             <FilePlus className="h-4 w-4"/>
               
-          </Button>
+          </button>
           </HoverCardTrigger>
               <HoverCardContent  className={`${setcolorpertheme}`}>
                New File
@@ -2052,7 +2061,7 @@ export default function Greet() {
           <div key={index} className="">
 
 
-          <Button className='rounded-lg border bg-card text-card-foreground shadow-sm  p-1'   onClick={
+          <button className='h-full flex items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer'   onClick={
             ()=>{
               invoke(
                 "otb",
@@ -2067,13 +2076,13 @@ export default function Greet() {
         } >
               <CodeIcon className="h-4 w-4" />
               <span className="font-medium text-sm ps-2">{bn}</span>
-          </Button>
+          </button>
           </div>
             ))}
         </div>
-        </div>
-      <div className="justify-between mb-2 ">
-          <div className={`flex flex-row gap-2 overflow-${scrollorauto}`}>
+        
+      <div className="justify-between ">
+          <div className={`flex flex-row  overflow-${scrollorauto}`}>
             <div className={`
               ${hideback?"hidden":""}
             `} >
@@ -2097,7 +2106,7 @@ export default function Greet() {
             </div>
             <div>
 
-            <Button variant={"ghost"}onClick={()=>{
+            <button className="mr-2 h-full items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer"onClick={()=>{
                  invoke("getparentpath",{
                   path
                 }).then((ei)=>{
@@ -2110,11 +2119,11 @@ export default function Greet() {
                   }
                 }).catch((e)=>console.error(e))
               }}><ArrowUp className="h-4 w-4"
-              /></Button>
+              /></button>
             </div>
             <div>
 
-            <Button className={`${hidefwd?"hidden":""} `} variant="ghost"  onClick={()=>{
+            <button className={`mr-2 h-full items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer ${hidefwd?"hidden":""} `} onClick={()=>{
                invoke("navbrowsetimeline",{
                 tabid:activetabid.toString(),
                 dir:false
@@ -2131,7 +2140,7 @@ export default function Greet() {
               }}>
               <ArrowRight className="h-4 w-4" 
              />
-            </Button>
+            </button  >
             </div>
             <datalist id="path-list">
             {pathsuggestlist.map((message, index) => (
@@ -2151,7 +2160,7 @@ export default function Greet() {
                               path: event.target.value
                           })
                             .then(result => {
-                              setvalid(result)
+                              setvalid(result as boolean)
                           })
                             .catch(console.error)
                     invoke(
@@ -2160,10 +2169,10 @@ export default function Greet() {
                         windowname:appWindow?.label,
                         path: event.target.value,
                       })
-                      .then((options:string[]) => {
+                      .then((options) => {
                         // console.log(options)
                         if (options !== null) {
-                          setpsl(options)
+                          setpsl(options as string[])
                         }
                       })
                       .catch((error:string) => {
@@ -2203,7 +2212,7 @@ export default function Greet() {
             <Button variant={"ghost"}  onClick={
               (event)=>{
                 reset()
-                let lct=new Date().getTime();
+                let lct=new Date().getTime().toString();
 
                 lastcalledtime.current=lct
                 
@@ -2226,14 +2235,15 @@ export default function Greet() {
               </div>
           </div>
         </div>
-        <div className="flex flex-row">
+        <div className="flex flex-row mr-2 h-full items-center ">
         {/* <Button className={`${isvalid?"":"hidden"}`} onClick={()=>{
               reset(pathitype)
               listfiles(activetabid,pathitype)
             }}> */}
-              <FolderRootIcon className="w-4 h-4 m-4"/>
+              {/* <FolderRootIcon className="w-4 h-4 m-4"/>
+              <ChevronRight className="w-4 h-4 m-4"/> */}
             {/* </Button> */}
-        <div className={`flex items-center space-x-6 ms-2 overflow-${scrollorauto}`}>
+        <div className={`flex items-center space-x-6 overflow-${scrollorauto}`}>
           {pathsplitlist
           // .filter(function (el) {
           //   return el.name.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase()) || el.mount_point.toLocaleLowerCase().includes(searchstring.toLocaleLowerCase())
@@ -2241,7 +2251,7 @@ export default function Greet() {
           .map((eachif,index)  => {
             if(eachif.pathtofol.trim().length>0){
 
-              return <button key={index} onClick={
+              return <><button className="items-center space-x-2 text-sm hover:bg-gray-700 rounded px-2 py-1 cursor-pointer" key={index} onClick={
                 ()=>
                 { 
                   addToTabHistory(activetabid.toString(),eachif.pathtofol)
@@ -2252,9 +2262,13 @@ export default function Greet() {
             }>
               {/* <TreesIcon className="h-4 w-4 "/> */}
               {eachif.interfolpath}</button>
+              <ChevronRight className="w-4 h-4 m-4"/></>
+              
             }
             return;
         })}
+        </div>
+        </div>
         </div>
         </div>
         {/* <div className="flex ">
@@ -2262,14 +2276,14 @@ export default function Greet() {
 
         </div> */}
         
-        {
-          layout==="detail" || layout==="grid" || layout==="windows"?(
+        {/* {
+          layout==="detail" || layout==="grid" || layout==="windows" ?(
             <div className="">
             </div>
           ):(null)
         }
-        
-       
+         */}
+       <div className="ps-3">
         {
           layout==="detail" ?
           (<span className={`flex flex-col overflow-${scrollorauto} `}>
@@ -2615,6 +2629,8 @@ export default function Greet() {
         </div>
          </> ):null
         }
+
+        </div>
         {/* File Operation Progress Dialog */}
       {showProgress && activeOperationId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

@@ -1,5 +1,6 @@
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from "./ui/context-menu";
-import { Folder, FileIcon, EyeIcon, ScanSearchIcon,BotIcon } from "lucide-react";
+import { EyeIcon, ScanSearchIcon,BotIcon } from "lucide-react";
+import { FcFolder as Folder, FcFile as FileIcon } from "react-icons/fc";
 import path from "path";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { scrollorauto, setcolorpertheme, converttstodt, supportedfiles } from "./greet";

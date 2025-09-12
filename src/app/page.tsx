@@ -10,7 +10,7 @@ export default function Home() {
   
 
   return (
-    <main className="absolute overflow-hidden h-full w-full">
+    <main className="bg-gray-900  absolute overflow-hidden h-full w-full">
       {/* <ZoomableContent> */}
         <Greet />
       {/* </ZoomableContent> */}
